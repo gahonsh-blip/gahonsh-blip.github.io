@@ -15,12 +15,31 @@
         .or-divider { text-align: center; margin: 40px 0; font-weight: 600; color: #64748b; position: relative; }
         .or-divider::before, .or-divider::after { content: ""; position: absolute; top: 50%; width: 43%; height: 1px; background: #cbd5e1; }
         .or-divider::before { left: 0; } .or-divider::after { right: 0; }
+        
+        /* Form Element Styling */
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: #334155;
+            background-color: #ffffff;
+            margin-top: 5px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
     </style>
 </head>
 <body>
     <header>
         <a href="index.html" class="logo">GAHONSH<span> FREELANCING</span></a>
-        <nav><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a></nav>
+        <nav><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html" class="active">Contact</a></nav>
     </header>
 
     <section class="section">
@@ -30,6 +49,7 @@
         <div class="grid" style="align-items: start;">
             <div class="contact-info-block">
                 <h3>Contact Info</h3>
+                <p><i class="fa-brands fa-whatsapp"></i> <strong>WhatsApp:</strong> +91 88251 83628</p>
                 <p><i class="fa-solid fa-phone"></i> <strong>Phone:</strong> +91 88251 83628</p>
                 <p><i class="fa-regular fa-envelope"></i> <strong>Email:</strong> gahonsh@gmail.com</p>
                 <p><i class="fa-solid fa-location-dot"></i> <strong>Location:</strong> Jharkhand, India</p>
@@ -38,19 +58,92 @@
 
             <form action="https://formspree.io/f/xzdqnoez" method="POST" style="margin: 0; width: 100%;">
                 <h3 style="margin-bottom: 20px; color: #0f172a;">Option 1: Submit Email Inquiry</h3>
+                
                 <div class="form-group">
                     <label>Name</label>
                     <input type="text" name="name" required placeholder="Enter your name">
                 </div>
+
+                <div class="form-group">
+                    <label>Phone / WhatsApp Number</label>
+                    <input type="tel" name="phone" required placeholder="e.g. +91 98765 43210">
+                </div>
+
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" name="email" required placeholder="Enter your email">
                 </div>
+
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country" required placeholder="e.g. India, United States">
+                </div>
+                
+                <div class="form-group">
+                    <label>What kind of design or digital work do you need?</label>
+                    <p style="font-size:14px;color:#64748b;margin-bottom:10px;">Select the service that best matches your project requirements.</p>
+                    <select name="service_requested" class="form-select" required>
+                        <option value="" disabled selected>Select the type that best matches your project...</option>
+                        
+                        <optgroup label="💼 Business & Data Automation">
+                            <option value="PDF Design & Automation">PDF Design & Automation</option>
+                            <option value="PowerPoint Presentation Design">PowerPoint Presentation Design</option>
+                            <option value="Excel Dashboards & Automation">Excel Dashboards & Automation</option>
+                            <option value="Data Management Solutions">Data Management Solutions</option>
+                            <option value="Business Documentation">Business Documentation</option>
+                            <option value="Website Development & Assistance">Website Development & Assistance</option>
+                            <option value="AI-Powered Content Solutions">AI-Powered Content Solutions</option>
+                            <option value="Internet Marketing Services">Internet Marketing Services</option>
+                            <option value="Freelancing Support Services">Freelancing Support Services</option>
+                            <option value="Digital Business Support">Digital Business Support</option>
+                        </optgroup>
+
+                        <optgroup label="🎨 Creative, Branding & Design">
+                            <option value="Logo Design">Logo Design</option>
+                            <option value="Brand Identity">Brand Identity</option>
+                            <option value="Landing Page Design">Landing Page Design</option>
+                            <option value="Website Design & Development">Website Design & Development</option>
+                            <option value="Mobile App Design">Mobile App Design</option>
+                            <option value="UI/UX Design">UI/UX Design</option>
+                            <option value="Illustration & Icons">Illustration & Icons</option>
+                            <option value="Animation & Motion Graphics">Animation & Motion Graphics</option>
+                            <option value="Social Media Design">Social Media Design</option>
+                            <option value="Print & Marketing Design">Print & Marketing Design</option>
+                        </optgroup>
+                        
+                        <option value="Other / Custom Project">Other / Custom Project</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Project Budget (INR)</label>
+                    <select name="project_budget" class="form-select" required>
+                        <option value="" disabled selected>Select your budget range...</option>
+                        <option value="Below ₹5,000">Below ₹5,000</option>
+                        <option value="₹5,000 - ₹15,000">₹5,000 - ₹15,000</option>
+                        <option value="₹15,000 - ₹50,000">₹15,000 - ₹50,000</option>
+                        <option value="₹50,000 - ₹1,00,000">₹50,000 - ₹1,00,000</option>
+                        <option value="Above ₹1,00,000">Above ₹1,00,000</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Expected Project Timeline</label>
+                    <select name="project_timeline" class="form-select" required>
+                        <option value="" disabled selected>Select when you need this completed...</option>
+                        <option value="Urgent (Less than 1 week)">Urgent (Less than 1 week)</option>
+                        <option value="1 - 2 Weeks">1 - 2 Weeks</option>
+                        <option value="3 - 4 Weeks">3 - 4 Weeks</option>
+                        <option value="1 Month +">1 Month +</option>
+                        <option value="Flexible / Ongoing">Flexible / Ongoing</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label>Message</label>
-                    <textarea name="message" rows="4" required placeholder="Describe your project requirements..."></textarea>
+                    <textarea name="message" rows="4" required placeholder="Describe your project, goals, preferred design style, deadline, and any special requirements..."></textarea>
                 </div>
-                <button type="submit" class="btn" style="width: 100%;">Submit Inquiry</button>
+                <button type="submit" class="btn" style="width: 100%;">Submit Project Inquiry</button>
             </form>
         </div>
 
