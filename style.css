@@ -1,0 +1,58 @@
+/* Gahonsh Global Premium Styling - 2026 */
+:root {
+    --primary: #0f172a;    /* Dark Navy */
+    --accent: #2563eb;     /* Royal Blue */
+    --text: #334155;       /* Charcoal Text */
+    --light: #f8fafc;      /* Soft White/Gray */
+    --white: #ffffff;
+}
+
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body { background-color: var(--light); color: var(--text); line-height: 1.6; }
+
+/* Global Navigation Bar */
+header {
+    background-color: var(--primary); padding: 20px 5%;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 1000;
+}
+.logo { font-size: 24px; font-weight: 700; color: var(--white); text-decoration: none; }
+.logo span { color: var(--accent); }
+nav a { color: var(--white); text-decoration: none; margin-left: 20px; font-weight: 500; transition: 0.3s; }
+nav a:hover { color: var(--accent); }
+
+/* Common Layout Sections */
+.section { padding: 80px 5%; max-width: 1200px; margin: 0 auto; text-align: center; }
+.section-title { font-size: 32px; color: var(--primary); margin-bottom: 40px; font-weight: 700; }
+
+/* Hero Section Rules */
+.hero { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: var(--white); padding: 100px 5%; text-align: center; }
+.hero h1 { font-size: 42px; margin-bottom: 20px; font-weight: 700; }
+.hero p { color: #94a3b8; font-size: 18px; margin-bottom: 30px; }
+
+/* Utility Grid Layouts */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 20px; }
+.card { background: var(--white); padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); text-align: left; transition: 0.3s; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+.card h3 { color: var(--primary); margin-bottom: 15px; }
+
+/* Standard Core Buttons */
+.btn { background-color: var(--accent); color: var(--white); padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; display: inline-block; border: none; cursor: pointer; transition: 0.3s; }
+.btn:hover { background-color: #1d4ed8; }
+
+/* Input Form Controls */
+form { max-width: 600px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; border: 1px solid #e2e8f0; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 16px; }
+
+/* Global Footer Properties */
+footer { background-color: var(--primary); color: #64748b; text-align: center; padding: 50px 20px; font-size: 14px; margin-top: 50px; }
+.footer-link { color: #2563eb; text-decoration: none; font-weight: 600; transition: 0.3s; }
+.footer-link:hover { color: #60a5fa; }
+
+@media (max-width: 768px) { header { flex-direction: column; gap: 15px; } .hero h1 { font-size: 32px; } }
