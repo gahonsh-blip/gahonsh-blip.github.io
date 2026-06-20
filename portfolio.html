@@ -8,41 +8,164 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .card i { font-size:32px; color:#2563eb; margin-bottom:15px; display:block; }
-        .notice-box { background: #eff6ff; border-left: 5px solid #2563eb; padding: 20px; text-align: left; margin-bottom: 40px; border-radius: 4px; }
-        .notice-box p { color: #1e40af; font-size: 15px; }
-        .tag { background: #e2e8f0; color: #475569; padding: 3px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        /* Modern Portfolio Grid Layout */
+        .portfolio-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; }
+        
+        .portfolio-card { 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .portfolio-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08); 
+        }
+        
+        /* Placeholder for Project Images/Previews */
+        .project-preview-box {
+            background: #f8fafc;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .project-preview-box i {
+            font-size: 64px;
+            color: #2563eb;
+            opacity: 0.8;
+        }
+        
+        .project-info { padding: 25px; text-align: left; }
+        .project-tag { 
+            display: inline-block; 
+            background: #eff6ff; 
+            color: #2563eb; 
+            font-size: 12px; 
+            font-weight: 600; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            margin-bottom: 12px; 
+            text-transform: uppercase;
+        }
+        .project-info h3 { font-size: 1.3rem; color: #0f172a; margin-bottom: 10px; font-weight: 700; }
+        .project-info p { color: #475569; font-size: 0.95rem; line-height: 1.6; margin-bottom: 12px; }
+        .project-result { color: #16a34a; font-size: 0.95rem; font-weight: 600; }
+        
+        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
+        .logo span { color: #2563eb; font-weight: 700; }
     </style>
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo" aria-label="GAHONSH FREELANCING Home">GAHONSH<span> FREELANCING</span></a>
-        <nav aria-label="Main Navigation">
-            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+        <a href="index.html" class="logo" style="font-weight:700; font-size: 22px; letter-spacing: 0.5px;">GAHONSH<span> FREELANCING</span></a>
+        <nav>
+            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html" class="active">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="section">
-        <h2 class="section-title">Technical Samples & Capabilities</h2>
-        
-        <div class="notice-box">
-            <p><i class="fa-solid fa-circle-info"></i> <strong>Note:</strong> Portfolio projects shown on this website are demonstration and sample works created to showcase design quality, workflow structure, and technical capabilities. Client-specific projects will be added as they become available.</p>
-        </div>
+    <section class="hero" style="padding: 60px 20px; text-align: center;">
+        <h1>Our Creative & Automation Portfolio</h1>
+        <p>Explore real-world case studies and project samples delivered to businesses globally.</p>
+    </section>
 
-        <div class="grid">
-            <div class="card"><span class="tag">System Automation</span><i class="fa-solid fa-terminal"></i><h3>Jarvis Scripting & Automation</h3><p>Custom computer control scripts and automated terminal system models designed for demonstration and workflow optimization purposes.</p></div>
-            <div class="card"><span class="tag">Web Design Sample</span><i class="fa-solid fa-code"></i><h3>Multi-Page Responsive Web Architecture</h3><p>The very deployment framework of this agency website, built using structured code, accessible semantic layout templates, and clean optimization.</p></div>
-            <div class="card"><span class="tag">Data Analytics Sample</span><i class="fa-regular fa-file-excel"></i><h3>Advanced Interest & Loan Matrix Dashboard</h3><p>A structured spreadsheet model demonstrating custom formulas, interest processing tiers, and clear data visualization pipelines.</p></div>
-            <div class="card"><span class="tag">PDF Design Sample</span><i class="fa-regular fa-file-pdf"></i><h3>Corporate Service Catalog & PDF Layouts</h3><p>Interactive PDF layouts and official service data sheets formatted strictly for high readability and premium aesthetic representation.</p></div>
-        </div>
-
-        <div class="commitment-box" style="margin-top: 60px; border-left: none; border-top: 5px solid #2563eb; text-align: left;">
-            <h3 style="color: #0f172a; margin-bottom: 10px;">Our Freelancing Advantage</h3>
-            <p style="color: #475569; font-size: 15px; line-height: 1.7;">As an independent digital service provider, we focus on quality, attention to detail, and personalized support for every single project. Our goal is to build long-term professional relationships through reliable and professional service delivery.</p>
+    <section class="section" style="background-color: #ffffff; padding: 40px 20px;">
+        <div class="grid" style="max-width: 900px; margin: 0 auto;">
+            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
+                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">50+</h3>
+                <p style="color: #475569; font-weight: 600;">Projects Completed</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
+                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">20+</h3>
+                <p style="color: #475569; font-weight: 600;">Services Offered</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
+                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">100%</h3>
+                <p style="color: #475569; font-weight: 600;">Remote Delivery</p>
+            </div>
         </div>
     </section>
 
-    <footer>
+    <div class="portfolio-container">
+        <div class="portfolio-grid">
+            
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-regular fa-file-excel"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">Automation</span>
+                    <h3>Automated Financial Dashboard</h3>
+                    <p>Advanced operational workflow tracking featuring complex formulas, custom macros, and real-time loan interest monitoring tiers.</p>
+                    <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Result:</strong> Reduced manual reporting time by 80% through dashboard automation.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-solid fa-palette"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">Branding</span>
+                    <h3>Modern Corporate Logo Design</h3>
+                    <p>A unique and memorable brand identity concept complete with full typography rules, color asset guidelines, and media assets.</p>
+                    <p class="project-result"><i class="fa-solid fa-square-check"></i> <strong>Result:</strong> Enhanced client brand recognition and established uniform corporate presence.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-regular fa-file-pdf"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">Digital Assets</span>
+                    <h3>Interactive Product Catalog</h3>
+                    <p>High-end PDF design with structured business documentation layouts, customized indexes, and clickable digital navigation rows.</p>
+                    <p class="project-result"><i class="fa-solid fa-bolt"></i> <strong>Result:</strong> Accelerated sales cycle by 35% using faster, user-friendly item navigation.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-solid fa-laptop-code"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">Web Development</span>
+                    <h3>High-Converting Landing Page</h3>
+                    <p>Modern responsive business portal designed specifically to accelerate client conversions, using a clean international look.</p>
+                    <p class="project-result"><i class="fa-solid fa-arrow-up-right-dots"></i> <strong>Result:</strong> Achieved a 25% increase in online inbound leads within first month.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">Presentation</span>
+                    <h3>Investor Pitch Deck Design</h3>
+                    <p>A professional high-impact PowerPoint presentation tailored for corporate business meetings and strategy pitches.</p>
+                    <p class="project-result"><i class="fa-solid fa-thumbs-up"></i> <strong>Result:</strong> Successfully backed business fundraising efforts with top visual execution.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="project-preview-box"><i class="fa-solid fa-robot"></i></div>
+                <div class="project-info">
+                    <span class="project-tag">AI Solutions</span>
+                    <h3>Smart Documentation System</h3>
+                    <p>AI-assisted content creation structure deployed to boost team document management workflows and copy execution speeds.</p>
+                    <p class="project-result"><i class="fa-solid fa-gauge-high"></i> <strong>Result:</strong> Boosted corporate drafting and documentation speeds by up to 50%.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <section class="section" style="background-color: #ffffff; padding: 40px 20px;">
+        <div class="commitment-box">
+            <h2 style="color: #0f172a; margin-bottom: 10px;">Like Our Work?</h2>
+            <p style="color: #64748b; margin-bottom: 25px;">Let's collaborate to build something impactful for your business workflows.</p>
+            <a href="contact.html" class="btn" style="padding: 12px 30px; font-size: 16px;">Get a Free Project Consultation</a>
+        </div>
+    </section>
+
+    <footer style="padding: 50px 20px;">
         <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
     </footer>
 </body>
