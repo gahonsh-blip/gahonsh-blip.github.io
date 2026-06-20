@@ -4,50 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing Plans | Gahonsh Freelancing</title>
+    <meta name="description" content="Explore flexible and transparent pricing plans for professional PDF design, Excel dashboards, UI/UX branding, and digital automation solutions at Gahonsh Freelancing.">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/pricing.html">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
-        .price-card { background: #ffffff; padding: 40px 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid #64748b; }
-        .price-card.featured { border-top-color: #2563eb; transform: scale(1.02); }
-        .price { font-size: 32px; font-weight: 700; color: #0f172a; margin: 15px 0; }
-        .features-list { text-align: left; margin: 25px 0; list-style: none; }
-        .features-list li { margin-bottom: 12px; font-size: 15px; }
-        .features-list i { color: #2563eb; margin-right: 10px; }
+        /* Modern Pricing Grid Layout */
+        .pricing-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; align-items: stretch; }
+        
+        .pricing-card { 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 35px 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .pricing-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08); 
+        }
+        
+        /* Featured Plan Style */
+        .pricing-card.featured {
+            border: 2px solid #2563eb;
+        }
+        .featured-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 15px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .plan-name { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+        .plan-price { font-size: 2rem; font-weight: 700; color: #2563eb; margin-bottom: 25px; }
+        
+        .plan-features { list-style: none; padding: 0; margin: 0 0 30px 0; text-align: left; flex-grow: 1; }
+        .plan-features li { margin-bottom: 12px; color: #475569; font-size: 0.98rem; display: flex; align-items: center; }
+        .plan-features i { color: #16a34a; margin-right: 10px; font-size: 16px; }
+        
+        /* FAQ Styling */
+        .faq-box { max-width: 800px; margin: 0 auto; text-align: left; background: #ffffff; padding: 35px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .faq-item { margin-bottom: 25px; }
+        .faq-item:last-child { margin-bottom: 0; }
+        .faq-item h3 { font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; font-weight: 700; }
+        .faq-item p { color: #475569; font-size: 0.98rem; line-height: 1.6; }
+        
+        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
+        .logo span { color: #2563eb; font-weight: 700; }
     </style>
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">GAHONSH<span> FREELANCING</span></a>
-        <nav><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a></nav>
+        <a href="index.html" class="logo" style="font-weight:700; font-size: 22px; letter-spacing: 0.5px;">GAHONSH<span> FREELANCING</span></a>
+        <nav>
+            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html" class="active">Pricing</a><a href="contact.html">Contact</a>
+        </nav>
     </header>
 
-    <section class="section">
-        <h2 class="section-title">Transparent Pricing Plans</h2>
+    <section class="hero" style="padding: 60px 20px; text-align: center;">
+        <h1>Flexible Pricing for Every Project</h1>
+        <p style="max-width:700px; margin: 15px auto 0 auto; color:#64748b; line-height: 1.6;">
+            Every project is unique. We provide tailored solutions and custom quotations based on your exact requirements, scope, and timeline.
+        </p>
+    </section>
+
+    <div class="pricing-container">
         <div class="pricing-grid">
-            <div class="price-card">
-                <h3>🌱 Basic Plan</h3><div class="price">Custom Quote</div>
-                <ul class="features-list">
-                    <li><i class="fa-solid fa-check"></i> Basic PDF & PPT Formatting</li>
-                    <li><i class="fa-solid fa-check"></i> Simple Data Entry & Sorting</li>
-                    <li><i class="fa-solid fa-check"></i> 100% Secure Data Handling</li>
-                </ul>
-                <a href="contact.html" class="btn" style="width: 100%;">Discuss Project</a>
-            </div>
-            <div class="price-card featured">
-                <h3>🚀 Standard Plan</h3><div class="price">Custom Quote</div>
-                <ul class="features-list">
-                    <li><i class="fa-solid fa-check"></i> Advanced Excel & Dashboards</li>
-                    <li><i class="fa-solid fa-check"></i> Interactive PDF & Pitch Decks</li>
-                    <li><i class="fa-solid fa-check"></i> Website Maintenance Support</li>
+            
+            <div class="pricing-card">
+                <div class="plan-name">🌱 Starter Plan</div>
+                <div class="plan-price">Custom Pricing</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> PDF Formatting</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Data Entry</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Basic Presentation Design</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Email Support</li>
                 </ul>
                 <a href="contact.html" class="btn" style="width: 100%;">Get Started</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <div class="featured-badge">Featured</div>
+                <div class="plan-name">🚀 Professional Plan</div>
+                <div class="plan-price">Custom Pricing</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Excel Dashboards</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Interactive PDFs</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Business Presentations</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Website Updates</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Priority Support</li>
+                </ul>
+                <a href="contact.html" class="btn" style="width: 100%;">Choose Professional</a>
+            </div>
+
+            <div class="pricing-card">
+                <div class="plan-name">🏢 Business Plan</div>
+                <div class="plan-price">Custom Pricing</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Complete Branding</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Website Design</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Landing Pages</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Automation Solutions</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Ongoing Support</li>
+                </ul>
+                <a href="contact.html" class="btn" style="width: 100%;">Choose Business</a>
+            </div>
+
+        </div>
+    </div>
+
+    <section class="section" style="padding: 60px 20px;">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 35px;">Frequently Asked Questions</h2>
+        <div class="faq-box">
+            <div class="faq-item">
+                <h3>Do you offer fixed pricing?</h3>
+                <p>Pricing depends on project complexity, timeline, and deliverables. A custom quote is provided after reviewing requirements.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What are your payment terms?</h3>
+                <p>We typically work with milestone-based payments or a standard advance deposit before starting the project. Detailed terms will be included in your official quotation.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Do you work with international clients?</h3>
+                <p>Yes. All services can be delivered remotely worldwide.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How quickly can a project start?</h3>
+                <p>Most projects can begin within a few business days after requirements are finalized.</p>
             </div>
         </div>
     </section>
 
-    <footer>
+    <section class="section" style="background-color: #ffffff; padding: 40px 20px; margin-bottom: 40px;">
+        <div style="text-align: center; margin-bottom: 25px; color: #64748b; font-size: 14px;">
+            <p><i class="fa-solid fa-shield-halved" style="color: #2563eb; margin-right: 5px;"></i> Secure Contracts &bull; Complete Data Confidentiality Guaranteed</p>
+        </div>
+        <div class="commitment-box">
+            <h2 style="color: #0f172a; margin-bottom: 10px;">Ready to Start Your Project?</h2>
+            <p style="color: #64748b; margin-bottom: 25px;">Get a personalized proposal based on your goals, timeline, budget, and project requirements.</p>
+            <a href="contact.html" class="btn" style="padding: 12px 30px; font-size: 16px;">Request a Custom Quote</a>
+        </div>
+    </section>
+
+    <footer style="padding: 50px 20px;">
         <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
     </footer>
 </body>
