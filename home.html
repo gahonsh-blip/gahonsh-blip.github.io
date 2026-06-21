@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Gahonsh Freelancing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .logo { font-weight: 700 !important; font-size: 24px !important; letter-spacing: 0.5px; text-decoration: none; color: #0f172a; transition: 0.3s; }
+        .logo span { color: #2563eb; font-weight: 700; }
+        .logo:hover { opacity: 0.85; }
+        .premium-hero {
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('images/hero.jpg') no-repeat center center/cover;
+            padding: 100px 20px; color: #ffffff; text-align: center;
+        }
+        .premium-hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 20px; color: #ffffff; }
+        .premium-hero p { font-size: 1.25rem; max-width: 800px; margin: 0 auto 35px auto; color: #94a3b8; line-height: 1.8; }
+        .hd-service-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.3s ease; text-align: left; }
+        .hd-service-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
+        .hd-img-container { width: 100%; height: 200px; overflow: hidden; }
+        .hd-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .hd-card-content { padding: 25px; }
+        .hd-card-content h3 { font-size: 1.25rem; color: #0f172a; margin-bottom: 10px; font-weight: 700; }
+        .hd-card-content p { color: #475569; font-size: 0.95rem; line-height: 1.6; }
+        .demo-showcase-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; max-width: 1000px; margin: 40px auto 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .demo-img-side { background: url('images/excel-dashboard.jpg') no-repeat center center/cover; min-height: 300px; }
+        .demo-text-side { padding: 40px; text-align: left; display: flex; flex-direction: column; justify-content: center; }
+        .project-tag { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 15px; text-transform: uppercase; width: max-content; }
+        .project-result { color: #16a34a; font-size: 0.95rem; font-weight: 600; margin-top: 15px; }
+        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="home.html" class="logo">GAHONSH<span> FREELANCING</span></a>
+        <nav>
+            <a href="home.html" style="font-weight: bold; color: #2563eb;">Home</a>
+            <a href="about.html">About</a>
+            <a href="services.html">Services</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <section class="premium-hero">
+        <h1>Smart Digital Solutions Tailored for Global Scale</h1>
+        <p>We deliver elite Excel intelligence, professional corporate brand assets, high-converting web applications, and data automation workflows built to drive performance.</p>
+        <a href="contact.html" class="btn" style="padding: 14px 35px; font-size: 17px;">Start Your Project Today</a>
+    </section>
+
+    <section class="section" style="background-color: #ffffff;">
+        <h2 class="section-title">Featured Services</h2>
+        <div class="grid" style="margin-bottom: 40px; gap: 30px;">
+            <div class="hd-service-card">
+                <div class="hd-img-container"><img src="images/excel-dashboard.jpg" alt="Excel"></div>
+                <div class="hd-card-content">
+                    <h3>Excel Dashboards</h3>
+                    <p>Advanced data tracking layouts, custom operational templates, and seamless financial business formulas.</p>
+                </div>
+            </div>
+            <div class="hd-service-card">
+                <div class="hd-img-container"><img src="images/pdf-design.jpg" alt="PDF"></div>
+                <div class="hd-card-content">
+                    <h3>PDF Design & Layouts</h3>
+                    <p>Premium interactive corporate brochures, digital product catalogs, and dynamic business forms.</p>
+                </div>
+            </div>
+            <div class="hd-service-card">
+                <div class="hd-img-container"><img src="images/website-design.jpg" alt="Web"></div>
+                <div class="hd-card-content">
+                    <h3>Website Engineering</h3>
+                    <p>Modern high-converting responsive front-end landing pages and corporate web frameworks.</p>
+                </div>
+            </div>
+            <div class="hd-service-card">
+                <div class="hd-img-container"><img src="images/branding.jpg" alt="Branding"></div>
+                <div class="hd-card-content">
+                    <h3>Branding Solutions</h3>
+                    <p>Unique vector logo generation, premium brand assets, color palettes, and comprehensive guidelines.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+        <h2 class="section-title">Featured Project Demo</h2>
+        <div class="demo-showcase-box">
+            <div class="demo-img-side"></div>
+            <div class="demo-text-side">
+                <span class="project-tag">Enterprise Solution</span>
+                <h3 style="font-size: 1.5rem; color: #0f172a; font-weight: 700; margin-bottom: 12px;">Automated Financial Intelligence Center</h3>
+                <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin-bottom: 15px;">A custom high-performance data engine designed for tracking corporate assets, embedding macro triggers, and multi-tier interactive chart tracking systems.</p>
+                <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Operational Impact:</strong> Saved 80% manual reporting latency.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding: 50px 20px;">
+        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
