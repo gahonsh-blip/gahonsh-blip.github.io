@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gahonsh Freelancing | Premium Digital & Automation Solutions</title>
+    <title>Gahonsh Freelancing | Elite Digital & Automation Solutions</title>
     <meta name="description" content="Professional freelancing agency offering advanced Excel dashboards, interactive PDF design, UI/UX branding, and end-to-end digital automation solutions globally.">
     <link rel="canonical" href="https://gahonsh-blip.github.io/">
     
+    <!-- Open Graph / Facebook Share Preview Tags (Local Asset) -->
     <meta property="og:title" content="GAHONSH Freelancing">
     <meta property="og:description" content="Premium Digital & Automation Solutions">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://gahonsh-blip.github.io/images/og-image.jpg">
 
+    <!-- Twitter Card Share Preview Tags (Local Asset) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="GAHONSH Freelancing">
     <meta name="twitter:description" content="Premium Digital & Automation Solutions">
@@ -21,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Modern Text Logo Highlight Setup */
+        /* Premium Text Logo */
         .logo {
             font-weight: 700 !important;
             font-size: 24px !important;
@@ -37,37 +39,83 @@
         .logo:hover {
             opacity: 0.85;
         }
-        
-        /* Portfolio Specific Sub-styles for Preview */
-        .project-preview-box {
-            background: #f8fafc;
+
+        /* HD Cinematic Hero Section (Local Image) */
+        .premium-hero {
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('images/hero.jpg') no-repeat center center/cover;
+            padding: 100px 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+        .premium-hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 20px; color: #ffffff; letter-spacing: -0.5px; }
+        .premium-hero p { font-size: 1.25rem; max-width: 800px; margin: 0 auto 35px auto; color: #94a3b8; line-height: 1.8; }
+
+        /* Full HD Service Tiles Style */
+        .hd-service-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .hd-service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+        }
+        .hd-img-container {
+            width: 100%;
             height: 200px;
+            overflow: hidden;
+        }
+        .hd-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hd-card-content { padding: 25px; }
+        .hd-card-content h3 { font-size: 1.25rem; color: #0f172a; margin-bottom: 10px; font-weight: 700; }
+        .hd-card-content p { color: #475569; font-size: 0.95rem; line-height: 1.6; }
+
+        /* Project Demo Showcase Section (Reusing Excel Image for local consistency) */
+        .demo-showcase-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 40px auto 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        .demo-img-side {
+            background: url('images/excel-dashboard.jpg') no-repeat center center/cover;
+            min-height: 300px;
+        }
+        .demo-text-side {
+            padding: 40px;
+            text-align: left;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            border-bottom: 1px solid #e2e8f0;
         }
-        .project-preview-box i {
-            font-size: 50px;
-            color: #2563eb;
-            opacity: 0.8;
-        }
-        .project-info { padding: 20px; text-align: left; }
+
         .project-tag { 
             display: inline-block; 
             background: #eff6ff; 
             color: #2563eb; 
             font-size: 11px; 
             font-weight: 600; 
-            padding: 3px 10px; 
+            padding: 4px 12px; 
             border-radius: 20px; 
-            margin-bottom: 10px; 
+            margin-bottom: 15px; 
             text-transform: uppercase;
+            width: max-content;
         }
-        .project-info h3 { font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; font-weight: 700; }
-        .project-info p { color: #475569; font-size: 0.92rem; line-height: 1.5; margin-bottom: 10px; }
-        .project-result { color: #16a34a; font-size: 0.92rem; font-weight: 600; }
-        
+        .project-result { color: #16a34a; font-size: 0.95rem; font-weight: 600; margin-top: 15px; }
+
         .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
     </style>
 </head>
@@ -83,12 +131,14 @@
         </nav>
     </header>
 
-    <section class="hero">
-        <h1>Smart Digital Solutions Tailored for Your Business</h1>
-        <p>We build advanced Excel dashboards, professional PDF documents, high-converting landing pages, and automated workflows to accelerate your growth.</p>
-        <a href="contact.html" class="btn">Start Your Project Today</a>
+    <!-- HD Cinematic Hero Section -->
+    <section class="premium-hero">
+        <h1>Smart Digital Solutions Tailored for Global Scale</h1>
+        <p>We deliver elite Excel intelligence, professional corporate brand assets, high-converting web applications, and data automation workflows built to drive performance.</p>
+        <a href="contact.html" class="btn" style="padding: 14px 35px; font-size: 17px;">Start Your Project Today</a>
     </section>
 
+    <!-- Why Choose Us -->
     <section class="section" style="background-color: #ffffff;">
         <h2 class="section-title">Why Choose Gahonsh Freelancing?</h2>
         <div class="grid">
@@ -110,6 +160,7 @@
         </div>
     </section>
 
+    <!-- Verified Statistics Section -->
     <section class="section" style="background-color: #f8fafc; padding: 40px 20px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
         <div class="grid" style="max-width: 1000px; margin: 0 auto;">
             <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
@@ -127,71 +178,81 @@
         </div>
     </section>
 
+    <!-- Full HD Service Tiles Section (Direct Local Images) -->
     <section class="section" style="background-color: #ffffff;">
         <h2 class="section-title">Featured Services</h2>
-        <div class="grid" style="margin-bottom: 40px;">
-            <div class="card">
-                <i class="fa-regular fa-file-excel" style="font-size: 32px; color: #2563eb; margin-bottom: 15px; display: block;"></i>
-                <h3>Excel Dashboards</h3>
-                <p>Advanced data tracking layouts, custom operational templates, and seamless financial business formulas.</p>
+        <div class="grid" style="margin-bottom: 40px; gap: 30px;">
+            
+            <!-- Tile 1: Excel -->
+            <div class="hd-service-card">
+                <div class="hd-img-container">
+                    <img src="images/excel-dashboard.jpg" alt="Excel Dashboards Visualization">
+                </div>
+                <div class="hd-card-content">
+                    <h3>Excel Dashboards</h3>
+                    <p>Advanced data tracking layouts, custom operational templates, and seamless financial business formulas built for speed.</p>
+                </div>
             </div>
-            <div class="card">
-                <i class="fa-regular fa-file-pdf" style="font-size: 32px; color: #2563eb; margin-bottom: 15px; display: block;"></i>
-                <h3>PDF Design</h3>
-                <p>Premium interactive corporate brochures, digital product catalogs, and clean internal business forms.</p>
+
+            <!-- Tile 2: PDF -->
+            <div class="hd-service-card">
+                <div class="hd-img-container">
+                    <img src="images/pdf-design.jpg" alt="PDF Corporate Design">
+                </div>
+                <div class="hd-card-content">
+                    <h3>PDF Design & Layouts</h3>
+                    <p>Premium interactive corporate brochures, digital product catalogs, and clean internal dynamic business forms.</p>
+                </div>
             </div>
-            <div class="card">
-                <i class="fa-solid fa-laptop-code" style="font-size: 32px; color: #2563eb; margin-bottom: 15px; display: block;"></i>
-                <h3>Website Design</h3>
-                <p>Modern responsive front-end landing pages and corporate web frameworks crafted to scale your traffic.</p>
+
+            <!-- Tile 3: Web -->
+            <div class="hd-service-card">
+                <div class="hd-img-container">
+                    <img src="images/website-design.jpg" alt="Responsive Website Development">
+                </div>
+                <div class="hd-card-content">
+                    <h3>Website Engineering</h3>
+                    <p>Modern high-converting responsive front-end landing pages and corporate web frameworks crafted to scale traffic.</p>
+                </div>
             </div>
-            <div class="card">
-                <i class="fa-solid fa-gem" style="font-size: 32px; color: #2563eb; margin-bottom: 15px; display: block;"></i>
-                <h3>Branding Solutions</h3>
-                <p>Unique vector logo generation, custom color palettes, and comprehensive brand guideline documentation.</p>
+
+            <!-- Tile 4: Branding -->
+            <div class="hd-service-card">
+                <div class="hd-img-container">
+                    <img src="images/branding.jpg" alt="Corporate Branding Asset Creation">
+                </div>
+                <div class="hd-card-content">
+                    <h3>Branding Solutions</h3>
+                    <p>Unique vector logo generation, premium brand assets, color palettes, and comprehensive guideline documentation.</p>
+                </div>
             </div>
+
         </div>
         <div style="text-align: center;">
             <a href="services.html" class="btn" style="padding: 12px 35px;">View All Services</a>
         </div>
     </section>
 
+    <!-- Advanced Project Demo Showcase Section (Local Asset) -->
     <section class="section" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-        <h2 class="section-title">Portfolio Highlights</h2>
-        <div class="grid" style="margin-bottom: 40px; gap: 30px;">
-            <div class="card" style="padding: 0; overflow: hidden; border-radius: 12px;">
-                <div class="project-preview-box"><i class="fa-regular fa-file-excel"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Automation</span>
-                    <h3>Automated Financial Dashboard</h3>
-                    <p>Advanced tracking system featuring complex financial workflows and smart interest monitoring tiers.</p>
-                    <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Result:</strong> Saved 80% manual reporting time.</p>
-                </div>
-            </div>
-            <div class="card" style="padding: 0; overflow: hidden; border-radius: 12px;">
-                <div class="project-preview-box"><i class="fa-solid fa-palette"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Branding</span>
-                    <h3>Modern Corporate Logo</h3>
-                    <p>A corporate brand identity complete with uniform typography guidelines and custom asset structures.</p>
-                    <p class="project-result"><i class="fa-solid fa-square-check"></i> <strong>Result:</strong> Established uniform global presence.</p>
-                </div>
-            </div>
-            <div class="card" style="padding: 0; overflow: hidden; border-radius: 12px;">
-                <div class="project-preview-box"><i class="fa-regular fa-file-pdf"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Digital Assets</span>
-                    <h3>Interactive Product Catalog</h3>
-                    <p>High-end PDF generation featuring clickable user navigation links and structured column breakdowns.</p>
-                    <p class="project-result"><i class="fa-solid fa-bolt"></i> <strong>Result:</strong> Accelerated client sales cycle by 35%.</p>
-                </div>
+        <h2 class="section-title">Featured Project Demo</h2>
+        
+        <div class="demo-showcase-box">
+            <div class="demo-img-side"></div>
+            <div class="demo-text-side">
+                <span class="project-tag">Enterprise Solution</span>
+                <h3 style="font-size: 1.5rem; color: #0f172a; font-weight: 700; margin-bottom: 12px;">Automated Financial Intelligence Center</h3>
+                <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin-bottom: 15px;">A custom high-performance data engine designed for tracking global corporate asset interests, embedding advanced macro triggers, and multi-tier interactive chart tracking systems.</p>
+                <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Operational Impact:</strong> Saved 80% manual reporting latency and removed error risk.</p>
             </div>
         </div>
-        <div style="text-align: center;">
+        
+        <div style="text-align: center; margin-top: 35px;">
             <a href="portfolio.html" class="btn" style="padding: 12px 35px;">Explore Full Portfolio</a>
         </div>
     </section>
 
+    <!-- Action-Oriented Client CTA -->
     <section class="section" style="background-color: #ffffff; padding: 60px 20px;">
         <div class="commitment-box">
             <h2 style="color: #0f172a; margin-bottom: 10px;">Ready to Scale Your Digital Workflows?</h2>
