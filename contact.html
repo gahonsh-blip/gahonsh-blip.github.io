@@ -598,21 +598,22 @@
         <!-- HIGH-CONVERTING SECURE INQUIRY FORM WITH ADVANCED FIELDS -->
         <div class="contact-card-box">
             <h2>Submit Project Inquiry</h2>
-            <form id="project-contact-form">
+            <form id="project-contact-form" action="https://formspree.io/f/xzdqnoez" method="POST">
+                <input type="hidden" name="_next" value="thank-you.html">
                 <div class="form-group">
                     <label for="client-name">Your Full Name / Company</label>
-                    <input type="text" id="client-name" placeholder="Enter name or brand name" required>
+                    <input type="text" id="client-name" name="name" placeholder="Enter name or brand name" required>
                 </div>
                 <div class="form-group">
                     <label for="client-email">Business Email Address</label>
-                    <input type="email" id="client-email" placeholder="your@email.com" required>
+                    <input type="email" id="client-email" name="email" placeholder="your@email.com" required>
                 </div>
                 <div class="form-group">
                     <label for="client-service">Select Required Digital Work</label>
                     <style>
                         #client-service option, #client-budget option { background: #070c19; color: #fff; }
                     </style>
-                    <select id="client-service" required>
+                    <select id="client-service" name="service" required>
                         <option value="" disabled selected>Select service type...</option>
                         <option value="Excel Dashboards & Automation">Excel Dashboards & Automation</option>
                         <option value="Interactive PDF Layout Design">Interactive PDF Layout Design</option>
@@ -623,7 +624,7 @@
                 </div>
                 <div class="form-group">
                     <label for="client-budget">Estimated Project Budget (INR)</label>
-                    <select id="client-budget" required>
+                    <select id="client-budget" name="budget" required>
                         <option value="" disabled selected>Select budget range...</option>
                         <option value="Under ₹5,000">Under ₹5,000</option>
                         <option value="₹5,000 – ₹20,000">₹5,000 – ₹20,000</option>
@@ -633,9 +634,9 @@
                 </div>
                 <div class="form-group">
                     <label for="client-message">Project Description & Target Goals</label>
-                    <textarea id="client-message" rows="4" placeholder="Describe your workflows requirements, preferred layout and rules..." required></textarea>
+                    <textarea id="client-message" name="message" rows="4" placeholder="Describe your workflows requirements, preferred layout and rules..." required></textarea>
                 </div>
-                <button type="submit" class="btn-submit">Submit Form via WhatsApp</button>
+                <button type="submit" class="btn-submit">Submit Form</button>
             </form>
         </div>
 
@@ -644,10 +645,10 @@
                 <div style="margin-bottom: 25px;"> 
     <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--text-main);">Our Operational Location</h3> 
     <div style="width:100%; height:260px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); background: rgba(255,255,255,0.01);"> 
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58957.54877717658!2d85.20521975!3d22.7339233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f60bfdc096a67f%3A0x6b7fa1b6cf02298d!2sArki%2C%20Jharkhand%20835224!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> 
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58957.54877717658!2d85.20521975!3d22.7339233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f60bfdc096a67f%3A0x6b7fa1b[...]
     </div> 
     <p style="margin-top:8px; font-size:0.9rem; color:#8a99ad;">
-        <a href="https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7" target="_blank" style="color:var(--accent-cyan); text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Google Maps</a>
+        <a href="https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7" target="_blank" style="color:var(--accent-cyan); text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Googl[...]
     </p> 
 </div>
 
@@ -777,26 +778,13 @@
             else { btnTop.classList.remove('show'); }
         });
 
-        // FORM SUBMISSION VALIDATION AND REDIRECTION DATA PACKET
-        document.getElementById('project-contact-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('client-name').value;
-            const email = document.getElementById('client-email').value;
-            const service = document.getElementById('client-service').value;
-            const budget = document.getElementById('client-budget').value;
-            const msg = document.getElementById('client-message').value;
-            
-            const encodedText = encodeURIComponent(`Hello Gahonsh Team,\n\nI want to submit a new inquiry:\n- Name: ${name}\n- Email: ${email}\n- Service Needed: ${service}\n- Budget Range: ${budget}\[...]`);
-            window.open(`https://wa.me/918825183628?text=${encodedText}`);
-        });
-
         // NEWSLETTER LOGIC
         document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
             const emailInput = document.getElementById('newsletter-email').value;
             if(emailInput.trim() === "" || !emailInput.includes('@')) {
                 alert("Please enter a valid business email address.");
             } else {
-                window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipeline.`);
+                window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipel[...]
             }
         });
     </script>
