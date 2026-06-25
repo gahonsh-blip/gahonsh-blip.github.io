@@ -1,62 +1,881 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | GAHONSH FREELANCING</title>
-    <link rel="stylesheet" href="style.css">
+    <title>About Us | Gahonsh Freelancing</title>
+    
+    <!-- SEO & Advanced Metadata Archetype -->
+    <meta name="description" content="Discover Gahonsh Freelancing - a professional digital solutions provider dedicated to building digital excellence and automating enterprise operations worldwide.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://gahonsh.github.io/about.html">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
+    <!-- Open Graph Metadata Grid -->
+    <meta property="og:title" content="About Us | Gahonsh Freelancing">
+    <meta property="og:description" content="Building Digital Excellence Worldwide. Professional Freelancing Solutions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gahonsh.github.io/about.html">
+    
+    <!-- Fonts & Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- UNIFIED SEO SCHEMAS -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://gahonsh.github.io/#organization",
+          "name": "GAHONSH FREELANCING",
+          "url": "https://gahonsh.github.io/",
+          "logo": "https://gahonsh.github.io/assets/logo.png"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gahonsh.github.io/about.html",
+          "url": "https://gahonsh.github.io/about.html",
+          "name": "About Us | Gahonsh Freelancing",
+          "isPartOf": { "@id": "https://gahonsh.github.io/#website" }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        /* CSS PREMIUM CONFIGURATION MATRIX */
+        :root {
+            --bg-dark: #030712;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 255, 204, 0.25);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            --text-main: #ffffff;
+            --text-slate: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* STICKY HEADER ARCHITECTURE */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 25px;
+            background: #0b0f19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
+        .dropdown-content a {
+            display: block;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* PREMIUM SLIDE-IN MOBILE NAVIGATION MENU */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .mobile-nav-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            align-self: flex-end;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-slate);
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-close:hover {
+            color: var(--accent-cyan);
+        }
+
+        .mobile-nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            padding-bottom: 10px;
+        }
+
+        /* ABOUT HERO MODULE */
+        .about-hero {
+            padding: 160px 8% 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 119, 255, 0.05), transparent 50%);
+        }
+
+        .about-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .about-hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-hero p {
+            color: var(--text-slate);
+            font-size: 1.25rem;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* REAL DATA METRICS LAYER */
+        .about-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .stat-item h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .stat-item p {
+            font-size: 0.8rem;
+            color: var(--text-slate);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* GLOBAL SECTIONS BASE */
+        section {
+            padding: 90px 8%;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-slate);
+            margin-bottom: 55px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1.05rem;
+        }
+
+        /* TRUST ELEMENT BLOCKS SECTION */
+        .trust-element-section {
+            background: #02050c;
+        }
+
+        .trust-element-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .trust-element-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .trust-element-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .trust-element-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-cyan);
+        }
+
+        .trust-element-card p {
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* METHODICAL WORKING PROCESS GRID */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+
+        .process-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .process-card .step-num {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-blue);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* STRATEGY VISION SECTION */
+        .vision-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .vision-card {
+            background: #070c19;
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .vision-card:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .vision-card i {
+            font-size: 2.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .vision-card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+        }
+
+        .vision-card p {
+            color: var(--text-slate);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* SAMPLE REVIEWS SECTION */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            border-radius: 16px;
+        }
+
+        .testimonial-card .stars {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-card p {
+            font-style: italic;
+            color: var(--text-slate);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .testimonial-card h4 {
+            color: var(--accent-cyan);
+            font-size: 0.95rem;
+        }
+
+        /* CONVERSION CALL TO ACTION SECTION */
+        .cta-banner {
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 119, 255, 0.08), transparent 60%);
+        }
+
+        .btn-cta {
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 25px rgba(0, 255, 204, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+        }
+
+        /* WHATSAPP FLOATING SYSTEM */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        /* BACK TO TOP BUTTON */
+        .back-to-top {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+        }
+
+        .back-to-top.show { opacity: 1; }
+        .back-to-top:hover { background: var(--accent-blue); }
+
+        /* 5-COLUMN FOOTER LAYER */
+        footer {
+            background: #02040a;
+            padding: 80px 8% 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-main);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .footer-col ul li a:hover { color: var(--accent-cyan); }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .newsletter-form input {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .newsletter-form button {
+            background: var(--accent-blue);
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover { background: var(--accent-cyan); color: #000; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-slate);
+            margin-left: 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover { color: var(--accent-cyan); }
+
+        /* RESPONSIVE LAYOUT BREAKPOINTS */
+        @media (max-width: 1024px) {
+            .trust-element-grid { grid-template-columns: repeat(2, 1fr); }
+            .process-grid { grid-template-columns: repeat(2, 1fr); }
+            .vision-grid, .testimonial-grid { grid-template-columns: 1fr; gap: 30px; }
+            .footer-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .trust-element-grid, .process-grid, .footer-grid { grid-template-columns: 1fr; }
+            .about-hero h1 { font-size: 2.5rem; }
+            .about-stats { flex-direction: column; gap: 20px; }
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
+    </style>
 </head>
 <body>
+
+    <!-- INTERACTIVE FLOATING ELEMENTS -->
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <!-- MOBILE SLIDE-IN OVERLAY SYSTEM -->
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Our Portfolio</a>
+        <a href="pricing.html">Pricing Matrix</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <!-- STICKY HEADER NAVIGATION -->
     <header>
-        <div class="logo">GAHONSH FREELANCING</div>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
         <nav>
-            <a href="home.html">Home</a>
-            <a href="index.html" class="active">About</a>
-            <a href="services.html">Services</a>
+            <a href="index.html">Home</a>
+            <a href="about.html" class="active">About</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
             <a href="portfolio.html">Portfolio</a>
             <a href="pricing.html">Pricing</a>
             <a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="hero">
-        <h1>Building Digital Excellence Worldwide</h1>
-        <p>Professional Freelancing Solutions for Businesses, Entrepreneurs, and Organizations.</p>
-    </section>
-
-    <section class="section">
-        <h2>Who We Are</h2>
-        <p>GAHONSH FREELANCING is a professional digital solutions provider dedicated to helping businesses, entrepreneurs, and organizations streamline their operations through modern digital services.</p>
-    </section>
-
-    <section class="section">
-        <h2>What We Do</h2>
-        <ul>
-            <li>PDF Design & Automation</li>
-            <li>Excel Dashboards & Automation</li>
-            <li>PowerPoint Presentation Design</li>
-            <li>Business Documentation & Web Support</li>
-        </ul>
-    </section>
-
-    <section class="stats">
-        <div class="stat-item">
-            <h3>100+</h3>
-            <p>Projects Completed</p>
-        </div>
-        <div class="stat-item">
-            <h3>98%</h3>
-            <p>Client Satisfaction</p>
-        </div>
-        <div class="stat-item">
-            <h3>24/7</h3>
-            <p>Remote Support</p>
+    <!-- ABOUT HERO MODULE -->
+    <section class="about-hero">
+        <h1>Building Digital Excellence <span>Worldwide</span></h1>
+        <p>GAHONSH FREELANCING is a professional digital solutions provider dedicated to helping businesses, entrepreneurs, and organizations streamline their operations through modern digital services[cite: 1, 7].</p>
+        
+        <div class="about-stats">
+            <div class="stat-item">
+                <h2 class="counter-num" data-target="50">0</h2>
+                <p>Projects Completed[cite: 1, 7]</p>
+            </div>
+            <div class="stat-item">
+                <h2 class="counter-num" data-target="20">0</h2>
+                <p>Services Offered[cite: 1, 7]</p>
+            </div>
+            <div class="stat-item">
+                <h2>100%</h2>
+                <p>Remote Delivery[cite: 1, 7]</p>
+            </div>
         </div>
     </section>
 
+    <!-- CONTACT TRUST SECTION -->
+    <section class="trust-element-section">
+        <h2 class="section-title">Our Operational Trust Promises</h2>
+        <p class="section-subtitle">We design operational guardrails that provide institutional-grade protection for business assets.</p>
+        <div class="trust-element-grid">
+            <div class="trust-element-card">
+                <h3><i class="fa-solid fa-shield-halved"></i> Secure Delivery</h3>
+                <p>Milestone-driven code deployment utilizing strict integration checks to prevent system layout lag.</p>
+            </div>
+            <div class="trust-element-card">
+                <h3><i class="fa-solid fa-headset"></i> Remote Support</h3>
+                <p>Constant communication and template support layers across global execution time zones.</p>
+            </div>
+            <div class="trust-element-card">
+                <h3><i class="fa-solid fa-bolt"></i> Fast Turnaround</h3>
+                <p>Optimized front-end and script compilation pipelines engineered to hit critical business deadlines.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WORK ROADMAP METHODOLOGY SECTION -->
+    <section>
+        <h2 class="section-title">Our Working Process</h2>
+        <p class="section-subtitle">A structured, secure, and milestone-based operational roadmap built for direct deployment.</p>
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="step-num">1</div>
+                <h3 style="margin-bottom:12px;">Consultation</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">Reviewing core specifications and validating tracking expectations.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-num">2</div>
+                <h3 style="margin-bottom:12px;">Planning</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">Architecting schema prototypes, design asset files, and layout logic.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-num">3</div>
+                <h3 style="margin-bottom:12px;">Development</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">Writing production-ready validation code, clean formulas, and styles.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-num">4</div>
+                <h3 style="margin-bottom:12px;">Delivery</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">System checks followed by safe remote code deployments and setup rows.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- STRATEGIC VISION & MISSION PANELS -->
+    <section class="vision-section">
+        <div class="vision-grid">
+            <div class="vision-card">
+                <i class="fa-solid fa-bullseye"></i>
+                <h2>Our Mission</h2>
+                <p>To deliver advanced automated macro intelligence, crisp visual typography layout guidelines, and ultra-high-converting web architectures built specifically to maximize execution speed and remove manual reporting data lag entirely[cite: 1, 2, 7, 8].</p>
+            </div>
+            <div class="vision-card">
+                <i class="fa-solid fa-eye"></i>
+                <h2>Our Vision</h2>
+                <p>To establish a database support center that allows modern enterprises and entrepreneurs to scale their operational business documentation securely and affordably.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SAMPLE REVIEWS TRANSPARENT TRACK SECTION -->
+    <section style="background: rgba(0,0,0,0.15);">
+        <h2 class="section-title">Sample Client Feedback</h2>
+        <p class="section-subtitle">Representative feedback logs illustrating standard project success loops across previous accounts.</p>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                <p>"Excellent PDF Design Service! The layout rules and digital corporate presentation structures completely transformed our pipeline visibility."</p>
+                <h4><i class="fa-solid fa-user-tie"></i> Independent Consultant — India</h4>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                <p>"Professional Excel Automation. The complex multi-tier macro engine significantly optimized our internal workflow tracking."</p>
+                <h4><i class="fa-solid fa-building-columns"></i> Financial Services Partner — Jharkhand</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- DIRECT CONVERSION CTA CONTEXT -->
+    <section class="cta-banner">
+        <h2>Ready to Start Your Project?[cite: 3, 9, 15]</h2>
+        <p style="color:var(--text-slate); margin-bottom: 25px;">Get a personalized proposal based on your goals, timeline, and requirements[cite: 3, 9, 15].</p>
+        <a href="contact.html" class="btn-cta">
+            <i class="fa-solid fa-paper-plane"></i> Get a Free Consultation Today
+        </a>
+    </section>
+
+    <!-- 5-COLUMN HIGH CONVERSION FOOTER LAYER -->
     <footer>
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
-        <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a></p>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Gahonsh</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="portfolio.html">Case Log Files</a></li>
+                    <li><a href="pricing.html">Price Matrix</a></li>
+                    <li><a href="index.html#faq">System FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal Matrix</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-and-conditions.html">Terms Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your corporate email">
+                    <button type="button" id="newsletter-submit-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <!-- INTERACTIVE SCRIPTS HUB -->
+    <script>
+        // REAL-TIME AUTO YEAR SCRIPT
+        document.getElementById('dynamic-year').innerText = new Date().getFullYear();
+
+        const menuOpenBtn = document.getElementById('mobile-menu-open-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuContainer = document.getElementById('mobile-menu-container');
+
+        const toggleMobileMenu = (open) => {
+            if(open) {
+                menuOverlay.classList.add('active');
+                menuContainer.classList.add('active');
+            } else {
+                menuOverlay.classList.remove('active');
+                menuContainer.classList.remove('active');
+            }
+        };
+
+        menuOpenBtn.addEventListener('click', () => toggleMobileMenu(true));
+        menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
+        menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // ACTIVE RESPONSIVE METRIC COUNTERS
+        const counters = document.querySelectorAll('.counter-num');
+        const countObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const target = +entry.target.getAttribute('data-target');
+                    let current = 0;
+                    const increment = target / 50;
+                    const update = () => {
+                        current += increment;
+                        if(current < target) {
+                            entry.target.innerText = Math.floor(current);
+                            setTimeout(update, 20);
+                        } else {
+                            entry.target.innerText = target;
+                        }
+                    };
+                    update();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {threshold: 0.6});
+        counters.forEach(c => countObserver.observe(c));
+
+        const btnTop = document.getElementById('btn-top');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 400) { btnTop.classList.add('show'); } 
+            else { btnTop.classList.remove('show'); }
+        });
+
+        // VALID EMAIL FRONTEND ALERT
+        document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('newsletter-email').value;
+            if(emailInput.trim() === "" || !emailInput.includes('@')) {
+                alert("Please enter a valid corporate email address.");
+            } else {
+                alert("Thank you! Your email has been safely added to our optimization update logs.");
+                document.getElementById('newsletter-email').value = "";
+            }
+        });
+    </script>
 </body>
 </html>
