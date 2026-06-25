@@ -1,5 +1,5 @@
 /* ==========================================================================
-   GAHONSH FREELANCING ULTRA HERO V3 - PREMIUM PRODUCTION CSS
+   GAHONSH FREELANCING ULTRA DESIGN V3 - SYSTEM SYNCHRONIZED CSS
    ========================================================================== */
 
 :root {
@@ -7,6 +7,8 @@
     --accent-cyan: #00ffcc;
     --accent-blue: #0077ff;
     --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+    --whatsapp-green: #25D366;
+    --whatsapp-gradient: linear-gradient(135deg, #25D366 0%, #1ebd58 100%);
     --text-white: #ffffff;
     --text-slate: #8a99ad;
     --glass-bg: rgba(255, 255, 255, 0.01);
@@ -14,6 +16,35 @@
     --glass-border-hover: rgba(0, 255, 204, 0.25);
 }
 
+/* --- PREMIUM FLOATING WHATSAPP BUTTON --- */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--whatsapp-gradient);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    color: var(--text-white);
+    text-decoration: none;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: pulseGlow 2.5s infinite;
+}
+
+.whatsapp-float:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5);
+    filter: brightness(1.1);
+}
+
+/* --- HERO SECTION ARCHITECTURE --- */
 .hero {
     position: relative;
     min-height: 100vh;
@@ -27,7 +58,7 @@
     padding: 120px 5% 60px;
 }
 
-/* Linear-Inspired Floating Ambient Background Glow */
+/* Linear-Inspired Ambient Neon Glow */
 .hero::before {
     content: "";
     position: absolute;
@@ -43,7 +74,6 @@
     animation: floatGlow 10s ease-in-out infinite;
 }
 
-/* Stripe-Inspired Radial Highlight Overlay */
 .hero-overlay {
     position: absolute;
     inset: 0;
@@ -59,7 +89,6 @@
     padding: 0 20px;
 }
 
-/* Premium Framer-Style Floating Badge */
 .hero-badge {
     display: inline-flex;
     align-items: center;
@@ -78,7 +107,6 @@
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Apple-Grade Clean Visual Typography */
 .hero h1 {
     font-size: 4.2rem;
     font-weight: 800;
@@ -100,10 +128,8 @@
     max-width: 700px;
     margin: 0 auto 45px;
     line-height: 1.65;
-    font-weight: 400;
 }
 
-/* Call To Action Buttons Framework */
 .hero-buttons {
     display: flex;
     gap: 20px;
@@ -126,7 +152,6 @@
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Stripe Glowing CTA Mode */
 .btn-primary {
     background: var(--accent-gradient);
     color: #040814;
@@ -151,7 +176,6 @@
     transform: translateY(-3px);
 }
 
-/* Glassmorphism Statistics Grid Integration */
 .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -198,29 +222,36 @@
 
 /* --- PREMIUM ANIMATION KEYFRAMES --- */
 @keyframes floatGlow {
-    0%, 100% {
-        transform: translate(0, 0) scale(1);
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -40px) scale(1.1); }
+}
+
+@keyframes pulseGlow {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0.5);
     }
     50% {
-        transform: translate(30px, -40px) scale(1.1);
+        transform: scale(1.06);
+        box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5), 0 0 0 15px rgba(37, 211, 102, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0);
     }
 }
 
-/* Responsive Fluid Layout Enhancements */
+/* --- RESPONSIVE CONFIGURATION --- */
 @media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.8rem;
-        letter-spacing: -1px;
+    .whatsapp-float {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
     }
-    .hero p {
-        font-size: 1.1rem;
-    }
-    .hero-stats {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    .btn-primary, .btn-secondary {
-        width: 100%;
-        justify-content: center;
-    }
+    .hero h1 { font-size: 2.8rem; letter-spacing: -1px; }
+    .hero p { font-size: 1.1rem; }
+    .hero-stats { grid-template-columns: 1fr; gap: 16px; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
 }
