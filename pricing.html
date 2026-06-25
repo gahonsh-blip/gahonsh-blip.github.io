@@ -1,168 +1,996 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing Plans | Gahonsh Freelancing</title>
-    <meta name="description" content="Explore flexible and transparent pricing plans for professional PDF design, Excel dashboards, UI/UX branding, and digital automation solutions at Gahonsh Freelancing.">
+    
+    <!-- SEO & Advanced Metadata Archetype -->
+    <meta name="description" content="Transparent and flexible pricing plans for Excel automation, business PDF design, website assistance, and AI solutions by Gahonsh Freelancing.">
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gahonsh-blip.github.io/pricing.html">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
+    <!-- Open Graph Metadata Grid -->
+    <meta property="og:title" content="Pricing Plans | Gahonsh Freelancing">
+    <meta property="og:description" content="Flexible price matrix structured precisely to match your budget limits.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gahonsh-blip.github.io/pricing.html">
+    
+    <!-- Fonts & Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- ADVANCED PRICE MATRIX SEO SCHEMAS WITH CORRECT DOMAIN -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://gahonsh-blip.github.io/#organization",
+          "name": "GAHONSH FREELANCING",
+          "url": "https://gahonsh-blip.github.io/",
+          "logo": "https://gahonsh-blip.github.io/assets/logo.png"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gahonsh-blip.github.io/pricing.html",
+          "url": "https://gahonsh-blip.github.io/pricing.html",
+          "name": "Pricing Plans | Gahonsh Freelancing",
+          "isPartOf": { "@id": "https://gahonsh-blip.github.io/#website" }
+        }
+      ]
+    }
+    </script>
+
     <style>
-        /* Modern Pricing Grid Layout */
-        .pricing-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; align-items: stretch; }
-        
-        .pricing-card { 
-            background: #ffffff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 35px 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        /* CSS PREMIUM CONFIGURATION MATRIX */
+        :root {
+            --bg-dark: #030712;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 255, 204, 0.25);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            --text-main: #ffffff;
+            --text-slate: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* STICKY HEADER ARCHITECTURE */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 8%;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown {
             position: relative;
         }
-        .pricing-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08); 
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 25px;
+            background: #0b0f19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
         }
-        
-        /* Featured Plan Style */
-        .pricing-card.featured {
-            border: 2px solid #2563eb;
+
+        .dropdown-content a {
+            display: block;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 0.9rem;
         }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* PREMIUM SLIDE-IN MOBILE NAVIGATION MENU */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .mobile-nav-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            align-self: flex-end;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-slate);
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-close:hover {
+            color: var(--accent-cyan);
+        }
+
+        .mobile-nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            padding-bottom: 10px;
+        }
+
+        /* PRICING HERO SECTION */
+        .pricing-hero {
+            padding: 160px 8% 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 119, 255, 0.05), transparent 50%);
+        }
+
+        .pricing-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .pricing-hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-hero p {
+            color: var(--text-slate);
+            font-size: 1.25rem;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* SAFE TRUST METRICS BLOCK */
+        .services-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .stat-item h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .stat-item p {
+            font-size: 0.8rem;
+            color: var(--text-slate);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* PERSUASIVE PRICING PLAN CARDS */
+        .pricing-section {
+            padding: 40px 8% 80px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        .price-card {
+            background: #070c19;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 50px 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.35s ease;
+        }
+
+        .price-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+        }
+
+        .price-card.featured {
+            border: 2px solid var(--accent-cyan);
+            background: linear-gradient(180deg, #0b1528 0%, #070c19 100%);
+            box-shadow: 0 10px 40px rgba(0, 255, 204, 0.1);
+        }
+
         .featured-badge {
             position: absolute;
             top: -15px;
             left: 50%;
             transform: translateX(-50%);
-            background: #2563eb;
-            color: #ffffff;
-            font-size: 12px;
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 6px 20px;
             font-weight: 700;
-            padding: 4px 15px;
-            border-radius: 20px;
+            font-size: 0.8rem;
+            border-radius: 50px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .price-header h3 {
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .price-amount {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .price-features li {
+            margin-bottom: 15px;
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .price-features li i {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+        }
+
+        /* STRATEGIC FEATURE COMPARISON MATRIX TABLE */
+        .comparison-section {
+            padding: 80px 8%;
+            background: rgba(255,255,255,0.01);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.3rem;
+            margin-bottom: 15px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-slate);
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1.05rem;
+        }
+
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .comp-table th, .comp-table td {
+            padding: 18px 25px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .comp-table th {
+            background: #070c19;
+            color: var(--text-main);
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
-        .plan-name { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
-        .plan-price { font-size: 2rem; font-weight: 700; color: #2563eb; margin-bottom: 25px; }
-        
-        .plan-features { list-style: none; padding: 0; margin: 0 0 30px 0; text-align: left; flex-grow: 1; }
-        .plan-features li { margin-bottom: 12px; color: #475569; font-size: 0.98rem; display: flex; align-items: center; }
-        .plan-features i { color: #16a34a; margin-right: 10px; font-size: 16px; }
-        
-        /* FAQ Styling */
-        .faq-box { max-width: 800px; margin: 0 auto; text-align: left; background: #ffffff; padding: 35px; border-radius: 12px; border: 1px solid #e2e8f0; }
-        .faq-item { margin-bottom: 25px; }
-        .faq-item:last-child { margin-bottom: 0; }
-        .faq-item h3 { font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; font-weight: 700; }
-        .faq-item p { color: #475569; font-size: 0.98rem; line-height: 1.6; }
-        
-        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
-        .logo span { color: #2563eb; font-weight: 700; }
+
+        .comp-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .comp-table i.fa-check { color: var(--accent-cyan); }
+        .comp-table i.fa-minus { color: var(--text-slate); opacity: 0.3; }
+
+        /* INTEGRATED SYSTEM FAQs (PRICING SPECIFIC) */
+        .faq-section {
+            padding: 90px 8% 40px;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover { background: rgba(255,255,255,0.02); }
+        .faq-answer {
+            display: none;
+            padding: 0 20px 20px;
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* NOT SURE WHICH PLAN FITS CONVERSION UPGRADE BLOCK */
+        .custom-solution-banner {
+            padding: 70px 8%;
+            text-align: center;
+            background: #02050c;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-solution-banner h2 {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .custom-solution-banner p {
+            color: var(--text-slate);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .btn-custom-quote {
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 25px rgba(0, 255, 204, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-custom-quote:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+        }
+
+        /* ACTIVE INTERACTION BUTTONS */
+        .btn-plan {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 50px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .price-card .btn-plan {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .price-card .btn-plan:hover {
+            background: var(--accent-blue);
+            border-color: transparent;
+            color: white;
+        }
+
+        .price-card.featured .btn-plan {
+            background: var(--accent-gradient);
+            color: #030712;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
+        }
+
+        .price-card.featured .btn-plan:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 25px rgba(0, 255, 204, 0.4);
+        }
+
+        /* TRANSACTIONS PROTECTION NOTICE */
+        .pricing-notice {
+            text-align: center;
+            color: var(--text-slate);
+            font-size: 0.9rem;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pricing-notice i { color: var(--accent-cyan); }
+
+        /* FLOATING UTILITIES */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+        }
+
+        .back-to-top.show { opacity: 1; }
+        .back-to-top:hover { background: var(--accent-blue); }
+
+        /* 5-COLUMN FOOTER LAYER */
+        footer {
+            background: #02040a;
+            padding: 80px 8% 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-main);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .footer-col ul li a:hover { color: var(--accent-cyan); }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .newsletter-form input {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .newsletter-form button {
+            background: var(--accent-blue);
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover { background: var(--accent-cyan); color: #000; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-slate);
+            margin-left: 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover { color: var(--accent-cyan); }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1024px) {
+            .pricing-grid { grid-template-columns: 1fr; gap: 30px; }
+            .footer-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .footer-grid { grid-template-columns: 1fr; }
+            .pricing-hero h1 { font-size: 2.5rem; }
+            .services-stats { flex-direction: column; gap: 20px; }
+            .comp-table { display: block; overflow-x: auto; }
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- INSTANT FLOATING INTERACTORS -->
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <!-- MOBILE SLIDE OVERLAY MAP -->
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Our Portfolio</a>
+        <a href="pricing.html">Pricing Matrix</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <!-- MAIN STICKY NAVBAR Header -->
     <header>
-        <a href="index.html" class="logo" style="font-weight:700; font-size: 22px; letter-spacing: 0.5px;">GAHONSH<span> FREELANCING</span></a>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
         <nav>
-            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html" class="active">Pricing</a><a href="contact.html">Contact</a>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html" class="active">Pricing</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="hero" style="padding: 60px 20px; text-align: center;">
-        <h1>Flexible Pricing for Every Project</h1>
-        <p style="max-width:700px; margin: 15px auto 0 auto; color:#64748b; line-height: 1.6;">
-            Every project is unique. We provide tailored solutions and custom quotations based on your exact requirements, scope, and timeline.
-        </p>
+    <!-- PRICING HERO SECTION -->
+    <section class="pricing-hero">
+        <h1>Transparent Plans For <span>Every Project</span></h1>
+        <p>Every single workflow requirement is unique. We provide clear, milestone-driven structures designed to match your budget perfectly.</p>
+        
+        <!-- SAFE REAL TRUST METRICS -->
+        <div class="services-stats">
+            <div class="stat-item">
+                <h2>Growing</h2>
+                <p>Portfolio</p>
+            </div>
+            <div class="stat-item">
+                <h2>Multiple</h2>
+                <p>Digital Services</p>
+            </div>
+            <div class="stat-item">
+                <h2>Remote Support</h2>
+                <p>Available</p>
+            </div>
+        </div>
     </section>
 
-    <div class="pricing-container">
+    <!-- PERSUASIVE PRICING MATRICES GRID (CONSISTENT NAMES) -->
+    <section class="pricing-section">
         <div class="pricing-grid">
             
-            <div class="pricing-card">
-                <div class="plan-name">ðŸŒ± Starter Plan</div>
-                <div class="plan-price">Custom Pricing</div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> PDF Formatting</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Data Entry</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Basic Presentation Design</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Email Support</li>
-                </ul>
-                <a href="contact.html" class="btn" style="width: 100%;">Get Started</a>
+            <!-- PLAN 1: STARTER MODEL -->
+            <div class="price-card">
+                <div class="price-header">
+                    <h3>Starter Plan</h3>
+                    <div class="price-amount">Starting From ₹999</div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Clean PDF Formatting</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Basic Administrative Data Entry</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Standard Presentation Layouts</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Standard Email System Support</li>
+                    </ul>
+                </div>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20get%20a%20custom%20quote%20for%20the%20Starter%20Plan." class="btn-plan" target="_blank">Get Started</a>
             </div>
 
-            <div class="pricing-card featured">
-                <div class="featured-badge">Featured</div>
-                <div class="plan-name">ðŸš€ Professional Plan</div>
-                <div class="plan-price">Custom Pricing</div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Excel Dashboards</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Interactive PDFs</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Business Presentations</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Website Updates</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Priority Support</li>
-                </ul>
-                <a href="contact.html" class="btn" style="width: 100%;">Choose Professional</a>
+            <!-- PLAN 2: FEATURED PROFESSIONAL MODEL -->
+            <div class="price-card featured">
+                <div class="featured-badge">Most Popular</div>
+                <div class="price-header">
+                    <h3>Professional Plan</h3>
+                    <div class="price-amount">Starting From ₹4,999</div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Advanced Excel Macro Dashboards</li>
+                        <li><i class="fa-solid fa-circle-check"></i> High-End Interactive PDFs</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Premium Investor Pitch Decks</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Constant Front-End Web Updates</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Priority SLA Communication Support</li>
+                    </ul>
+                </div>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20am%20interested%20in%20the%20Professional%20Plan%20milestones." class="btn-plan" target="_blank">Choose Professional</a>
             </div>
 
-            <div class="pricing-card">
-                <div class="plan-name">ðŸ¢ Business Plan</div>
-                <div class="plan-price">Custom Pricing</div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Complete Branding</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Website Design</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Landing Pages</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Automation Solutions</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Ongoing Support</li>
-                </ul>
-                <a href="contact.html" class="btn" style="width: 100%;">Choose Business</a>
+            <!-- PLAN 3: ENTERPRISE AUTOMATION GRID (BUG FIXED CTA) -->
+            <div class="price-card">
+                <div class="price-header">
+                    <h3>Business Plan</h3>
+                    <div class="price-amount">Custom Quote</div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Full Corporate Branding Identity</li>
+                        <li><i class="fa-solid fa-circle-check"></i> High-Converting Web Architectures</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Specialized AI Prompt Assistants</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Complete Workflow Automation Solutions</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Ongoing Technical Infrastructure Support</li>
+                    </ul>
+                </div>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20discuss%20the%20Enterprise%20Business%20Plan%20parameters." class="btn-plan" target="_blank">Request Custom Quote</a>
             </div>
 
         </div>
-    </div>
 
-    <section class="section" style="padding: 60px 20px;">
-        <h2 class="section-title" style="text-align: center; margin-bottom: 35px;">Frequently Asked Questions</h2>
-        <div class="faq-box">
+        <!-- TRANSACTIONS PROTECTION NOTICE -->
+        <div class="pricing-notice">
+            <p><i class="fa-solid fa-lock"></i> Secure Contracts & Complete Data Confidentiality Guaranteed</p>
+        </div>
+    </section>
+
+    <!-- STRATEGIC FEATURE COMPARISON MATRIX TABLE (CONSISTENT NAMES) -->
+    <section class="comparison-section">
+        <h2 class="section-title">Features Comparison Matrix</h2>
+        <p class="section-subtitle">Analyze standard parameters across our tiered development models.</p>
+        
+        <table class="comp-table">
+            <thead>
+                <tr>
+                    <th>Features</th>
+                    <th>Starter</th>
+                    <th>Professional</th>
+                    <th>Business</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>PDF Design Layouts</td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                </tr>
+                <tr>
+                    <td>Excel Automation Tools</td>
+                    <td><i class="fa-solid fa-check"></i> Basic</td>
+                    <td><i class="fa-solid fa-check"></i> Advanced</td>
+                    <td><i class="fa-solid fa-check"></i> Advanced</td>
+                </tr>
+                <tr>
+                    <td>Website Technical Support</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                </tr>
+                <tr>
+                    <td>AI Content Assistants</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                </tr>
+                <tr>
+                    <td>Priority SLA Support Rows</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Included</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- INTEGRATED SYSTEM FAQs SECTION (PRICING SPECIFIC UPGRADE) -->
+    <section class="faq-section">
+        <h2 class="section-title">Pricing Frequently Asked Questions</h2>
+        <p class="section-subtitle">Clear answers to help you understand our operational onboarding and payment loops.</p>
+        <div class="faq-container">
             <div class="faq-item">
-                <h3>Do you offer fixed pricing?</h3>
-                <p>Pricing depends on project complexity, timeline, and deliverables. A custom quote is provided after reviewing requirements.</p>
+                <div class="faq-question">What's included in revisions? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">Revisions include text changes, column/row restructuring, formula adjustments, and layout fine-tuning based on the initial project scope sheet.</div>
             </div>
             <div class="faq-item">
-                <h3>What are your payment terms?</h3>
-                <p>We typically work with milestone-based payments or a standard advance deposit before starting the project. Detailed terms will be included in your official quotation.</p>
+                <div class="faq-question">How do payments work? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">We operate on a milestone-driven system. Projects are divided into clear deliverables, and payments are securely cleared after each stage is verified.</div>
             </div>
             <div class="faq-item">
-                <h3>Do you work with international clients?</h3>
-                <p>Yes. All services can be delivered remotely worldwide.</p>
+                <div class="faq-question">Can pricing change during a project? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">No. Once a fixed quote or milestone budget is officially agreed upon, the price remains locked unless completely new requirements are added outside the initial brief.</div>
             </div>
             <div class="faq-item">
-                <h3>How quickly can a project start?</h3>
-                <p>Most projects can begin within a few business days after requirements are finalized.</p>
+                <div class="faq-question">Do you offer custom multi-page packages? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">Absolutely. If your business workflows require a mixed setup (e.g., combining custom Excel scripts with an interactive PDF profile), we can draft a tailored quote sheet.</div>
             </div>
         </div>
     </section>
 
-    <section class="section" style="background-color: #ffffff; padding: 40px 20px; margin-bottom: 40px;">
-        <div style="text-align: center; margin-bottom: 25px; color: #64748b; font-size: 14px;">
-            <p><i class="fa-solid fa-shield-halved" style="color: #2563eb; margin-right: 5px;"></i> Secure Contracts &bull; Complete Data Confidentiality Guaranteed</p>
-        </div>
-        <div class="commitment-box">
-            <h2 style="color: #0f172a; margin-bottom: 10px;">Ready to Start Your Project?</h2>
-            <p style="color: #64748b; margin-bottom: 25px;">Get a personalized proposal based on your goals, timeline, budget, and project requirements.</p>
-            <a href="contact.html" class="btn" style="padding: 12px 30px; font-size: 16px;">Request a Custom Quote</a>
-        </div>
+    <!-- NOT SURE WHICH PLAN FITS CONVERSION BLOCK -->
+    <section class="custom-solution-banner">
+        <h2>Not Sure Which Plan Fits Your Needs?</h2>
+        <p>Contact us today and receive a personalized workflow recommendation perfectly matched to your business.</p>
+        <a href="contact.html" class="btn-custom-quote">
+            <i class="fa-solid fa-paper-plane"></i> Get Free Consultation
+        </a>
     </section>
 
-    <footer style="padding: 50px 20px;">
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
+    <!-- FOOTER MODULE LAYER (SIMPLIFIED & POWERFUL) -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Gahonsh</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Professional digital solutions including Excel Automation, PDF Design, Presentation Design, Website Assistance and AI Content Services.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="portfolio.html">Case Log Files</a></li>
+                    <li><a href="pricing.html">Price Matrix</a></li>
+                    <li><a href="index.html#faq">System FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal Matrix</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-and-conditions.html">Terms Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your corporate email">
+                    <button type="button" id="newsletter-submit-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <!-- INTERACTIVE SLIDE NAVIGATION SCRIPT -->
+    <script>
+        // DYNAMIC YEAR AUTOMATION
+        document.getElementById('dynamic-year').innerText = new Date().getFullYear();
+
+        const menuOpenBtn = document.getElementById('mobile-menu-open-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuContainer = document.getElementById('mobile-menu-container');
+
+        const toggleMobileMenu = (open) => {
+            if(open) {
+                menuOverlay.classList.add('active');
+                menuContainer.classList.add('active');
+            } else {
+                menuOverlay.classList.remove('active');
+                menuContainer.classList.remove('active');
+            }
+        };
+
+        menuOpenBtn.addEventListener('click', () => toggleMobileMenu(true));
+        menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
+        menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // FAQ SLIDE SYSTEM
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        faqQuestions.forEach(q => {
+            q.addEventListener('click', () => {
+                const answer = q.nextElementSibling;
+                const icon = q.querySelector('i');
+                if(answer.style.display === 'block') {
+                    answer.style.display = 'none';
+                    icon.className = 'fa-solid fa-plus';
+                } else {
+                    answer.style.display = 'block';
+                    icon.className = 'fa-solid fa-minus';
+                }
+            });
+        });
+
+        const btnTop = document.getElementById('btn-top');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 400) { btnTop.classList.add('show'); } 
+            else { btnTop.classList.remove('show'); }
+        });
+
+        document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('newsletter-email').value;
+            if(emailInput.trim() === "" || !emailInput.includes('@')) {
+                alert("Please enter a valid business email address.");
+            } else {
+                alert("Thank you! Your email has been added to our optimization update log.");
+                document.getElementById('newsletter-email').value = "";
+            }
+        });
+    </script>
 </body>
 </html>
