@@ -1,279 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gahonsh Freelancing | Elite Digital & Automation Solutions</title>
-    <meta name="description" content="Professional freelancing agency offering advanced Excel dashboards, interactive PDF design, UI/UX branding, and end-to-end digital automation solutions globally.">
-    <link rel="canonical" href="https://gahonsh-blip.github.io/">
-    
-    <!-- Open Graph / Facebook Share Preview Tags (Local Asset) -->
-    <meta property="og:title" content="GAHONSH Freelancing">
-    <meta property="og:description" content="Premium Digital & Automation Solutions">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://gahonsh-blip.github.io/images/og-image.jpg">
-
-    <!-- Twitter Card Share Preview Tags (Local Asset) -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="GAHONSH Freelancing">
-    <meta name="twitter:description" content="Premium Digital & Automation Solutions">
-    <meta name="twitter:image" content="https://gahonsh-blip.github.io/images/og-image.jpg">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <title>Gahonsh Freelancing | Premium Web Concept</title>
     <style>
-        /* Premium Text Logo */
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary: #0a0f1d;
+            --accent: #00ffcc;
+            --accent-gradient: linear-gradient(135deg, #00ffcc, #0077ff);
+            --text-light: #ffffff;
+            --text-muted: #8a99ad;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-card: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* --- KEYFRAMES FOR ANIMATIONS --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(0,255,204,0.6)); }
+            50% { filter: drop-shadow(0 0 20px rgba(0,255,204,1)); }
+        }
+
+        /* --- HEADER & NAVIGATION --- */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 15, 29, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-card);
+        }
+
         .logo {
-            font-weight: 700 !important;
-            font-size: 24px !important;
-            letter-spacing: 0.5px;
-            text-decoration: none;
-            color: #0f172a;
-            transition: 0.3s;
-        }
-        .logo span {
-            color: #2563eb;
-            font-weight: 700;
-        }
-        .logo:hover {
-            opacity: 0.85;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* HD Cinematic Hero Section (Local Image) */
-        .premium-hero {
-            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('images/hero.jpg') no-repeat center center/cover;
-            padding: 100px 20px;
-            color: #ffffff;
-            text-align: center;
-        }
-        .premium-hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 20px; color: #ffffff; letter-spacing: -0.5px; }
-        .premium-hero p { font-size: 1.25rem; max-width: 800px; margin: 0 auto 35px auto; color: #94a3b8; line-height: 1.8; }
-
-        /* Full HD Service Tiles Style */
-        .hd-service-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-        .hd-service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-        }
-        .hd-img-container {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-        }
-        .hd-img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .hd-card-content { padding: 25px; }
-        .hd-card-content h3 { font-size: 1.25rem; color: #0f172a; margin-bottom: 10px; font-weight: 700; }
-        .hd-card-content p { color: #475569; font-size: 0.95rem; line-height: 1.6; }
-
-        /* Project Demo Showcase Section (Reusing Excel Image for local consistency) */
-        .demo-showcase-box {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            overflow: hidden;
-            max-width: 1000px;
-            margin: 40px auto 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-        .demo-img-side {
-            background: url('images/excel-dashboard.jpg') no-repeat center center/cover;
-            min-height: 300px;
-        }
-        .demo-text-side {
-            padding: 40px;
-            text-align: left;
+        /* --- HERO SECTION (ANMOL DESIGN) --- */
+        .hero {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 10%;
+            background: radial-gradient(circle at 50% 40%, rgba(0, 119, 255, 0.15), transparent 60%);
         }
 
-        .project-tag { 
-            display: inline-block; 
-            background: #eff6ff; 
-            color: #2563eb; 
-            font-size: 11px; 
-            font-weight: 600; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            margin-bottom: 15px; 
-            text-transform: uppercase;
-            width: max-content;
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
         }
-        .project-result { color: #16a34a; font-size: 0.95rem; font-weight: 600; margin-top: 15px; }
 
-        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
+        .hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 40px;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        /* --- DROP DOWN CONTACT BUTTON --- */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            animation: fadeIn 1.4s ease-out;
+        }
+
+        .dropbtn {
+            background: var(--accent-gradient);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: glow 3s infinite;
+        }
+
+        .dropbtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 255, 204, 0.4);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #161f38;
+            min-width: 280px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-card);
+            z-index: 1;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-light);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-content a:hover {
+            background: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* --- 5 COLUMN FOOTER --- */
+        footer {
+            background: #060a14;
+            padding: 80px 5% 30px;
+            border-top: 1px solid var(--border-card);
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 30px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--accent);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 968px) {
+            .footer-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero h1 { font-size: 2.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            header { justify-content: center; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- NAV BAR -->
     <header>
-        <a href="index.html" class="logo">GAHONSH<span> FREELANCING</span></a>
-        <nav>
-            <a href="about.html">About</a>
-            <a href="services.html">Services</a>
-            <a href="portfolio.html">Portfolio</a>
-            <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-        </nav>
+        <div class="logo">GAHONSH</div>
     </header>
 
-    <!-- HD Cinematic Hero Section -->
-    <section class="premium-hero">
-        <h1>Smart Digital Solutions Tailored for Global Scale</h1>
-        <p>We deliver elite Excel intelligence, professional corporate brand assets, high-converting web applications, and data automation workflows built to drive performance.</p>
-        <a href="contact.html" class="btn" style="padding: 14px 35px; font-size: 17px;">Start Your Project Today</a>
-    </section>
-
-    <!-- Why Choose Us -->
-    <section class="section" style="background-color: #ffffff;">
-        <h2 class="section-title">Why Choose Gahonsh Freelancing?</h2>
-        <div class="grid">
-            <div class="card">
-                <i class="fa-solid fa-gauge-high" style="font-size: 40px; color: #2563eb; margin-bottom: 20px; display: block;"></i>
-                <h3>Data & Automation</h3>
-                <p>Custom Excel intelligence, business dashboard automation, and structured technical data tracking tools.</p>
-            </div>
-            <div class="card">
-                <i class="fa-solid fa-bezier-curve" style="font-size: 40px; color: #2563eb; margin-bottom: 20px; display: block;"></i>
-                <h3>Creative Branding</h3>
-                <p>International corporate logo design, intuitive UI/UX workflows, and professional marketing print layout solutions.</p>
-            </div>
-            <div class="card">
-                <i class="fa-solid fa-globe" style="font-size: 40px; color: #2563eb; margin-bottom: 20px; display: block;"></i>
-                <h3>Global Delivery</h3>
-                <p>100% remote workflow management delivering premium operational business materials globally with absolute data security.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Verified Statistics Section -->
-    <section class="section" style="background-color: #f8fafc; padding: 40px 20px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-        <div class="grid" style="max-width: 1000px; margin: 0 auto;">
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">20+</h3>
-                <p style="color: #475569; font-weight: 600;">Professional Services</p>
-            </div>
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">100%</h3>
-                <p style="color: #475569; font-weight: 600;">Remote Delivery</p>
-            </div>
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">Global</h3>
-                <p style="color: #475569; font-weight: 600;">Client Support</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Full HD Service Tiles Section (Direct Local Images) -->
-    <section class="section" style="background-color: #ffffff;">
-        <h2 class="section-title">Featured Services</h2>
-        <div class="grid" style="margin-bottom: 40px; gap: 30px;">
-            
-            <!-- Tile 1: Excel -->
-            <div class="hd-service-card">
-                <div class="hd-img-container">
-                    <img src="images/excel-dashboard.jpg" alt="Excel Dashboards Visualization">
-                </div>
-                <div class="hd-card-content">
-                    <h3>Excel Dashboards</h3>
-                    <p>Advanced data tracking layouts, custom operational templates, and seamless financial business formulas built for speed.</p>
-                </div>
-            </div>
-
-            <!-- Tile 2: PDF -->
-            <div class="hd-service-card">
-                <div class="hd-img-container">
-                    <img src="images/pdf-design.jpg" alt="PDF Corporate Design">
-                </div>
-                <div class="hd-card-content">
-                    <h3>PDF Design & Layouts</h3>
-                    <p>Premium interactive corporate brochures, digital product catalogs, and clean internal dynamic business forms.</p>
-                </div>
-            </div>
-
-            <!-- Tile 3: Web -->
-            <div class="hd-service-card">
-                <div class="hd-img-container">
-                    <img src="images/website-design.jpg" alt="Responsive Website Development">
-                </div>
-                <div class="hd-card-content">
-                    <h3>Website Engineering</h3>
-                    <p>Modern high-converting responsive front-end landing pages and corporate web frameworks crafted to scale traffic.</p>
-                </div>
-            </div>
-
-            <!-- Tile 4: Branding -->
-            <div class="hd-service-card">
-                <div class="hd-img-container">
-                    <img src="images/branding.jpg" alt="Corporate Branding Asset Creation">
-                </div>
-                <div class="hd-card-content">
-                    <h3>Branding Solutions</h3>
-                    <p>Unique vector logo generation, premium brand assets, color palettes, and comprehensive guideline documentation.</p>
-                </div>
-            </div>
-
-        </div>
-        <div style="text-align: center;">
-            <a href="services.html" class="btn" style="padding: 12px 35px;">View All Services</a>
-        </div>
-    </section>
-
-    <!-- Advanced Project Demo Showcase Section (Local Asset) -->
-    <section class="section" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-        <h2 class="section-title">Featured Project Demo</h2>
+    <!-- HERO SECTION (ANIMATION & DESIGN) -->
+    <section class="hero">
+        <h1>दुनियां का सबसे <span>लजवाब डिज़ाइन</span></h1>
+        <p>क्लीन कोड, मॉडर्न डार्क थीम और यूनीक एनिमेशन का ऐसा तालमेल जो हर विज़िटर को पहली नज़र में दीवाना बना दे।</p>
         
-        <div class="demo-showcase-box">
-            <div class="demo-img-side"></div>
-            <div class="demo-text-side">
-                <span class="project-tag">Enterprise Solution</span>
-                <h3 style="font-size: 1.5rem; color: #0f172a; font-weight: 700; margin-bottom: 12px;">Automated Financial Intelligence Center</h3>
-                <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin-bottom: 15px;">A custom high-performance data engine designed for tracking global corporate asset interests, embedding advanced macro triggers, and multi-tier interactive chart tracking systems.</p>
-                <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Operational Impact:</strong> Saved 80% manual reporting latency and removed error risk.</p>
+        <!-- CONTACT DROP DOWN -->
+        <div class="dropdown">
+            <button class="dropbtn">Contact Us ↓</button>
+            <div class="dropdown-content">
+                <!-- WHATSAPP CONTACT LINK -->
+                <a href="https://wa.me/918825183628" target="_blank">
+                    💬 WhatsApp Chat
+                </a>
+                <a href="mailto:gahonsh@gmail.com">📧 Email Inquiry</a>
+                <a href="tel:+918825183628">📞 Call Directly</a>
             </div>
         </div>
-        
-        <div style="text-align: center; margin-top: 35px;">
-            <a href="portfolio.html" class="btn" style="padding: 12px 35px;">Explore Full Portfolio</a>
-        </div>
     </section>
 
-    <!-- Action-Oriented Client CTA -->
-    <section class="section" style="background-color: #ffffff; padding: 60px 20px;">
-        <div class="commitment-box">
-            <h2 style="color: #0f172a; margin-bottom: 10px;">Ready to Scale Your Digital Workflows?</h2>
-            <p style="color: #64748b; margin-bottom: 25px;">Let's collaborate to bring high-end design and automation capabilities directly to your corporate setups.</p>
-            <a href="contact.html" class="btn" style="padding: 12px 30px; font-size: 16px;">Get a Free Project Consultation</a>
+    <!-- 5 COLUMN FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>Gahonsh</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Vision</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Web Development</a></li>
+                    <li><a href="#">PDF Automation</a></li>
+                    <li><a href="#">UI/UX Design</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Our Portfolio</a></li>
+                    <li><a href="#">Case Studies</a></li>
+                    <li><a href="#">Blogs</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Security</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Connect</h4>
+                <ul>
+                    <li><a href="https://wa.me/918825183628" target="_blank">WhatsApp</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                    <li><a href="#">Twitter</a></li>
+                </ul>
+            </div>
         </div>
-    </section>
-
-    <footer style="padding: 50px 20px;">
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> 
-           <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | 
-           <a href="terms.html" class="footer-link">Terms & Conditions</a>
-        </p>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
+        </div>
     </footer>
-<footer class="v-footer">
-    <div class="v-footer-container">
-        <div class="v-footer-col"><h2>GAHONSH</h2><p>Digital Solutions.</p></div>
-        <div class="v-footer-col"><h3>Services</h3><ul><li><a href="services.html">Excel</a></li></ul></div>
-        <div class="v-footer-col"><h3>Resources</h3><ul><li><a href="portfolio.html">Portfolio</a></li></ul></div>
-        <div class="v-footer-col"><h3>Support</h3><ul><li><a href="contact.html">Contact</a></li></ul></div>
-    </div>
-</footer>
+
 </body>
 </html>
