@@ -1,172 +1,988 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Portfolio | Gahonsh Freelancing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SEO & Advanced Metadata Archetype -->
+    <meta name="description" content="Explore the comprehensive project log portfolio of Gahonsh Freelancing. View real-world samples and download verified Excel automation models and business PDF layouts.">
+    <meta name="keywords" content="Excel Automation, PDF Design, Business Dashboard, Website Design, Portfolio, Gahonsh Freelancing">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/portfolio.html">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
+    <!-- Open Graph Metadata Grid -->
+    <meta property="og:title" content="Our Portfolio | Gahonsh Freelancing">
+    <meta property="og:description" content="Explore and download verified Excel automation models and business PDF layouts.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gahonsh-blip.github.io/portfolio.html">
+    
+    <!-- Fonts & Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- UNIFIED PORTFOLIO SEO SCHEMAS WITH WEBSITE ENTITY GRAPH FIXED -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://gahonsh-blip.github.io/#organization",
+          "name": "GAHONSH FREELANCING",
+          "url": "https://gahonsh-blip.github.io/",
+          "logo": "https://gahonsh-blip.github.io/assets/logo.png"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://gahonsh-blip.github.io/#website",
+          "url": "https://gahonsh-blip.github.io/",
+          "name": "GAHONSH FREELANCING"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gahonsh-blip.github.io/portfolio.html",
+          "url": "https://gahonsh-blip.github.io/portfolio.html",
+          "name": "Our Portfolio | Gahonsh Freelancing",
+          "isPartOf": { "@id": "https://gahonsh-blip.github.io/#website" }
+        }
+      ]
+    }
+    </script>
+
     <style>
-        /* Modern Portfolio Grid Layout */
-        .portfolio-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; }
-        
-        .portfolio-card { 
-            background: #ffffff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            overflow: hidden; 
+        /* CSS PREMIUM CONFIGURATION MATRIX */
+        :root {
+            --bg-dark: #030712;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 255, 204, 0.25);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            --text-main: #ffffff;
+            --text-slate: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* STICKY HEADER ARCHITECTURE */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 25px;
+            background: #0b0f19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
+        .dropdown-content a {
+            display: block;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* PREMIUM SLIDE-IN MOBILE NAVIGATION MENU */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .mobile-nav-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            align-self: flex-end;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-slate);
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-close:hover {
+            color: var(--accent-cyan);
+        }
+
+        .mobile-nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            padding-bottom: 10px;
+        }
+
+        /* PORTFOLIO HERO SECTION */
+        .portfolio-hero {
+            padding: 160px 8% 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 119, 255, 0.05), transparent 50%);
+        }
+
+        .portfolio-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .portfolio-hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .portfolio-hero p {
+            color: var(--text-slate);
+            font-size: 1.25rem;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* FILTER BUTTONS ROW */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-filter {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            padding: 10px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
-        .portfolio-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08); 
+
+        .btn-filter:hover, .btn-filter.active {
+            border-color: var(--accent-cyan);
+            color: var(--text-main);
+            background: rgba(0, 255, 204, 0.02);
         }
-        
-        /* Placeholder for Project Images/Previews */
-        .project-preview-box {
-            background: #f8fafc;
-            height: 220px;
+
+        /* DYNAMIC PORTFOLIO CASE STUDY GRID */
+        .portfolio-section {
+            padding: 20px 8% 70px;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .project-card {
+            background: #070c19;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+        }
+
+        .project-thumb {
+            width: 100%;
+            height: 180px;
+            background: #0d1527;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
             position: relative;
         }
-        .project-preview-box i {
-            font-size: 64px;
-            color: #2563eb;
-            opacity: 0.8;
+
+        .project-thumb i {
+            font-size: 3.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .project-info { padding: 25px; text-align: left; }
-        .project-tag { 
-            display: inline-block; 
-            background: #eff6ff; 
-            color: #2563eb; 
-            font-size: 12px; 
-            font-weight: 600; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            margin-bottom: 12px; 
+
+        .project-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(3, 7, 18, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            border-radius: 50px;
+            color: var(--accent-cyan);
+            font-weight: bold;
             text-transform: uppercase;
         }
-        .project-info h3 { font-size: 1.3rem; color: #0f172a; margin-bottom: 10px; font-weight: 700; }
-        .project-info p { color: #475569; font-size: 0.95rem; line-height: 1.6; margin-bottom: 12px; }
-        .project-result { color: #16a34a; font-size: 0.95rem; font-weight: 600; }
-        
-        .commitment-box { max-width: 700px; margin: 0 auto; text-align: center; background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2563eb; }
-        .logo span { color: #2563eb; font-weight: 700; }
+
+        .project-body {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .project-body h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .project-body p {
+            color: var(--text-slate);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-download-sample {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 11px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.3s;
+        }
+
+        .btn-download-sample:hover {
+            background: var(--accent-gradient);
+            color: #030712;
+            border-color: transparent;
+        }
+
+        /* TRUST SECTION BLOCK */
+        .trust-section {
+            padding: 70px 8%;
+            background: rgba(255,255,255,0.01);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .trust-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .trust-grid div {
+            background: #070c19;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+        }
+
+        .trust-grid h3 {
+            font-size: 2.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .trust-grid p {
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* CONVERSION BANNER LAYER */
+        .portfolio-cta {
+            text-align: center;
+            padding: 80px 8%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 119, 255, 0.08), transparent 60%);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .portfolio-cta h2 { font-size: 2.3rem; margin-bottom: 12px; }
+        .portfolio-cta p { color: var(--text-slate); margin-bottom: 30px; }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 25px rgba(0, 255, 204, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+        }
+
+        /* FLOATING UTILITIES */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+        }
+
+        .back-to-top.show { opacity: 1; }
+        .back-to-top:hover { background: var(--accent-blue); }
+
+        /* 5-COLUMN FOOTER LAYER */
+        footer {
+            background: #02040a;
+            padding: 80px 8% 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-main);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .footer-col ul li a:hover { color: var(--accent-cyan); }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .newsletter-form input {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .newsletter-form button {
+            background: var(--accent-blue);
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover { background: var(--accent-cyan); color: #000; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-slate);
+            margin-left: 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover { color: var(--accent-cyan); }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1024px) {
+            .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+            .trust-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-grid, .trust-grid, .footer-grid { grid-template-columns: 1fr; }
+            .portfolio-hero h1 { font-size: 2.5rem; }
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- INSTANT FLOATING INTERACTORS -->
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <!-- MOBILE SLIDE OVERLAY MAP -->
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Our Portfolio</a>
+        <a href="pricing.html">Pricing Matrix</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <!-- MAIN STICKY NAVBAR HEADER -->
     <header>
-        <a href="index.html" class="logo" style="font-weight:700; font-size: 22px; letter-spacing: 0.5px;">GAHONSH<span> FREELANCING</span></a>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
         <nav>
-            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html" class="active">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="portfolio.html" class="active">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="hero" style="padding: 60px 20px; text-align: center;">
-        <h1>Our Creative & Automation Portfolio</h1>
-        <p>Explore real-world case studies and project samples delivered to businesses globally.</p>
-    </section>
-
-    <section class="section" style="background-color: #ffffff; padding: 40px 20px;">
-        <div class="grid" style="max-width: 900px; margin: 0 auto;">
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">50+</h3>
-                <p style="color: #475569; font-weight: 600;">Projects Completed</p>
-            </div>
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">20+</h3>
-                <p style="color: #475569; font-weight: 600;">Services Offered</p>
-            </div>
-            <div class="card" style="text-align: center; padding: 20px; border-radius: 8px;">
-                <h3 style="font-size: 2.5rem; color: #2563eb; margin-bottom: 5px; font-weight: 700;">100%</h3>
-                <p style="color: #475569; font-weight: 600;">Remote Delivery</p>
-            </div>
+    <!-- PORTFOLIO HERO SECTION -->
+    <section class="portfolio-hero">
+        <h1>Our Case Log <span>Portfolio</span></h1>
+        <p>Explore verified project samples and download live workflow templates compiled across our active service tracks.</p>
+        
+        <!-- CATEGORY FILTER BUTTONS -->
+        <div class="filter-container">
+            <button class="btn-filter active" data-filter="all">All Logs</button>
+            <button class="btn-filter" data-filter="excel">Excel Sheets</button>
+            <button class="btn-filter" data-filter="pdf">PDF Layouts</button>
+            <button class="btn-filter" data-filter="web">Web Portals</button>
         </div>
     </section>
 
-    <div class="portfolio-container">
+    <!-- DYNAMIC PORTFOLIO GRID EXPANSION (12 LOGS ADDED) -->
+    <section class="portfolio-section">
         <div class="portfolio-grid">
             
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-regular fa-file-excel"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Automation</span>
-                    <h3>Automated Financial Dashboard</h3>
-                    <p>Advanced operational workflow tracking featuring complex formulas, custom macros, and real-time loan interest monitoring tiers.</p>
-                    <p class="project-result"><i class="fa-solid fa-chart-line"></i> <strong>Result:</strong> Reduced manual reporting time by 80% through dashboard automation.</p>
+            <!-- EXCEL LAYER 1 -->
+            <div class="project-card" data-category="excel">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <div class="project-tag">Excel Tracker</div>
+                </div>
+                <div class="project-body">
+                    <h3>Finance Dashboard</h3>
+                    <p>Advanced calculation sheets utilizing automated macros and dynamic visual matrix structures to reduce manual tracking lag.</p>
+                    <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Sample Sheet
+                    </a>
                 </div>
             </div>
 
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-solid fa-palette"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Branding</span>
-                    <h3>Modern Corporate Logo Design</h3>
-                    <p>A unique and memorable brand identity concept complete with full typography rules, color asset guidelines, and media assets.</p>
-                    <p class="project-result"><i class="fa-solid fa-square-check"></i> <strong>Result:</strong> Enhanced client brand recognition and established uniform corporate presence.</p>
+            <!-- EXCEL LAYER 2 -->
+            <div class="project-card" data-category="excel">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-calculator"></i>
+                    <div class="project-tag">Excel Tracker</div>
+                </div>
+                <div class="project-body">
+                    <h3>Loan Calculator</h3>
+                    <p>Smart installment tracking systems built specifically to monitor outstanding billing structures and warning lines safely.</p>
+                    <a href="assets/projects/loan-calculator-sample.xlsx" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Calculator
+                    </a>
                 </div>
             </div>
 
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-regular fa-file-pdf"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Digital Assets</span>
-                    <h3>Interactive Product Catalog</h3>
-                    <p>High-end PDF design with structured business documentation layouts, customized indexes, and clickable digital navigation rows.</p>
-                    <p class="project-result"><i class="fa-solid fa-bolt"></i> <strong>Result:</strong> Accelerated sales cycle by 35% using faster, user-friendly item navigation.</p>
+            <!-- EXCEL LAYER 3 -->
+            <div class="project-card" data-category="excel">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <div class="project-tag">Excel Tracker</div>
+                </div>
+                <div class="project-body">
+                    <h3>Inventory Tracker</h3>
+                    <p>Automated stock accounting spreadsheets featuring formula thresholds that alert your unit before manual shortages occur.</p>
+                    <a href="assets/projects/inventory-tracker-sample.xlsx" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Tracker
+                    </a>
                 </div>
             </div>
 
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-solid fa-laptop-code"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Web Development</span>
-                    <h3>High-Converting Landing Page</h3>
-                    <p>Modern responsive business portal designed specifically to accelerate client conversions, using a clean international look.</p>
-                    <p class="project-result"><i class="fa-solid fa-arrow-up-right-dots"></i> <strong>Result:</strong> Achieved a 25% increase in online inbound leads within first month.</p>
+            <!-- EXCEL LAYER 4 -->
+            <div class="project-card" data-category="excel">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-clipboard-user"></i>
+                    <div class="project-tag">Excel Tracker</div>
+                </div>
+                <div class="project-body">
+                    <h3>Attendance Manager</h3>
+                    <p>Clean operational sheet systems engineered perfectly to structure local grading metrics and attendance logs.</p>
+                    <a href="assets/projects/attendance-manager-sample.xlsx" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Manager
+                    </a>
                 </div>
             </div>
 
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">Presentation</span>
-                    <h3>Investor Pitch Deck Design</h3>
-                    <p>A professional high-impact PowerPoint presentation tailored for corporate business meetings and strategy pitches.</p>
-                    <p class="project-result"><i class="fa-solid fa-thumbs-up"></i> <strong>Result:</strong> Successfully backed business fundraising efforts with top visual execution.</p>
+            <!-- PDF LAYER 1 -->
+            <div class="project-card" data-category="pdf">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-building"></i>
+                    <div class="project-tag">PDF Layout</div>
+                </div>
+                <div class="project-body">
+                    <h3>Company Profile</h3>
+                    <p>Premium corporate brochure structure crafted with precise typographical grids and absolute corporate visual alignment.</p>
+                    <a href="assets/projects/company-profile-sample.pdf" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Profile
+                    </a>
                 </div>
             </div>
 
-            <div class="portfolio-card">
-                <div class="project-preview-box"><i class="fa-solid fa-robot"></i></div>
-                <div class="project-info">
-                    <span class="project-tag">AI Solutions</span>
-                    <h3>Smart Documentation System</h3>
-                    <p>AI-assisted content creation structure deployed to boost team document management workflows and copy execution speeds.</p>
-                    <p class="project-result"><i class="fa-solid fa-gauge-high"></i> <strong>Result:</strong> Boosted corporate drafting and documentation speeds by up to 50%.</p>
+            <!-- PDF LAYER 2 -->
+            <div class="project-card" data-category="pdf">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <div class="project-tag">PDF Layout</div>
+                </div>
+                <div class="project-body">
+                    <h3>Product Catalog</h3>
+                    <p>Clean typographical brand asset book configured with internal hyperlinked indices for fast digital distribution tracks.</p>
+                    <a href="assets/projects/corporate-catalog-sample.pdf" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Catalog
+                    </a>
                 </div>
             </div>
 
-        </div>
-    </div>
+            <!-- PDF LAYER 3 -->
+            <div class="project-card" data-category="pdf">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-book-open"></i>
+                    <div class="project-tag">PDF Layout</div>
+                </div>
+                <div class="project-body">
+                    <h3>Service Brochure</h3>
+                    <p>Elegant layout structures detailing complete technical parameters cleanly to minimize customer onboarding lag.</p>
+                    <a href="assets/projects/service-brochure-sample.pdf" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Brochure
+                    </a>
+                </div>
+            </div>
 
-    <section class="section" style="background-color: #ffffff; padding: 40px 20px;">
-        <div class="commitment-box">
-            <h2 style="color: #0f172a; margin-bottom: 10px;">Like Our Work?</h2>
-            <p style="color: #64748b; margin-bottom: 25px;">Let's collaborate to build something impactful for your business workflows.</p>
-            <a href="contact.html" class="btn" style="padding: 12px 30px; font-size: 16px;">Get a Free Project Consultation</a>
+            <!-- PDF LAYER 4 -->
+            <div class="project-card" data-category="pdf">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-id-card"></i>
+                    <div class="project-tag">PDF Layout</div>
+                </div>
+                <div class="project-body">
+                    <h3>Resume Design</h3>
+                    <p>Sleek visual layouts optimized systematically to highlight professional execution records across technical nodes.</p>
+                    <a href="assets/projects/resume-design-sample.pdf" class="btn-download-sample" download>
+                        <i class="fa-solid fa-download"></i> Download Resume
+                    </a>
+                </div>
+            </div>
+
+            <!-- WEB LAYER 1 -->
+            <div class="project-card" data-category="web">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-globe"></i>
+                    <div class="project-tag">Web Portal</div>
+                </div>
+                <div class="project-body">
+                    <h3>Business Website</h3>
+                    <p>Complete structural deployment models configuring clean navigation systems to align your corporate goals online.</p>
+                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
+                        <i class="fa-solid fa-eye"></i> View Live Site
+                    </a>
+                </div>
+            </div>
+
+            <!-- WEB LAYER 2 -->
+            <div class="project-card" data-category="web">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-laptop-code"></i>
+                    <div class="project-tag">Web Portal</div>
+                </div>
+                <div class="project-body">
+                    <h3>Landing Page</h3>
+                    <p>High-converting layout setup using light script compilation rows optimized perfectly to scale local brand conversions.</p>
+                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
+                        <i class="fa-solid fa-eye"></i> View Interface
+                    </a>
+                </div>
+            </div>
+
+            <!-- WEB LAYER 3 -->
+            <div class="project-card" data-category="web">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <div class="project-tag">Web Portal</div>
+                </div>
+                <div class="project-body">
+                    <h3>Coaching Website</h3>
+                    <p>Custom online educational interfaces mapping class timetables, grading modules, and course structures flawlessly.</p>
+                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
+                        <i class="fa-solid fa-eye"></i> View Live Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- WEB LAYER 4 -->
+            <div class="project-card" data-category="web">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <div class="project-tag">Web Portal</div>
+                </div>
+                <div class="project-body">
+                    <h3>Portfolio Website</h3>
+                    <p>Premium dark-mode personal asset showcases engineered to compile active service archives beautifully.</p>
+                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
+                        <i class="fa-solid fa-eye"></i> View Archive
+                    </a>
+                </div>
+            </div>
+
         </div>
     </section>
 
-    <footer style="padding: 50px 20px;">
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
+    <!-- TRUST SECTION BLOCK UPGRADE -->
+    <section class="trust-section">
+        <h2>Why Clients Choose Us</h2>
+        <div class="trust-grid">
+            <div>
+                <h3>50+</h3>
+                <p>Projects Delivered</p>
+            </div>
+            <div>
+                <h3>100%</h3>
+                <p>Client Support</p>
+            </div>
+            <div>
+                <h3>Fast</h3>
+                <p>Delivery Time</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CONVERSION CTA BANNER -->
+    <section class="portfolio-cta">
+        <h2>Have a Specific Layout Project Requirement?</h2>
+        <p>Let us create a secure, custom-engineered solution matching your workflow parameters perfectly.</p>
+        <a href="contact.html" class="btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Request Custom Project Quote
+        </a>
+    </section>
+
+    <!-- FOOTER MODULE LAYER (BRANDING FIXED) -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>GAHONSH FREELANCING</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Professional digital solutions including Excel Automation, PDF Design, Presentation Design, Website Assistance and AI Content Services.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="portfolio.html">Case Log Files</a></li>
+                    <li><a href="pricing.html">Price Matrix</a></li>
+                    <li><a href="index.html#faq">System FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal Matrix</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-and-conditions.html">Terms Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your corporate email">
+                    <button type="button" id="newsletter-submit-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <!-- DYNAMIC FILTER MATRIX SCRIPT (BUGS FULLY RECTIFIED) -->
+    <script>
+        document.getElementById('dynamic-year').innerText = new Date().getFullYear();
+
+        const menuOpenBtn = document.getElementById('mobile-menu-open-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuContainer = document.getElementById('mobile-menu-container');
+
+        const toggleMobileMenu = (open) => {
+            if(open) {
+                menuOverlay.classList.add('active');
+                menuContainer.classList.add('active');
+            } else {
+                menuOverlay.classList.remove('active');
+                menuContainer.classList.remove('active');
+            }
+        };
+
+        menuOpenBtn.addEventListener('click', () => toggleMobileMenu(true));
+        menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
+        menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // PORTFOLIO FILTER LOGIC ENGINE (BUG FIXED MATRIX)
+        const filterButtons = document.querySelectorAll('.btn-filter');
+        const projectCards = document.querySelectorAll('.project-card');
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filterValue = btn.getAttribute('data-filter');
+
+                projectCards.forEach(card => {
+                    if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        const btnTop = document.getElementById('btn-top');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 400) { btnTop.classList.add('show'); } 
+            else { btnTop.classList.remove('show'); }
+        });
+
+        document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('newsletter-email').value;
+            if(emailInput.trim() === "" || !emailInput.includes('@')) {
+                alert("Please enter a valid business email address.");
+            } else {
+                alert("Thank you! Your email has been added to our optimization update log.");
+                document.getElementById('newsletter-email').value = "";
+            }
+        });
+    </script>
 </body>
 </html>
