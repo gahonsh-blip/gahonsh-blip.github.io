@@ -1,165 +1,794 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | Gahonsh Freelancing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SEO & Advanced Metadata Archetype -->
+    <meta name="description" content="Get in touch with Gahonsh Freelancing. Submit your project inquiry or chat instantly via WhatsApp for Excel automation, PDF designs, and web development.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://gahonsh.github.io/contact.html">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
+    <!-- Open Graph Metadata Grid -->
+    <meta property="og:title" content="Contact Us | Gahonsh Freelancing">
+    <meta property="og:description" content="Submit your digital project requirements or connect instantly via WhatsApp.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gahonsh.github.io/contact.html">
+    
+    <!-- Fonts & Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .contact-info-block { background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; }
-        .contact-info-block h3 { color: #0f172a; margin-bottom: 15px; border-bottom: 2px solid #2563eb; display: inline-block; padding-bottom: 5px; }
-        .contact-info-block p { margin-bottom: 12px; font-size: 15px; }
-        .contact-info-block i { color: #2563eb; margin-right: 10px; width: 20px; }
-        .or-divider { text-align: center; margin: 40px 0; font-weight: 600; color: #64748b; position: relative; }
-        .or-divider::before, .or-divider::after { content: ""; position: absolute; top: 50%; width: 43%; height: 1px; background: #cbd5e1; }
-        .or-divider::before { left: 0; } .or-divider::after { right: 0; }
-        
-        /* Form Element Styling */
-        .form-select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            color: #334155;
-            background-color: #ffffff;
-            margin-top: 5px;
-            outline: none;
-            transition: 0.3s;
+    
+    <!-- SYSTEM ADVANCED CONTACT SEO SCHEMAS -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://gahonsh.github.io/#organization",
+          "name": "GAHONSH FREELANCING",
+          "url": "https://gahonsh.github.io/",
+          "logo": "https://gahonsh.github.io/assets/logo.png"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gahonsh.github.io/contact.html",
+          "url": "https://gahonsh.github.io/contact.html",
+          "name": "Contact Us | Gahonsh Freelancing",
+          "isPartOf": { "@id": "https://gahonsh.github.io/#website" }
         }
-        .form-select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+      ]
+    }
+    </script>
+
+    <style>
+        /* CSS PREMIUM CONFIGURATION MATRIX */
+        :root {
+            --bg-dark: #030712;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 255, 204, 0.25);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            --text-main: #ffffff;
+            --text-slate: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* STICKY HEADER ARCHITECTURE */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 25px;
+            background: #0b0f19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
+        .dropdown-content a {
+            display: block;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* MOBILE NAVIGATION SYSTEM */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .mobile-nav-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            align-self: flex-end;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-slate);
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-close:hover {
+            color: var(--accent-cyan);
+        }
+
+        .mobile-nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            padding-bottom: 10px;
+        }
+
+        /* CONTACT HERO MODULE */
+        .contact-hero {
+            padding: 160px 8% 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 119, 255, 0.05), transparent 50%);
+        }
+
+        .contact-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .contact-hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact-hero p {
+            color: var(--text-slate);
+            font-size: 1.25rem;
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* TRACKED TRUST METRICS SYNC */
+        .contact-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .stat-item h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .stat-item p {
+            font-size: 0.8rem;
+            color: var(--text-slate);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* TWO-COLUMN INQUIRY SPLIT LAYOUT */
+        .contact-container {
+            padding: 40px 8% 90px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 50px;
+        }
+
+        /* FORM BOX */
+        .contact-card-box {
+            background: #070c19;
+            border: 1px solid var(--border-color);
+            padding: 45px;
+            border-radius: 24px;
+        }
+
+        .contact-card-box h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 14px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--accent-gradient);
+            color: #030712;
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 255, 204, 0.4);
+        }
+
+        /* RIGHT PANEL INFO */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .info-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+        }
+
+        .info-block h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-cyan);
+        }
+
+        .info-block p {
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .instant-whatsapp-box {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.05) 0%, transparent 100%);
+            border: 1px solid rgba(37, 211, 102, 0.2);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .btn-whatsapp-direct {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #25d366;
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .btn-whatsapp-direct:hover {
+            transform: translateY(-2px);
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+        }
+
+        .back-to-top.show { opacity: 1; }
+        .back-to-top:hover { background: var(--accent-blue); }
+
+        /* 5-COLUMN FOOTER LAYER */
+        footer {
+            background: #02040a;
+            padding: 80px 8% 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-main);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .footer-col ul li a:hover { color: var(--accent-cyan); }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .newsletter-form input {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .newsletter-form button {
+            background: var(--accent-blue);
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover { background: var(--accent-cyan); color: #000; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-slate);
+            margin-left: 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover { color: var(--accent-cyan); }
+
+        @media (max-width: 1024px) {
+            .contact-container { grid-template-columns: 1fr; gap: 40px; }
+            .footer-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .footer-grid { grid-template-columns: 1fr; }
+            .contact-hero h1 { font-size: 2.5rem; }
+            .contact-stats { flex-direction: column; gap: 20px; }
+            .contact-card-box { padding: 30px; }
+            nav { display: none; }
+            .menu-toggle { display: block; }
         }
     </style>
 </head>
 <body>
+
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Our Portfolio</a>
+        <a href="pricing.html">Pricing Matrix</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
     <header>
-        <a href="index.html" class="logo">GAHONSH<span> FREELANCING</span></a>
-        <nav><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html" class="active">Contact</a></nav>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html" class="active">Contact</a>
+        </nav>
     </header>
 
-    <section class="section">
-        <h2 class="section-title">Client Inquiry & Support</h2>
-        <p style="color: #64748b; margin-bottom: 40px;">Choose your preferred way to reach out. Submit the formal email form or connect instantly via WhatsApp.</p>
-
-        <div class="grid" style="align-items: start;">
-            <div class="contact-info-block">
-                <h3>Contact Info</h3>
-                <p><i class="fa-brands fa-whatsapp"></i> <strong>WhatsApp:</strong> +91 88251 83628</p>
-                <p><i class="fa-solid fa-phone"></i> <strong>Phone:</strong> +91 88251 83628</p>
-                <p><i class="fa-regular fa-envelope"></i> <strong>Email:</strong> gahonsh@gmail.com</p>
-                <p><i class="fa-solid fa-location-dot"></i> <strong>Location:</strong> Jharkhand, India</p>
-                <p><i class="fa-solid fa-clock"></i> <strong>Hours:</strong> Mon - Sun (09:00 AM - 06:00 PM)</p>
+    <section class="contact-hero">
+        <h1>Let's Collaborate On Your <span>Next Project</span></h1>
+        <p>Choose your preferred way to reach out. Submit the formal inquiry form or connect instantly via WhatsApp routing to skip response lag entirely.</p>
+        
+        <div class="contact-stats">
+            <div class="stat-item">
+                <h2 class="counter-num" data-target="100">0</h2>
+                <p>Projects Completed</p>
             </div>
+            <div class="stat-item">
+                <h2><span class="counter-num" data-target="98">0</span>%</h2>
+                <p>Satisfaction Rate</p>
+            </div>
+            <div class="stat-item">
+                <h2>24/7</h2>
+                <p>Remote Support</p>
+            </div>
+        </div>
+    </section>
 
-            <form action="https://formspree.io/f/xzdqnoez" method="POST" style="margin: 0; width: 100%;">
-                <h3 style="margin-bottom: 20px; color: #0f172a;">Option 1: Submit Email Inquiry</h3>
-                
+    <section class="contact-container">
+        
+        <!-- HIGH-CONVERTING SECURE INQUIRY FORM WITH ADVANCED FIELDS -->
+        <div class="contact-card-box">
+            <h2>Submit Project Inquiry</h2>
+            <form id="project-contact-form">
                 <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" name="name" required placeholder="Enter your name">
+                    <label for="client-name">Your Full Name / Company</label>
+                    <input type="text" id="client-name" placeholder="Enter name or brand name" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Phone / WhatsApp Number</label>
-                    <input type="tel" name="phone" required placeholder="e.g. +91 98765 43210">
+                    <label for="client-email">Business Email Address</label>
+                    <input type="email" id="client-email" placeholder="your@email.com" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" required placeholder="Enter your email">
-                </div>
-
-                <div class="form-group">
-                    <label>Country</label>
-                    <input type="text" name="country" required placeholder="e.g. India, United States">
-                </div>
-                
-                <div class="form-group">
-                    <label>What kind of design or digital work do you need?</label>
-                    <p style="font-size:14px;color:#64748b;margin-bottom:10px;">Select the service that best matches your project requirements.</p>
-                    <select name="service_requested" class="form-select" required>
-                        <option value="" disabled selected>Select the type that best matches your project...</option>
-                        
-                        <optgroup label="ðŸ’¼ Business & Data Automation">
-                            <option value="PDF Design & Automation">PDF Design & Automation</option>
-                            <option value="PowerPoint Presentation Design">PowerPoint Presentation Design</option>
-                            <option value="Excel Dashboards & Automation">Excel Dashboards & Automation</option>
-                            <option value="Data Management Solutions">Data Management Solutions</option>
-                            <option value="Business Documentation">Business Documentation</option>
-                            <option value="Website Development & Assistance">Website Development & Assistance</option>
-                            <option value="AI-Powered Content Solutions">AI-Powered Content Solutions</option>
-                            <option value="Internet Marketing Services">Internet Marketing Services</option>
-                            <option value="Freelancing Support Services">Freelancing Support Services</option>
-                            <option value="Digital Business Support">Digital Business Support</option>
-                        </optgroup>
-
-                        <optgroup label="ðŸŽ¨ Creative, Branding & Design">
-                            <option value="Logo Design">Logo Design</option>
-                            <option value="Brand Identity">Brand Identity</option>
-                            <option value="Landing Page Design">Landing Page Design</option>
-                            <option value="Website Design & Development">Website Design & Development</option>
-                            <option value="Mobile App Design">Mobile App Design</option>
-                            <option value="UI/UX Design">UI/UX Design</option>
-                            <option value="Illustration & Icons">Illustration & Icons</option>
-                            <option value="Animation & Motion Graphics">Animation & Motion Graphics</option>
-                            <option value="Social Media Design">Social Media Design</option>
-                            <option value="Print & Marketing Design">Print & Marketing Design</option>
-                        </optgroup>
-                        
-                        <option value="Other / Custom Project">Other / Custom Project</option>
+                    <label for="client-service">Select Required Digital Work</label>
+                    <style>
+                        #client-service option, #client-budget option { background: #070c19; color: #fff; }
+                    </style>
+                    <select id="client-service" required>
+                        <option value="" disabled selected>Select service type...</option>
+                        <option value="Excel Dashboards & Automation">Excel Dashboards & Automation</option>
+                        <option value="Interactive PDF Layout Design">Interactive PDF Layout Design</option>
+                        <option value="PowerPoint Presentation Design">PowerPoint Presentation Design</option>
+                        <option value="Website Development & Setup">Website Development & Setup</option>
+                        <option value="AI Content & Workflow Solutions">AI Content & Workflow Solutions</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label>Estimated Project Budget (INR)</label>
-                    <select name="project_budget" class="form-select" required>
-                        <option value="" disabled selected>Select your budget range...</option>
-                        <option value="Below â‚¹5,000">Below â‚¹5,000</option>
-                        <option value="â‚¹5,000 - â‚¹15,000">â‚¹5,000 - â‚¹15,000</option>
-                        <option value="â‚¹15,000 - â‚¹50,000">â‚¹15,000 - â‚¹50,000</option>
-                        <option value="â‚¹50,000 - â‚¹1,00,000">â‚¹50,000 - â‚¹1,00,000</option>
-                        <option value="Above â‚¹1,00,000">Above â‚¹1,00,000</option>
+                    <label for="client-budget">Estimated Project Budget (INR)</label>
+                    <select id="client-budget" required>
+                        <option value="" disabled selected>Select budget range...</option>
+                        <option value="Under ₹5,000">Under ₹5,000</option>
+                        <option value="₹5,000 – ₹20,000">₹5,000 – ₹20,000</option>
+                        <option value="₹20,000 – ₹50,000">₹20,000 – ₹50,000</option>
+                        <option value="₹50,000+">₹50,000+</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label>Expected Project Timeline</label>
-                    <select name="project_timeline" class="form-select" required>
-                        <option value="" disabled selected>Select when you need this completed...</option>
-                        <option value="Urgent (Less than 1 week)">Urgent (Less than 1 week)</option>
-                        <option value="1 - 2 Weeks">1 - 2 Weeks</option>
-                        <option value="3 - 4 Weeks">3 - 4 Weeks</option>
-                        <option value="1 Month +">1 Month +</option>
-                        <option value="Flexible / Ongoing">Flexible / Ongoing</option>
-                    </select>
+                    <label for="client-message">Project Description & Target Goals</label>
+                    <textarea id="client-message" rows="4" placeholder="Describe your workflows requirements, preferred layout and rules..." required></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea name="message" rows="4" required placeholder="Describe your project, goals, preferred design style, deadline, and any special requirements..."></textarea>
-                </div>
-                <button type="submit" class="btn" style="width: 100%;">Submit Project Inquiry</button>
+                <button type="submit" class="btn-submit">Submit Form via WhatsApp</button>
             </form>
         </div>
 
-        <div class="or-divider">OR CONNECT INSTANTLY</div>
+        <div class="info-panel">
+            
+            <div class="instant-whatsapp-box">
+                <h3 style="justify-content: center; font-size: 1.3rem;"><i class="fa-brands fa-whatsapp"></i> Chat Instantly</h3>
+                <p style="margin-top: 10px;">Skip form configurations and open a direct pipeline conversation with our development team.</p>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20start%20a%20project%20consultation.[cite: 16]" class="btn-whatsapp-direct" target="_blank">
+                    Start Instant Chat
+                </a>
+            </div>
 
-        <div style="text-align: center;">
-            <h3 style="margin-bottom: 15px; color: #0f172a;">Option 2: Chat Directly on WhatsApp</h3>
-            <p style="color: #64748b; margin-bottom: 20px;">Skip the form routing and open an instant conversation with our team.</p>
-            <a href="https://wa.me/918825183628?text=Hello%20Gahonsh%20Freelancing,%20I%20visited%20your%20website%20and%20want%20to%20discuss%20a%20project." class="btn" style="background-color: #25d366; font-size: 16px; padding: 15px 40px;" target="_blank">
-                <i class="fa-brands fa-whatsapp" style="margin-right: 8px; font-size: 20px;"></i> Start WhatsApp Chat
-            </a>
+            <div class="info-block">
+                <h3><i class="fa-solid fa-clock"></i> Response Guarantee</h3>
+                <p>All direct messaging channels are tracked constantly. Expect a response review within 1-3 business hours during standard operational tracks.</p>
+            </div>
+
+            <div class="grid-card safety-matrix" style="background: rgba(255,255,255,0.01); border: 1px dashed var(--border-color); padding: 25px; border-radius: 16px;">
+                <h3 style="font-size:1.1rem; margin-bottom:10px; color:var(--accent-cyan);"><i class="fa-solid fa-lock"></i> Secure Data Promise</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem; line-height:1.5;">We adhere to strict corporate data processing boundaries. None of your uploaded structures, client identities, or business data metrics are shared externally.</p>
+            </div>
         </div>
     </section>
 
     <footer>
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Gahonsh</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="portfolio.html">Case Log Files</a></li>
+                    <li><a href="pricing.html">Price Matrix</a></li>
+                    <!-- BUG FIXED: NOW MAPS PROPERLY TO INDEX FAQ LAYER -->
+                    <li><a href="index.html#faq">System FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal Matrix</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-and-conditions.html">Terms Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your corporate email">
+                    <button type="button" id="newsletter-submit-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        // SLIDE MOBILE MENU CONTROLS
+        const menuOpenBtn = document.getElementById('mobile-menu-open-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuContainer = document.getElementById('mobile-menu-container');
+
+        const toggleMobileMenu = (open) => {
+            if(open) {
+                menuOverlay.classList.add('active');
+                menuContainer.classList.add('active');
+            } else {
+                menuOverlay.classList.remove('active');
+                menuContainer.classList.remove('active');
+            }
+        };
+
+        menuOpenBtn.addEventListener('click', () => toggleMobileMenu(true));
+        menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
+        menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // ANIMATED INTERSECTION OBSERVER FOR STATS COUNTERS
+        const counters = document.querySelectorAll('.counter-num');
+        const countObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const target = +entry.target.getAttribute('data-target');
+                    let current = 0;
+                    const increment = target / 50;
+                    const update = () => {
+                        current += increment;
+                        if(current < target) {
+                            entry.target.innerText = Math.floor(current);
+                            setTimeout(update, 20);
+                        } else {
+                            entry.target.innerText = target;
+                        }
+                    };
+                    update();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {threshold: 0.6});
+        counters.forEach(c => countObserver.observe(c));
+
+        // BACK TO TOP MODULE
+        const btnTop = document.getElementById('btn-top');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 400) { btnTop.classList.add('show'); } 
+            else { btnTop.classList.remove('show'); }
+        });
+
+        // FORM SUBMISSION VALIDATION AND REDIRECTION DATA PACKET
+        document.getElementById('project-contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('client-name').value;
+            const email = document.getElementById('client-email').value;
+            const service = document.getElementById('client-service').value;
+            const budget = document.getElementById('client-budget').value;
+            const msg = document.getElementById('client-message').value;
+            
+            const encodedText = encodeURIComponent(`Hello Gahonsh Team,\n\nI want to submit a new inquiry:\n- Name: ${name}\n- Email: ${email}\n- Service Needed: ${service}\n- Budget Range: ${budget}\n- Description: ${msg}`);
+            window.open(`https://wa.me/918825183628?text=${encodedText}`);
+        });
+
+        // NEWSLETTER LOGIC
+        document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('newsletter-email').value;
+            if(emailInput.trim() === "" || !emailInput.includes('@')) {
+                alert("Please enter a valid business email address.");
+            } else {
+                window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipeline.`);
+            }
+        });
+    </script>
 </body>
 </html>
