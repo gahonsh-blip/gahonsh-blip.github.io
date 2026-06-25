@@ -1,46 +1,1125 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Services | Gahonsh Freelancing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <meta name="description" content="Explore the professional digital services of Gahonsh Freelancing including advanced Excel automation, business PDF design, website assistance, and AI content solutions.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/services.html">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
+    <meta property="og:title" content="Our Services | Gahonsh Freelancing">
+    <meta property="og:description" content="Excel Automation, PDF Design, PPT Presentations, Websites & AI Solutions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gahonsh-blip.github.io/services.html">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://gahonsh-blip.github.io/#organization",
+          "name": "GAHONSH FREELANCING",
+          "url": "https://gahonsh-blip.github.io/",
+          "logo": "https://gahonsh-blip.github.io/assets/logo.png"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gahonsh-blip.github.io/services.html",
+          "url": "https://gahonsh-blip.github.io/services.html",
+          "name": "Our Services | Gahonsh Freelancing",
+          "isPartOf": { "@id": "https://gahonsh-blip.github.io/#website" }
+        },
+        {
+          "@type": "Service",
+          "name": "Excel Automation & Dashboards",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Advanced tracking spreadsheets, customized analytics dashboards, complex formula development, and smart macros to optimize data flows."
+        },
+        {
+          "@type": "Service",
+          "name": "PDF Design & Interactive Layouts",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Creation of professional, structured, and interactive digital PDF documents, corporate profiles, and automated digital catalogs."
+        },
+        {
+          "@type": "Service",
+          "name": "Presentation Design",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Designing modern, visually premium investor pitch decks, corporate slide modules, and sales layouts matching your brand identity."
+        },
+        {
+          "@type": "Service",
+          "name": "Website Assistance",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Setup of premium high-converting landing pages, responsive business layouts, maintenance checks, and code updates."
+        },
+        {
+          "@type": "Service",
+          "name": "AI Content Solutions",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Leveraging specialized AI utilities for text copy optimization, prompt engineering templates, and fast productivity workflows."
+        },
+        {
+          "@type": "Service",
+          "name": "Branding Solutions",
+          "provider": { "@id": "https://gahonsh-blip.github.io/#organization" },
+          "description": "Memorable corporate logo asset concepts, clean typographical systems, media parameters, and custom brand assets."
+        }
+      ]
+    }
+    </script>
+
     <style>
-        .services-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 40px; }
-        .service-large-card { background: #ffffff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; border-top: 4px solid #2563eb; }
-        .service-large-card i { font-size: 36px; color: #2563eb; margin-bottom: 20px; display: block; }
-        .service-large-card h3 { color: #0f172a; margin-bottom: 12px; font-size: 20px; }
-        .service-large-card p { font-size: 15px; color: #475569; line-height: 1.6; }
+        /* CSS PREMIUM CONFIGURATION MATRIX */
+        :root {
+            --bg-dark: #030712;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 255, 204, 0.25);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            --text-main: #ffffff;
+            --text-slate: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* STICKY HEADER ARCHITECTURE */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 25px;
+            background: #0b0f19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
+        .dropdown-content a {
+            display: block;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* PREMIUM SLIDE-IN MOBILE NAVIGATION MENU */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .mobile-nav-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            align-self: flex-end;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-slate);
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-close:hover {
+            color: var(--accent-cyan);
+        }
+
+        .mobile-nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            padding-bottom: 10px;
+        }
+
+        /* SERVICES HERO MODULE */
+        .services-hero {
+            padding: 160px 8% 40px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.05), transparent 50%);
+        }
+
+        .services-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .services-hero h1 span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .services-hero p.tagline-sub {
+            color: var(--text-slate);
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .services-hero p.desc-sub {
+            color: var(--text-slate);
+            font-size: 1.15rem;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* SAFE TRUST METRICS BLOCK */
+        .services-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .stat-item p {
+            font-size: 0.8rem;
+            color: var(--text-slate);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-item h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        /* 6 FLIP CARDS GRID SECTION */
+        .services-container {
+            padding: 40px 8% 80px;
+        }
+
+        .services-flip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            height: 380px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-front, .flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 35px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flip-front {
+            background: #070c19;
+            color: var(--text-main);
+        }
+
+        .flip-front i {
+            font-size: 2.8rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .flip-front h3 {
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+        }
+
+        .flip-front p {
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card-price-tag {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(0, 255, 204, 0.05);
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 1px dashed rgba(0, 255, 204, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .flip-back {
+            background: linear-gradient(135deg, #0b1528 0%, #030712 100%);
+            color: white;
+            transform: rotateY(180deg);
+            border-color: var(--accent-cyan);
+            justify-content: center;
+        }
+
+        .flip-back h3 {
+            font-size: 1.25rem;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+        }
+
+        .flip-back ul {
+            list-style: none;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .flip-back ul li {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: var(--text-slate);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flip-back ul li i {
+            color: var(--accent-cyan);
+            font-size: 0.85rem;
+        }
+
+        .btn-card-quote {
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 8px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2);
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .btn-card-quote:hover {
+            transform: scale(1.05);
+        }
+
+        /* SERVICE COMPARISON GRID */
+        .comparison-section {
+            padding: 80px 8%;
+            background: rgba(255,255,255,0.01);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.3rem;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-slate);
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1.05rem;
+        }
+
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .comp-table th, .comp-table td {
+            padding: 18px 25px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .comp-table th {
+            background: #070c19;
+            color: var(--text-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comp-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .comp-table i.fa-check { color: var(--accent-cyan); }
+        .comp-table i.fa-minus { color: var(--text-slate); opacity: 0.3; }
+
+        /* INTEGRATED SYSTEM FAQs */
+        .faq-section {
+            padding: 90px 8% 40px;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover { background: rgba(255,255,255,0.02); }
+        .faq-answer {
+            display: none;
+            padding: 0 20px 20px;
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* CUSTOM SOLUTION CONVERSION UPGRADE BLOCK */
+        .custom-solution-banner {
+            padding: 60px 8%;
+            text-align: center;
+            background: #02050c;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-solution-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .custom-solution-banner p {
+            color: var(--text-slate);
+            font-size: 1.05rem;
+            margin-bottom: 25px;
+        }
+
+        .btn-custom-quote {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .btn-custom-quote:hover {
+            background: var(--accent-blue);
+            border-color: transparent;
+        }
+
+        /* HIGH-CONVERTING CALL TO ACTION BLOCK */
+        .services-cta {
+            padding: 90px 8%;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 119, 255, 0.08), transparent 60%);
+        }
+
+        .services-cta h2 { font-size: 2.5rem; margin-bottom: 15px; }
+        .services-cta p { color: var(--text-slate); font-size: 1.1rem; margin-bottom: 35px; }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #030712;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 25px rgba(0, 255, 204, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+        }
+
+        /* FLOATING UTILITIES */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+        }
+
+        .back-to-top.show { opacity: 1; }
+        .back-to-top:hover { background: var(--accent-blue); }
+
+        /* 5-COLUMN FOOTER LAYER */
+        footer {
+            background: #02040a;
+            padding: 80px 8% 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            color: var(--text-main);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .footer-col ul li a:hover { color: var(--accent-cyan); }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .newsletter-form input {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .newsletter-form button {
+            background: var(--accent-blue);
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover { background: var(--accent-cyan); color: #000; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-slate);
+            margin-left: 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover { color: var(--accent-cyan); }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1024px) {
+            .services-flip-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .services-flip-grid, .footer-grid { grid-template-columns: 1fr; }
+            .services-hero h1 { font-size: 2.5rem; }
+            .services-stats { flex-direction: column; gap: 20px; }
+            .comp-table { display: block; overflow-x: auto; }
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
     </style>
 </head>
 <body>
+
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Our Portfolio</a>
+        <a href="pricing.html">Pricing Matrix</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
     <header>
-        <a href="index.html" class="logo" aria-label="GAHONSH FREELANCING Home">GAHONSH<span> FREELANCING</span></a>
-        <nav aria-label="Main Navigation">
-            <a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <div class="dropdown">
+                <a href="services.html" class="active">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="section">
-        <h2 class="section-title">Our Professional Digital Services</h2>
-        <div class="services-container">
-            <div class="service-large-card"><i class="fa-regular fa-file-pdf"></i><h3>PDF Design & Automation</h3><p>Creation of professional, structured, and interactive digital PDF documents, corporate profiles, and automated digital catalogs.</p></div>
-            <div class="service-large-card"><i class="fa-regular fa-images"></i><h3>PowerPoint Presentation Design</h3><p>Designing modern, visually impactful pitch decks, operational slides, and business presentations tailored completely to your brand.</p></div>
-            <div class="service-large-card"><i class="fa-regular fa-file-excel"></i><h3>Excel Dashboards & Automation</h3><p>Advanced tracking spreadsheets, customized analytics dashboards, complex formula development, and smart macros to optimize data flows.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-database"></i><h3>Data Management Solutions</h3><p>Accurate administrative data entry, secure processing, logical data structuring, and sorting with absolute attention to detail.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-briefcase"></i><h3>Business Documentation</h3><p>Drafting official corporate letters, formal service sheets, business invoices, and clean paperwork formatting for seamless communication.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-globe"></i><h3>Website Development & Assistance</h3><p>End-to-end setup of professional web interfaces, structural maintenance, constant content updates, and regular technical support.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-robot"></i><h3>AI-Powered Content Solutions</h3><p>Leveraging cutting-edge AI utilities for copy optimization, technical writing support, and creating smart, fast productivity workflows.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-chart-line"></i><h3>Internet Marketing Services</h3><p>Strategic local visibility optimization, digital footprint enhancements, and clean marketing support to attract modern clients.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-laptop-code"></i><h3>Freelancing Support Services</h3><p>Comprehensive assistance for setting up freelance network infrastructure, document templates, and administrative backups.</p></div>
-            <div class="service-large-card"><i class="fa-solid fa-headset"></i><h3>Digital Business Support</h3><p>Dedicated remote virtual assistance, client follow-up tracking templates, and general technical operational support available globally.</p></div>
+    <section class="services-hero">
+        <h1>Professional Digital Services <span>For Modern Businesses</span></h1>
+        <p class="tagline-sub">Excel Automation • PDF Design • PPT Design • Websites • AI Solutions</p>
+        <p class="desc-sub">We build easy-to-use automated workflows, elegant corporate documents, and robust web tools tailored to help your brand optimize work and scale faster.</p>
+        
+        <div class="services-stats">
+            <div class="stat-item">
+                <h2>Growing</h2>
+                <p>Portfolio</p>
+            </div>
+            <div class="stat-item">
+                <h2>Multiple</h2>
+                <p>Digital Services</p>
+            </div>
+            <div class="stat-item">
+                <h2>Remote Support</h2>
+                <p>Available</p>
+            </div>
         </div>
     </section>
 
+    <section class="services-container">
+        <div class="services-flip-grid">
+            
+            <div class="flip-card" id="excel">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-solid fa-table"></i>
+                        <h3>Excel Automation</h3>
+                        <p>Custom tracking spreadsheets, automated charts, formula optimization, and advanced macro workflows to save manual reporting time.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>Excel Work Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> Custom Interactive Macros</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Dynamic Business Dashboards</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Complex Formula Fixing</li>
+                            <li><i class="fa-solid fa-circle-check"></i> 80% Reduction in Reporting Latency</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20am%20interested%20in%20Excel%20Automation%20services." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" id="pdf">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-regular fa-file-pdf"></i>
+                        <h3>Business PDF Design</h3>
+                        <p>Creation of clean, professional, and interactive digital PDF documents, corporate profile structures, and product catalogs.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>PDF Design Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> Clickable Navigation Rows</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Structured Company Layouts</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Clean Typography & Rules</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Automated Digital Catalogs</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20am%20interested%20in%20Business%20PDF%20Design%20services." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" id="ppt">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-solid fa-display"></i>
+                        <h3>Presentation Design</h3>
+                        <p>Designing modern, visually premium investor pitch decks, corporate slide modules, and sales layouts matching your brand identity.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>Presentation Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> High-Impact Investor Decks</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Modern Business Slide Decks</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Custom Assets & Typography</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Clean Minimal Layout Styles</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20need%20a%20quote%20for%20Presentation%20Design." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" id="web">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-solid fa-code"></i>
+                        <h3>Website Assistance</h3>
+                        <p>Setup of premium high-converting landing pages, responsive business layouts, maintenance checks, and code updates.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>Web Support Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> Responsive Front-End Portals</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Constant Framework Content Updates</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Regular Technical Support</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Clean Mobile-First Code Layouts</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20need%20a%20quote%20for%20Website%20Assistance." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" id="ai">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-solid fa-microchip"></i>
+                        <h3>AI Content Solutions</h3>
+                        <p>Leveraging specialized AI utilities for text copy optimization, prompt engineering templates, and fast productivity workflows.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>AI Assistant Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> Custom Prompt Architectures</li>
+                            <li><i class="fa-solid fa-circle-check"></i> AI-Assisted Content Systems</li>
+                            <li><i class="fa-solid fa-circle-check"></i> 50% Faster Copy Optimization</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Smart Productivity Workflows</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20need%20a%20quote%20for%20AI%20Solutions." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" id="branding">
+                <div class="flip-card-inner">
+                    <div class="flip-front">
+                        <i class="fa-solid fa-bezier-curve"></i>
+                        <h3>Branding Solutions</h3>
+                        <p>Memorable corporate logo asset concepts, clean typographical systems, media parameters, and custom brand assets.</p>
+                        <div class="card-price-tag">Starting From ₹499</div>
+                    </div>
+                    <div class="flip-back">
+                        <h3>Branding Asset Specs</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-circle-check"></i> Vector Corporate Logos</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Full Typography Rules</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Structured Asset Color Swatches</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Uniform Media Presences</li>
+                        </ul>
+                        <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20need%20a%20quote%20for%20Branding%20Solutions." class="btn-card-quote" target="_blank">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="comparison-section">
+        <h2 class="section-title">Service Features Blueprint</h2>
+        <p class="section-subtitle">Meticulously analyze delivery parameters across our tiered packages.</p>
+        
+        <table class="comp-table">
+            <thead>
+                <tr>
+                    <th>Features</th>
+                    <th>Starter</th>
+                    <th>Professional</th>
+                    <th>Enterprise</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Custom Layout Framing</td>
+                    <td><i class="fa-solid fa-check"></i> Basic</td>
+                    <td><i class="fa-solid fa-check"></i> Advanced</td>
+                    <td><i class="fa-solid fa-check"></i> Elite Custom</td>
+                </tr>
+                <tr>
+                    <td>Advanced Macro Scripts</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Dynamic Included</td>
+                    <td><i class="fa-solid fa-check"></i> Multi-Tier Matrix</td>
+                </tr>
+                <tr>
+                    <td>Clickable UI Integration</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Standard</td>
+                    <td><i class="fa-solid fa-check"></i> Seamless Interactive</td>
+                </tr>
+                <tr>
+                    <td>System Support Rows</td>
+                    <td><i class="fa-solid fa-minus"></i></td>
+                    <td><i class="fa-solid fa-check"></i> Priority Support</td>
+                    <td><i class="fa-solid fa-check"></i> Ongoing SLA Hub</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Quick answers to standard operational questions regarding our delivery channels.</p>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">How long does delivery take? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">Minor layout adjustments or PDF tracking take 2-4 days. Larger custom macro spreadsheets or full web pipelines depend on the layout complexity.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Do you provide project revisions? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">Yes. Standard project trackers include built-in revision cycles to ensure complete accuracy matching your rules.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can you work remotely? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">Absolutely. All business support, dashboard engineering, and operational layout delivery rows are managed remotely for international scales.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What payment methods are accepted? <i class="fa-solid fa-plus"></i></div>
+                <div class="faq-answer">We typically process secure milestone-based transactions or standard deposit options depending on your personalized quote sheet.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="custom-solution-banner">
+        <h2>Need a Custom Solution?</h2>
+        <p>Tell us your requirements and receive a personalized quote.</p>
+        <a href="contact.html" class="btn-custom-quote">Contact for Custom Quote</a>
+    </section>
+
+    <section class="services-cta">
+        <h2>Ready To Start Your Project?</h2>
+        <p>Get a personalized proposal based on your goals, timeline, budget, and project requirements.</p>
+        <a href="https://wa.me/918825183628" class="btn-primary" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp Now for Free Consultation
+        </a>
+    </section>
+
     <footer>
-        <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved. <br> <a href="privacy-policy.html" class="footer-link">Privacy Policy</a> | <a href="terms.html" class="footer-link">Terms & Conditions</a></p>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Gahonsh</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="portfolio.html">Case Log Files</a></li>
+                    <li><a href="pricing.html">Price Matrix</a></li>
+                    <li><a href="index.html#faq">System FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal Matrix</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-and-conditions.html">Terms Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletter-email" placeholder="Your corporate email">
+                    <button type="button" id="newsletter-submit-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        // DYNAMIC YEAR AUTOMATION
+        document.getElementById('dynamic-year').innerText = new Date().getFullYear();
+
+        const menuOpenBtn = document.getElementById('mobile-menu-open-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuContainer = document.getElementById('mobile-menu-container');
+
+        const toggleMobileMenu = (open) => {
+            if(open) {
+                menuOverlay.classList.add('active');
+                menuContainer.classList.add('active');
+            } else {
+                menuOverlay.classList.remove('active');
+                menuContainer.classList.remove('active');
+            }
+        };
+
+        menuOpenBtn.addEventListener('click', () => toggleMobileMenu(true));
+        menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
+        menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // FAQ SLIDE SYSTEM
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        faqQuestions.forEach(q => {
+            q.addEventListener('click', () => {
+                const answer = q.nextElementSibling;
+                const icon = q.querySelector('i');
+                if(answer.style.display === 'block') {
+                    answer.style.display = 'none';
+                    icon.className = 'fa-solid fa-plus';
+                } else {
+                    answer.style.display = 'block';
+                    icon.className = 'fa-solid fa-minus';
+                }
+            });
+        });
+
+        const btnTop = document.getElementById('btn-top');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 400) { btnTop.classList.add('show'); } 
+            else { btnTop.classList.remove('show'); }
+        });
+
+        document.getElementById('newsletter-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('newsletter-email').value;
+            if(emailInput.trim() === "" || !emailInput.includes('@')) {
+                alert("Please enter a valid business email address.");
+            } else {
+                alert("Thank you! Your email has been added to our optimization update log.");
+                document.getElementById('newsletter-email').value = "";
+            }
+        });
+    </script>
 </body>
 </html>
