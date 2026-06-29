@@ -255,3 +255,33 @@
     .hero-stats { grid-template-columns: 1fr; gap: 16px; }
     .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
 }
+/* प्रोफेशनल लाइट मोड */
+.light-mode {
+    --bg-dark: #ffffff !important;
+    --bg-card: #f8f9fa !important;
+    --border-color: #dadce0 !important;
+    --text-main: #202124 !important;
+    --text-slate: #5f6368 !important;
+    --accent-cyan: #1a73e8 !important;
+    --accent-blue: #1558d6 !important;
+}
+
+/* हेडर और अन्य एलिमेंट्स के लिए */
+.light-mode header,
+.light-mode .dropdown-content,
+.light-mode .mobile-nav-menu,
+.light-mode .trust-badges,
+.light-mode .port-card,
+.light-mode footer {
+    background: #ffffff !important;
+}
+
+.light-mode .newsletter-form input {
+    color: #202124 !important;
+    background: #ffffff !important;
+}
+
+/* स्मूथ एनीमेशन */
+body, header, .why-card, .process-card, .testimonial-card, .faq-item, .port-card, footer {
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease !important;
+}
