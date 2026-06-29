@@ -772,6 +772,7 @@
         </style>
 </head>
 <body>
+    <button onclick="changeMode()" style="position: fixed; top: 90px; left: 20px; z-index: 9999; padding: 10px 15px; border-radius: 8px; cursor: pointer; background: var(--accent-blue); color: white; border: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🌓 Light/Dark Mode</button>
 
     <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
         <i class="fa-brands fa-whatsapp"></i>
@@ -1109,5 +1110,10 @@
             }
         });
     </script>
+<script>
+  function changeMode() {
+    document.body.classList.toggle("light-mode");
+  }
+</script>
 </body>
 </html>
