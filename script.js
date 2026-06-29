@@ -1,3 +1,4 @@
+console.log("Script load ho rahi hai!");
 // बटन बनाने और उसे काम में लाने का नया पूरा कोड
 const btn = document.createElement("button");
 btn.innerHTML = "🌓 Light/Dark Mode";
