@@ -742,7 +742,34 @@
             nav { display: none; }
             .menu-toggle { display: block; }
         }
-    </style>
+    /* गूगल जैसा प्रोफेशनल लाइट मोड (पूरी तरह सुरक्षित) */
+.light-mode {
+    --bg-dark: #ffffff !important;       
+    --bg-card: #f8f9fa !important;       
+    --border-color: #dadce0 !important;  
+    --text-main: #202124 !important;     
+    --text-slate: #5f6368 !important;    
+    --accent-cyan: #1a73e8 !important;   
+    --accent-blue: #1558d6 !important;
+}
+
+/* हेडर, फुटर और कार्ड्स को लाइट करने के लिए ताकि टेक्स्ट न छुपे */
+.light-mode header,
+.light-mode .dropdown-content,
+.light-mode .mobile-nav-menu,
+.light-mode .trust-badges,
+.light-mode .port-card,
+.light-mode footer {
+    background: #ffffff !important;
+}
+
+/* ईमेल बॉक्स के टेक्स्ट को साफ़ दिखाने के लिए */
+.light-mode .newsletter-form input {
+    color: #202124 !important;
+    background: #ffffff !important;
+}
+    
+        </style>
 </head>
 <body>
 
