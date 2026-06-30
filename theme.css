@@ -1,0 +1,13 @@
+body.light-mode {
+    --bg-dark: #ffffff !important;
+    --bg-card: #f3f4f6 !important;
+    --border-color: #cccccc !important;
+    --text-main: #000000 !important;
+    --text-slate: #444444 !important;
+}
+
+body.light-mode footer, 
+body.light-mode .contact-card-box, 
+body.light-mode .info-block {
+    background: var(--bg-card) !important;
+}
