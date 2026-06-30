@@ -531,6 +531,7 @@
     </style>
 </head>
 <body>
+    <button onclick="document.body.classList.toggle('light-mode')" style="position: fixed; top: 100px; left: 20px; z-index: 999999; padding: 10px 15px; background: #1558d6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🌓 Light/Dark Mode</button>
 
     <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
         <i class="fa-brands fa-whatsapp"></i>
@@ -782,32 +783,9 @@
             if(emailInput.trim() === "" || !emailInput.includes('@')) {
                 alert("Please enter a valid business email address.");
             } else {
-                window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipel[...]
+                window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipeline!`);
             }
         });
     </script>
-            <script>
-    // Manual Light Mode Button for Contact Page
-    const btn = document.createElement("button");
-    btn.innerHTML = "🌓 Light/Dark Mode";
-    btn.style.position = "fixed";
-    btn.style.top = "90px";
-    btn.style.left = "20px";
-    btn.style.zIndex = "999999";
-    btn.style.padding = "10px 15px";
-    btn.style.borderRadius = "8px";
-    btn.style.cursor = "pointer";
-    btn.style.background = "#1558d6";
-    btn.style.color = "white";
-    btn.style.border = "none";
-    btn.style.fontWeight = "bold";
-    btn.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-
-    btn.onclick = function () {
-        document.body.classList.toggle("light-mode");
-    };
-
-    document.body.appendChild(btn);
-</script>
 </body>
 </html>
