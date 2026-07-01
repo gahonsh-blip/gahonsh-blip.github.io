@@ -1,287 +1,139 @@
-/* ==========================================================================
-   GAHONSH FREELANCING ULTRA DESIGN V3 - SYSTEM SYNCHRONIZED CSS
-   ========================================================================== */
+/* ============================================
+   PURE ANIMATIONS – SECURE-SYSTEM STYLE
+   बाकी सब कुछ वैसा ही रहेगा
+   ============================================ */
 
-:root {
-    --hero-bg: #030712;
-    --accent-cyan: #00ffcc;
-    --accent-blue: #0077ff;
-    --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
-    --whatsapp-green: #25D366;
-    --whatsapp-gradient: linear-gradient(135deg, #25D366 0%, #1ebd58 100%);
-    --text-white: #ffffff;
-    --text-slate: #8a99ad;
-    --glass-bg: rgba(255, 255, 255, 0.01);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --glass-border-hover: rgba(0, 255, 204, 0.25);
+/* ----- 1. SCROLL REVEAL ANIMATIONS ----- */
+/* ये एनिमेशन तब चलेगा जब एलिमेंट स्क्रॉल करके दिखे */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* --- PREMIUM FLOATING WHATSAPP BUTTON --- */
-.whatsapp-float {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--whatsapp-gradient);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    color: var(--text-white);
-    text-decoration: none;
-    z-index: 9999;
-    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: pulseGlow 2.5s infinite;
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.whatsapp-float:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5);
-    filter: brightness(1.1);
+/* थोड़ी देरी से आने वाले एलिमेंट्स के लिए */
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* बाएँ से आने के लिए */
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* --- HERO SECTION ARCHITECTURE --- */
-.hero {
+.reveal-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* दाएँ से आने के लिए */
+.reveal-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ----- 2. HOVER EFFECTS (बिना डिज़ाइन बदले) ----- */
+/* ये सिर्फ एनिमेशन है – कलर, बैकग्राउंड, बॉर्डर नहीं बदलेगा */
+
+.hover-lift {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-scale:hover {
+    transform: scale(1.03);
+}
+
+/* ----- 3. COUNTER ANIMATION (नंबर गिनती) ----- */
+/* यह आपके पास पहले से है, लेकिन मैं इसे और स्मूथ कर रहा हूँ */
+
+.counter-num {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+/* ----- 4. SECTION DIVIDER LINE ANIMATION ----- */
+.section-line {
     position: relative;
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
     overflow: hidden;
-    background: var(--hero-bg);
-    padding: 120px 5% 60px;
 }
 
-/* Linear-Inspired Ambient Neon Glow */
-.hero::before {
-    content: "";
+.section-line::after {
+    content: '';
     position: absolute;
-    width: 700px;
-    height: 700px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0, 119, 255, 0.12) 0%, rgba(0, 255, 204, 0.04) 50%, transparent 100%);
-    filter: blur(80px);
-    top: 15%;
-    left: 20%;
-    z-index: 1;
-    pointer-events: none;
-    animation: floatGlow 10s ease-in-out infinite;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--accent-cyan, #00ffcc);
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 40%, rgba(0, 255, 204, 0.02), transparent 70%);
-    z-index: 1;
-    pointer-events: none;
+.section-line.visible::after {
+    width: 60px;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 950px;
-    padding: 0 20px;
+/* ----- 5. IMAGE ZOOM ON HOVER (सिर्फ जूम, बाकी कुछ नहीं) ----- */
+.img-zoom {
+    overflow: hidden;
 }
 
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    margin-bottom: 30px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: var(--accent-cyan);
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+.img-zoom img,
+.img-zoom .port-mockup {
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.hero h1 {
-    font-size: 4.2rem;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -1.5px;
-    color: var(--text-white);
-    margin-bottom: 24px;
+.img-zoom:hover img,
+.img-zoom:hover .port-mockup {
+    transform: scale(1.05);
 }
 
-.hero h1 span {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* ----- 6. BUTTON PULSE (वैकल्पिक) ----- */
+.pulse-once {
+    animation: pulseOnce 1.5s ease-in-out 1;
 }
 
-.hero p {
-    font-size: 1.25rem;
-    color: var(--text-slate);
-    max-width: 700px;
-    margin: 0 auto 45px;
-    line-height: 1.65;
+@keyframes pulseOnce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-.hero-buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 65px;
+/* ----- 7. GLOBAL PAGE LOAD FADE (धीरे-धीरे पेज दिखे) ----- */
+.page-load {
+    opacity: 0;
+    animation: pageFadeIn 0.8s ease forwards;
 }
 
-.btn-primary,
-.btn-secondary {
-    padding: 16px 38px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-primary {
-    background: var(--accent-gradient);
-    color: #040814;
-    box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(0, 255, 204, 0.35);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.02);
-    color: var(--text-white);
-    border: 1px solid var(--glass-border);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: var(--accent-cyan);
-    transform: translateY(-3px);
-}
-
-.hero-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.stat {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 25px 20px;
-    border-radius: 18px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.stat:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: var(--glass-border-hover);
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-}
-
-.stat h2 {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.6rem;
-    font-weight: 800;
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
-}
-
-.stat p {
-    font-size: 0.85rem;
-    color: var(--text-slate);
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
-
-/* --- PREMIUM ANIMATION KEYFRAMES --- */
-@keyframes floatGlow {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(30px, -40px) scale(1.1); }
-}
-
-@keyframes pulseGlow {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0.5);
-    }
-    50% {
-        transform: scale(1.06);
-        box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5), 0 0 0 15px rgba(37, 211, 102, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0);
-    }
-}
-
-/* --- RESPONSIVE CONFIGURATION --- */
-@media (max-width: 768px) {
-    .whatsapp-float {
-        bottom: 20px;
-        right: 20px;
-        width: 52px;
-        height: 52px;
-        font-size: 24px;
-    }
-    .hero h1 { font-size: 2.8rem; letter-spacing: -1px; }
-    .hero p { font-size: 1.1rem; }
-    .hero-stats { grid-template-columns: 1fr; gap: 16px; }
-    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
-}
-/* प्रोफेशनल लाइट मोड */
-.light-mode {
-    --bg-dark: #ffffff !important;
-    --bg-card: #f8f9fa !important;
-    --border-color: #dadce0 !important;
-    --text-main: #202124 !important;
-    --text-slate: #5f6368 !important;
-    --accent-cyan: #1a73e8 !important;
-    --accent-blue: #1558d6 !important;
-}
-
-/* हेडर और अन्य एलिमेंट्स के लिए */
-.light-mode header,
-.light-mode .dropdown-content,
-.light-mode .mobile-nav-menu,
-.light-mode .trust-badges,
-.light-mode .port-card,
-.light-mode footer {
-    background: #ffffff !important;
-}
-
-.light-mode .newsletter-form input {
-    color: #202124 !important;
-    background: #ffffff !important;
-}
-
-/* स्मूथ एनीमेशन */
-body, header, .why-card, .process-card, .testimonial-card, .faq-item, .port-card, footer {
-    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease !important;
+@keyframes pageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
