@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -515,6 +515,49 @@
         }
         .social-icons a:hover { color: var(--accent-cyan); }
 
+        /* ============================================ */
+        /* PURE ANIMATIONS – SECURE-SYSTEM STYLE */
+        /* बाकी सब कुछ वैसा ही रहेगा */
+        /* ============================================ */
+
+        /* ----- 1. SCROLL REVEAL ANIMATIONS ----- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal-delay-5 { transition-delay: 0.5s; }
+
+        /* ----- 2. HOVER EFFECTS (बिना डिज़ाइन बदले) ----- */
+        .hover-lift {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .hover-scale {
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.03);
+        }
+
         @media (max-width: 1024px) {
             .contact-container { grid-template-columns: 1fr; gap: 40px; }
             .footer-grid { grid-template-columns: repeat(3, 1fr); }
@@ -572,30 +615,37 @@
         </nav>
     </header>
 
-    <section class="contact-hero">
+    <!-- ============================================ -->
+    <!-- ✅ HERO SECTION – एनिमेशन क्लासेस जोड़ी गईं -->
+    <!-- ============================================ -->
+    <section class="contact-hero reveal">
         <h1>Let's Collaborate On Your <span>Next Project</span></h1>
         <p>Choose your preferred way to reach out. Submit the formal inquiry form or connect instantly via WhatsApp routing to skip response lag entirely.</p>
         
+        <!-- ✅ STATS – एनिमेशन क्लासेस जोड़ी गईं -->
         <div class="contact-stats">
-            <div class="stat-item">
+            <div class="stat-item hover-lift">
                 <h2 class="counter-num" data-target="100">100</h2>
                 <p>Projects Completed</p>
             </div>
-            <div class="stat-item">
+            <div class="stat-item hover-lift">
                 <h2><span class="counter-num" data-target="98">98</span>%</h2>
                 <p>Satisfaction Rate</p>
             </div>
-            <div class="stat-item">
+            <div class="stat-item hover-lift">
                 <h2>24/7</h2>
                 <p>Remote Support</p>
             </div>
         </div>
     </section>
 
+    <!-- ============================================ -->
+    <!-- ✅ CONTACT CONTAINER – एनिमेशन क्लासेस -->
+    <!-- ============================================ -->
     <section class="contact-container">
         
-        <!-- HIGH-CONVERTING SECURE INQUIRY FORM WITH ADVANCED FIELDS -->
-        <div class="contact-card-box">
+        <!-- ✅ LEFT: FORM – एनिमेशन क्लासेस -->
+        <div class="contact-card-box reveal reveal-delay-1">
             <h2>Submit Project Inquiry</h2>
             <form id="project-contact-form" action="https://formspree.io/f/xzdqnoez" method="POST">
                 <input type="hidden" name="_next" value="thank-you.html">
@@ -635,38 +685,47 @@
                     <label for="client-message">Project Description & Target Goals</label>
                     <textarea id="client-message" name="message" rows="4" placeholder="Describe your workflows requirements, preferred layout and rules..." required></textarea>
                 </div>
-                <button type="submit" class="btn-submit">Submit Form</button>
+                <button type="submit" class="btn-submit hover-scale">Submit Form</button>
             </form>
         </div>
 
+        <!-- ✅ RIGHT PANEL – एनिमेशन क्लासेस -->
         <div class="info-panel">
             
-                <div style="margin-bottom: 25px;"> 
-    <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--text-main);">Our Operational Location</h3> 
-    <div style="width:100%; height:260px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); background: rgba(255,255,255,0.01);"> 
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58957.54877717658!2d85.20521975!3d22.7339233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f60bfdc096a67f%3A0x6b7fa1b[...]
-    </div> 
-    <p style="margin-top:8px; font-size:0.9rem; color:#8a99ad;">
-        <a href="https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7" target="_blank" style="color:var(--accent-cyan); text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Googl[...]
-    </p> 
-</div>
+            <!-- ✅ MAP – एनिमेशन क्लासेस -->
+            <div class="reveal reveal-delay-2" style="margin-bottom: 25px;"> 
+                <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--text-main);">Our Operational Location</h3> 
+                <div style="width:100%; height:260px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); background: rgba(255,255,255,0.01);"> 
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58957.54877717658!2d85.20521975!3d22.7339233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f60bfdc096a67f%3A0x6b7fa1b[...]" 
+                        style="width:100%; height:100%; border:0;" allowfullscreen="" loading="lazy">
+                    </iframe>
+                </div> 
+                <p style="margin-top:8px; font-size:0.9rem; color:#8a99ad;">
+                    <a href="https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Google Maps
+                    </a>
+                </p> 
+            </div>
 
-            <div class="instant-whatsapp-box">
+            <!-- ✅ WHATSAPP BOX – एनिमेशन क्लासेस -->
+            <div class="instant-whatsapp-box hover-lift reveal reveal-delay-3">
                 <h3 style="justify-content: center; font-size: 1.3rem;"><i class="fa-brands fa-whatsapp"></i> Chat Instantly</h3>
                 <p style="margin-top: 10px;">Skip form configurations and open a direct pipeline conversation with our development team.</p>
-                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20start%20a%20project%20consultation.[cite: 16]" class="btn-whatsapp-direct" target="_blank">
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20start%20a%20project%20consultation." class="btn-whatsapp-direct" target="_blank">
                     Start Instant Chat
                 </a>
             </div>
 
-            <div class="info-block">
+            <!-- ✅ RESPONSE GUARANTEE – एनिमेशन क्लासेस -->
+            <div class="info-block hover-lift reveal reveal-delay-4">
                 <h3><i class="fa-solid fa-clock"></i> Response Guarantee</h3>
                 <p>All direct messaging channels are tracked constantly. Expect a response review within 1-3 business hours during standard operational tracks.</p>
             </div>
 
-            <div class="grid-card safety-matrix" style="background: rgba(255,255,255,0.01); border: 1px dashed var(--border-color); padding: 25px; border-radius: 16px;">
+            <!-- ✅ SECURITY – एनिमेशन क्लासेस -->
+            <div class="grid-card safety-matrix hover-lift reveal reveal-delay-5" style="background: rgba(255,255,255,0.01); border: 1px dashed var(--border-color); padding: 25px; border-radius: 16px;">
                 <h3 style="font-size:1.1rem; margin-bottom:10px; color:var(--accent-cyan);"><i class="fa-solid fa-lock"></i> Secure Data Promise</h3>
-                <p style="color:var(--text-slate); font-size:0.9rem; line-height:1.5;">We adhere to strict corporate data processing boundaries. None of your uploaded structures, client identities, or[...]
+                <p style="color:var(--text-slate); font-size:0.9rem; line-height:1.5;">We adhere to strict corporate data processing boundaries. None of your uploaded structures, client identities, or project details are shared with third-party entities.</p>
             </div>
         </div>
     </section>
@@ -675,7 +734,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.<[...]
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
             </div>
             <div class="footer-col">
                 <h4>Services</h4>
@@ -690,7 +749,6 @@
                 <ul>
                     <li><a href="portfolio.html">Case Log Files</a></li>
                     <li><a href="pricing.html">Price Matrix</a></li>
-                    <!-- BUG FIXED: NOW MAPS PROPERLY TO INDEX FAQ LAYER -->
                     <li><a href="index.html#faq">System FAQ</a></li>
                 </ul>
             </div>
@@ -786,14 +844,34 @@
                 window.open(`https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20would%20like%20to%20subscribe%20my%20email%20${encodeURIComponent(emailInput)}%20to%20your%20newsletter%20pipeline!`);
             }
         });
+
+        // ============================================
+        // SCROLL REVEAL ANIMATION (स्क्रॉल करने पर चले)
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+            
+            if (revealElements.length > 0) {
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry, index) => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                entry.target.classList.add('visible');
+                            }, index * 80);
+                            revealObserver.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.15,
+                    rootMargin: '0px 0px -50px 0px'
+                });
+                
+                revealElements.forEach(el => revealObserver.observe(el));
+            }
+        });
     </script>
 
 <script src="theme.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
