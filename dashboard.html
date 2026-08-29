@@ -466,6 +466,11 @@
 
         <!-- ACTION BUTTONS -->
         <div class="master-actions">
+            <!-- + ADD SECTION / CARD BUTTON -->
+            <button class="btn-ctrl" id="btnAddSectionTop" style="background: linear-gradient(135deg, rgba(0, 255, 204, 0.2) 0%, rgba(0, 119, 255, 0.2) 100%); border-color: var(--accent-cyan); color: #fff; font-weight: 700;">
+                <i class="fa-solid fa-plus-circle" style="color: var(--accent-cyan);"></i> + नया सेक्शन / कार्ड जोड़ें
+            </button>
+
             <span id="saveStatus" style="font-size: 0.82rem; color: var(--text-slate); display: flex; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> Ready
             </span>
@@ -496,13 +501,18 @@
     <div class="instruction-banner">
         <div class="instruction-chips">
             <span class="inst-chip"><i class="fa-solid fa-mouse-pointer"></i> <strong>टेक्स्ट पर क्लिक करें</strong> = सीधे बदलें</span>
-            <span class="inst-chip"><i class="fa-solid fa-image"></i> <strong>फोटो पर क्लिक करें</strong> = नई फोटो बदलें/फाइल अपलोड करें</span>
-            <span class="inst-chip"><i class="fa-solid fa-link"></i> <strong>बटन/लिंक पर क्लिक करें</strong> = लिंक URL और नाम बदलें</span>
+            <span class="inst-chip"><i class="fa-solid fa-file-arrow-up"></i> <strong>बटन/लिंक पर क्लिक करें</strong> = फाइल अपलोड करें या लिंक बदलें</span>
+            <span class="inst-chip"><i class="fa-solid fa-image"></i> <strong>फोटो पर क्लिक करें</strong> = नई फोटो बदलें/अपलोड करें</span>
             <span class="inst-chip"><i class="fa-solid fa-video"></i> <strong>वीडियो पर क्लिक करें</strong> = YouTube वीडियो लिंक बदलें</span>
         </div>
-        <button class="btn-ctrl" id="btnUploadImageDirect" style="padding: 4px 10px; font-size: 0.8rem;">
-            <i class="fa-solid fa-cloud-arrow-up"></i> नई फोटो अपलोड करें
-        </button>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-ctrl" id="btnUploadAnyFile" style="padding: 4px 10px; font-size: 0.8rem; background: rgba(0, 255, 204, 0.15); border-color: var(--accent-cyan); color: #fff; font-weight: 700;">
+                <i class="fa-solid fa-file-arrow-up" style="color: var(--accent-cyan);"></i> 📁 फ़ाइल / डॉक अपलोड करें
+            </button>
+            <button class="btn-ctrl" id="btnUploadImageDirect" style="padding: 4px 10px; font-size: 0.8rem;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> नई फोटो अपलोड करें
+            </button>
+        </div>
     </div>
 
     <!-- 4. LIVE VISUAL EDITOR CANVAS -->
@@ -520,11 +530,11 @@
 
             <!-- FILE UPLOAD DROPZONE -->
             <div class="form-group">
-                <label class="form-label"><i class="fa-solid fa-cloud-arrow-up"></i> 1. अपने कंप्यूटर/मोबाइल से फाइल अपलोड करें:</label>
+                <label class="form-label"><i class="fa-solid fa-cloud-arrow-up"></i> 1. अपने कंप्यूटर/मोबाइल से फोटो अपलोड करें:</label>
                 <div class="upload-dropzone" id="imageDropzone">
                     <i class="fa-solid fa-file-arrow-up" style="font-size: 26px; color: var(--accent-cyan); margin-bottom: 6px;"></i>
-                    <p style="font-size: 0.85rem; font-weight: 600; color: #fff;">फाइल चुनने के लिए यहाँ क्लिक करें (Click to Choose File)</p>
-                    <span style="font-size: 0.74rem; color: var(--text-slate);">PNG, JPG, JPEG, SVG, WebP सपोर्टेड</span>
+                    <p style="font-size: 0.85rem; font-weight: 600; color: #fff;">फोटो चुनने के लिए यहाँ क्लिक करें (Click to Choose Image)</p>
+                    <span style="font-size: 0.74rem; color: var(--text-slate);">PNG, JPG, JPEG, SVG, WebP, GIF सपोर्टेड</span>
                     <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
                 </div>
             </div>
@@ -557,42 +567,132 @@
         </div>
     </div>
 
-    <!-- 6. MODAL: EDIT HYPERLINK & BUTTON (हाइपरलिंक और बटन बदलें) -->
+    <!-- 6. MODAL: EDIT HYPERLINK, FILE TYPE & FILE UPLOAD (हाइपरलिंक, फ़ाइल प्रकार और फ़ाइल अपलोड) -->
     <div id="modalLink" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width: 580px;">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-link"></i> हाइपरलिंक या बटन बदलें</h3>
+                <h3><i class="fa-solid fa-file-arrow-up"></i> फ़ाइल अपलोड या लिंक बदलें (File Upload & Link)</h3>
                 <button class="btn-ctrl" onclick="closeModal('modalLink')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
+            <!-- 1. DIRECT FILE UPLOAD DROPZONE -->
+            <div class="form-group" style="background: rgba(0, 255, 204, 0.04); border: 1px dashed rgba(0, 255, 204, 0.3); border-radius: 8px; padding: 12px;">
+                <label class="form-label" style="color: var(--accent-cyan); font-weight: 700;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> 1. अपने कंप्यूटर/मोबाइल से कोई भी फ़ाइल अपलोड करें:
+                </label>
+                <div class="upload-dropzone" id="linkFileDropzone" style="padding: 14px 10px;">
+                    <i class="fa-solid fa-file-excel" style="font-size: 24px; color: #10b981; margin-right: 6px;"></i>
+                    <i class="fa-solid fa-file-pdf" style="font-size: 24px; color: #ef4444; margin-right: 6px;"></i>
+                    <i class="fa-solid fa-file-word" style="font-size: 24px; color: #38bdf8; margin-right: 6px;"></i>
+                    <i class="fa-solid fa-file-zipper" style="font-size: 24px; color: #fbbf24; margin-bottom: 6px;"></i>
+                    <p style="font-size: 0.85rem; font-weight: 600; color: #fff; margin-top: 4px;">फ़ाइल चुनने के लिए यहाँ क्लिक करें (Click or Drag File Here)</p>
+                    <span style="font-size: 0.74rem; color: var(--text-slate);">सपोर्टेड: Excel (.xlsx, .xls, .csv), PDF (.pdf), Word (.docx), Zip, Images</span>
+                    <input type="file" id="linkFileInput" accept=".xlsx,.xls,.csv,.pdf,.docx,.doc,.pptx,.zip,.rar,.png,.jpg,.jpeg,.svg,.webp" style="display: none;">
+                </div>
+                <div id="linkUploadStatus" style="display: none; font-size: 0.78rem; color: #34d399; margin-top: 8px; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle-check"></i> <span id="linkUploadStatusText">File ready!</span>
+                </div>
+            </div>
+
+            <!-- 2. FILE TYPE SELECTOR -->
             <div class="form-group">
-                <label class="form-label">बटन / लिंक का टेक्स्ट (Text Displayed):</label>
-                <input type="text" id="linkTextInput" class="form-input" placeholder="e.g. संपर्क करें / Book Consultation">
+                <label class="form-label"><i class="fa-solid fa-tags"></i> 2. फ़ाइल या लिंक का प्रकार (File Type):</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="excel" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-solid fa-file-excel" style="color: #10b981;"></i> Excel Sheet
+                    </button>
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="pdf" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF Document
+                    </button>
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="word" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-solid fa-file-word" style="color: #38bdf8;"></i> Word Doc
+                    </button>
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="zip" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-solid fa-file-zipper" style="color: #fbbf24;"></i> ZIP Archive
+                    </button>
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="web" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-solid fa-globe" style="color: #38bdf8;"></i> Web Link
+                    </button>
+                    <button type="button" class="btn-ctrl file-type-btn" data-type="whatsapp" style="padding: 6px; font-size: 0.78rem; justify-content: center;">
+                        <i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i> WhatsApp
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. BUTTON TEXT & LINK HREF -->
+            <div class="form-group">
+                <label class="form-label">बटन / लिंक का नाम (Display Text):</label>
+                <input type="text" id="linkTextInput" class="form-input" placeholder="e.g. Download Sample Sheet / View Project">
             </div>
 
             <div class="form-group">
-                <label class="form-label">टारगेट URL / हाइपरलिंक (href):</label>
-                <input type="text" id="linkHrefInput" class="form-input" placeholder="e.g. contact.html, services.html, https://wa.me/...">
-                <div class="preset-grid">
+                <label class="form-label">फ़ाइल पाथ या लिंक URL (href):</label>
+                <input type="text" id="linkHrefInput" class="form-input" placeholder="e.g. assets/projects/sample.xlsx या contact.html">
+                <div class="preset-grid" style="margin-top: 6px;">
+                    <span class="preset-badge" onclick="setPresetLink('assets/projects/finance-dashboard-sample.xlsx')">Sample Excel</span>
+                    <span class="preset-badge" onclick="setPresetLink('assets/projects/company-profile-sample.pdf')">Sample PDF</span>
                     <span class="preset-badge" onclick="setPresetLink('contact.html')">Contact Page</span>
                     <span class="preset-badge" onclick="setPresetLink('services.html')">Services</span>
                     <span class="preset-badge" onclick="setPresetLink('portfolio.html')">Portfolio</span>
-                    <span class="preset-badge" onclick="setPresetLink('pricing.html')">Pricing</span>
                     <span class="preset-badge" onclick="setPresetLink('https://wa.me/918825183628')">WhatsApp Chat</span>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">नया टैब में खोलें?</label>
-                <select id="linkTargetSelect" class="form-input">
-                    <option value="_self">उसी पेज में (_self)</option>
-                    <option value="_blank">नए टैब में खोलें (_blank)</option>
-                </select>
+            <!-- 4. DOWNLOAD & TAB SETTINGS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label class="form-label">डाउनलोड मोड:</label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #fff; cursor: pointer; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <input type="checkbox" id="linkDownloadCheck" checked style="accent-color: var(--accent-cyan); width: 16px; height: 16px;">
+                        <span>डाउनलोड फ़ाइल बनाएं (Downloadable)</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">खोलने का तरीका:</label>
+                    <select id="linkTargetSelect" class="form-input">
+                        <option value="_self">उसी पेज में (_self)</option>
+                        <option value="_blank">नए टैब में खोलें (_blank)</option>
+                    </select>
+                </div>
             </div>
 
             <div class="modal-foot">
                 <button class="btn-ctrl" onclick="closeModal('modalLink')">रद्द करें</button>
-                <button class="btn-ctrl btn-save-live" id="btnApplyLink"><i class="fa-solid fa-check"></i> लिंक अपडेट करें</button>
+                <button class="btn-ctrl btn-save-live" id="btnApplyLink"><i class="fa-solid fa-check"></i> फ़ाइल / लिंक अपडेट करें</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6B. MODAL: UNIVERSAL FILE MANAGER (फ़ाइल मैनेजर / अपलोडर) -->
+    <div id="modalUniversalUpload" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-cloud-arrow-up"></i> कोई भी फ़ाइल अपलोड करें (Excel, PDF, Image, Doc)</h3>
+                <button class="btn-ctrl" onclick="closeModal('modalUniversalUpload')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="form-group">
+                <div class="upload-dropzone" id="uniDropzone" style="padding: 24px 16px;">
+                    <i class="fa-solid fa-folder-open" style="font-size: 36px; color: var(--accent-cyan); margin-bottom: 8px;"></i>
+                    <p style="font-size: 0.95rem; font-weight: 700; color: #fff;">यहाँ क्लिक करके अपने फोन या कंप्यूटर से फाइल चुनें</p>
+                    <span style="font-size: 0.76rem; color: var(--text-slate);">Excel (.xlsx, .xls, .csv), PDF, Word, Images, Zip आदि</span>
+                    <input type="file" id="uniFileInput" style="display: none;">
+                </div>
+            </div>
+
+            <div id="uniResultBox" style="display: none; background: rgba(0, 255, 204, 0.08); border: 1px solid var(--accent-cyan); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-size: 0.8rem; color: #fff; margin-bottom: 6px; font-weight: 700;">
+                    <i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> फ़ाइल सफलतापूर्वक अपलोड हो गई!
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="uniUploadedUrl" class="form-input" readonly style="font-size: 0.8rem;">
+                    <button class="btn-ctrl" id="btnCopyUniUrl" style="white-space: nowrap;"><i class="fa-solid fa-copy"></i> कॉपी करें</button>
+                </div>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn-ctrl" onclick="closeModal('modalUniversalUpload')">बंद करें</button>
             </div>
         </div>
     </div>
@@ -618,6 +718,74 @@
         </div>
     </div>
 
+    <!-- 8. MODAL: ADD NEW SECTION / PROJECT CARD (नया सेक्शन / प्रोजेक्ट कार्ड जोड़ें) -->
+    <div id="modalAddSection" class="modal-overlay">
+        <div class="modal-box" style="max-width: 550px;">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-plus-circle"></i> नया सेक्शन या प्रोजेक्ट कार्ड जोड़ें</h3>
+                <button class="btn-ctrl" onclick="closeModal('modalAddSection')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <p style="color: var(--text-slate); font-size: 0.85rem; margin-bottom: 16px;">
+                आप जिस प्रकार का कार्ड या सेक्शन जोड़ना चाहते हैं, उसे चुनें। यह उसी डिज़ाइन और साइज़ में तुरंत जुड़ जाएगा और आप उसे एडिट कर सकेंगे:
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(0, 255, 204, 0.08); border-color: rgba(0, 255, 204, 0.4);" onclick="addNewItem('excel')">
+                    <i class="fa-solid fa-file-excel" style="color: #10b981; font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">Excel Tracker Card</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">एक्सेल प्रोजेक्ट कार्ड</div>
+                    </div>
+                </button>
+
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.4);" onclick="addNewItem('pdf')">
+                    <i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">PDF Layout Card</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">पीडीएफ डॉक्यूमेंट कार्ड</div>
+                    </div>
+                </button>
+
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(0, 119, 255, 0.08); border-color: rgba(0, 119, 255, 0.4);" onclick="addNewItem('web')">
+                    <i class="fa-solid fa-globe" style="color: #38bdf8; font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">Web Portal Card</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">वेबसाइट प्रोजेक्ट कार्ड</div>
+                    </div>
+                </button>
+
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(168, 85, 247, 0.08); border-color: rgba(168, 85, 247, 0.4);" onclick="addNewItem('service')">
+                    <i class="fa-solid fa-layer-group" style="color: #c084fc; font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">Service / Feature</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">सर्विस या फीचर ब्लॉक</div>
+                    </div>
+                </button>
+
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.4);" onclick="addNewItem('pricing')">
+                    <i class="fa-solid fa-tags" style="color: #fbbf24; font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">Pricing Plan Card</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">प्राइसिंग प्लान कार्ड</div>
+                    </div>
+                </button>
+
+                <button type="button" class="btn-ctrl" style="padding: 12px; justify-content: flex-start; background: rgba(255, 255, 255, 0.05); border-color: var(--border-color);" onclick="addNewItem('clone_last')">
+                    <i class="fa-solid fa-copy" style="color: var(--accent-cyan); font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">Clone Active Card</div>
+                        <div style="font-size: 0.72rem; color: var(--text-slate);">वर्तमान कार्ड की नकल जोड़ें</div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn-ctrl" onclick="closeModal('modalAddSection')">रद्द करें</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div id="toast"><i class="fa-solid fa-circle-check" style="color: var(--accent-cyan);"></i> <span id="toastMsg">Saved!</span></div>
 
@@ -639,6 +807,7 @@
         const btnUnlock = document.getElementById("btnUnlock");
         const pageSelectDropdown = document.getElementById("pageSelectDropdown");
         const editorFrame = document.getElementById("editorFrame");
+        const btnAddSectionTop = document.getElementById("btnAddSectionTop");
         const btnSaveLive = document.getElementById("btnSaveLive");
         const btnViewLive = document.getElementById("btnViewLive");
         const btnDownload = document.getElementById("btnDownload");
@@ -646,6 +815,13 @@
         const saveStatus = document.getElementById("saveStatus");
         const toast = document.getElementById("toast");
         const toastMsg = document.getElementById("toastMsg");
+
+        // Top button to add section
+        if (btnAddSectionTop) {
+            btnAddSectionTop.addEventListener("click", () => {
+                openModal("modalAddSection");
+            });
+        }
 
         // Device buttons
         const btnDesktop = document.getElementById("btnDesktop");
@@ -752,12 +928,64 @@
                 a:hover {
                     outline: 2px dashed #38bdf8 !important;
                 }
+                
+                /* Floating Card Quick Actions (Duplicate & Delete) */
+                .project-card, .service-card, .pricing-card, .feature-card, .step-card, .faq-item {
+                    position: relative !important;
+                }
+                .card-editor-toolbar {
+                    position: absolute !important;
+                    top: 10px !important;
+                    right: 10px !important;
+                    display: none !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    z-index: 9999 !important;
+                    background: #0f172a !important;
+                    border: 1.5px solid #00ffcc !important;
+                    border-radius: 8px !important;
+                    padding: 4px 8px !important;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,255,204,0.3) !important;
+                }
+                .project-card:hover > .card-editor-toolbar,
+                .service-card:hover > .card-editor-toolbar,
+                .pricing-card:hover > .card-editor-toolbar,
+                .feature-card:hover > .card-editor-toolbar,
+                .step-card:hover > .card-editor-toolbar,
+                .faq-item:hover > .card-editor-toolbar {
+                    display: flex !important;
+                }
+                .card-tool-btn {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                    color: #ffffff !important;
+                    font-size: 11px !important;
+                    font-weight: 700 !important;
+                    cursor: pointer !important;
+                    padding: 3px 8px !important;
+                    border-radius: 4px !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                    transition: all 0.2s !important;
+                }
+                .card-tool-btn.add:hover {
+                    background: rgba(0, 255, 204, 0.3) !important;
+                    border-color: #00ffcc !important;
+                    color: #00ffcc !important;
+                }
+                .card-tool-btn.del:hover {
+                    background: rgba(239, 68, 68, 0.3) !important;
+                    border-color: #ef4444 !important;
+                    color: #fca5a5 !important;
+                }
             `;
             doc.head.appendChild(style);
 
             // 1. MAKE ALL TEXT & HEADINGS EDITABLE
             const textNodes = doc.querySelectorAll("h1, h2, h3, h4, h5, h6, p, span, li, dt, dd, b, strong, em, .stat-number, .stat-label, .badge");
             textNodes.forEach(el => {
+                if (el.closest('.card-editor-toolbar')) return;
                 if (el.children.length === 0 || el.tagName.startsWith('H') || el.tagName === 'P') {
                     el.contentEditable = "true";
                     el.addEventListener("input", () => {
@@ -782,6 +1010,7 @@
             // 3. CLICK LINKS & BUTTONS TO OPEN LINK MODAL
             const links = doc.querySelectorAll("a");
             links.forEach(a => {
+                if (a.closest('.card-editor-toolbar')) return;
                 a.title = "लिंक URL और नाम बदलने के लिए क्लिक करें";
                 a.addEventListener("click", (e) => {
                     e.preventDefault();
@@ -802,7 +1031,201 @@
                     });
                 }
             });
+
+            // 5. ATTACH CARD HOVER TOOLBARS (DUPLICATE & DELETE)
+            attachCardToolbars(doc);
         }
+
+        function attachCardToolbars(doc) {
+            const cards = doc.querySelectorAll(".project-card, .service-card, .pricing-card, .feature-card, .step-card, .faq-item");
+            cards.forEach(card => {
+                // Prevent duplicate toolbar injection
+                if (card.querySelector(".card-editor-toolbar")) return;
+
+                const toolbar = doc.createElement("div");
+                toolbar.className = "card-editor-toolbar";
+                toolbar.innerHTML = `
+                    <button type="button" class="card-tool-btn add" title="इस कार्ड की तरह नया कार्ड जोड़ें">
+                        <i class="fa-solid fa-clone"></i> + जोड़ें (Duplicate)
+                    </button>
+                    <button type="button" class="card-tool-btn del" title="यह कार्ड हटाएं">
+                        <i class="fa-solid fa-trash-can"></i> हटाएं (Delete)
+                    </button>
+                `;
+
+                // Clone Card Handler
+                toolbar.querySelector(".card-tool-btn.add").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    duplicateCard(card, doc);
+                });
+
+                // Delete Card Handler
+                toolbar.querySelector(".card-tool-btn.del").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (confirm("क्या आप इस कार्ड को हटाना चाहते हैं?")) {
+                        card.remove();
+                        isDirty = true;
+                        saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                        showToast("कार्ड हटा दिया गया!");
+                    }
+                });
+
+                card.appendChild(toolbar);
+            });
+        }
+
+        function duplicateCard(card, doc) {
+            const clone = card.cloneNode(true);
+            const tb = clone.querySelector(".card-editor-toolbar");
+            if (tb) tb.remove();
+
+            // Insert immediately after current card
+            card.parentNode.insertBefore(clone, card.nextSibling);
+
+            // Re-setup interactions on document
+            setupIframeInteractions(doc);
+
+            // Scroll to clone and highlight
+            clone.scrollIntoView({ behavior: "smooth", block: "center" });
+            clone.style.outline = "3px solid #00ffcc";
+            clone.style.boxShadow = "0 0 25px rgba(0, 255, 204, 0.6)";
+            setTimeout(() => {
+                clone.style.outline = "";
+                clone.style.boxShadow = "";
+            }, 2500);
+
+            isDirty = true;
+            saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+            showToast("✅ नया कार्ड उसी साइज़ और डिज़ाइन में जुड़ गया!");
+        }
+
+        // 6. ADD NEW SECTION / CARD FROM TOP MENU
+        window.addNewItem = function(type) {
+            const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
+            if (!doc || !doc.body) return;
+
+            let targetContainer = null;
+            let newHTML = "";
+
+            if (type === "clone_last") {
+                const existingCards = doc.querySelectorAll(".project-card, .service-card, .pricing-card, .feature-card");
+                if (existingCards.length > 0) {
+                    const lastCard = existingCards[existingCards.length - 1];
+                    duplicateCard(lastCard, doc);
+                    closeModal("modalAddSection");
+                    return;
+                }
+            }
+
+            // Check for portfolio grid
+            const portfolioGrid = doc.querySelector(".portfolio-grid");
+            const servicesGrid = doc.querySelector(".services-grid") || doc.querySelector(".features-grid");
+            const pricingGrid = doc.querySelector(".pricing-grid");
+
+            if (type === "excel") {
+                targetContainer = portfolioGrid || doc.querySelector("main") || doc.body;
+                newHTML = `
+                    <div class="project-card" data-category="excel">
+                        <div class="project-thumb">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <div class="project-tag">Excel Tracker</div>
+                        </div>
+                        <div class="project-body">
+                            <h3>New Excel Sheet Title</h3>
+                            <p>Advanced calculation sheets utilizing automated macros and dynamic visual matrix structures to reduce manual tracking lag.</p>
+                            <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-download-sample" download>
+                                <i class="fa-solid fa-download"></i> Download Sample Sheet
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (type === "pdf") {
+                targetContainer = portfolioGrid || doc.querySelector("main") || doc.body;
+                newHTML = `
+                    <div class="project-card" data-category="pdf">
+                        <div class="project-thumb">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <div class="project-tag">PDF Layout</div>
+                        </div>
+                        <div class="project-body">
+                            <h3>New PDF Document Layout</h3>
+                            <p>Premium corporate brochure structure crafted with precise typographical grids and absolute corporate visual alignment.</p>
+                            <a href="assets/projects/company-profile-sample.pdf" class="btn-download-sample" download>
+                                <i class="fa-solid fa-download"></i> Download Sample PDF
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (type === "web") {
+                targetContainer = portfolioGrid || doc.querySelector("main") || doc.body;
+                newHTML = `
+                    <div class="project-card" data-category="web">
+                        <div class="project-thumb">
+                            <i class="fa-solid fa-globe"></i>
+                            <div class="project-tag">Web Portal</div>
+                        </div>
+                        <div class="project-body">
+                            <h3>New Web Portal Project</h3>
+                            <p>Complete structural deployment models configuring clean navigation systems to align your corporate goals online.</p>
+                            <a href="contact.html" class="btn-download-sample">
+                                <i class="fa-solid fa-eye"></i> View Project / Live Site
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (type === "service") {
+                targetContainer = servicesGrid || doc.querySelector("main") || doc.body;
+                newHTML = `
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                        <h3>New Service Feature</h3>
+                        <p>Professional engineering and execution services tailored to maximize organizational speed and reliability.</p>
+                        <a href="contact.html" class="btn-ctrl" style="margin-top: 15px; display: inline-block;">Get Started</a>
+                    </div>
+                `;
+            } else if (type === "pricing") {
+                targetContainer = pricingGrid || doc.querySelector("main") || doc.body;
+                newHTML = `
+                    <div class="pricing-card">
+                        <div class="pricing-badge">Standard</div>
+                        <h3>Standard Package</h3>
+                        <div class="price-val">₹4,999 <span>/ project</span></div>
+                        <p>Complete delivery with source assets and revisions.</p>
+                        <ul class="pricing-features">
+                            <li>Custom Layouts</li>
+                            <li>Priority Delivery</li>
+                            <li>Direct Support</li>
+                        </ul>
+                        <a href="contact.html" class="btn-pricing">Choose Plan</a>
+                    </div>
+                `;
+            }
+
+            if (targetContainer && newHTML) {
+                const tempWrap = doc.createElement("div");
+                tempWrap.innerHTML = newHTML.trim();
+                const newElem = tempWrap.firstElementChild;
+                targetContainer.appendChild(newElem);
+
+                setupIframeInteractions(doc);
+
+                newElem.scrollIntoView({ behavior: "smooth", block: "center" });
+                newElem.style.outline = "3px solid #00ffcc";
+                newElem.style.boxShadow = "0 0 25px rgba(0, 255, 204, 0.6)";
+                setTimeout(() => {
+                    newElem.style.outline = "";
+                    newElem.style.boxShadow = "";
+                }, 2500);
+
+                isDirty = true;
+                saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                showToast("✅ नया सेक्शन / कार्ड जुड़ गया! आप इसे एडिट कर सकते हैं।");
+            }
+
+            closeModal("modalAddSection");
+        };
 
         // 5. IMAGE MODAL & UPLOAD CONTROLS
         function openImageModal(imgEl) {
@@ -871,13 +1294,157 @@
             openModal("modalImage");
         });
 
-        // 6. LINK MODAL CONTROLS
+        // 6. LINK, FILE TYPE & DOCUMENT UPLOAD CONTROLS
+        let activeSelectedFileType = null;
+
         function openLinkModal(linkEl) {
             targetLinkElement = linkEl;
-            document.getElementById("linkTextInput").value = linkEl.innerText.trim() || linkEl.textContent.trim();
-            document.getElementById("linkHrefInput").value = linkEl.getAttribute("href") || "";
+            
+            const rawHref = linkEl.getAttribute("href") || "";
+            const currentText = linkEl.innerText.trim() || linkEl.textContent.trim();
+            const hasDownload = linkEl.hasAttribute("download") || /\.(xlsx|xls|csv|pdf|docx|doc|zip|rar)$/i.test(rawHref);
+
+            document.getElementById("linkTextInput").value = currentText;
+            document.getElementById("linkHrefInput").value = rawHref;
             document.getElementById("linkTargetSelect").value = linkEl.getAttribute("target") || "_self";
+            document.getElementById("linkDownloadCheck").checked = hasDownload;
+            
+            // Reset upload status
+            const uploadStatus = document.getElementById("linkUploadStatus");
+            uploadStatus.style.display = "none";
+
+            // Detect and highlight file type
+            detectAndHighlightFileType(rawHref);
+
             openModal("modalLink");
+        }
+
+        function detectAndHighlightFileType(href) {
+            document.querySelectorAll(".file-type-btn").forEach(btn => {
+                btn.style.background = "rgba(255, 255, 255, 0.05)";
+                btn.style.borderColor = "var(--border-color)";
+            });
+
+            let type = "web";
+            if (/\.(xlsx|xls|csv)$/i.test(href)) type = "excel";
+            else if (/\.pdf$/i.test(href)) type = "pdf";
+            else if (/\.(docx|doc|txt|rtf)$/i.test(href)) type = "word";
+            else if (/\.(zip|rar|tar|gz)$/i.test(href)) type = "zip";
+            else if (/wa\.me/i.test(href)) type = "whatsapp";
+
+            activeSelectedFileType = type;
+            const matchBtn = document.querySelector(`.file-type-btn[data-type="${type}"]`);
+            if (matchBtn) {
+                matchBtn.style.background = "rgba(0, 255, 204, 0.2)";
+                matchBtn.style.borderColor = "var(--accent-cyan)";
+            }
+        }
+
+        // File type pill click listeners
+        document.querySelectorAll(".file-type-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const type = btn.getAttribute("data-type");
+                activeSelectedFileType = type;
+
+                document.querySelectorAll(".file-type-btn").forEach(b => {
+                    b.style.background = "rgba(255, 255, 255, 0.05)";
+                    b.style.borderColor = "var(--border-color)";
+                });
+                btn.style.background = "rgba(0, 255, 204, 0.2)";
+                btn.style.borderColor = "var(--accent-cyan)";
+
+                const textInput = document.getElementById("linkTextInput");
+                const hrefInput = document.getElementById("linkHrefInput");
+                const downloadCheck = document.getElementById("linkDownloadCheck");
+
+                if (type === "excel") {
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-tracker.xlsx";
+                    if (!textInput.value || textInput.value === "View Project" || textInput.value === "Get Started") textInput.value = "Download Sample Sheet";
+                    downloadCheck.checked = true;
+                } else if (type === "pdf") {
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-document.pdf";
+                    if (!textInput.value || textInput.value === "View Project" || textInput.value === "Get Started") textInput.value = "Download Sample PDF";
+                    downloadCheck.checked = true;
+                } else if (type === "word") {
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-document.docx";
+                    if (!textInput.value || textInput.value === "View Project") textInput.value = "Download Document";
+                    downloadCheck.checked = true;
+                } else if (type === "zip") {
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-files.zip";
+                    if (!textInput.value || textInput.value === "View Project") textInput.value = "Download ZIP Archive";
+                    downloadCheck.checked = true;
+                } else if (type === "web") {
+                    downloadCheck.checked = false;
+                    if (!textInput.value) textInput.value = "View Live Site";
+                } else if (type === "whatsapp") {
+                    hrefInput.value = "https://wa.me/918825183628";
+                    textInput.value = "Chat on WhatsApp";
+                    downloadCheck.checked = false;
+                    document.getElementById("linkTargetSelect").value = "_blank";
+                }
+            });
+        });
+
+        // LINK MODAL FILE UPLOAD HANDLER
+        const linkFileDropzone = document.getElementById("linkFileDropzone");
+        const linkFileInput = document.getElementById("linkFileInput");
+
+        if (linkFileDropzone && linkFileInput) {
+            linkFileDropzone.addEventListener("click", () => linkFileInput.click());
+            linkFileInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const statusEl = document.getElementById("linkUploadStatus");
+                const statusText = document.getElementById("linkUploadStatusText");
+                statusEl.style.display = "flex";
+                statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> अपलोड हो रहा है: ${file.name}...`;
+
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const res = await fetch("/api/upload-file", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                fileName: file.name,
+                                fileData: reader.result
+                            })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            document.getElementById("linkHrefInput").value = result.url;
+                            document.getElementById("linkDownloadCheck").checked = true;
+                            
+                            // Auto suggest clean text
+                            const cleanName = file.name.replace(/\.[^/.]+$/, "");
+                            const ext = result.extension || "";
+                            if (ext.includes("xls")) {
+                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (Excel)";
+                                detectAndHighlightFileType(".xlsx");
+                            } else if (ext.includes("pdf")) {
+                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (PDF)";
+                                detectAndHighlightFileType(".pdf");
+                            } else if (ext.includes("doc")) {
+                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (Doc)";
+                                detectAndHighlightFileType(".docx");
+                            } else {
+                                document.getElementById("linkTextInput").value = "Download " + file.name;
+                            }
+
+                            statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> ✅ फ़ाइल सुरक्षित रूप से अपलोड हो गई: <strong>${result.url}</strong>`;
+                            showToast("✅ फ़ाइल अपलोड हो गई और लिंक सेट हो गया!");
+                        } else {
+                            alert("फ़ाइल अपलोड विफल: " + result.message);
+                            statusEl.style.display = "none";
+                        }
+                    } catch (err) {
+                        alert("फ़ाइल अपलोड एरर: " + err.message);
+                        statusEl.style.display = "none";
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         document.getElementById("btnApplyLink").addEventListener("click", () => {
@@ -885,28 +1452,123 @@
                 const text = document.getElementById("linkTextInput").value.trim();
                 const href = document.getElementById("linkHrefInput").value.trim();
                 const target = document.getElementById("linkTargetSelect").value;
+                const isDownload = document.getElementById("linkDownloadCheck").checked;
 
-                if (text && targetLinkElement.children.length === 0) {
-                    targetLinkElement.textContent = text;
-                } else if (text) {
-                    // If link has an icon, preserve icon and update text
-                    const icon = targetLinkElement.querySelector("i");
-                    if (icon) {
-                        targetLinkElement.innerHTML = icon.outerHTML + " " + text;
-                    } else {
-                        targetLinkElement.textContent = text;
-                    }
+                // Pick best icon based on file type
+                let iconClass = "fa-download";
+                if (activeSelectedFileType === "excel" || /\.(xlsx|xls|csv)$/i.test(href)) {
+                    iconClass = "fa-file-excel";
+                } else if (activeSelectedFileType === "pdf" || /\.pdf$/i.test(href)) {
+                    iconClass = "fa-file-pdf";
+                } else if (activeSelectedFileType === "word" || /\.(docx|doc)$/i.test(href)) {
+                    iconClass = "fa-file-word";
+                } else if (activeSelectedFileType === "zip" || /\.(zip|rar)$/i.test(href)) {
+                    iconClass = "fa-file-zipper";
+                } else if (activeSelectedFileType === "whatsapp" || /wa\.me/i.test(href)) {
+                    iconClass = "fa-brands fa-whatsapp";
+                } else if (activeSelectedFileType === "web" || !isDownload) {
+                    iconClass = "fa-eye";
+                }
+
+                if (text) {
+                    const iconPrefix = iconClass.startsWith("fa-brands") ? iconClass : `fa-solid ${iconClass}`;
+                    targetLinkElement.innerHTML = `<i class="${iconPrefix}"></i> ${text}`;
                 }
 
                 if (href) targetLinkElement.setAttribute("href", href);
                 targetLinkElement.setAttribute("target", target);
                 
+                if (isDownload) {
+                    targetLinkElement.setAttribute("download", "");
+                } else {
+                    targetLinkElement.removeAttribute("download");
+                }
+
+                // If link belongs to a project card, update card category & tag if needed
+                const parentCard = targetLinkElement.closest(".project-card");
+                if (parentCard && activeSelectedFileType) {
+                    if (activeSelectedFileType === "excel" || activeSelectedFileType === "pdf" || activeSelectedFileType === "web") {
+                        parentCard.setAttribute("data-category", activeSelectedFileType);
+                        const tagEl = parentCard.querySelector(".project-tag");
+                        const thumbIcon = parentCard.querySelector(".project-thumb i");
+                        if (tagEl) {
+                            if (activeSelectedFileType === "excel") tagEl.textContent = "Excel Tracker";
+                            else if (activeSelectedFileType === "pdf") tagEl.textContent = "PDF Layout";
+                            else if (activeSelectedFileType === "web") tagEl.textContent = "Web Portal";
+                        }
+                        if (thumbIcon) {
+                            if (activeSelectedFileType === "excel") thumbIcon.className = "fa-solid fa-file-excel";
+                            else if (activeSelectedFileType === "pdf") thumbIcon.className = "fa-solid fa-file-pdf";
+                            else if (activeSelectedFileType === "web") thumbIcon.className = "fa-solid fa-globe";
+                        }
+                    }
+                }
+                
                 isDirty = true;
                 saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                showToast("हाइपरलिंक अपडेट हो गया!");
+                showToast("✅ फ़ाइल व लिंक सफलतापूर्वक अपडेट हो गया!");
             }
             closeModal("modalLink");
         });
+
+        // 6B. UNIVERSAL FILE MANAGER MODAL
+        const btnUploadAnyFile = document.getElementById("btnUploadAnyFile");
+        const uniDropzone = document.getElementById("uniDropzone");
+        const uniFileInput = document.getElementById("uniFileInput");
+        const uniResultBox = document.getElementById("uniResultBox");
+        const uniUploadedUrl = document.getElementById("uniUploadedUrl");
+        const btnCopyUniUrl = document.getElementById("btnCopyUniUrl");
+
+        if (btnUploadAnyFile) {
+            btnUploadAnyFile.addEventListener("click", () => {
+                uniResultBox.style.display = "none";
+                openModal("modalUniversalUpload");
+            });
+        }
+
+        if (uniDropzone && uniFileInput) {
+            uniDropzone.addEventListener("click", () => uniFileInput.click());
+            uniFileInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                showToast("फ़ाइल अपलोड हो रही है...");
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const res = await fetch("/api/upload-file", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                fileName: file.name,
+                                fileData: reader.result
+                            })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            uniUploadedUrl.value = result.url;
+                            uniResultBox.style.display = "block";
+                            showToast("✅ फ़ाइल अपलोड हो गई: " + result.url);
+                        } else {
+                            alert("अपलोड विफल: " + result.message);
+                        }
+                    } catch (err) {
+                        alert("अपलोड एरर: " + err.message);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        if (btnCopyUniUrl) {
+            btnCopyUniUrl.addEventListener("click", () => {
+                navigator.clipboard.writeText(uniUploadedUrl.value);
+                btnCopyUniUrl.innerHTML = `<i class="fa-solid fa-check"></i> कॉपीड!`;
+                setTimeout(() => {
+                    btnCopyUniUrl.innerHTML = `<i class="fa-solid fa-copy"></i> कॉपी करें`;
+                }, 2000);
+            });
+        }
 
         // 7. VIDEO MODAL CONTROLS
         function openVideoModal(videoEl) {
@@ -960,10 +1622,11 @@
 
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             
-            // Clean helper styling tag and contenteditables before saving clean HTML
+            // Clean helper styling tag, toolbars, and contenteditables before saving clean HTML
             const helperTag = doc.getElementById("editor-helper-styles");
             if (helperTag) helperTag.remove();
 
+            doc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
             doc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
             doc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
 
@@ -1002,7 +1665,14 @@
         // 11. DOWNLOAD CURRENT FILE
         btnDownload.addEventListener("click", () => {
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
-            const updatedHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+            const cloneDoc = doc.cloneNode(true);
+            const helperTag = cloneDoc.getElementById("editor-helper-styles");
+            if (helperTag) helperTag.remove();
+            cloneDoc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
+            cloneDoc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
+            cloneDoc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
+
+            const updatedHTML = "<!DOCTYPE html>\n" + cloneDoc.documentElement.outerHTML;
             const blob = new Blob([updatedHTML], { type: "text/html" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");

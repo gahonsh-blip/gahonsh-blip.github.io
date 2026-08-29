@@ -45,17 +45,32 @@ app.post('/api/save-page', (req, res) => {
     }
 });
 
-// API to upload an asset/image file (Base64)
+// API to upload any asset/document/image file (Base64)
 app.post('/api/upload-file', (req, res) => {
     try {
-        const { fileName, fileData, folder = 'images' } = req.body;
+        const { fileName, fileData, folder } = req.body;
         if (!fileName || !fileData) {
             return res.status(400).json({ success: false, message: 'Missing file name or data' });
         }
 
-        const safeFolder = folder === 'assets' ? 'assets' : 'images';
+        const ext = path.extname(fileName).toLowerCase();
+        let targetSubfolder = folder;
+
+        if (!targetSubfolder) {
+            // Auto-detect best subfolder by extension
+            if (['.xlsx', '.xls', '.csv', '.pdf', '.docx', '.doc', '.pptx', '.zip', '.rar'].includes(ext)) {
+                targetSubfolder = 'assets/projects';
+            } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.ico'].includes(ext)) {
+                targetSubfolder = 'images';
+            } else {
+                targetSubfolder = 'assets';
+            }
+        }
+
+        // Clean folder name to prevent directory traversal
+        const sanitizedFolder = targetSubfolder.replace(/\.\./g, '').replace(/^\/+/, '');
         const safeName = path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
-        const targetDir = path.join(__dirname, safeFolder);
+        const targetDir = path.join(__dirname, sanitizedFolder);
         
         if (!fs.existsSync(targetDir)) {
             fs.mkdirSync(targetDir, { recursive: true });
@@ -65,9 +80,15 @@ app.post('/api/upload-file', (req, res) => {
         const base64Data = fileData.replace(/^data:[a-zA-Z0-9/+-]+;base64,/, '');
         fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
 
-        const relativeUrl = `${safeFolder}/${safeName}`;
-        console.log(`[Owner Studio] Uploaded file: ${relativeUrl}`);
-        return res.json({ success: true, url: relativeUrl, message: `File saved as ${relativeUrl}` });
+        const relativeUrl = `${sanitizedFolder}/${safeName}`;
+        console.log(`[Owner Studio] Successfully uploaded file: ${relativeUrl} (${(base64Data.length * 0.75 / 1024).toFixed(1)} KB)`);
+        return res.json({ 
+            success: true, 
+            url: relativeUrl, 
+            fileName: safeName,
+            extension: ext,
+            message: `File saved as ${relativeUrl}` 
+        });
     } catch (err) {
         console.error('[Owner Studio] Upload error:', err);
         return res.status(500).json({ success: false, message: err.message });
