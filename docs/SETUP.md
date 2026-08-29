@@ -9,8 +9,17 @@ How to run, preview, and deploy the **Gahonsh Freelancing** static website.
 - A GitHub account for publishing (the site runs on GitHub Pages).
 
 ## 1. Local Preview
+ 
+### Option A: Using Node.js (Recommended)
 
-There is nothing to install.
+```bash
+npm install
+npm run dev
+```
+
+Open <http://localhost:3000>.
+
+### Option B: Using Python or Direct Static Server
 
 ```bash
 # from the repository root

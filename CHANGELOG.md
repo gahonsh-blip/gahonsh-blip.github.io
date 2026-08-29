@@ -11,9 +11,10 @@ from available history.
 
 ### Added
 
-- Initial repository documentation: `README.md`, `AGENTS.md`,
-  `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`,
+- Initial repository documentation audit & complete reference files: `README.md`, `AGENTS.md`,
+  `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`, `.env.example`,
   and `docs/` (`SETUP.md`, `API.md`, `DATABASE.md`).
+- Node.js preview server configuration (`server.js`, `package.json`, `metadata.json`) for zero-configuration container and local runs.
 - `assets/logo.png` favicon generated from `assets/logo.jpeg` (fixes 404 on
   every page).
 - Open Graph and Twitter Card share-preview tags in `index.html` using

@@ -1,0 +1,8 @@
+{
+  "name": "Gahonsh Freelancing",
+  "description": "Gahonsh Freelancing - Smart Digital Solutions Worldwide: Excel Automation, PDF Design, Website Development & AI Solutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

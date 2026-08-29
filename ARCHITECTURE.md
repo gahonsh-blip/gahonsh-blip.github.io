@@ -73,6 +73,10 @@ gahonsh-blip.github.io/
 ├── theme.css               342 B / 13 lines — light-mode CSS variable overrides
 ├── style.css               3,825 B / 139 lines — animation utilities (.reveal, .hover-lift, ...)
 │                           ⚠ not loaded by any active page (legacy)
+├── server.js               Node.js static server for local and cloud container preview
+├── package.json            Dependencies and preview scripts (`npm run dev`)
+├── metadata.json           Platform application metadata
+├── .env.example            Environment configuration declaration
 ├── assets/
 │   ├── logo.jpeg           Brand logo (used as <img> on thank-you.html)
 │   └── logo.png            Favicon PNG (generated from logo.jpeg — fixes page favicons)

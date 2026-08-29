@@ -67,8 +67,13 @@ HTML files directly or serving the folder with any static file server.
 ├── theme.js            Theme persistence (localStorage)
 ├── theme.css           Light-mode CSS overrides
 ├── style.css           Animation utility classes (loaded only by legacy pages)
+├── server.js           Node.js static server for local/container dev
+├── package.json        Node.js manifest and preview scripts
+├── metadata.json       Platform metadata configuration
+├── .env.example        Environment configuration declaration
 ├── assets/logo.jpeg    Logo image (used on thank-you page)
-├── images/             Legacy image assets referenced by older page versions
+├── assets/logo.png     Favicon PNG (generated from logo.jpeg)
+├── images/             Legacy image assets & social share preview (og-image.jpg)
 ├── robots.txt          Search-engine crawling rules
 ├── sitemap.xml         Site sitemap
 ├── googleb9deb43124fcee02.html  Google Search Console verification file
@@ -78,9 +83,17 @@ HTML files directly or serving the folder with any static file server.
 
 ## Setup
 
-No build step or package manager is required.
+The website is vanilla HTML/CSS/JS and can be served via standard Node.js scripts or any static file server.
 
-### Option 1 — Preview locally
+### Option 1 — Preview locally (Node.js)
+
+```bash
+npm install
+npm run dev
+# then open http://localhost:3000
+```
+
+### Option 2 — Preview locally (Python / Static Server)
 
 ```bash
 # any static file server works; Python example:

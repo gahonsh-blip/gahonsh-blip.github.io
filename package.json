@@ -1,0 +1,14 @@
+{
+  "name": "gahonsh-freelancing",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Gahonsh Freelancing - Smart Digital Solutions Worldwide",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
