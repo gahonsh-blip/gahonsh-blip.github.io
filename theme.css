@@ -1,13 +1,90 @@
 body.light-mode {
-    --bg-dark: #ffffff !important;
-    --bg-card: #f3f4f6 !important;
-    --border-color: #cccccc !important;
-    --text-main: #000000 !important;
-    --text-slate: #444444 !important;
+    --bg-dark: #f8fafc !important;
+    --bg-card: #ffffff !important;
+    --border-color: rgba(0, 0, 0, 0.1) !important;
+    --border-hover: rgba(0, 119, 255, 0.4) !important;
+    --text-main: #0f172a !important;
+    --text-slate: #475569 !important;
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
 }
 
-body.light-mode footer, 
-body.light-mode .contact-card-box, 
-body.light-mode .info-block {
-    background: var(--bg-card) !important;
+body.light-mode header {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
+
+body.light-mode .logo {
+    color: #0f172a !important;
+}
+
+body.light-mode nav a {
+    color: #334155 !important;
+}
+
+body.light-mode nav a:hover,
+body.light-mode nav a.active {
+    color: #0077ff !important;
+}
+
+body.light-mode .dropdown-content {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .dropdown-content a {
+    color: #334155 !important;
+}
+
+body.light-mode .dropdown-content a:hover {
+    background: #f1f5f9 !important;
+    color: #0077ff !important;
+}
+
+body.light-mode .mobile-nav-menu {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .mobile-nav-menu a {
+    color: #0f172a !important;
+}
+
+body.light-mode footer,
+body.light-mode .footer-bottom,
+body.light-mode .contact-card-box, 
+body.light-mode .info-block,
+body.light-mode .stat-item,
+body.light-mode .project-card,
+body.light-mode .feature-card,
+body.light-mode .pricing-card,
+body.light-mode .faq-item,
+body.light-mode .container {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode input,
+body.light-mode select,
+body.light-mode textarea {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+body.light-mode .social-icons a {
+    color: #475569 !important;
+}
+
+body.light-mode .social-icons a:hover {
+    color: #0077ff !important;
+}
+

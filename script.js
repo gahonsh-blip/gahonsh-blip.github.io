@@ -1,53 +1,67 @@
-console.log("Script load ho rahi hai!");
-
 // ============================================
-// LIGHT/DARK MODE BUTTON – IMPROVED VERSION
+// LIGHT/DARK MODE BUTTON – ROBUST VERSION
 // ============================================
+(function() {
+    if (document.getElementById("themeToggleBtn")) return;
 
-// 1. बटन बनाएँ
-const btn = document.createElement("button");
-btn.innerHTML = "🌓 Light/Dark Mode";
-btn.style.position = "fixed";
-btn.style.top = "90px";
-btn.style.left = "20px";
-btn.style.zIndex = "9999";
-btn.style.padding = "10px 15px";
-btn.style.borderRadius = "8px";
-btn.style.cursor = "pointer";
-btn.style.background = "#1558d6";
-btn.style.color = "white";
-btn.style.border = "none";
-btn.style.fontWeight = "bold";
-btn.style.fontSize = "14px";
-btn.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-btn.style.transition = "all 0.3s ease"; // ✨ होवर पर स्मूथ ट्रांजिशन
+    function initThemeButton() {
+        if (!document.body || document.getElementById("themeToggleBtn")) return;
 
-// 2. होवर इफेक्ट (CSS के बिना)
-btn.addEventListener('mouseenter', function() {
-    this.style.background = "#0077ff";
-    this.style.transform = "scale(1.05)";
-    this.style.boxShadow = "0 6px 20px rgba(0,119,255,0.4)";
-});
+        const btn = document.createElement("button");
+        btn.id = "themeToggleBtn";
+        const isCurrentLight = document.body.classList.contains("light-mode") || localStorage.getItem("theme") === "light";
+        
+        if (isCurrentLight && !document.body.classList.contains("light-mode")) {
+            document.body.classList.add("light-mode");
+        }
 
-btn.addEventListener('mouseleave', function() {
-    this.style.background = "#1558d6";
-    this.style.transform = "scale(1)";
-    this.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-});
+        btn.innerHTML = isCurrentLight ? "🌙 Dark Mode" : "🌓 Light Mode";
+        btn.style.position = "fixed";
+        btn.style.top = "90px";
+        btn.style.left = "20px";
+        btn.style.zIndex = "9999";
+        btn.style.padding = "8px 14px";
+        btn.style.borderRadius = "30px";
+        btn.style.cursor = "pointer";
+        btn.style.background = isCurrentLight ? "#0284c7" : "#1558d6";
+        btn.style.color = "white";
+        btn.style.border = "1px solid rgba(255,255,255,0.2)";
+        btn.style.fontWeight = "600";
+        btn.style.fontSize = "13px";
+        btn.style.boxShadow = "0 4px 14px rgba(0,0,0,0.3)";
+        btn.style.transition = "all 0.25s ease";
 
-// 3. क्लिक करने पर लाइट मोड टॉगल + बटन का टेक्स्ट बदले
-btn.onclick = function() {
-    document.body.classList.toggle("light-mode");
-    
-    // बटन का टेक्स्ट बदलें
-    if (document.body.classList.contains("light-mode")) {
-        this.innerHTML = "🌙 Dark Mode";
-        this.style.background = "#1a73e8"; // लाइट मोड में थोड़ा अलग कलर
-    } else {
-        this.innerHTML = "🌓 Light/Dark Mode";
-        this.style.background = "#1558d6";
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = "scale(1.05)";
+            this.style.boxShadow = "0 6px 20px rgba(0,119,255,0.4)";
+        });
+
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = "scale(1)";
+            this.style.boxShadow = "0 4px 14px rgba(0,0,0,0.3)";
+        });
+
+        btn.onclick = function() {
+            document.body.classList.toggle("light-mode");
+            const isLight = document.body.classList.contains("light-mode");
+            localStorage.setItem("theme", isLight ? "light" : "dark");
+            
+            if (isLight) {
+                this.innerHTML = "🌙 Dark Mode";
+                this.style.background = "#0284c7";
+            } else {
+                this.innerHTML = "🌓 Light Mode";
+                this.style.background = "#1558d6";
+            }
+        };
+
+        document.body.appendChild(btn);
     }
-};
 
-// 4. बटन को वेबसाइट पर जोड़ें
-document.body.appendChild(btn);
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initThemeButton);
+    } else {
+        initThemeButton();
+    }
+})();
+

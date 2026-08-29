@@ -1,32 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Studio | Gahonsh Freelancing</title>
+    <title>Website Visual Editor | Gahonsh Freelancing</title>
     
-    <!-- Security: Do not index or follow dashboard in search engines -->
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-dark: #030712;
-            --bg-panel: #0b1120;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(0, 255, 204, 0.3);
+            --bg-dark: #070d19;
+            --bg-panel: #0f172a;
+            --bg-card: #1e293b;
+            --border-color: rgba(255, 255, 255, 0.12);
             --accent-cyan: #00ffcc;
             --accent-blue: #0077ff;
-            --accent-gradient: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
-            --accent-glow: rgba(0, 255, 204, 0.15);
-            --text-main: #ffffff;
+            --accent-green: #10b981;
+            --text-main: #f8fafc;
             --text-slate: #94a3b8;
-            --text-muted: #64748b;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
         }
 
         * {
@@ -39,22 +32,21 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* LOCK SCREEN (OWNER AUTH) */
+        /* 1. AUTH SCREEN */
         #authScreen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
             background: radial-gradient(circle at top, #0f172a 0%, #030712 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: 999999;
             padding: 20px;
         }
 
@@ -62,509 +54,353 @@
             background: var(--bg-panel);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 40px 32px;
-            max-width: 440px;
+            padding: 36px 30px;
+            max-width: 420px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow);
-        }
-
-        .auth-logo {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
-        }
-
-        .auth-logo span {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .auth-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(0, 255, 204, 0.1);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 255, 204, 0.3);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-        }
-
-        .auth-input-group {
-            margin: 20px 0;
-            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 204, 0.15);
         }
 
         .auth-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.4);
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 14px 16px 14px 44px;
-            border-radius: 10px;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
             font-size: 1rem;
-            letter-spacing: 2px;
+            margin: 16px 0;
             outline: none;
-            transition: all 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
         }
-
         .auth-input:focus {
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
         }
 
-        .auth-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-slate);
-        }
-
-        .btn-auth {
+        .btn-main {
             width: 100%;
-            padding: 14px;
-            background: var(--accent-gradient);
+            padding: 12px;
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #030712;
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
 
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 255, 204, 0.3);
-        }
-
-        .auth-hint {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 18px;
-            line-height: 1.4;
-        }
-
-        /* DASHBOARD APP LAYOUT */
-        #dashboardApp {
-            display: none;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        /* HEADER */
-        .dash-header {
-            background: rgba(3, 7, 18, 0.95);
+        /* 2. TOP MASTER CONTROL BAR */
+        .master-bar {
+            background: #0b1329;
             border-bottom: 1px solid var(--border-color);
-            padding: 14px 24px;
+            padding: 10px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 500;
-            backdrop-filter: blur(10px);
+            gap: 12px;
+            flex-wrap: wrap;
+            z-index: 1000;
         }
 
-        .dash-brand {
+        .master-brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .dash-brand h1 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
+        .master-brand h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
-
-        .dash-brand h1 span {
-            background: var(--accent-gradient);
+        .master-brand h1 span {
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .dash-badge {
-            background: rgba(0, 255, 204, 0.12);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 255, 204, 0.25);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .dash-actions {
+        /* PAGE SELECTOR DROPDOWN */
+        .page-dropdown-wrap {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid var(--accent-cyan);
+            border-radius: 10px;
+            padding: 4px 12px;
         }
 
-        .btn-action {
-            background: rgba(255, 255, 255, 0.05);
+        .page-dropdown-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .page-select {
+            background: #020617;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            min-width: 220px;
+        }
+        .page-select:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .master-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-ctrl {
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 8px 14px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            transition: all 0.2s;
             text-decoration: none;
+            white-space: nowrap;
         }
-
-        .btn-action:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .btn-ctrl:hover {
+            background: rgba(255, 255, 255, 0.12);
             border-color: var(--accent-cyan);
             color: var(--accent-cyan);
         }
 
-        .btn-action.btn-primary {
-            background: var(--accent-gradient);
-            color: #030712;
+        .btn-save-live {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 1px solid #10b981;
+            color: #ffffff !important;
             font-weight: 700;
-            border: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+        }
+        .btn-save-live:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
         }
 
-        .btn-action.btn-primary:hover {
-            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
-            color: #030712;
-        }
-
-        .btn-action.btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-
-        .btn-action.btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fff;
-        }
-
-        /* MAIN CONTAINER */
-        .dash-body {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            height: calc(100vh - 65px);
-        }
-
-        /* SIDEBAR FILE NAV */
-        .dash-sidebar {
-            width: 280px;
-            background: var(--bg-panel);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-
-        .sidebar-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .sidebar-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-
-        .file-list {
-            list-style: none;
-            overflow-y: auto;
-            flex: 1;
-            padding: 8px;
-        }
-
-        .file-item {
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .btn-device {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
             color: var(--text-slate);
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
         }
-
-        .file-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-main);
-        }
-
-        .file-item.active {
-            background: rgba(0, 255, 204, 0.08);
-            border-color: rgba(0, 255, 204, 0.3);
+        .btn-device.active {
+            background: rgba(0, 255, 204, 0.15);
             color: var(--accent-cyan);
-            font-weight: 600;
+            border-color: var(--accent-cyan);
         }
 
-        .file-info {
+        /* 3. HELPER BANNER */
+        .instruction-banner {
+            background: #060d1d;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 18px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--text-slate);
             gap: 10px;
         }
 
-        .file-tag {
-            font-size: 0.7rem;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: var(--text-muted);
-        }
-
-        /* CONTENT WORKSPACE */
-        .dash-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: var(--bg-dark);
-        }
-
-        /* TABS HEADER */
-        .content-nav {
-            background: #060a14;
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 16px;
+        .instruction-chips {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .nav-tabs {
-            display: flex;
-            gap: 4px;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-slate);
-            padding: 14px 18px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
+        .inst-chip {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: #cbd5e1;
         }
-
-        .tab-btn:hover {
-            color: var(--text-main);
-        }
-
-        .tab-btn.active {
+        .inst-chip i {
             color: var(--accent-cyan);
-            border-bottom-color: var(--accent-cyan);
-            background: rgba(0, 255, 204, 0.03);
         }
 
-        .editor-top-actions {
+        /* 4. MAIN EDITING CANVAS CONTAINER */
+        .editor-container {
+            flex: 1;
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        /* TAB PANELS */
-        .tab-panel {
-            display: none;
-            flex: 1;
-            overflow: hidden;
-            flex-direction: column;
-        }
-
-        .tab-panel.active {
-            display: flex;
-        }
-
-        /* CODE EDITOR SPLIT / FULL */
-        .editor-split {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .editor-pane {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-            background: #040813;
+            justify-content: center;
+            background: #030712;
+            padding: 12px;
             overflow: hidden;
             position: relative;
         }
 
-        .editor-toolbar {
-            background: #080e1d;
-            border-bottom: 1px solid var(--border-color);
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .code-textarea {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            color: #e2e8f0;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            padding: 16px;
-            border: none;
-            outline: none;
-            resize: none;
-            tab-size: 4;
-            white-space: pre;
-            overflow: auto;
-        }
-
-        /* PREVIEW PANE */
-        .preview-pane {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        .preview-iframe {
             background: #ffffff;
-            overflow: hidden;
-        }
-
-        .preview-toolbar {
-            background: #080e1d;
-            border-bottom: 1px solid var(--border-color);
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-slate);
-        }
-
-        .preview-frame {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #ffffff;
-        }
-
-        /* VISUAL QUICK EDITOR & SNIPPET PANELS (SCROLLABLE) */
-        .scrollable-panel {
-            padding: 24px;
-            overflow-y: auto;
-            flex: 1;
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .panel-card {
-            background: var(--bg-panel);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            transition: width 0.3s ease;
+            width: 100%;
+            height: 100%;
+        }
+        .preview-iframe.tablet {
+            width: 768px;
+        }
+        .preview-iframe.mobile {
+            width: 390px;
         }
 
-        .panel-card-header {
+        /* 5. MODAL POPUPS FOR EDITING */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.78);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background: var(--bg-panel);
+            border: 1.5px solid var(--accent-cyan);
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 204, 0.2);
+            animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.94); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 16px;
-            padding-bottom: 12px;
+            padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .panel-card-title {
+        .modal-head h3 {
             font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-main);
+            color: #fff;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-
-        .panel-card-title i {
+        .modal-head h3 i {
             color: var(--accent-cyan);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
+            margin-bottom: 14px;
         }
 
         .form-label {
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             font-weight: 600;
             color: var(--text-slate);
         }
 
-        .form-input, .form-textarea, .form-select {
-            background: rgba(0, 0, 0, 0.4);
+        .form-input, .form-textarea {
+            width: 100%;
+            background: #020617;
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px 14px;
+            color: #fff;
+            padding: 10px 12px;
             border-radius: 8px;
             font-size: 0.9rem;
             outline: none;
             transition: border-color 0.2s;
         }
-
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
+        .form-input:focus, .form-textarea:focus {
             border-color: var(--accent-cyan);
         }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-            line-height: 1.5;
+        .upload-dropzone {
+            border: 2px dashed rgba(0, 255, 204, 0.4);
+            background: rgba(0, 255, 204, 0.03);
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-dropzone:hover {
+            background: rgba(0, 255, 204, 0.08);
+            border-color: var(--accent-cyan);
+        }
+
+        .preset-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .preset-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-slate);
+            cursor: pointer;
+        }
+        .preset-badge:hover {
+            background: rgba(0, 255, 204, 0.12);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .modal-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
         }
 
         /* TOAST NOTIFICATION */
-        #toastNotice {
+        #toast {
             position: fixed;
             bottom: 24px;
             right: 24px;
@@ -575,753 +411,641 @@
             border-radius: 10px;
             font-size: 0.9rem;
             font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 15px rgba(0, 255, 204, 0.2);
             display: none;
             align-items: center;
             gap: 10px;
-            z-index: 10000;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* CODE BLOCK BOX */
-        .snippet-box {
-            background: #030712;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 14px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #38bdf8;
-            position: relative;
-            margin-top: 10px;
-            word-break: break-all;
-            white-space: pre-wrap;
-        }
-
-        .btn-copy-snippet {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-
-        .btn-copy-snippet:hover {
-            background: var(--accent-cyan);
-            color: #030712;
-        }
-
-        /* STEP BADGE */
-        .step-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-gradient);
-            color: #030712;
-            font-weight: 800;
-            font-size: 0.8rem;
-            margin-right: 8px;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            .dash-body {
-                flex-direction: column;
-                height: auto;
-            }
-            .dash-sidebar {
-                width: 100%;
-                height: 180px;
-            }
-            .editor-split {
-                flex-direction: column;
-                height: 700px;
-            }
-            .editor-pane, .preview-pane {
-                height: 350px;
-            }
+            z-index: 1000000;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. OWNER AUTHENTICATION GATE -->
+    <!-- 1. OWNER AUTH SCREEN -->
     <div id="authScreen">
         <div class="auth-card">
-            <div class="auth-logo">GAHONSH <span>STUDIO</span></div>
-            <div class="auth-badge"><i class="fa-solid fa-lock"></i> Owner Dashboard</div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 6px;">GAHONSH <span style="color: var(--accent-cyan);">STUDIO</span></h2>
             <p style="color: var(--text-slate); font-size: 0.9rem; margin-bottom: 20px;">
-                Secure Site Content & Page Customization Center. Enter your owner passcode to manage your pages.
+                आसान वेबसाइट विज़ुअल एडिटर। ड्रॉपडाउन से पेज चुनें और सीधे क्लिक करके टेक्स्ट, फोटो, वीडियो और लिंक बदलें।
             </p>
+            <input type="password" id="passInput" class="auth-input" placeholder="पासकोड दर्ज करें (Default: 8825)" autocomplete="off">
+            <button type="button" class="btn-main" id="btnUnlock">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> एडिटर खोलें (Open Editor)
+            </button>
+        </div>
+    </div>
 
-            <div class="auth-input-group">
-                <i class="fa-solid fa-key auth-icon"></i>
-                <input type="password" id="passcodeInput" class="auth-input" placeholder="Enter Owner Passcode..." autocomplete="off">
-            </div>
+    <!-- 2. TOP MASTER BAR -->
+    <header class="master-bar">
+        <div class="master-brand">
+            <h1>GAHONSH <span>STUDIO</span></h1>
+        </div>
 
-            <button type="button" class="btn-auth" id="btnLogin">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i> Unlock Dashboard
+        <!-- 🌟 PAGE SELECTOR DROPDOWN (आसान पेज सेलेक्टर) -->
+        <div class="page-dropdown-wrap">
+            <span class="page-dropdown-label"><i class="fa-solid fa-file-lines"></i> पेज चुनें (Select Page):</span>
+            <select id="pageSelectDropdown" class="page-select">
+                <option value="index.html">1. होम पेज (index.html)</option>
+                <option value="about.html">2. हमारे बारे में (about.html)</option>
+                <option value="services.html">3. सेवाएँ (services.html)</option>
+                <option value="portfolio.html">4. पोर्टफोलियो (portfolio.html)</option>
+                <option value="pricing.html">5. प्राइसिंग (pricing.html)</option>
+                <option value="contact.html">6. संपर्क (contact.html)</option>
+                <option value="privacy-policy.html">7. प्राइवेसी पॉलिसी (privacy-policy.html)</option>
+                <option value="terms.html">8. नियम और शर्तें (terms.html)</option>
+                <option value="thank-you.html">9. थैंक यू पेज (thank-you.html)</option>
+            </select>
+        </div>
+
+        <!-- DEVICE VIEWPORT BUTTONS -->
+        <div style="display: flex; gap: 4px;">
+            <button class="btn-device active" id="btnDesktop" title="डेस्कटॉप व्यू"><i class="fa-solid fa-desktop"></i></button>
+            <button class="btn-device" id="btnTablet" title="टैबलेट व्यू"><i class="fa-solid fa-tablet-screen-button"></i></button>
+            <button class="btn-device" id="btnMobile" title="मोबाइल व्यू"><i class="fa-solid fa-mobile-screen"></i></button>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="master-actions">
+            <span id="saveStatus" style="font-size: 0.82rem; color: var(--text-slate); display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> Ready
+            </span>
+
+            <!-- SAVE LIVE BUTTON -->
+            <button class="btn-ctrl btn-save-live" id="btnSaveLive">
+                <i class="fa-solid fa-rocket"></i> लाइव सेव करें (Save & Make Live)
             </button>
 
-            <div class="auth-hint">
-                <i class="fa-solid fa-shield-halved"></i> Private access only. This page is excluded from public navigation and search engines.
+            <!-- VIEW LIVE -->
+            <button class="btn-ctrl" id="btnViewLive" title="लाइव वेबसाइट नए टैब में देखें">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> लाइव पेज
+            </button>
+
+            <!-- DOWNLOAD BACKUP -->
+            <button class="btn-ctrl" id="btnDownload" title="HTML फाइल डाउनलोड करें">
+                <i class="fa-solid fa-download"></i> डाउनलोड
+            </button>
+
+            <!-- LOCK -->
+            <button class="btn-ctrl" id="btnLock" style="color: #f87171;" title="एडिटर लॉक करें">
+                <i class="fa-solid fa-lock"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 3. INSTRUCTION BAR -->
+    <div class="instruction-banner">
+        <div class="instruction-chips">
+            <span class="inst-chip"><i class="fa-solid fa-mouse-pointer"></i> <strong>टेक्स्ट पर क्लिक करें</strong> = सीधे बदलें</span>
+            <span class="inst-chip"><i class="fa-solid fa-image"></i> <strong>फोटो पर क्लिक करें</strong> = नई फोटो बदलें/फाइल अपलोड करें</span>
+            <span class="inst-chip"><i class="fa-solid fa-link"></i> <strong>बटन/लिंक पर क्लिक करें</strong> = लिंक URL और नाम बदलें</span>
+            <span class="inst-chip"><i class="fa-solid fa-video"></i> <strong>वीडियो पर क्लिक करें</strong> = YouTube वीडियो लिंक बदलें</span>
+        </div>
+        <button class="btn-ctrl" id="btnUploadImageDirect" style="padding: 4px 10px; font-size: 0.8rem;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> नई फोटो अपलोड करें
+        </button>
+    </div>
+
+    <!-- 4. LIVE VISUAL EDITOR CANVAS -->
+    <main class="editor-container">
+        <iframe id="editorFrame" class="preview-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </main>
+
+    <!-- 5. MODAL: EDIT IMAGE & FILE UPLOAD (फोटो और फाइल अपलोड) -->
+    <div id="modalImage" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-image"></i> फोटो बदलें या फाइल अपलोड करें</h3>
+                <button class="btn-ctrl" onclick="closeModal('modalImage')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- FILE UPLOAD DROPZONE -->
+            <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-cloud-arrow-up"></i> 1. अपने कंप्यूटर/मोबाइल से फाइल अपलोड करें:</label>
+                <div class="upload-dropzone" id="imageDropzone">
+                    <i class="fa-solid fa-file-arrow-up" style="font-size: 26px; color: var(--accent-cyan); margin-bottom: 6px;"></i>
+                    <p style="font-size: 0.85rem; font-weight: 600; color: #fff;">फाइल चुनने के लिए यहाँ क्लिक करें (Click to Choose File)</p>
+                    <span style="font-size: 0.74rem; color: var(--text-slate);">PNG, JPG, JPEG, SVG, WebP सपोर्टेड</span>
+                    <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <div style="text-align: center; color: var(--text-slate); font-size: 0.8rem; margin: 8px 0;">— या —</div>
+
+            <!-- IMAGE URL INPUT -->
+            <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-link"></i> 2. फोटो का URL या पाथ लिखें:</label>
+                <input type="text" id="imgSrcInput" class="form-input" placeholder="e.g. images/hero.jpg या https://...">
+                <div class="preset-grid">
+                    <span class="preset-badge" onclick="setPresetImg('images/hero.jpg')">Hero Photo</span>
+                    <span class="preset-badge" onclick="setPresetImg('images/excel-dashboard.jpg')">Excel Project</span>
+                    <span class="preset-badge" onclick="setPresetImg('images/pdf-design.jpg')">PDF Project</span>
+                    <span class="preset-badge" onclick="setPresetImg('images/website-design.jpg')">Website Project</span>
+                    <span class="preset-badge" onclick="setPresetImg('images/branding.jpg')">Branding</span>
+                    <span class="preset-badge" onclick="setPresetImg('assets/logo.png')">Logo</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Alt विवरण (SEO):</label>
+                <input type="text" id="imgAltInput" class="form-input" placeholder="फोटो का नाम या विवरण">
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn-ctrl" onclick="closeModal('modalImage')">रद्द करें</button>
+                <button class="btn-ctrl btn-save-live" id="btnApplyImage"><i class="fa-solid fa-check"></i> फोटो अपडेट करें</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. OWNER DASHBOARD APPLICATION -->
-    <div id="dashboardApp">
-        <!-- TOP NAVBAR -->
-        <header class="dash-header">
-            <div class="dash-brand">
-                <h1>GAHONSH <span>STUDIO</span></h1>
-                <span class="dash-badge"><i class="fa-solid fa-crown"></i> OWNER CONSOLE</span>
+    <!-- 6. MODAL: EDIT HYPERLINK & BUTTON (हाइपरलिंक और बटन बदलें) -->
+    <div id="modalLink" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-link"></i> हाइपरलिंक या बटन बदलें</h3>
+                <button class="btn-ctrl" onclick="closeModal('modalLink')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div class="dash-actions">
-                <button class="btn-action" id="btnLiveSite" onclick="window.open('index.html', '_blank')">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Website
-                </button>
-                <button class="btn-action btn-danger" id="btnLockStudio" title="Lock Dashboard">
-                    <i class="fa-solid fa-lock"></i> Lock
-                </button>
+            <div class="form-group">
+                <label class="form-label">बटन / लिंक का टेक्स्ट (Text Displayed):</label>
+                <input type="text" id="linkTextInput" class="form-input" placeholder="e.g. संपर्क करें / Book Consultation">
             </div>
-        </header>
 
-        <!-- MAIN WORKSPACE -->
-        <div class="dash-body">
-            <!-- LEFT SIDEBAR: PAGE SELECTOR -->
-            <aside class="dash-sidebar">
-                <div class="sidebar-header">
-                    <span class="sidebar-title"><i class="fa-solid fa-folder-tree"></i> Website Pages</span>
-                    <span class="file-tag" id="fileCountBadge">10 Files</span>
+            <div class="form-group">
+                <label class="form-label">टारगेट URL / हाइपरलिंक (href):</label>
+                <input type="text" id="linkHrefInput" class="form-input" placeholder="e.g. contact.html, services.html, https://wa.me/...">
+                <div class="preset-grid">
+                    <span class="preset-badge" onclick="setPresetLink('contact.html')">Contact Page</span>
+                    <span class="preset-badge" onclick="setPresetLink('services.html')">Services</span>
+                    <span class="preset-badge" onclick="setPresetLink('portfolio.html')">Portfolio</span>
+                    <span class="preset-badge" onclick="setPresetLink('pricing.html')">Pricing</span>
+                    <span class="preset-badge" onclick="setPresetLink('https://wa.me/918825183628')">WhatsApp Chat</span>
                 </div>
-                <ul class="file-list" id="fileListContainer">
-                    <li class="file-item active" data-file="index.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Home (index.html)</span>
-                        </div>
-                        <span class="file-tag">Main</span>
-                    </li>
-                    <li class="file-item" data-file="about.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>About (about.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="services.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Services (services.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="portfolio.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Portfolio (portfolio.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="pricing.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Pricing (pricing.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="contact.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Contact (contact.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="privacy-policy.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Privacy (privacy-policy.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="terms.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Terms (terms.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="thank-you.html">
-                        <div class="file-info">
-                            <i class="fa-brands fa-html5" style="color: #e34f26;"></i>
-                            <span>Thank You (thank-you.html)</span>
-                        </div>
-                    </li>
-                    <li class="file-item" data-file="sitemap.xml">
-                        <div class="file-info">
-                            <i class="fa-solid fa-sitemap" style="color: #00ffcc;"></i>
-                            <span>Sitemap (sitemap.xml)</span>
-                        </div>
-                        <span class="file-tag">SEO</span>
-                    </li>
-                </ul>
-            </aside>
+            </div>
 
-            <!-- RIGHT WORKSPACE WITH TABS -->
-            <main class="dash-content">
-                <!-- TABS BAR -->
-                <div class="content-nav">
-                    <div class="nav-tabs">
-                        <button class="tab-btn active" data-tab="tabEditor">
-                            <i class="fa-solid fa-code"></i> Live Page Editor
-                        </button>
-                        <button class="tab-btn" data-tab="tabQuickUpdate">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Quick Content Replacer
-                        </button>
-                        <button class="tab-btn" data-tab="tabSnippets">
-                            <i class="fa-solid fa-puzzle-piece"></i> Snippet Generator
-                        </button>
-                        <button class="tab-btn" data-tab="tabSettings">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Save & Deploy Guide
-                        </button>
-                    </div>
+            <div class="form-group">
+                <label class="form-label">नया टैब में खोलें?</label>
+                <select id="linkTargetSelect" class="form-input">
+                    <option value="_self">उसी पेज में (_self)</option>
+                    <option value="_blank">नए टैब में खोलें (_blank)</option>
+                </select>
+            </div>
 
-                    <div class="editor-top-actions">
-                        <button class="btn-action" id="btnSaveLocal" title="Save draft in browser">
-                            <i class="fa-solid fa-floppy-disk"></i> Save Draft
-                        </button>
-                        <button class="btn-action" id="btnCopyCode" title="Copy code to clipboard">
-                            <i class="fa-solid fa-copy"></i> Copy Code
-                        </button>
-                        <button class="btn-action btn-primary" id="btnDownloadFile" title="Download updated HTML file to your device">
-                            <i class="fa-solid fa-download"></i> Download File
-                        </button>
-                    </div>
-                </div>
+            <div class="modal-foot">
+                <button class="btn-ctrl" onclick="closeModal('modalLink')">रद्द करें</button>
+                <button class="btn-ctrl btn-save-live" id="btnApplyLink"><i class="fa-solid fa-check"></i> लिंक अपडेट करें</button>
+            </div>
+        </div>
+    </div>
 
-                <!-- TAB 1: LIVE CODE & SPLIT PREVIEW EDITOR -->
-                <div class="tab-panel active" id="tabEditor">
-                    <div class="editor-split">
-                        <!-- CODE EDITOR -->
-                        <div class="editor-pane">
-                            <div class="editor-toolbar">
-                                <span id="currentFileNameDisplay"><i class="fa-solid fa-file-code"></i> Editing: <strong>index.html</strong></span>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="btn-action" id="btnRefreshPreview" style="padding: 4px 8px; font-size: 0.75rem;">
-                                        <i class="fa-solid fa-play"></i> Update Preview
-                                    </button>
-                                    <button class="btn-action" id="btnResetCode" style="padding: 4px 8px; font-size: 0.75rem;">
-                                        <i class="fa-solid fa-rotate-left"></i> Revert
-                                    </button>
-                                </div>
-                            </div>
-                            <textarea id="pageCodeArea" class="code-textarea" spellcheck="false" placeholder="Loading page content..."></textarea>
-                        </div>
+    <!-- 7. MODAL: EDIT VIDEO EMBED (वीडियो लिंक बदलें) -->
+    <div id="modalVideo" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-video"></i> वीडियो लिंक (YouTube / MP4) बदलें</h3>
+                <button class="btn-ctrl" onclick="closeModal('modalVideo')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
 
-                        <!-- LIVE PREVIEW PANE -->
-                        <div class="preview-pane">
-                            <div class="preview-toolbar">
-                                <span><i class="fa-solid fa-eye"></i> Live Interactive Preview</span>
-                                <span style="font-size: 0.75rem; color: var(--accent-cyan);"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Sync Active</span>
-                            </div>
-                            <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label class="form-label">YouTube वीडियो लिंक या वीडियो URL:</label>
+                <input type="text" id="videoUrlInput" class="form-input" placeholder="https://www.youtube.com/watch?v=... या youtu.be/...">
+                <span style="font-size: 0.74rem; color: var(--text-slate);">YouTube लिंक डालने पर वह स्वतः HD प्लेयर में बदल जाएगा।</span>
+            </div>
 
-                <!-- TAB 2: VISUAL QUICK REPLACER & SITE DATA -->
-                <div class="tab-panel" id="tabQuickUpdate">
-                    <div class="scrollable-panel">
-                        <!-- QUICK BATCH FIND & REPLACE -->
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
-                                    Find & Replace in Current File
-                                </div>
-                            </div>
-                            <p style="color: var(--text-slate); font-size: 0.88rem; margin-bottom: 16px;">
-                                Quickly replace phone numbers, prices, text, or links in the active file without manually searching line by line.
-                            </p>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Find Text / Link</label>
-                                    <input type="text" id="findInput" class="form-input" placeholder="e.g. +91 8825183628 or $49">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Replace With</label>
-                                    <input type="text" id="replaceInput" class="form-input" placeholder="e.g. +91 9999999999 or $79">
-                                </div>
-                                <div class="form-group full-width" style="margin-top: 8px;">
-                                    <button type="button" class="btn-action btn-primary" id="btnExecuteReplace" style="width: fit-content;">
-                                        <i class="fa-solid fa-bolt"></i> Replace in Active Editor
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- GLOBAL BUSINESS CONTACT PRESETS -->
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-solid fa-address-card"></i>
-                                    Business Preset References
-                                </div>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">WhatsApp Number</label>
-                                    <input type="text" id="presetWhatsApp" class="form-input" value="918825183628" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Business Email</label>
-                                    <input type="text" id="presetEmail" class="form-input" value="gahonsh@gmail.com" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Formspree Endpoint</label>
-                                    <input type="text" id="presetFormspree" class="form-input" value="https://formspree.io/f/xzdqnoez" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">GitHub Pages Canonical Base</label>
-                                    <input type="text" id="presetDomain" class="form-input" value="https://gahonsh-blip.github.io/" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 3: SNIPPET BUILDER -->
-                <div class="tab-panel" id="tabSnippets">
-                    <div class="scrollable-panel">
-                        <!-- WHATSAPP LINK GENERATOR -->
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i>
-                                    WhatsApp Link Generator
-                                </div>
-                            </div>
-                            <p style="color: var(--text-slate); font-size: 0.88rem; margin-bottom: 16px;">
-                                Build pre-filled WhatsApp links for services, quotes, or custom consultations.
-                            </p>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">WhatsApp Number (with country code)</label>
-                                    <input type="text" id="waPhone" class="form-input" value="918825183628">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Pre-filled Message</label>
-                                    <input type="text" id="waMsg" class="form-input" value="Hello Gahonsh Team, I would like to inquire about your services.">
-                                </div>
-                                <div class="form-group full-width">
-                                    <button class="btn-action" id="btnGenWa" style="width: fit-content;">
-                                        <i class="fa-solid fa-code"></i> Generate Link
-                                    </button>
-                                    <div class="snippet-box" id="waResult">https://wa.me/918825183628?text=Hello%20Gahonsh%20Team...
-                                        <button class="btn-copy-snippet" onclick="copyText('waResult')">Copy</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- PORTFOLIO ITEM CARD BUILDER -->
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-solid fa-briefcase"></i>
-                                    Portfolio Project Card Snippet
-                                </div>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Project Title</label>
-                                    <input type="text" id="portTitle" class="form-input" placeholder="e.g. Financial Dashboard Matrix">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Category</label>
-                                    <select id="portCategory" class="form-select">
-                                        <option value="excel">Excel Automation (excel)</option>
-                                        <option value="pdf">PDF Design (pdf)</option>
-                                        <option value="web">Web Development (web)</option>
-                                        <option value="ai">AI Solutions (ai)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group full-width">
-                                    <label class="form-label">Short Description</label>
-                                    <input type="text" id="portDesc" class="form-input" placeholder="Automated multi-sheet macro system with financial analytics.">
-                                </div>
-                                <div class="form-group full-width">
-                                    <button class="btn-action" id="btnGenPort" style="width: fit-content;">
-                                        <i class="fa-solid fa-code"></i> Generate Project HTML Card
-                                    </button>
-                                    <div class="snippet-box" id="portResult">&lt;div class="project-card" data-category="excel"&gt;...&lt;/div&gt;
-                                        <button class="btn-copy-snippet" onclick="copyText('portResult')">Copy</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 4: DEPLOYMENT & GITHUB GUIDE -->
-                <div class="tab-panel" id="tabSettings">
-                    <div class="scrollable-panel">
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                    How to Apply Changes to Live Website
-                                </div>
-                            </div>
-                            <div style="color: var(--text-slate); font-size: 0.92rem; line-height: 1.8;">
-                                <p style="margin-bottom: 16px;">
-                                    Since Gahonsh is hosted on <strong>GitHub Pages</strong>, changes become live as soon as the edited file is committed to your GitHub repository.
-                                </p>
-
-                                <div style="background: rgba(0, 255, 204, 0.05); border-left: 3px solid var(--accent-cyan); padding: 14px; border-radius: 6px; margin-bottom: 20px;">
-                                    <strong style="color: var(--accent-cyan);">Quick Method (No Terminal Required):</strong>
-                                    <ol style="margin-left: 20px; margin-top: 8px;">
-                                        <li>Edit your page in the <strong>Live Page Editor</strong> tab.</li>
-                                        <li>Click the green <strong style="color: #fff;">"Download File"</strong> button (e.g. <code>index.html</code>).</li>
-                                        <li>Open your GitHub repository in your browser: <code>github.com/gahonsh-blip/gahonsh-blip.github.io</code></li>
-                                        <li>Click <strong>Add file &rarr; Upload files</strong>, drop your downloaded file, and click <strong>Commit changes</strong>.</li>
-                                        <li>Within 30-60 seconds, your live website automatically updates worldwide!</li>
-                                    </ol>
-                                </div>
-
-                                <div style="background: rgba(0, 119, 255, 0.05); border-left: 3px solid var(--accent-blue); padding: 14px; border-radius: 6px;">
-                                    <strong style="color: #60a5fa;">Direct Copy-Paste Method:</strong>
-                                    <ol style="margin-left: 20px; margin-top: 8px;">
-                                        <li>Click <strong style="color: #fff;">"Copy Code"</strong> in the dashboard.</li>
-                                        <li>Open that file on GitHub.com and click the Pencil icon (Edit file).</li>
-                                        <li>Select all (<code>Ctrl + A</code>), paste the new code (<code>Ctrl + V</code>), and click <strong>Commit changes</strong>.</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- OWNER PASSCODE CONFIG -->
-                        <div class="panel-card">
-                            <div class="panel-card-header">
-                                <div class="panel-card-title">
-                                    <i class="fa-solid fa-key"></i>
-                                    Owner Passcode Settings
-                                </div>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Change Owner Passcode</label>
-                                    <input type="password" id="newPasscodeInput" class="form-input" placeholder="Enter new custom passcode...">
-                                </div>
-                                <div class="form-group" style="align-self: flex-end;">
-                                    <button class="btn-action btn-primary" id="btnSavePasscode">
-                                        <i class="fa-solid fa-check"></i> Update Passcode
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
+            <div class="modal-foot">
+                <button class="btn-ctrl" onclick="closeModal('modalVideo')">रद्द करें</button>
+                <button class="btn-ctrl btn-save-live" id="btnApplyVideo"><i class="fa-solid fa-check"></i> वीडियो अपडेट करें</button>
+            </div>
         </div>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toastNotice">
-        <i class="fa-solid fa-circle-check" style="color: var(--accent-cyan);"></i>
-        <span id="toastMessage">Action completed successfully!</span>
-    </div>
+    <div id="toast"><i class="fa-solid fa-circle-check" style="color: var(--accent-cyan);"></i> <span id="toastMsg">Saved!</span></div>
 
+    <!-- MAIN JAVASCRIPT CONTROLLER -->
     <script>
-        // OWNER AUTHENTICATION & APP CONTROLLER
-        const DEFAULT_PASSCODE = "8825"; // Default passcode for owner
-        const STORAGE_KEY_PASS = "gahonsh_owner_pass";
-        const STORAGE_KEY_AUTH = "gahonsh_is_authed";
-        const STORAGE_DRAFTS_PREFIX = "gahonsh_draft_";
+        const AUTH_PASS = "8825";
+        let currentPage = "index.html";
+        let currentRawHTML = "";
+        let isDirty = false;
 
-        let currentFile = "index.html";
-        let originalFileContents = {};
+        // Currently selected elements for modals
+        let targetImgElement = null;
+        let targetLinkElement = null;
+        let targetVideoElement = null;
 
-        // DOM Elements
+        // DOM elements
         const authScreen = document.getElementById("authScreen");
-        const dashboardApp = document.getElementById("dashboardApp");
-        const passcodeInput = document.getElementById("passcodeInput");
-        const btnLogin = document.getElementById("btnLogin");
-        const btnLockStudio = document.getElementById("btnLockStudio");
-        const fileListContainer = document.getElementById("fileListContainer");
-        const pageCodeArea = document.getElementById("pageCodeArea");
-        const previewFrame = document.getElementById("previewFrame");
-        const currentFileNameDisplay = document.getElementById("currentFileNameDisplay");
-        const btnRefreshPreview = document.getElementById("btnRefreshPreview");
-        const btnSaveLocal = document.getElementById("btnSaveLocal");
-        const btnCopyCode = document.getElementById("btnCopyCode");
-        const btnDownloadFile = document.getElementById("btnDownloadFile");
-        const btnResetCode = document.getElementById("btnResetCode");
+        const passInput = document.getElementById("passInput");
+        const btnUnlock = document.getElementById("btnUnlock");
+        const pageSelectDropdown = document.getElementById("pageSelectDropdown");
+        const editorFrame = document.getElementById("editorFrame");
+        const btnSaveLive = document.getElementById("btnSaveLive");
+        const btnViewLive = document.getElementById("btnViewLive");
+        const btnDownload = document.getElementById("btnDownload");
+        const btnLock = document.getElementById("btnLock");
+        const saveStatus = document.getElementById("saveStatus");
+        const toast = document.getElementById("toast");
+        const toastMsg = document.getElementById("toastMsg");
 
-        // Check authentication status
+        // Device buttons
+        const btnDesktop = document.getElementById("btnDesktop");
+        const btnTablet = document.getElementById("btnTablet");
+        const btnMobile = document.getElementById("btnMobile");
+
+        // 1. AUTHENTICATION
         function checkAuth() {
-            const isAuthed = sessionStorage.getItem(STORAGE_KEY_AUTH);
-            if (isAuthed === "true") {
+            if (sessionStorage.getItem("owner_auth") === "true") {
                 authScreen.style.display = "none";
-                dashboardApp.style.display = "flex";
-                loadFile(currentFile);
-            } else {
-                authScreen.style.display = "flex";
-                dashboardApp.style.display = "none";
+                loadPage(currentPage);
             }
         }
 
-        // Login Handler
-        function handleLogin() {
-            const entered = passcodeInput.value.trim();
-            const savedPass = localStorage.getItem(STORAGE_KEY_PASS) || DEFAULT_PASSCODE;
-
-            if (entered === savedPass || entered === "8825" || entered === "admin") {
-                sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
-                showToast("Welcome to Owner Studio!");
-                checkAuth();
+        btnUnlock.addEventListener("click", () => {
+            if (passInput.value === AUTH_PASS) {
+                sessionStorage.setItem("owner_auth", "true");
+                authScreen.style.display = "none";
+                showToast("स्वागत है! एडिटर तैयार है।");
+                loadPage(currentPage);
             } else {
-                showToast("Incorrect passcode. Please try again.");
-                passcodeInput.style.borderColor = "#ef4444";
-                setTimeout(() => passcodeInput.style.borderColor = "rgba(255, 255, 255, 0.08)", 2000);
+                alert("गलत पासकोड! कृपया सही पासकोड दर्ज करें (डिफ़ॉल्ट: 8825)");
+            }
+        });
+        passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") btnUnlock.click(); });
+
+        btnLock.addEventListener("click", () => {
+            sessionStorage.removeItem("owner_auth");
+            location.reload();
+        });
+
+        // 2. PAGE SELECTION DROPDOWN
+        pageSelectDropdown.addEventListener("change", (e) => {
+            if (isDirty) {
+                if (!confirm("आपने बदलाव किए हैं। क्या आप बिना सेव किए दूसरा पेज खोलना चाहते हैं?")) {
+                    pageSelectDropdown.value = currentPage;
+                    return;
+                }
+            }
+            currentPage = e.target.value;
+            loadPage(currentPage);
+        });
+
+        // 3. LOAD PAGE INTO IFRAME & INJECT CLICK-TO-EDIT ENGINE
+        async function loadPage(pageName) {
+            saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-cyan);"></i> लोड हो रहा है...`;
+            try {
+                const res = await fetch(pageName + "?v=" + Date.now());
+                if (!res.ok) throw new Error("पेज लोड नहीं हो सका");
+                currentRawHTML = await res.text();
+                renderEditablePage(currentRawHTML);
+                isDirty = false;
+                saveStatus.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> Ready: ${pageName}`;
+            } catch (err) {
+                console.error("Load error:", err);
+                saveStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Error`;
+                alert("पेज लोड करने में त्रुटि: " + err.message);
             }
         }
 
-        btnLogin.addEventListener("click", handleLogin);
-        passcodeInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") handleLogin();
+        function renderEditablePage(htmlContent) {
+            const iframeDoc = editorFrame.contentDocument || editorFrame.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(htmlContent);
+            iframeDoc.close();
+
+            // Wait for iframe DOM to be ready then attach live click listeners
+            iframeDoc.addEventListener("DOMContentLoaded", () => setupIframeInteractions(iframeDoc));
+            setTimeout(() => setupIframeInteractions(iframeDoc), 350);
+        }
+
+        // 4. ATTACH CLICK-TO-EDIT & HIGHLIGHTING
+        function setupIframeInteractions(doc) {
+            if (!doc || !doc.body) return;
+
+            // Inject Visual helper styles inside iframe
+            const style = doc.createElement("style");
+            style.id = "editor-helper-styles";
+            style.textContent = `
+                [contenteditable="true"] {
+                    outline: 2px dashed #00ffcc !important;
+                    outline-offset: 3px !important;
+                    cursor: text !important;
+                    transition: background 0.2s !important;
+                }
+                [contenteditable="true"]:hover {
+                    background: rgba(0, 255, 204, 0.08) !important;
+                }
+                [contenteditable="true"]:focus {
+                    outline: 2px solid #00ffcc !important;
+                    background: rgba(0, 255, 204, 0.12) !important;
+                }
+                img.editable-img, .project-card img, .hero-img, .logo img {
+                    cursor: pointer !important;
+                    transition: transform 0.2s, outline 0.2s !important;
+                }
+                img:hover {
+                    outline: 3px solid #00ffcc !important;
+                    outline-offset: 2px !important;
+                }
+                a.editable-link, a.btn, a.cta-btn, .nav-menu a {
+                    position: relative;
+                }
+                a:hover {
+                    outline: 2px dashed #38bdf8 !important;
+                }
+            `;
+            doc.head.appendChild(style);
+
+            // 1. MAKE ALL TEXT & HEADINGS EDITABLE
+            const textNodes = doc.querySelectorAll("h1, h2, h3, h4, h5, h6, p, span, li, dt, dd, b, strong, em, .stat-number, .stat-label, .badge");
+            textNodes.forEach(el => {
+                if (el.children.length === 0 || el.tagName.startsWith('H') || el.tagName === 'P') {
+                    el.contentEditable = "true";
+                    el.addEventListener("input", () => {
+                        isDirty = true;
+                        saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                    });
+                }
+            });
+
+            // 2. CLICK IMAGE TO OPEN IMAGE / UPLOAD MODAL
+            const images = doc.querySelectorAll("img");
+            images.forEach(img => {
+                img.classList.add("editable-img");
+                img.title = "फोटो या फाइल बदलने के लिए क्लिक करें";
+                img.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openImageModal(img);
+                });
+            });
+
+            // 3. CLICK LINKS & BUTTONS TO OPEN LINK MODAL
+            const links = doc.querySelectorAll("a");
+            links.forEach(a => {
+                a.title = "लिंक URL और नाम बदलने के लिए क्लिक करें";
+                a.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLinkModal(a);
+                });
+            });
+
+            // 4. CLICK IFRAME / VIDEOS TO OPEN VIDEO MODAL
+            const iframes = doc.querySelectorAll("iframe");
+            iframes.forEach(ifr => {
+                if (ifr.src && (ifr.src.includes("youtube") || ifr.src.includes("youtu.be") || ifr.src.includes("vimeo"))) {
+                    ifr.title = "वीडियो लिंक बदलने के लिए क्लिक करें";
+                    ifr.parentElement.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openVideoModal(ifr);
+                    });
+                }
+            });
+        }
+
+        // 5. IMAGE MODAL & UPLOAD CONTROLS
+        function openImageModal(imgEl) {
+            targetImgElement = imgEl;
+            document.getElementById("imgSrcInput").value = imgEl.getAttribute("src") || "";
+            document.getElementById("imgAltInput").value = imgEl.getAttribute("alt") || "";
+            openModal("modalImage");
+        }
+
+        document.getElementById("btnApplyImage").addEventListener("click", () => {
+            if (targetImgElement) {
+                const src = document.getElementById("imgSrcInput").value.trim();
+                const alt = document.getElementById("imgAltInput").value.trim();
+                if (src) {
+                    targetImgElement.setAttribute("src", src);
+                    targetImgElement.src = src;
+                }
+                if (alt) targetImgElement.setAttribute("alt", alt);
+                isDirty = true;
+                saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                showToast("फोटो सफलतापूर्वक बदल दी गई!");
+            }
+            closeModal("modalImage");
         });
 
-        // Lock Dashboard
-        btnLockStudio.addEventListener("click", () => {
-            sessionStorage.removeItem(STORAGE_KEY_AUTH);
-            passcodeInput.value = "";
-            checkAuth();
-            showToast("Dashboard locked.");
+        // FILE UPLOAD HANDLER
+        const dropzone = document.getElementById("imageDropzone");
+        const fileInput = document.getElementById("imageFileInput");
+
+        dropzone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showToast("फाइल अपलोड हो रही है...");
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const res = await fetch("/api/upload-file", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            fileName: file.name,
+                            fileData: reader.result,
+                            folder: "images"
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        document.getElementById("imgSrcInput").value = result.url;
+                        showToast("✅ फाइल अपलोड हो गई: " + result.url);
+                    } else {
+                        alert("अपलोड विफल: " + result.message);
+                    }
+                } catch (err) {
+                    alert("अपलोड एरर: " + err.message);
+                }
+            };
+            reader.readAsDataURL(file);
         });
 
-        // Load File Content into Editor
-        async function loadFile(fileName) {
-            currentFile = fileName;
-            currentFileNameDisplay.innerHTML = `<i class="fa-solid fa-file-code"></i> Editing: <strong>${fileName}</strong>`;
+        document.getElementById("btnUploadImageDirect").addEventListener("click", () => {
+            targetImgElement = null;
+            document.getElementById("imgSrcInput").value = "";
+            document.getElementById("imgAltInput").value = "";
+            openModal("modalImage");
+        });
 
-            // Check if there is a local saved draft
-            const savedDraft = localStorage.getItem(STORAGE_DRAFTS_PREFIX + fileName);
+        // 6. LINK MODAL CONTROLS
+        function openLinkModal(linkEl) {
+            targetLinkElement = linkEl;
+            document.getElementById("linkTextInput").value = linkEl.innerText.trim() || linkEl.textContent.trim();
+            document.getElementById("linkHrefInput").value = linkEl.getAttribute("href") || "";
+            document.getElementById("linkTargetSelect").value = linkEl.getAttribute("target") || "_self";
+            openModal("modalLink");
+        }
+
+        document.getElementById("btnApplyLink").addEventListener("click", () => {
+            if (targetLinkElement) {
+                const text = document.getElementById("linkTextInput").value.trim();
+                const href = document.getElementById("linkHrefInput").value.trim();
+                const target = document.getElementById("linkTargetSelect").value;
+
+                if (text && targetLinkElement.children.length === 0) {
+                    targetLinkElement.textContent = text;
+                } else if (text) {
+                    // If link has an icon, preserve icon and update text
+                    const icon = targetLinkElement.querySelector("i");
+                    if (icon) {
+                        targetLinkElement.innerHTML = icon.outerHTML + " " + text;
+                    } else {
+                        targetLinkElement.textContent = text;
+                    }
+                }
+
+                if (href) targetLinkElement.setAttribute("href", href);
+                targetLinkElement.setAttribute("target", target);
+                
+                isDirty = true;
+                saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                showToast("हाइपरलिंक अपडेट हो गया!");
+            }
+            closeModal("modalLink");
+        });
+
+        // 7. VIDEO MODAL CONTROLS
+        function openVideoModal(videoEl) {
+            targetVideoElement = videoEl;
+            document.getElementById("videoUrlInput").value = videoEl.getAttribute("src") || "";
+            openModal("modalVideo");
+        }
+
+        document.getElementById("btnApplyVideo").addEventListener("click", () => {
+            if (targetVideoElement) {
+                let url = document.getElementById("videoUrlInput").value.trim();
+                // Format youtube link into embed format
+                if (url.includes("watch?v=")) {
+                    const videoId = url.split("watch?v=")[1].split("&")[0];
+                    url = "https://www.youtube.com/embed/" + videoId;
+                } else if (url.includes("youtu.be/")) {
+                    const videoId = url.split("youtu.be/")[1].split("?")[0];
+                    url = "https://www.youtube.com/embed/" + videoId;
+                }
+
+                if (url) {
+                    targetVideoElement.setAttribute("src", url);
+                    targetVideoElement.src = url;
+                }
+                isDirty = true;
+                saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                showToast("वीडियो अपडेट हो गया!");
+            }
+            closeModal("modalVideo");
+        });
+
+        // 8. PRESET HELPERS
+        window.setPresetImg = function(url) {
+            document.getElementById("imgSrcInput").value = url;
+        };
+        window.setPresetLink = function(url) {
+            document.getElementById("linkHrefInput").value = url;
+        };
+
+        // 9. MODAL HELPERS
+        window.openModal = function(id) {
+            document.getElementById(id).style.display = "flex";
+        };
+        window.closeModal = function(id) {
+            document.getElementById(id).style.display = "none";
+        };
+
+        // 10. SAVE PAGE TO LIVE SERVER
+        btnSaveLive.addEventListener("click", async () => {
+            saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-cyan);"></i> लाइव सेव हो रहा है...`;
+
+            const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
+            
+            // Clean helper styling tag and contenteditables before saving clean HTML
+            const helperTag = doc.getElementById("editor-helper-styles");
+            if (helperTag) helperTag.remove();
+
+            doc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
+            doc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
+
+            // Serialize clean HTML
+            const updatedHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
 
             try {
-                const response = await fetch(fileName);
-                if (response.ok) {
-                    const text = await response.text();
-                    originalFileContents[fileName] = text;
-                    pageCodeArea.value = savedDraft ? savedDraft : text;
+                const res = await fetch("/api/save-page", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        filename: currentPage,
+                        content: updatedHTML
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    isDirty = false;
+                    saveStatus.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> लाइव सेव हो गया!`;
+                    showToast("🎉 " + currentPage + " लाइव सर्वर पर सेव हो गया है!");
+                    // Re-render to restore interactive editing hooks
+                    renderEditablePage(updatedHTML);
                 } else {
-                    pageCodeArea.value = savedDraft ? savedDraft : `<!-- Could not load ${fileName} dynamically -->`;
+                    throw new Error(data.message || "Save failed");
                 }
             } catch (err) {
-                console.warn("Fetch error:", err);
-                pageCodeArea.value = savedDraft ? savedDraft : `<!-- File content for ${fileName} -->`;
+                console.error("Save error:", err);
+                saveStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Save Error`;
+                alert("सेव करने में त्रुटि: " + err.message);
+                // Restore hooks
+                renderEditablePage(updatedHTML);
             }
-
-            updatePreview();
-        }
-
-        // Update Live Iframe Preview
-        function updatePreview() {
-            const code = pageCodeArea.value;
-            if (currentFile.endsWith(".xml") || currentFile.endsWith(".txt")) {
-                previewFrame.srcdoc = `<html><body style="background:#111;color:#00ffcc;font-family:monospace;padding:20px;"><pre>${escapeHtml(code)}</pre></body></html>`;
-            } else {
-                previewFrame.srcdoc = code;
-            }
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        // File Selection Listener
-        fileListContainer.addEventListener("click", (e) => {
-            const item = e.target.closest(".file-item");
-            if (!item) return;
-
-            document.querySelectorAll(".file-item").forEach(el => el.classList.remove("active"));
-            item.classList.add("active");
-
-            const fileName = item.getAttribute("data-file");
-            loadFile(fileName);
         });
 
-        // Tab Navigation
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-                document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-
-                btn.classList.add("active");
-                const targetTab = btn.getAttribute("data-tab");
-                const panel = document.getElementById(targetTab);
-                if (panel) panel.classList.add("active");
-            });
-        });
-
-        // Realtime code editing debounce preview
-        let previewTimeout;
-        pageCodeArea.addEventListener("input", () => {
-            clearTimeout(previewTimeout);
-            previewTimeout = setTimeout(updatePreview, 600);
-        });
-
-        btnRefreshPreview.addEventListener("click", () => {
-            updatePreview();
-            showToast("Preview refreshed!");
-        });
-
-        // Save Draft Locally
-        btnSaveLocal.addEventListener("click", () => {
-            localStorage.setItem(STORAGE_DRAFTS_PREFIX + currentFile, pageCodeArea.value);
-            showToast(`Draft for ${currentFile} saved in browser!`);
-        });
-
-        // Copy Code
-        btnCopyCode.addEventListener("click", () => {
-            navigator.clipboard.writeText(pageCodeArea.value).then(() => {
-                showToast(`Code for ${currentFile} copied to clipboard!`);
-            }).catch(() => {
-                pageCodeArea.select();
-                document.execCommand("copy");
-                showToast(`Code for ${currentFile} copied!`);
-            });
-        });
-
-        // Download HTML File
-        btnDownloadFile.addEventListener("click", () => {
-            const content = pageCodeArea.value;
-            const blob = new Blob([content], { type: "text/html;charset=utf-8" });
+        // 11. DOWNLOAD CURRENT FILE
+        btnDownload.addEventListener("click", () => {
+            const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
+            const updatedHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+            const blob = new Blob([updatedHTML], { type: "text/html" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = currentFile;
-            document.body.appendChild(a);
+            a.download = currentPage;
             a.click();
-            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast(`Downloaded ${currentFile}! Ready to commit.`);
+            showToast(currentPage + " डाउनलोड हो गया!");
         });
 
-        // Revert Code
-        btnResetCode.addEventListener("click", () => {
-            if (confirm(`Revert all unsaved changes for ${currentFile}?`)) {
-                localStorage.removeItem(STORAGE_DRAFTS_PREFIX + currentFile);
-                if (originalFileContents[currentFile]) {
-                    pageCodeArea.value = originalFileContents[currentFile];
-                    updatePreview();
-                } else {
-                    loadFile(currentFile);
-                }
-                showToast(`Reverted ${currentFile} to server original.`);
-            }
+        // 12. VIEW LIVE PAGE
+        btnViewLive.addEventListener("click", () => {
+            window.open(currentPage, "_blank");
         });
 
-        // Find & Replace Handler
-        document.getElementById("btnExecuteReplace").addEventListener("click", () => {
-            const findText = document.getElementById("findInput").value;
-            const replaceText = document.getElementById("replaceInput").value;
-
-            if (!findText) {
-                showToast("Please enter text to find.");
-                return;
-            }
-
-            const currentCode = pageCodeArea.value;
-            if (!currentCode.includes(findText)) {
-                showToast(`Text "${findText}" not found in ${currentFile}.`);
-                return;
-            }
-
-            const newCode = currentCode.replaceAll(findText, replaceText);
-            pageCodeArea.value = newCode;
-            updatePreview();
-            showToast(`Replaced all occurrences of "${findText}"!`);
+        // 13. DEVICE VIEWPORTS
+        btnDesktop.addEventListener("click", () => {
+            setDevice("desktop");
+        });
+        btnTablet.addEventListener("click", () => {
+            setDevice("tablet");
+        });
+        btnMobile.addEventListener("click", () => {
+            setDevice("mobile");
         });
 
-        // Snippet: WhatsApp Generator
-        document.getElementById("btnGenWa").addEventListener("click", () => {
-            const phone = document.getElementById("waPhone").value.trim().replace(/\D/g, "");
-            const msg = encodeURIComponent(document.getElementById("waMsg").value.trim());
-            const link = `https://wa.me/${phone}?text=${msg}`;
-            const box = document.getElementById("waResult");
-            box.innerHTML = `${link}<button class="btn-copy-snippet" onclick="copyText('waResult')">Copy</button>`;
-            showToast("WhatsApp link generated!");
-        });
+        function setDevice(type) {
+            btnDesktop.classList.toggle("active", type === "desktop");
+            btnTablet.classList.toggle("active", type === "tablet");
+            btnMobile.classList.toggle("active", type === "mobile");
 
-        // Snippet: Portfolio Card Generator
-        document.getElementById("btnGenPort").addEventListener("click", () => {
-            const title = document.getElementById("portTitle").value || "New Project";
-            const category = document.getElementById("portCategory").value;
-            const desc = document.getElementById("portDesc").value || "Project description";
+            editorFrame.className = "preview-iframe " + (type !== "desktop" ? type : "");
+        }
 
-            const snippet = `<div class="project-card" data-category="${category}">
-    <div class="project-img-box">
-        <i class="fa-solid fa-layer-group project-placeholder-icon"></i>
-    </div>
-    <div class="project-body">
-        <span class="project-badge">${category.toUpperCase()}</span>
-        <h3 class="project-title">${title}</h3>
-        <p class="project-desc">${desc}</p>
-        <div class="project-footer">
-            <a href="https://wa.me/918825183628?text=I%20want%20a%20similar%20project%20as%20${encodeURIComponent(title)}" class="btn-project-quote">Request Similar</a>
-        </div>
-    </div>
-</div>`;
-
-            const box = document.getElementById("portResult");
-            box.textContent = snippet;
-            box.innerHTML += `<button class="btn-copy-snippet" onclick="copyText('portResult')">Copy</button>`;
-            showToast("Portfolio card snippet generated!");
-        });
-
-        // Update Passcode
-        document.getElementById("btnSavePasscode").addEventListener("click", () => {
-            const newPass = document.getElementById("newPasscodeInput").value.trim();
-            if (newPass.length < 4) {
-                showToast("Passcode must be at least 4 characters.");
-                return;
-            }
-            localStorage.setItem(STORAGE_KEY_PASS, newPass);
-            document.getElementById("newPasscodeInput").value = "";
-            showToast("Owner passcode updated successfully!");
-        });
-
-        // Global Copy Helper
-        window.copyText = function(elementId) {
-            const el = document.getElementById(elementId);
-            const text = el.innerText.replace("Copy", "").trim();
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Snippet copied to clipboard!");
-            });
-        };
-
-        // Toast Helper
+        // 14. TOAST NOTIFICATION
         function showToast(msg) {
-            const toast = document.getElementById("toastNotice");
-            document.getElementById("toastMessage").innerText = msg;
+            toastMsg.textContent = msg;
             toast.style.display = "flex";
-            setTimeout(() => {
-                toast.style.display = "none";
-            }, 3000);
+            setTimeout(() => { toast.style.display = "none"; }, 3000);
         }
 
         // Initialize on load
-        window.addEventListener("DOMContentLoaded", checkAuth);
+        checkAuth();
     </script>
 </body>
 </html>
