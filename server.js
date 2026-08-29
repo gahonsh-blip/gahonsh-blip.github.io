@@ -9,8 +9,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-// Body parser for JSON
-app.use(express.json({ limit: '50mb' }));
+// Body parser for JSON with large limit for all file types (Docs, Spreadsheets, Media, Archives)
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // API to save updated page directly to disk
 app.post('/api/save-page', (req, res) => {
@@ -45,7 +46,7 @@ app.post('/api/save-page', (req, res) => {
     }
 });
 
-// API to upload any asset/document/image file (Base64)
+// API to upload ANY file type (Excel, PDF, Word, PPT, Zip, Media, Images, Code, etc.)
 app.post('/api/upload-file', (req, res) => {
     try {
         const { fileName, fileData, folder } = req.body;
@@ -57,13 +58,15 @@ app.post('/api/upload-file', (req, res) => {
         let targetSubfolder = folder;
 
         if (!targetSubfolder) {
-            // Auto-detect best subfolder by extension
-            if (['.xlsx', '.xls', '.csv', '.pdf', '.docx', '.doc', '.pptx', '.zip', '.rar'].includes(ext)) {
+            // Intelligent auto-detection of best subfolder by extension for ANY file type
+            if (['.xlsx', '.xls', '.csv', '.tsv', '.ods', '.pdf', '.docx', '.doc', '.pptx', '.ppt', '.zip', '.rar', '.7z', '.tar', '.gz'].includes(ext)) {
                 targetSubfolder = 'assets/projects';
-            } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.ico'].includes(ext)) {
+            } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.ico', '.avif', '.bmp', '.tiff'].includes(ext)) {
                 targetSubfolder = 'images';
+            } else if (['.mp4', '.webm', '.mkv', '.avi', '.mov', '.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac'].includes(ext)) {
+                targetSubfolder = 'assets/media';
             } else {
-                targetSubfolder = 'assets';
+                targetSubfolder = 'assets/files';
             }
         }
 
@@ -77,17 +80,26 @@ app.post('/api/upload-file', (req, res) => {
         }
 
         const targetPath = path.join(targetDir, safeName);
-        const base64Data = fileData.replace(/^data:[a-zA-Z0-9/+-]+;base64,/, '');
-        fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+        const base64Data = fileData.replace(/^data:[^;]+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        fs.writeFileSync(targetPath, buffer);
+
+        const bytes = buffer.length;
+        const sizeFormatted = bytes > 1024 * 1024 
+            ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` 
+            : `${(bytes / 1024).toFixed(1)} KB`;
 
         const relativeUrl = `${sanitizedFolder}/${safeName}`;
-        console.log(`[Owner Studio] Successfully uploaded file: ${relativeUrl} (${(base64Data.length * 0.75 / 1024).toFixed(1)} KB)`);
+        console.log(`[Owner Studio] Uploaded: ${relativeUrl} (${sizeFormatted})`);
+        
         return res.json({ 
             success: true, 
             url: relativeUrl, 
             fileName: safeName,
             extension: ext,
-            message: `File saved as ${relativeUrl}` 
+            size: sizeFormatted,
+            sizeBytes: bytes,
+            message: `File saved as ${relativeUrl} (${sizeFormatted})` 
         });
     } catch (err) {
         console.error('[Owner Studio] Upload error:', err);
