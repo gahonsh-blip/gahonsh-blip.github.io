@@ -72,15 +72,29 @@ body.light-mode .mobile-nav-menu {
 
 body.light-mode .mobile-nav-menu a {
     color: #0f172a !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    background: rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
-body.light-mode .mobile-nav-close {
+body.light-mode .mobile-nav-menu a:hover,
+body.light-mode .mobile-nav-menu a:focus {
+    background: rgba(2, 132, 199, 0.08) !important;
+    color: #0284c7 !important;
+    border-color: rgba(2, 132, 199, 0.25) !important;
+}
+
+body.light-mode .mobile-nav-close,
+body.light-mode #menu-close-btn {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
     color: #475569 !important;
 }
 
-body.light-mode .mobile-nav-close:hover {
+body.light-mode .mobile-nav-close:hover,
+body.light-mode #menu-close-btn:hover {
+    background: rgba(2, 132, 199, 0.1) !important;
     color: #0284c7 !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
 }
 
 /* CARDS, BLOCKS & CONTAINERS */
@@ -390,3 +404,104 @@ body.light-mode .gahonsh-tab-btn.active {
         transition: none !important;
     }
 }
+
+/* ============================================
+   MOBILE NAVIGATION USABILITY & TOUCH TARGETS
+   Enhanced padding, large tap areas & close btn
+   ============================================ */
+.mobile-nav-menu {
+    position: fixed;
+    top: 0;
+    right: -340px;
+    width: min(320px, 86vw);
+    height: 100%;
+    background: #070c19;
+    border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    z-index: 2001;
+    padding: 24px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+.mobile-nav-menu.active {
+    right: 0;
+}
+
+.mobile-nav-close,
+#menu-close-btn {
+    align-self: flex-end;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    margin-bottom: 8px;
+    margin-right: -4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    font-size: 1.45rem !important;
+    color: var(--text-slate, #94a3b8);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.mobile-nav-close:hover,
+#menu-close-btn:hover {
+    color: var(--accent-cyan, #00ffcc) !important;
+    background: rgba(0, 255, 204, 0.12);
+    border-color: rgba(0, 255, 204, 0.35);
+    transform: scale(1.06);
+}
+
+.mobile-nav-close:active,
+#menu-close-btn:active {
+    transform: scale(0.92);
+}
+
+.mobile-nav-menu a {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    min-height: 48px !important;
+    padding: 13px 18px !important;
+    margin: 2px 0;
+    color: var(--text-main, #f8fafc);
+    text-decoration: none;
+    font-size: 1.02rem;
+    font-weight: 600;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.mobile-nav-menu a:hover,
+.mobile-nav-menu a:focus {
+    background: rgba(0, 255, 204, 0.08);
+    color: var(--accent-cyan, #00ffcc) !important;
+    border-color: rgba(0, 255, 204, 0.25);
+    transform: translateX(4px);
+}
+
+.mobile-nav-menu a:active {
+    transform: translateX(2px) scale(0.99);
+}
+

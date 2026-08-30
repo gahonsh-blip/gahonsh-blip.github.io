@@ -481,6 +481,11 @@
                 const password = document.getElementById('signInPassword').value;
                 const btn = document.getElementById('btnSubmitSignIn');
 
+                if (!window.GahonshDB || !window.GahonshDB.Auth) {
+                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    return;
+                }
+
                 try {
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
@@ -513,6 +518,11 @@
                 const password = document.getElementById('signUpPassword').value;
                 const btn = document.getElementById('btnSubmitSignUp');
 
+                if (!window.GahonshDB || !window.GahonshDB.Auth) {
+                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    return;
+                }
+
                 try {
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
@@ -541,6 +551,11 @@
                 const skillsRaw = document.getElementById('editProfileSkills').value;
                 const bio = document.getElementById('editProfileBio').value.trim();
                 const btn = document.getElementById('btnSaveProfile');
+
+                if (!window.GahonshDB || !window.GahonshDB.Profiles) {
+                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    return;
+                }
 
                 const skills = skillsRaw
                     .split(',')
@@ -628,13 +643,15 @@
         if (!backdrop) return;
 
         try {
-            const profile = await window.GahonshDB.Profiles.getMyProfile();
-            if (profile) {
-                document.getElementById('editProfileTitle').value = profile.title || '';
-                document.getElementById('editProfileLocation').value = profile.location || '';
-                document.getElementById('editProfileRate').value = profile.hourly_rate || 0;
-                document.getElementById('editProfileSkills').value = Array.isArray(profile.skills) ? profile.skills.join(', ') : '';
-                document.getElementById('editProfileBio').value = profile.bio || '';
+            if (window.GahonshDB?.Profiles?.getMyProfile) {
+                const profile = await window.GahonshDB.Profiles.getMyProfile();
+                if (profile) {
+                    document.getElementById('editProfileTitle').value = profile.title || '';
+                    document.getElementById('editProfileLocation').value = profile.location || '';
+                    document.getElementById('editProfileRate').value = profile.hourly_rate || 0;
+                    document.getElementById('editProfileSkills').value = Array.isArray(profile.skills) ? profile.skills.join(', ') : '';
+                    document.getElementById('editProfileBio').value = profile.bio || '';
+                }
             }
         } catch (err) {
             console.warn('[openProfileModal]', err);
@@ -645,7 +662,11 @@
 
     async function refreshUserState() {
         try {
-            _currentUser = await window.GahonshDB.Auth.getCurrentUser();
+            if (window.GahonshDB?.Auth?.getCurrentUser) {
+                _currentUser = await window.GahonshDB.Auth.getCurrentUser();
+            } else {
+                _currentUser = null;
+            }
         } catch (err) {
             console.warn('[refreshUserState]', err);
             _currentUser = null;
@@ -687,7 +708,9 @@
                 const btnSignOut = document.getElementById('btnNavSignOut');
                 if (btnSignOut) {
                     btnSignOut.onclick = async () => {
-                        await window.GahonshDB.Auth.signOut();
+                        if (window.GahonshDB?.Auth?.signOut) {
+                            await window.GahonshDB.Auth.signOut();
+                        }
                         showToast('Signed out successfully.');
                         refreshUserState();
                     };
@@ -700,7 +723,10 @@
                 `;
                 nav.appendChild(authWrapper);
 
-                document.getElementById('btnNavSignIn').onclick = () => openAuthModal('signin');
+                const btnNavSignIn = document.getElementById('btnNavSignIn');
+                if (btnNavSignIn) {
+                    btnNavSignIn.onclick = () => openAuthModal('signin');
+                }
             }
         }
 
@@ -723,7 +749,7 @@
                     <div style="font-size:0.85rem; color:#00ffcc; margin-bottom:10px; font-weight:600;">
                         <i class="fa-solid fa-user-check"></i> ${name} (${role.toUpperCase()})
                     </div>
-                    <button id="btnMobileSignOut" style="width:100%; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px; border-radius:6px; font-size:0.85rem; cursor:pointer; font-weight:600;">
+                    <button id="btnMobileSignOut" style="width:100%; min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:12px 18px; border-radius:10px; font-size:0.95rem; cursor:pointer; font-weight:600; touch-action:manipulation;">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                     </button>
                 `;
@@ -732,14 +758,16 @@
                 const btnMobSignOut = document.getElementById('btnMobileSignOut');
                 if (btnMobSignOut) {
                     btnMobSignOut.onclick = async () => {
-                        await window.GahonshDB.Auth.signOut();
+                        if (window.GahonshDB?.Auth?.signOut) {
+                            await window.GahonshDB.Auth.signOut();
+                        }
                         showToast('Signed out successfully.');
                         refreshUserState();
                     };
                 }
             } else {
                 mobileAuthWrapper.innerHTML = `
-                    <button id="btnMobileSignIn" style="width:100%; background:linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color:#070c19; border:none; padding:10px; border-radius:8px; font-size:0.9rem; font-weight:700; cursor:pointer;">
+                    <button id="btnMobileSignIn" style="width:100%; min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color:#070c19; border:none; padding:12px 18px; border-radius:10px; font-size:0.95rem; font-weight:700; cursor:pointer; touch-action:manipulation;">
                         <i class="fa-solid fa-user"></i> Sign In / Join Gahonsh
                     </button>
                 `;
@@ -754,7 +782,8 @@
     }
 
     function checkConfigBanner() {
-        if (!window.isSupabaseConfigured() && !document.getElementById('cfgNoticeBanner')) {
+        const isConfigured = typeof window.isSupabaseConfigured === 'function' ? window.isSupabaseConfigured() : false;
+        if (!isConfigured && !document.getElementById('cfgNoticeBanner')) {
             const banner = document.createElement('div');
             banner.id = 'cfgNoticeBanner';
             banner.className = 'config-banner-notice';
@@ -764,7 +793,10 @@
             `;
             document.body.prepend(banner);
 
-            document.getElementById('btnOpenConfigNotice').onclick = openConfigModal;
+            const btnNotice = document.getElementById('btnOpenConfigNotice');
+            if (btnNotice) {
+                btnNotice.onclick = openConfigModal;
+            }
         }
     }
 
@@ -774,11 +806,13 @@
         checkConfigBanner();
         refreshUserState();
 
-        // Listen to auth events
-        window.GahonshDB.Auth.onAuthStateChange((event, session, user) => {
-            _currentUser = user;
-            updateHeaderNav(user);
-        });
+        // Listen to auth events safely
+        if (window.GahonshDB?.Auth?.onAuthStateChange) {
+            window.GahonshDB.Auth.onAuthStateChange((event, session, user) => {
+                _currentUser = user;
+                updateHeaderNav(user);
+            });
+        }
     }
 
     if (document.readyState === 'loading') {
