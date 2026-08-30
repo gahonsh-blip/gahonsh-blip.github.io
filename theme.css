@@ -12,9 +12,26 @@ body.light-mode {
     color: #0f172a !important;
 }
 
+/* GLOBAL SCROLLBAR POLISH */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+}
+
 body.light-mode header {
     background: rgba(255, 255, 255, 0.95) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
 }
 
 body.light-mode .logo {
@@ -28,6 +45,7 @@ body.light-mode nav a {
 body.light-mode nav a:hover,
 body.light-mode nav a.active {
     color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.08) !important;
 }
 
 body.light-mode .dropdown-content {
@@ -74,14 +92,59 @@ body.light-mode .stat-item,
 body.light-mode .project-card,
 body.light-mode .feature-card,
 body.light-mode .pricing-card,
+body.light-mode .price-card,
 body.light-mode .faq-item,
 body.light-mode .container,
 body.light-mode .port-card,
-body.light-mode .trust-badges {
+body.light-mode .trust-badges,
+body.light-mode .why-card,
+body.light-mode .process-card,
+body.light-mode .testimonial-card,
+body.light-mode .trust-card,
+body.light-mode .vision-card,
+body.light-mode .service-card-front,
+body.light-mode .service-card-back,
+body.light-mode .contact-info-card,
+body.light-mode .contact-form-card {
     background: #ffffff !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
     color: #0f172a !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .hero-badge,
+body.light-mode .badge-logo {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #0284c7 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .btn-secondary {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .btn-secondary:hover {
+    background: #f1f5f9 !important;
+    border-color: #0284c7 !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .port-mockup {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: rgba(15, 23, 42, 0.15) !important;
+}
+
+body.light-mode .port-card {
+    background: #ffffff !important;
+}
+
+body.light-mode .port-tag {
+    background: rgba(2, 132, 199, 0.1) !important;
+    color: #0284c7 !important;
 }
 
 /* MARKETPLACE SPECIFIC LIGHT THEME OVERRIDES */
@@ -224,6 +287,7 @@ body.light-mode select:focus,
 body.light-mode textarea:focus {
     border-color: #0284c7 !important;
     background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
 body.light-mode input::placeholder,
@@ -248,4 +312,35 @@ body.light-mode .config-banner-notice {
 body.light-mode .config-banner-btn {
     background: #0284c7 !important;
     color: #ffffff !important;
+}
+
+/* AUTH MODAL LIGHT THEME */
+body.light-mode .gahonsh-auth-box {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    color: #0f172a !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 30px rgba(2, 132, 199, 0.08) !important;
+}
+
+body.light-mode .gahonsh-role-card {
+    background: #f8fafc !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .gahonsh-role-card h4 {
+    color: #0f172a !important;
+}
+
+body.light-mode .gahonsh-role-card.selected {
+    background: rgba(2, 132, 199, 0.08) !important;
+    border-color: #0284c7 !important;
+}
+
+body.light-mode .gahonsh-tab-btn {
+    color: #64748b !important;
+}
+
+body.light-mode .gahonsh-tab-btn.active {
+    color: #0284c7 !important;
+    border-bottom-color: #0284c7 !important;
 }
