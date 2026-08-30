@@ -5,12 +5,15 @@ body.light-mode {
     --border-hover: rgba(0, 119, 255, 0.4) !important;
     --text-main: #0f172a !important;
     --text-slate: #475569 !important;
+    --accent-cyan: #0284c7 !important;
+    --accent-blue: #1558d6 !important;
+    --accent-green: #059669 !important;
     background-color: #f8fafc !important;
     color: #0f172a !important;
 }
 
 body.light-mode header {
-    background: rgba(255, 255, 255, 0.92) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -24,7 +27,7 @@ body.light-mode nav a {
 
 body.light-mode nav a:hover,
 body.light-mode nav a.active {
-    color: #0077ff !important;
+    color: #0284c7 !important;
 }
 
 body.light-mode .dropdown-content {
@@ -45,12 +48,24 @@ body.light-mode .dropdown-content a:hover {
 body.light-mode .mobile-nav-menu {
     background: #ffffff !important;
     color: #0f172a !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.08) !important;
 }
 
 body.light-mode .mobile-nav-menu a {
     color: #0f172a !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
+body.light-mode .mobile-nav-close {
+    color: #475569 !important;
+}
+
+body.light-mode .mobile-nav-close:hover {
+    color: #0284c7 !important;
+}
+
+/* CARDS, BLOCKS & CONTAINERS */
 body.light-mode footer,
 body.light-mode .footer-bottom,
 body.light-mode .contact-card-box, 
@@ -60,19 +75,155 @@ body.light-mode .project-card,
 body.light-mode .feature-card,
 body.light-mode .pricing-card,
 body.light-mode .faq-item,
-body.light-mode .container {
+body.light-mode .container,
+body.light-mode .port-card,
+body.light-mode .trust-badges {
     background: #ffffff !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
     color: #0f172a !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+/* MARKETPLACE SPECIFIC LIGHT THEME OVERRIDES */
+body.light-mode .jobs-hero,
+body.light-mode .talent-hero {
+    background: radial-gradient(circle at 50% 0%, rgba(2, 132, 199, 0.08) 0%, #f8fafc 70%) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .search-bar-wrapper,
+body.light-mode .search-talent-box {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .job-card,
+body.light-mode .talent-card,
+body.light-mode .portal-card,
+body.light-mode .filters-sidebar,
+body.light-mode .user-profile-header,
+body.light-mode .main-card,
+body.light-mode .side-card,
+body.light-mode .post-card,
+body.light-mode .proposal-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .job-card:hover,
+body.light-mode .talent-card:hover {
+    border-color: rgba(2, 132, 199, 0.4) !important;
+    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.1) !important;
+}
+
+body.light-mode .job-card-title,
+body.light-mode .talent-name,
+body.light-mode .project-title,
+body.light-mode .profile-name {
+    color: #0f172a !important;
+}
+
+body.light-mode .job-card-title:hover {
+    color: #0284c7 !important;
+}
+
+body.light-mode .job-budget-badge {
+    background: rgba(2, 132, 199, 0.1) !important;
+    border: 1px solid rgba(2, 132, 199, 0.25) !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .talent-rate-badge {
+    color: #0284c7 !important;
+}
+
+body.light-mode .skill-tag,
+body.light-mode .talent-skill,
+body.light-mode .meta-badge {
+    background: #f1f5f9 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #334155 !important;
+}
+
+body.light-mode .meta-badge.highlight {
+    background: rgba(2, 132, 199, 0.1) !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .skill-chip {
+    background: #f1f5f9 !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    color: #334155 !important;
+}
+
+body.light-mode .skill-chip.active {
+    background: rgba(2, 132, 199, 0.12) !important;
+    border-color: #0284c7 !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .portal-tab-btn {
+    color: #64748b !important;
+}
+
+body.light-mode .portal-tab-btn.active {
+    color: #0284c7 !important;
+    border-bottom-color: #0284c7 !important;
+}
+
+body.light-mode .status-open {
+    background: rgba(2, 132, 199, 0.1) !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .status-accepted,
+body.light-mode .status-completed {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #059669 !important;
+}
+
+body.light-mode .status-in_progress,
+body.light-mode .status-active {
+    background: rgba(37, 99, 235, 0.12) !important;
+    color: #1d4ed8 !important;
+}
+
+body.light-mode .profile-role-tag {
+    background: rgba(2, 132, 199, 0.1) !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+    color: #0284c7 !important;
+}
+
+body.light-mode .btn-outline {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .btn-outline:hover {
+    border-color: #0284c7 !important;
+    color: #0284c7 !important;
+    background: #f8fafc !important;
+}
+
+/* FORM INPUTS IN LIGHT THEME */
 body.light-mode input,
 body.light-mode select,
 body.light-mode textarea {
-    background: #f1f5f9 !important;
+    background: #f8fafc !important;
     color: #0f172a !important;
     border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-mode input:focus,
+body.light-mode select:focus,
+body.light-mode textarea:focus {
+    border-color: #0284c7 !important;
+    background: #ffffff !important;
 }
 
 body.light-mode input::placeholder,
@@ -85,6 +236,16 @@ body.light-mode .social-icons a {
 }
 
 body.light-mode .social-icons a:hover {
-    color: #0077ff !important;
+    color: #0284c7 !important;
 }
 
+body.light-mode .config-banner-notice {
+    background: linear-gradient(90deg, #e0f2fe, #f0f9ff) !important;
+    color: #0369a1 !important;
+    border-bottom: 1px solid rgba(2, 132, 199, 0.2) !important;
+}
+
+body.light-mode .config-banner-btn {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+}

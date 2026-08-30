@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Portal & Dashboard | Gahonsh Freelancing</title>
+    <meta name="description" content="Manage your active projects, submitted proposals, contracts, and freelance profile on Gahonsh Marketplace Portal.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(0, 255, 204, 0.4);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-green: #10b981;
+            --text-main: #f8fafc;
+            --text-slate: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+        header {
+            position: sticky; top: 0; width: 100%;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; border-bottom: 1px solid var(--border-color);
+            padding: 18px 6%; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.35rem; font-weight: 800; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--accent-cyan); }
+        nav { display: flex; align-items: center; gap: 20px; }
+        nav a { color: var(--text-slate); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.25s; }
+        nav a:hover, nav a.active { color: var(--accent-cyan); }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* MOBILE NAV */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; pointer-events: auto; }
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0; right: -320px; width: 300px; height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-nav-menu.active { right: 0; }
+        .mobile-nav-close { align-self: flex-end; font-size: 1.6rem; cursor: pointer; color: var(--text-slate); }
+        .mobile-nav-close:hover { color: var(--accent-cyan); }
+        .mobile-nav-menu a { color: var(--text-main); text-decoration: none; font-size: 1.05rem; font-weight: 600; }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto 80px;
+            padding: 0 6%;
+        }
+
+        .user-profile-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .profile-info-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-avatar-large {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffcc, #0077ff);
+            color: #070c19;
+            font-size: 2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-name { font-size: 1.5rem; font-weight: 800; }
+        .profile-role-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .portal-tabs {
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .portal-tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: var(--text-slate);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .portal-tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        .portal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: rgba(0, 255, 204, 0.1); color: var(--accent-cyan); }
+        .status-accepted { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .status-pending { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .status-in_progress, .status-active { background: rgba(0, 119, 255, 0.15); color: var(--accent-blue); }
+        .status-completed { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            header nav { display: none; }
+            .user-profile-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="jobs.html">Find Work (Jobs)</a>
+        <a href="find-talent.html">Find Talent</a>
+        <a href="post-job.html">Post a Job</a>
+        <a href="marketplace-dashboard.html" style="color:var(--accent-cyan);">Marketplace Portal</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <header>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Find Work</a>
+            <a href="find-talent.html">Find Talent</a>
+            <a href="post-job.html">Post a Job</a>
+            <a href="marketplace-dashboard.html" class="active">Portal</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="user-profile-header">
+            <div class="profile-info-left">
+                <div class="profile-avatar-large" id="userAvatarLarge">M</div>
+                <div>
+                    <div class="profile-name" id="userFullName">Member</div>
+                    <span class="profile-role-tag" id="userRoleTag">Freelancer</span>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="post-job.html" class="btn-outline" style="background:var(--accent-blue); border:none; color:white;">
+                    <i class="fa-solid fa-plus"></i> Post Job
+                </a>
+                <button class="btn-outline" id="btnEditProfileTrigger">
+                    <i class="fa-solid fa-user-pen"></i> Edit Profile
+                </button>
+            </div>
+        </div>
+
+        <div class="portal-tabs" id="portalTabsNav">
+            <button class="portal-tab-btn active" id="tabJobsOrProposals">My Projects / Proposals</button>
+            <button class="portal-tab-btn" id="tabContracts">Active Contracts</button>
+        </div>
+
+        <div id="portalTabContent">
+            <div id="tabListingsContainer">
+                <p style="color:var(--text-slate);">Loading activity records...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        let currentUser = null;
+        let currentTab = 'primary'; // 'primary' or 'contracts'
+
+        async function initDashboard() {
+            currentUser = window.GahonshAuthUI.getCurrentUser();
+            if (!currentUser && window.isSupabaseConfigured()) {
+                currentUser = await window.GahonshDB.Auth.getCurrentUser();
+            }
+
+            if (!currentUser) {
+                document.getElementById('userFullName').innerText = 'Guest User';
+                document.getElementById('userRoleTag').innerText = 'Not Signed In';
+                document.getElementById('tabListingsContainer').innerHTML = `
+                    <div style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:16px;">Please sign in to view your posted projects, proposals, and contracts.</p>
+                        <button onclick="window.GahonshAuthUI.openAuthModal('signin')" class="btn-outline" style="background:linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color:#070c19; font-weight:700;">Sign In / Join</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const name = currentUser.profile?.full_name || 'Member';
+            const role = currentUser.profile?.role || 'freelancer';
+
+            document.getElementById('userFullName').innerText = name;
+            document.getElementById('userAvatarLarge').innerText = name.charAt(0).toUpperCase();
+            document.getElementById('userRoleTag').innerText = role.toUpperCase();
+
+            loadUserActivity(role);
+        }
+
+        async function loadUserActivity(role) {
+            const container = document.getElementById('tabListingsContainer');
+            if (currentTab === 'contracts') {
+                await loadContracts();
+                return;
+            }
+
+            if (role === 'client') {
+                document.getElementById('tabJobsOrProposals').innerText = 'My Posted Projects';
+                let jobs = [];
+                if (window.isSupabaseConfigured()) {
+                    jobs = await window.GahonshDB.Jobs.getMyJobs();
+                }
+
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = `
+                        <div class="portal-card" style="text-align:center; padding:40px;">
+                            <p style="color:var(--text-slate); margin-bottom:14px;">You have not posted any projects yet.</p>
+                            <a href="post-job.html" class="btn-outline">Post a Project Now</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = jobs.map(j => `
+                    <div class="portal-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div>
+                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${j.id}" style="color:var(--text-main); text-decoration:none;">${j.title}</a></h3>
+                                <span class="status-badge status-${j.status}">${j.status}</span> • <span style="color:var(--text-slate); font-size:0.85rem;">${j.category}</span>
+                            </div>
+                            <a href="job-details.html?id=${j.id}" class="btn-outline">Manage Proposals (${j.proposals_count || 0})</a>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('tabJobsOrProposals').innerText = 'My Submitted Proposals';
+                let proposals = [];
+                if (window.isSupabaseConfigured()) {
+                    proposals = await window.GahonshDB.Proposals.getMyProposals();
+                }
+
+                if (!proposals || proposals.length === 0) {
+                    container.innerHTML = `
+                        <div class="portal-card" style="text-align:center; padding:40px;">
+                            <p style="color:var(--text-slate); margin-bottom:14px;">You have not submitted any proposals yet.</p>
+                            <a href="jobs.html" class="btn-outline">Find Work & Submit Proposals</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = proposals.map(p => `
+                    <div class="portal-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div>
+                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${p.job?.id || ''}" style="color:var(--text-main); text-decoration:none;">${p.job?.title || 'Project'}</a></h3>
+                                <span class="status-badge status-${p.status}">${p.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${p.bid_amount}</span>
+                            </div>
+                            <a href="job-details.html?id=${p.job?.id || ''}" class="btn-outline">View Project</a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function loadContracts() {
+            const container = document.getElementById('tabListingsContainer');
+            let contracts = [];
+            if (window.isSupabaseConfigured()) {
+                contracts = await window.GahonshDB.Contracts.getMyContracts();
+            }
+
+            if (!contracts || contracts.length === 0) {
+                container.innerHTML = `
+                    <div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate);">No active contracts found.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = contracts.map(c => `
+                <div class="portal-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3 style="font-size:1.15rem; margin-bottom:6px;">${c.job?.title || 'Contract'}</h3>
+                            <span class="status-badge status-${c.status}">${c.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Total: $${c.total_amount}</span>
+                        </div>
+                        <a href="job-details.html?id=${c.job?.id || ''}" class="btn-outline">View Project Details</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tab Switching
+        document.getElementById('tabJobsOrProposals').onclick = () => {
+            currentTab = 'primary';
+            document.getElementById('tabJobsOrProposals').classList.add('active');
+            document.getElementById('tabContracts').classList.remove('active');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
+        };
+
+        document.getElementById('tabContracts').onclick = () => {
+            currentTab = 'contracts';
+            document.getElementById('tabContracts').classList.add('active');
+            document.getElementById('tabJobsOrProposals').classList.remove('active');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
+        };
+
+        // Edit profile button
+        document.getElementById('btnEditProfileTrigger').onclick = () => {
+            if (window.GahonshAuthUI?.openProfileModal) {
+                window.GahonshAuthUI.openProfileModal();
+            } else {
+                window.GahonshAuthUI.openAuthModal('signin');
+            }
+        };
+
+        // Mobile Nav Trigger
+        document.getElementById('mobile-menu-open-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.add('active');
+            document.getElementById('mobile-menu-container').classList.add('active');
+        };
+        document.getElementById('menu-close-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+        document.getElementById('menu-overlay').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initDashboard, 300);
+        });
+    </script>
+</body>
+</html>

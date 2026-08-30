@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Work & Freelance Jobs | Gahonsh Freelancing</title>
+    <meta name="description" content="Explore high-paying freelance jobs in Excel automation, web development, PDF layout design, Python workflows, and digital business solutions on Gahonsh.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(0, 255, 204, 0.4);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-green: #10b981;
+            --text-main: #f8fafc;
+            --text-slate: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            color: var(--accent-cyan);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.25s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-cyan);
+        }
+
+        .dropdown { position: relative; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #070c19;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+        .dropdown-content a {
+            display: block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* MOBILE NAV */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; pointer-events: auto; }
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0; right: -320px; width: 300px; height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-nav-menu.active { right: 0; }
+        .mobile-nav-close { align-self: flex-end; font-size: 1.6rem; cursor: pointer; }
+        .mobile-nav-menu a { color: var(--text-main); text-decoration: none; font-size: 1.05rem; font-weight: 600; }
+
+        /* MARKETPLACE HERO SEARCH */
+        .jobs-hero {
+            padding: 50px 6% 30px;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 255, 204, 0.08) 0%, transparent 60%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .jobs-hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .jobs-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .jobs-hero h1 span {
+            background: linear-gradient(135deg, #00ffcc, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .jobs-hero p {
+            color: var(--text-slate);
+            font-size: 1.05rem;
+            margin-bottom: 28px;
+        }
+
+        .search-bar-wrapper {
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .light-mode .search-bar-wrapper {
+            background: #ffffff;
+            border-color: rgba(0,0,0,0.12);
+        }
+
+        .search-bar-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 10px 16px;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            color: #070c19;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn-search:hover {
+            transform: scale(1.02);
+        }
+
+        /* MAIN MARKETPLACE LAYOUT */
+        .marketplace-container {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 6%;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 35px;
+            align-items: start;
+        }
+
+        /* FILTERS SIDEBAR */
+        .filters-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            position: sticky;
+            top: 100px;
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .filter-section h4 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+            color: var(--text-main);
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--text-slate);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .filter-option input[type="radio"],
+        .filter-option input[type="checkbox"] {
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* JOB LISTINGS FEED */
+        .jobs-feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .jobs-feed-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .post-job-cta-btn {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .post-job-cta-btn:hover {
+            background: var(--accent-cyan);
+            color: #070c19;
+        }
+
+        .job-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 26px;
+            margin-bottom: 20px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .job-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 15px;
+        }
+
+        .job-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .job-card-title:hover {
+            color: var(--accent-cyan);
+        }
+
+        .job-budget-badge {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--accent-cyan);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .light-mode .job-budget-badge {
+            background: rgba(0, 119, 255, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .job-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-slate);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .job-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .job-description-preview {
+            color: var(--text-slate);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .skills-tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .job-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .client-info-snippet {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-slate);
+        }
+
+        .btn-view-job {
+            background: var(--accent-blue);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-view-job:hover {
+            opacity: 0.9;
+        }
+
+        /* EMPTY & LOADING STATES */
+        .empty-jobs-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+        }
+
+        .empty-jobs-state i {
+            font-size: 3rem;
+            color: var(--text-slate);
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .marketplace-container {
+                grid-template-columns: 1fr;
+            }
+            .filters-sidebar {
+                position: static;
+            }
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="jobs.html" style="color:var(--accent-cyan);">Find Work (Jobs)</a>
+        <a href="find-talent.html">Find Talent</a>
+        <a href="post-job.html">Post a Job</a>
+        <a href="marketplace-dashboard.html">Marketplace Portal</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html" class="active">Find Work</a>
+            <a href="find-talent.html">Find Talent</a>
+            <a href="post-job.html">Post a Job</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="marketplace-dashboard.html">Portal</a>
+        </nav>
+    </header>
+
+    <!-- SEARCH HERO -->
+    <section class="jobs-hero">
+        <div class="jobs-hero-content">
+            <h1>Find Your Next <span>High-Impact Project</span></h1>
+            <p>Browse verified freelance jobs across Excel engineering, full-stack web applications, PDF automation, and business intelligence.</p>
+            
+            <div class="search-bar-wrapper">
+                <input type="text" id="jobSearchInput" placeholder="Search by job title, skill (e.g., Python, Excel, React, PDF)...">
+                <button class="btn-search" id="btnSearchJobs">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search Jobs
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARKETPLACE CONTAINER -->
+    <main class="marketplace-container">
+        <!-- SIDEBAR FILTERS -->
+        <aside class="filters-sidebar">
+            <div class="filter-section">
+                <h4>Category</h4>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="all" checked> All Categories</label>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="Excel Automation"> Excel & Spreadsheets</label>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="Web Engineering"> Web Engineering</label>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="PDF & Design"> PDF & Brand Layouts</label>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="Python & AI"> Python & AI Systems</label>
+                <label class="filter-option"><input type="radio" name="filterCategory" value="Data & Analytics"> Data & Analytics</label>
+            </div>
+
+            <div class="filter-section">
+                <h4>Job Type</h4>
+                <label class="filter-option"><input type="radio" name="filterType" value="all" checked> Any Type</label>
+                <label class="filter-option"><input type="radio" name="filterType" value="fixed"> Fixed Price</label>
+                <label class="filter-option"><input type="radio" name="filterType" value="hourly"> Hourly Rate</label>
+            </div>
+
+            <div class="filter-section">
+                <h4>Experience Level</h4>
+                <label class="filter-option"><input type="radio" name="filterExperience" value="all" checked> All Levels</label>
+                <label class="filter-option"><input type="radio" name="filterExperience" value="entry"> Entry Level</label>
+                <label class="filter-option"><input type="radio" name="filterExperience" value="intermediate"> Intermediate</label>
+                <label class="filter-option"><input type="radio" name="filterExperience" value="expert"> Expert</label>
+            </div>
+        </aside>
+
+        <!-- JOBS FEED -->
+        <section class="jobs-feed">
+            <div class="jobs-feed-header">
+                <h2>Open Projects (<span id="jobsCountDisplay">0</span>)</h2>
+                <a href="post-job.html" class="post-job-cta-btn">
+                    <i class="fa-solid fa-plus"></i> Post a Job
+                </a>
+            </div>
+
+            <div id="jobsListContainer">
+                <div class="empty-jobs-state">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <h3>Loading available projects...</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // Sample fallback jobs shown when Supabase database is awaiting initial project connection
+        const DEMO_JOBS = [
+            {
+                id: 'demo-job-1',
+                title: 'Corporate Excel VBA Automated Financial Reporting Dashboard',
+                category: 'Excel Automation',
+                job_type: 'fixed',
+                budget_min: 450,
+                experience_level: 'intermediate',
+                estimated_duration: 'Less than 1 month',
+                description: 'We need an advanced Excel and VBA developer to build an automated macro dashboard that aggregates monthly sales data across 12 regional branches into standardized visual charts and P&L summaries.',
+                required_skills: ['Excel VBA', 'Financial Modeling', 'Pivot Tables', 'Dashboard Design'],
+                proposals_count: 3,
+                created_at: new Date().toISOString(),
+                client: { full_name: 'Apex Global Logistics', location: 'United Kingdom', is_verified: true }
+            },
+            {
+                id: 'demo-job-2',
+                title: 'Full-Stack Customer Portal with Auth and Invoice Download',
+                category: 'Web Engineering',
+                job_type: 'fixed',
+                budget_min: 1200,
+                experience_level: 'expert',
+                estimated_duration: '1 to 3 months',
+                description: 'Looking for an experienced web engineer to build a high-performance customer dashboard with secure authentication, invoice management, and automated PDF export capabilities.',
+                required_skills: ['JavaScript', 'HTML5/CSS3', 'Node.js', 'PostgreSQL', 'PDF Export'],
+                proposals_count: 5,
+                created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+                client: { full_name: 'Strata Tech Ventures', location: 'United States', is_verified: true }
+            },
+            {
+                id: 'demo-job-3',
+                title: 'Vector PDF Catalog & Brand Asset Redesign',
+                category: 'PDF & Design',
+                job_type: 'hourly',
+                hourly_rate_min: 35,
+                hourly_rate_max: 50,
+                experience_level: 'intermediate',
+                estimated_duration: 'Less than 1 month',
+                description: 'Need a meticulous designer to redesign our 24-page product catalog into high-resolution, print-ready and web-optimized interactive PDF formats with fillable forms.',
+                required_skills: ['PDF Design', 'Interactive Forms', 'Typography', 'Branding'],
+                proposals_count: 2,
+                created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+                client: { full_name: 'Nordic Retail Group', location: 'Germany', is_verified: true }
+            }
+        ];
+
+        async function loadJobs() {
+            const container = document.getElementById('jobsListContainer');
+            const countDisplay = document.getElementById('jobsCountDisplay');
+
+            const searchVal = document.getElementById('jobSearchInput').value.trim();
+            const categoryVal = document.querySelector('input[name="filterCategory"]:checked')?.value || 'all';
+            const typeVal = document.querySelector('input[name="filterType"]:checked')?.value || 'all';
+            const expVal = document.querySelector('input[name="filterExperience"]:checked')?.value || 'all';
+
+            let jobs = [];
+
+            try {
+                if (window.isSupabaseConfigured()) {
+                    jobs = await window.GahonshDB.Jobs.getOpenJobs({
+                        search: searchVal,
+                        category: categoryVal,
+                        job_type: typeVal,
+                        experience_level: expVal
+                    });
+                }
+            } catch (err) {
+                console.warn('[Jobs Feed] Supabase fetch error or not initialized:', err);
+            }
+
+            // If database has no jobs yet or is unconfigured, display demo initial feed
+            if (!jobs || jobs.length === 0) {
+                jobs = DEMO_JOBS.filter(j => {
+                    if (categoryVal !== 'all' && j.category !== categoryVal) return false;
+                    if (typeVal !== 'all' && j.job_type !== typeVal) return false;
+                    if (expVal !== 'all' && j.experience_level !== expVal) return false;
+                    if (searchVal) {
+                        const q = searchVal.toLowerCase();
+                        const titleMatch = j.title.toLowerCase().includes(q);
+                        const skillMatch = j.required_skills.some(s => s.toLowerCase().includes(q));
+                        if (!titleMatch && !skillMatch) return false;
+                    }
+                    return true;
+                });
+            }
+
+            countDisplay.innerText = jobs.length;
+
+            if (jobs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-jobs-state">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <h3>No projects found matching your criteria</h3>
+                        <p style="color:var(--text-slate); margin-top:8px;">Try clearing filters or be the first to post a new job!</p>
+                        <a href="post-job.html" class="post-job-cta-btn" style="margin-top:16px;">Post a Job Now</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = jobs.map(job => {
+                const budgetText = job.job_type === 'fixed' 
+                    ? `Fixed Budget: $${job.budget_min || 0}`
+                    : `Hourly: $${job.hourly_rate_min || 20} - $${job.hourly_rate_max || 50}/hr`;
+
+                const clientName = job.client?.full_name || 'Verified Client';
+                const clientLocation = job.client?.location || 'Remote';
+                const skillsHtml = (job.required_skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+                return `
+                    <article class="job-card" id="job-card-${job.id}">
+                        <div class="job-card-header">
+                            <div>
+                                <a href="job-details.html?id=${job.id}" class="job-card-title">${job.title}</a>
+                                <div class="job-meta-row" style="margin-top:6px;">
+                                    <span class="job-meta-item"><i class="fa-solid fa-layer-group"></i> ${job.category}</span>
+                                    <span class="job-meta-item"><i class="fa-solid fa-gauge-high"></i> ${job.experience_level}</span>
+                                    <span class="job-meta-item"><i class="fa-regular fa-clock"></i> ${job.estimated_duration || '1 to 3 months'}</span>
+                                    <span class="job-meta-item"><i class="fa-solid fa-paperclip"></i> ${job.proposals_count || 0} Proposals</span>
+                                </div>
+                            </div>
+                            <div class="job-budget-badge">${budgetText}</div>
+                        </div>
+
+                        <p class="job-description-preview">${job.description}</p>
+
+                        <div class="skills-tag-cloud">${skillsHtml}</div>
+
+                        <div class="job-card-footer">
+                            <div class="client-info-snippet">
+                                <i class="fa-solid fa-shield-check" style="color:var(--accent-cyan);"></i>
+                                <strong>${clientName}</strong> • ${clientLocation}
+                            </div>
+                            <a href="job-details.html?id=${job.id}" class="btn-view-job">View & Apply</a>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Event Bindings
+        document.getElementById('btnSearchJobs').onclick = loadJobs;
+        document.getElementById('jobSearchInput').onkeyup = (e) => {
+            if (e.key === 'Enter') loadJobs();
+        };
+
+        document.querySelectorAll('.filters-sidebar input').forEach(input => {
+            input.onchange = loadJobs;
+        });
+
+        // Mobile Nav Trigger
+        document.getElementById('mobile-menu-open-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.add('active');
+            document.getElementById('mobile-menu-container').classList.add('active');
+        };
+        document.getElementById('menu-close-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+        document.getElementById('menu-overlay').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', loadJobs);
+    </script>
+</body>
+</html>

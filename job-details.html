@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details & Proposals | Gahonsh Freelancing</title>
+    <meta name="description" content="View freelance project details, client requirements, budget, and submit proposals on Gahonsh Freelancing.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(0, 255, 204, 0.4);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --accent-green: #10b981;
+            --text-main: #f8fafc;
+            --text-slate: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+        header {
+            position: sticky; top: 0; width: 100%;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; border-bottom: 1px solid var(--border-color);
+            padding: 18px 6%; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.35rem; font-weight: 800; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--accent-cyan); }
+        nav { display: flex; align-items: center; gap: 20px; }
+        nav a { color: var(--text-slate); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.25s; }
+        nav a:hover, nav a.active { color: var(--accent-cyan); }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* MOBILE NAV */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; pointer-events: auto; }
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0; right: -320px; width: 300px; height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-nav-menu.active { right: 0; }
+        .mobile-nav-close { align-self: flex-end; font-size: 1.6rem; cursor: pointer; color: var(--text-slate); }
+        .mobile-nav-close:hover { color: var(--accent-cyan); }
+        .mobile-nav-menu a { color: var(--text-main); text-decoration: none; font-size: 1.05rem; font-weight: 600; }
+
+        .details-container {
+            max-width: 1200px;
+            margin: 40px auto 80px;
+            padding: 0 6%;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 35px;
+            align-items: start;
+        }
+
+        .main-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 35px;
+        }
+
+        .side-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .back-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .back-nav-link:hover {
+            transform: translateX(-3px);
+        }
+
+        .project-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .meta-badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .meta-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-slate);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-badge.highlight {
+            background: rgba(0, 255, 204, 0.1);
+            border-color: rgba(0, 255, 204, 0.3);
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .section-header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 24px 0 12px;
+            color: var(--text-main);
+        }
+
+        .job-full-desc {
+            color: var(--text-slate);
+            font-size: 1rem;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .skills-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        /* CLIENT SIDEBAR */
+        .client-avatar-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .client-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffcc, #0077ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #070c19;
+            font-weight: 800;
+        }
+
+        .client-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-slate);
+        }
+
+        .client-detail-item i {
+            color: var(--accent-cyan);
+            width: 16px;
+        }
+
+        /* PROPOSAL SUBMISSION & PROPOSALS LIST */
+        .proposal-form-section {
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .btn-action {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            color: #070c19;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        /* RECEIVED PROPOSALS CARDS */
+        .proposal-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .proposal-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-hire {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-hire:hover { opacity: 0.9; }
+
+        @media (max-width: 900px) {
+            .details-container { grid-template-columns: 1fr; }
+            .menu-toggle { display: block; }
+            header nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="jobs.html" style="color:var(--accent-cyan);">Find Work (Jobs)</a>
+        <a href="find-talent.html">Find Talent</a>
+        <a href="post-job.html">Post a Job</a>
+        <a href="marketplace-dashboard.html">Marketplace Portal</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <header>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Find Work</a>
+            <a href="find-talent.html">Find Talent</a>
+            <a href="post-job.html">Post a Job</a>
+            <a href="marketplace-dashboard.html">Portal</a>
+        </nav>
+    </header>
+
+    <main class="details-container">
+        <!-- MAIN JOB INFO & BIDDING -->
+        <div class="main-card">
+            <a href="jobs.html" class="back-nav-link"><i class="fa-solid fa-arrow-left"></i> Back to Jobs Feed</a>
+
+            <h1 class="project-title" id="jobTitle">Loading project details...</h1>
+            
+            <div class="meta-badges-row">
+                <span class="meta-badge highlight" id="jobBudgetBadge"><i class="fa-solid fa-dollar-sign"></i> Budget: Loading...</span>
+                <span class="meta-badge" id="jobCategoryBadge"><i class="fa-solid fa-layer-group"></i> Category</span>
+                <span class="meta-badge" id="jobExpBadge"><i class="fa-solid fa-gauge-high"></i> Intermediate</span>
+                <span class="meta-badge" id="jobDurationBadge"><i class="fa-regular fa-clock"></i> 1 to 3 months</span>
+                <span class="meta-badge" id="jobProposalsBadge"><i class="fa-solid fa-paperclip"></i> 0 Proposals</span>
+            </div>
+
+            <h3 class="section-header-title">Project Overview & Deliverables</h3>
+            <p class="job-full-desc" id="jobDescription">Loading...</p>
+
+            <h3 class="section-header-title">Skills & Expertise Needed</h3>
+            <div class="skills-cloud" id="skillsCloud"></div>
+
+            <!-- PROPOSALS SECTION (DYNAMIC FOR FREELANCER OR CLIENT) -->
+            <div class="proposal-form-section" id="proposalInteractionSection">
+                <h3 class="section-header-title" id="proposalSectionHeading">Submit a Proposal for this Project</h3>
+                
+                <!-- FREELANCER PROPOSAL FORM -->
+                <form id="proposalForm">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:16px;">
+                        <div class="form-group">
+                            <label for="bidAmount">Your Bid Amount ($ USD) *</label>
+                            <input type="number" id="bidAmount" class="form-control" placeholder="e.g. 450" required min="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliveryDays">Estimated Delivery Time (Days) *</label>
+                            <input type="number" id="deliveryDays" class="form-control" placeholder="e.g. 7" required min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coverLetter">Cover Letter & Technical Approach *</label>
+                        <textarea id="coverLetter" class="form-control" style="min-height:130px;" placeholder="Explain your methodology, relevant experience, and how you will execute this project flawlessly..." required minlength="20"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-action" id="btnSubmitProposal">
+                        <i class="fa-solid fa-paper-plane"></i> Send Proposal to Client
+                    </button>
+                </form>
+
+                <!-- CLIENT PROPOSALS MANAGEMENT VIEW -->
+                <div id="clientProposalsView" style="display:none;">
+                    <div id="clientProposalsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR: CLIENT CREDIBILITY -->
+        <aside class="side-card">
+            <h3 style="font-size:1.1rem; margin-bottom:16px; font-weight:700;">About the Client</h3>
+            <div class="client-avatar-block">
+                <div class="client-avatar" id="clientAvatarLetter">C</div>
+                <div>
+                    <h4 id="clientName" style="font-size:1.05rem;">Verified Client</h4>
+                    <span style="font-size:0.8rem; color:var(--accent-cyan);" id="clientVerifiedTag"><i class="fa-solid fa-shield-check"></i> Identity Verified</span>
+                </div>
+            </div>
+
+            <div class="client-detail-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <span id="clientLocation">Remote</span>
+            </div>
+            <div class="client-detail-item">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span id="clientMemberSince">Member of Gahonsh</span>
+            </div>
+            <div class="client-detail-item">
+                <i class="fa-solid fa-briefcase"></i>
+                <span>Payment Verified Guarantee</span>
+            </div>
+        </aside>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('id') || 'demo-job-1';
+        let currentJob = null;
+
+        async function loadJobDetails() {
+            try {
+                if (window.isSupabaseConfigured()) {
+                    currentJob = await window.GahonshDB.Jobs.getJobById(jobId);
+                }
+            } catch (err) {
+                console.warn('Supabase getJobById fallback:', err);
+            }
+
+            if (!currentJob) {
+                // Fallback demo job
+                currentJob = {
+                    id: jobId,
+                    title: 'Corporate Excel VBA Automated Financial Reporting Dashboard',
+                    category: 'Excel Automation',
+                    job_type: 'fixed',
+                    budget_min: 450,
+                    experience_level: 'intermediate',
+                    estimated_duration: 'Less than 1 month',
+                    description: `We are looking for an expert Excel and VBA automation specialist to architect an end-to-end financial dashboard.\n\nKey Requirements:\n• Automated multi-branch data aggregation via macros\n• Dynamic monthly P&L charts and variance indicators\n• Protected output formulas with clean modern styling\n• Turnaround within 7-10 days with documentation`,
+                    required_skills: ['Excel VBA', 'Financial Modeling', 'Pivot Tables', 'Macro Security'],
+                    proposals_count: 3,
+                    client: { full_name: 'Apex Global Logistics', location: 'London, UK', is_verified: true }
+                };
+            }
+
+            // Populate UI
+            document.getElementById('jobTitle').innerText = currentJob.title;
+            document.getElementById('jobBudgetBadge').innerHTML = currentJob.job_type === 'fixed'
+                ? `<i class="fa-solid fa-dollar-sign"></i> Fixed Budget: $${currentJob.budget_min || 0}`
+                : `<i class="fa-solid fa-dollar-sign"></i> Hourly: $${currentJob.hourly_rate_min || 20} - $${currentJob.hourly_rate_max || 50}/hr`;
+
+            document.getElementById('jobCategoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${currentJob.category}`;
+            document.getElementById('jobExpBadge').innerHTML = `<i class="fa-solid fa-gauge-high"></i> ${currentJob.experience_level}`;
+            document.getElementById('jobDurationBadge').innerHTML = `<i class="fa-regular fa-clock"></i> ${currentJob.estimated_duration || '1 to 3 months'}`;
+            document.getElementById('jobProposalsBadge').innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentJob.proposals_count || 0} Proposals`;
+            document.getElementById('jobDescription').innerText = currentJob.description;
+
+            // Skills
+            const skillsCloud = document.getElementById('skillsCloud');
+            skillsCloud.innerHTML = (currentJob.required_skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+            // Client Info
+            const clientName = currentJob.client?.full_name || 'Verified Client';
+            document.getElementById('clientName').innerText = clientName;
+            document.getElementById('clientAvatarLetter').innerText = clientName.charAt(0).toUpperCase();
+            document.getElementById('clientLocation').innerText = currentJob.client?.location || 'Remote / Worldwide';
+
+            // Check if current user is the owner of this job
+            const currentUser = window.GahonshAuthUI.getCurrentUser();
+            if (currentUser && currentJob.client_id === currentUser.id) {
+                renderClientProposalsView();
+            }
+        }
+
+        async function renderClientProposalsView() {
+            document.getElementById('proposalSectionHeading').innerText = 'Received Proposals for Your Review';
+            document.getElementById('proposalForm').style.display = 'none';
+            const clientView = document.getElementById('clientProposalsView');
+            clientView.style.display = 'block';
+
+            let proposals = [];
+            if (window.isSupabaseConfigured()) {
+                try {
+                    proposals = await window.GahonshDB.Proposals.getProposalsForJob(currentJob.id);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            const listContainer = document.getElementById('clientProposalsList');
+            if (proposals.length === 0) {
+                listContainer.innerHTML = '<p style="color:var(--text-slate);">No proposals received yet for this project.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = proposals.map(p => `
+                <div class="proposal-card" id="prop-${p.id}">
+                    <div class="proposal-card-header">
+                        <div>
+                            <strong>${p.freelancer?.full_name || 'Freelancer'}</strong>
+                            <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${p.bid_amount}</span> • <span>${p.delivery_time_days} days</span>
+                        </div>
+                        <div>
+                            ${p.status === 'accepted' ? '<span style="color:var(--accent-green); font-weight:700;">Hired ✓</span>' : `<button class="btn-hire" onclick="hireFreelancer('${p.id}')">Accept & Hire</button>`}
+                        </div>
+                    </div>
+                    <p style="font-size:0.9rem; color:var(--text-slate);">${p.cover_letter}</p>
+                </div>
+            `).join('');
+        }
+
+        window.hireFreelancer = async function(proposalId) {
+            if (!confirm('Accept this proposal and establish the contract?')) return;
+            try {
+                const contractId = await window.GahonshDB.Contracts.acceptProposalAndHire(proposalId);
+                window.GahonshAuthUI.showToast('🎉 Contract created and freelancer hired!');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (err) {
+                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Hiring failed'));
+            }
+        };
+
+        // Handle Proposal Submit
+        document.getElementById('proposalForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitProposal');
+            const currentUser = window.GahonshAuthUI.getCurrentUser();
+
+            if (!currentUser) {
+                window.GahonshAuthUI.openAuthModal('signup');
+                window.GahonshAuthUI.showToast('Please sign in as a Freelancer to bid.');
+                return;
+            }
+
+            const bidAmount = document.getElementById('bidAmount').value;
+            const deliveryDays = document.getElementById('deliveryDays').value;
+            const coverLetter = document.getElementById('coverLetter').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                if (window.isSupabaseConfigured()) {
+                    await window.GahonshDB.Proposals.submitProposal(currentJob.id, coverLetter, bidAmount, deliveryDays);
+                    window.GahonshAuthUI.showToast('🎉 Proposal submitted successfully!');
+                    document.getElementById('proposalForm').reset();
+                } else {
+                    window.GahonshAuthUI.showToast('Proposal validated! Connect Supabase to persist proposals to database.');
+                }
+            } catch (err) {
+                console.error(err);
+                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Submission failed.'));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Proposal to Client';
+            }
+        };
+
+        // Mobile Nav Trigger
+        document.getElementById('mobile-menu-open-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.add('active');
+            document.getElementById('mobile-menu-container').classList.add('active');
+        };
+        document.getElementById('menu-close-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+        document.getElementById('menu-overlay').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+
+        document.addEventListener('DOMContentLoaded', loadJobDetails);
+    </script>
+</body>
+</html>

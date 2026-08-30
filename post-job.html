@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job & Hire Top Talent | Gahonsh Freelancing</title>
+    <meta name="description" content="Post your freelance project on Gahonsh. Reach elite Excel experts, full-stack engineers, and digital specialists worldwide.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(0, 255, 204, 0.4);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --text-main: #f8fafc;
+            --text-slate: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+        header {
+            position: sticky; top: 0; width: 100%;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; border-bottom: 1px solid var(--border-color);
+            padding: 18px 6%; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.35rem; font-weight: 800; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--accent-cyan); }
+        nav { display: flex; align-items: center; gap: 20px; }
+        nav a { color: var(--text-slate); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.25s; }
+        nav a:hover, nav a.active { color: var(--accent-cyan); }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* MOBILE NAV */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; pointer-events: auto; }
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0; right: -320px; width: 300px; height: 100%;
+            background: #070c19;
+            border-left: 1px solid var(--border-color);
+            z-index: 2001;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-nav-menu.active { right: 0; }
+        .mobile-nav-close { align-self: flex-end; font-size: 1.6rem; cursor: pointer; color: var(--text-slate); }
+        .mobile-nav-close:hover { color: var(--accent-cyan); }
+        .mobile-nav-menu a { color: var(--text-main); text-decoration: none; font-size: 1.05rem; font-weight: 600; }
+
+        .form-container {
+            max-width: 850px;
+            margin: 40px auto 80px;
+            padding: 0 20px;
+        }
+
+        .post-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .form-header h1 span { color: var(--accent-cyan); }
+        .form-header p { color: var(--text-slate); font-size: 0.95rem; }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .form-group .sub-label {
+            font-size: 0.82rem;
+            color: var(--text-slate);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        textarea.form-control {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* SKILLS CHIP SELECTOR */
+        .skills-picker-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .skill-chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .skill-chip.active {
+            background: rgba(0, 255, 204, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .btn-submit-job {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            color: #070c19;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit-job:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .post-card { padding: 24px 18px; }
+            .grid-2-col { grid-template-columns: 1fr; }
+            .menu-toggle { display: block; }
+            header nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="jobs.html">Find Work (Jobs)</a>
+        <a href="find-talent.html">Find Talent</a>
+        <a href="post-job.html" style="color:var(--accent-cyan);">Post a Job</a>
+        <a href="marketplace-dashboard.html">Marketplace Portal</a>
+        <a href="about.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+
+    <header>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Find Work</a>
+            <a href="find-talent.html">Find Talent</a>
+            <a href="post-job.html" class="active">Post a Job</a>
+            <a href="marketplace-dashboard.html">Portal</a>
+        </nav>
+    </header>
+
+    <main class="form-container">
+        <div class="post-card">
+            <div class="form-header">
+                <h1>Post a <span>New Project</span></h1>
+                <p>Describe your technical requirements and connect with top-tier freelancers within minutes.</p>
+            </div>
+
+            <form id="postJobForm">
+                <div class="form-group">
+                    <label for="jobTitle">Project Title *</label>
+                    <span class="sub-label">Write a clear, descriptive headline summarizing the scope of work.</span>
+                    <input type="text" id="jobTitle" class="form-control" placeholder="e.g. Automated Excel Financial Dashboard with Macro Integration" required minlength="10">
+                </div>
+
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label for="jobCategory">Category *</label>
+                        <select id="jobCategory" class="form-control" required>
+                            <option value="Excel Automation">Excel & Spreadsheet Automation</option>
+                            <option value="Web Engineering">Full-Stack Web Development</option>
+                            <option value="PDF & Design">PDF Layouts & Brand Documents</option>
+                            <option value="Python & AI">Python & AI Workflow Automation</option>
+                            <option value="Data & Analytics">Data Intelligence & Dashboards</option>
+                            <option value="Mobile Development">Mobile Application Development</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jobType">Pricing Model *</label>
+                        <select id="jobType" class="form-control" required>
+                            <option value="fixed">Fixed Price Budget</option>
+                            <option value="hourly">Hourly Rate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" id="budgetRowFixed">
+                    <div class="form-group">
+                        <label for="budgetMin">Total Budget (USD $) *</label>
+                        <input type="number" id="budgetMin" class="form-control" placeholder="e.g. 500" min="20" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estimatedDuration">Estimated Duration *</label>
+                        <select id="estimatedDuration" class="form-control">
+                            <option value="Less than 1 month">Less than 1 month</option>
+                            <option value="1 to 3 months">1 to 3 months</option>
+                            <option value="3 to 6 months">3 to 6 months</option>
+                            <option value="More than 6 months">More than 6 months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="jobDescription">Detailed Scope & Requirements *</label>
+                    <span class="sub-label">Outline your deliverables, required tools, expectations, and timelines clearly.</span>
+                    <textarea id="jobDescription" class="form-control" placeholder="Provide complete specifications of what needs to be built or delivered..." required minlength="30"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="customSkillInput">Required Skills & Technologies (Select or Type)</label>
+                    <input type="text" id="customSkillInput" class="form-control" placeholder="Type a skill and press Enter (e.g. Excel VBA, React, Python)...">
+                    <div class="skills-picker-wrapper" id="skillsPicker">
+                        <span class="skill-chip active" data-skill="Excel VBA">Excel VBA</span>
+                        <span class="skill-chip active" data-skill="Financial Modeling">Financial Modeling</span>
+                        <span class="skill-chip" data-skill="JavaScript">JavaScript</span>
+                        <span class="skill-chip" data-skill="React">React</span>
+                        <span class="skill-chip" data-skill="Python">Python</span>
+                        <span class="skill-chip" data-skill="PDF Design">PDF Design</span>
+                        <span class="skill-chip" data-skill="PostgreSQL">PostgreSQL</span>
+                        <span class="skill-chip" data-skill="Data Analytics">Data Analytics</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="experienceLevel">Experience Level Required</label>
+                    <select id="experienceLevel" class="form-control">
+                        <option value="intermediate">Intermediate (Solid experience required)</option>
+                        <option value="entry">Entry Level (Looking for budget-friendly talent)</option>
+                        <option value="expert">Expert (Top tier specialized authority)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit-job" id="btnPublishJob">
+                    <i class="fa-solid fa-paper-plane"></i> Publish Project & Start Receiving Bids
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // Skills selection handling
+        const selectedSkills = new Set(['Excel VBA', 'Financial Modeling']);
+
+        document.querySelectorAll('.skill-chip').forEach(chip => {
+            chip.onclick = () => {
+                const skill = chip.dataset.skill;
+                if (selectedSkills.has(skill)) {
+                    selectedSkills.delete(skill);
+                    chip.classList.remove('active');
+                } else {
+                    selectedSkills.add(skill);
+                    chip.classList.add('active');
+                }
+            };
+        });
+
+        const customSkillInput = document.getElementById('customSkillInput');
+        customSkillInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = customSkillInput.value.trim();
+                if (val && !selectedSkills.has(val)) {
+                    selectedSkills.add(val);
+                    const chip = document.createElement('span');
+                    chip.className = 'skill-chip active';
+                    chip.innerText = val;
+                    chip.dataset.skill = val;
+                    chip.onclick = () => {
+                        selectedSkills.delete(val);
+                        chip.remove();
+                    };
+                    document.getElementById('skillsPicker').appendChild(chip);
+                    customSkillInput.value = '';
+                }
+            }
+        };
+
+        // Form Submit
+        document.getElementById('postJobForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnPublishJob');
+
+            const currentUser = window.GahonshAuthUI.getCurrentUser();
+            if (!currentUser) {
+                window.GahonshAuthUI.openAuthModal('signup');
+                window.GahonshAuthUI.showToast('Please sign in or create a Client account first.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing Project...';
+
+            const payload = {
+                title: document.getElementById('jobTitle').value.trim(),
+                category: document.getElementById('jobCategory').value,
+                job_type: document.getElementById('jobType').value,
+                budget_min: parseFloat(document.getElementById('budgetMin').value) || 0,
+                estimated_duration: document.getElementById('estimatedDuration').value,
+                description: document.getElementById('jobDescription').value.trim(),
+                required_skills: Array.from(selectedSkills),
+                experience_level: document.getElementById('experienceLevel').value
+            };
+
+            try {
+                if (window.isSupabaseConfigured()) {
+                    const newJob = await window.GahonshDB.Jobs.createJob(payload);
+                    window.GahonshAuthUI.showToast('🎉 Project published successfully!');
+                    setTimeout(() => {
+                        window.location.href = `job-details.html?id=${newJob.id}`;
+                    }, 1200);
+                } else {
+                    window.GahonshAuthUI.showToast('Project verified! Please connect Supabase in production to store live database records.');
+                    setTimeout(() => {
+                        window.location.href = 'jobs.html';
+                    }, 1500);
+                }
+            } catch (err) {
+                console.error(err);
+                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Failed to publish job.'));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publish Project & Start Receiving Bids';
+            }
+        };
+
+        // Mobile Nav Trigger
+        document.getElementById('mobile-menu-open-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.add('active');
+            document.getElementById('mobile-menu-container').classList.add('active');
+        };
+        document.getElementById('menu-close-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+        document.getElementById('menu-overlay').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+    </script>
+</body>
+</html>
