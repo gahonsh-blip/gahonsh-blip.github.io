@@ -97,7 +97,9 @@ To enable persistent database storage and real user authentication for the marke
 ├── script.js                   Theme Button Injector
 ├── docs/
 │   ├── marketplace-schema.sql  PostgreSQL Schema + RLS + Triggers
-│   └── SETUP.md                Comprehensive Setup Guide
+│   ├── SETUP.md                Comprehensive Setup Guide
+│   ├── DATABASE.md             Database Architecture & RLS Documentation
+│   └── API.md                  API & Integration Reference
 └── package.json                Dev Server & Build Scripts
 ```
 

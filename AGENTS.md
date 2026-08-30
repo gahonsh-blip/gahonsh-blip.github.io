@@ -1,125 +1,47 @@
 # AGENTS.md
 
 Repository guide for AI agents and human contributors working on the
-**Gahonsh Freelancing** GitHub Pages static site.
+**Gahonsh Freelancing & Marketplace** GitHub Pages repository.
 
-## Project Type
+## Project Type & Runtime
 
-- **Static website only.** Vanilla HTML5/CSS3/JS, no framework, no build
-  step, no package manager, no backend, no database.
-- Hosted on **GitHub Pages**. Content is served directly from the `main`
-  branch repository root.
-- Any change to files in `main` becomes live on deploy. Treat every edit
-  as **production-facing**.
+- **Type:** Agency Website & Freelance Marketplace.
+- **Frontend Runtime:** Vanilla HTML5 / CSS3 / JavaScript (ES6+), zero heavy build bundlers required.
+- **Backend & Database:** [Supabase](https://supabase.com) (PostgreSQL 15+, Auth, Row-Level Security, Triggers, RPC) with built-in `MockDataEngine` client-side fallback for instant zero-config testing.
+- **Hosting:** Hosted directly on **GitHub Pages** (`https://gahonsh-blip.github.io/`) from the `main` branch.
+- **Preview Server:** Node.js static preview server (`server.js`) on Port 3000.
 
 ## Non-Negotiable Rules
 
-1. **Never break a page.** Every page is a standalone self-contained HTML
-   file with its own inline `<style>` and `<script>` blocks. Validating a
-   change requires opening the affected page(s) in a browser.
-2. **Keep paths relative.** Links use relative paths (`index.html`,
-   `assets/logo.jpeg`, `images/hero.jpg`). Do not introduce absolute local
-   paths.
-3. **No secrets in code.** There are no credentials to add. Do not add API
-   keys, tokens, or personal data anywhere in the repo. The Formspree
-   endpoint and WhatsApp number are intentionally public business
-   contact-points; keep them that way and never treat them as secrets to
-   hide or rotate.
-4. **Do not regenerate/overwrite the archive.** `FullWebsiteCode.zip` and
-   `_tmp_unzip/` are retained as a historical snapshot of an older site
-   version. Code fixes belong in the live files, not in the archive.
-5. **Preserve SEO assets.** `sitemap.xml`, `robots.txt`, the Google
-   verification file, canonical URLs, and JSON-LD structured data must be
-   updated together whenever URLs or page titles change.
-6. **No templating shortcuts.** Pages are hand-maintained. When a change
-   affects shared UI (header/footer/scripts), it must be applied to every
-   page that shares it — there is no partial or shared template.
+1. **Never break a page.** Every HTML file is a standalone page with dedicated layout styling and scripts. Any structural change to shared headers/footers must be applied across all active pages.
+2. **Keep paths relative.** Links and assets use relative paths (`index.html`, `assets/logo.png`, `theme.css`). Do not introduce absolute local paths.
+3. **No secrets in code.** Never commit database service-role secret keys, admin passwords, or personal credentials. The public Supabase `anon` key, Formspree endpoint, and WhatsApp number are public client-side contact points.
+4. **Preserve SEO & Metadata assets.** `sitemap.xml`, `robots.txt`, `metadata.json`, Open Graph meta tags, Google verification file (`googleb9deb43124fcee02.html`), and JSON-LD structured data must remain intact and updated when URLs change.
+5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
+6. **Preserve Demo Fallback Capability.** `supabase-client.js` and `auth.js` must maintain fallback functionality so the marketplace remains fully testable even before live Supabase credentials are provided.
 
 ## Code Conventions
 
-- **HTML:** semantic sections, inline styles use CSS custom properties
-  defined in each page's `:root` (`--bg-dark`, `--accent-cyan`,
-  `--text-main`, etc.).
-- **CSS:** shared light-mode overrides in `theme.css`; per-page styles are
-  inline. `style.css` is a legacy animation-utility stylesheet and is not
-  loaded by any active page.
-- **JS:** plain functions/`const`, no imports. `script.js` injects the
-  light/dark toggle button; `theme.js` persists the choice in
-  `localStorage` (`light`/`dark`).
-- **Comments:** existing inline scripts mix English and Hinglish comments.
-  New comments should be concise English.
-- **Indentation:** 4 spaces for HTML/JS inline blocks.
+- **HTML:** Semantic sections with unique element IDs where required. CSS custom properties defined in each page's `:root` (`--bg-dark`, `--accent-cyan`, `--text-main`, etc.).
+- **CSS:** Shared light-mode overrides and mobile touch-target rules in `theme.css`; page-specific styles in `<style>` blocks.
+- **JS:** Plain ES6 functions, modules, and clear comments.
+- **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls.
 
-## Testing
+## Testing & Verification
 
-There is **no automated test infrastructure** (no CI, no `package.json`).
-Manual verification is the standard:
+- **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
+- **Core Checks:**
+  - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
+  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`).
+  - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
 
-- Serve locally: `python3 -m http.server 8000`.
-- Check the affected page(s) plus at least `index.html` for nav/footer
-  consistency.
-- Verify mobile navigation (hamburger overlay) at narrow widths.
-- If you touch shared behavior, verify: theme toggle, back-to-top,
-  WhatsApp links, portfolio filters, FAQ accordion, and stat counters on
-  the pages where they appear.
-- HTML validation (e.g., [validator.w3.org](https://validator.w3.org)) is
-  recommended for structural edits.
+## External Services & Endpoints
 
-Do **not** add a build/test framework without explicit user approval.
+- **Supabase Cloud:** Client-side integration via `supabase-client.js` & `auth.js`
+- **Formspree Endpoint:** `https://formspree.io/f/xzdqnoez`
+- **WhatsApp Support:** `+91 88251 83628` (`wa.me/918825183628`)
+- **Official Email:** `gahonsh@gmail.com`
+- **Google Maps Embed:** `https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7`
+- **Font Awesome:** Version 6.4.0 via cdnjs
 
-## Security Guidelines
-
-- Zero backend means zero server-side injection surface. The main risks
-  are **in-page**:
-  - Never insert unescaped user-controlled content into the HTML.
-  - The contact form must keep POSTing to the existing Formspree endpoint;
-    do not add a custom action or inline handlers that send data elsewhere.
-  - Newsletter input is only used to build a WhatsApp URL; keep it
-    validated client-side and `encodeURIComponent`-escaped.
-  - Do not add external scripts/CDNs without evaluating supply-chain risk.
-    Font Awesome (cdnjs) and Google Maps embed are the current external
-    integrations; document any new one.
-  - No entry point in this static site should ever hold a credential.
-- If a future dynamic backend is introduced, follow OWASP Top 10 practices
-  and do not weaken the current no-credentials posture.
-
-## Git Workflow
-
-- Branch and open a pull request for any non-trivial change. Do not push
-  directly to `main` for features.
-- Keep commits focused and message them in plain English (e.g.,
-  `fix: correct favicon reference on all pages`).
-- Before committing, confirm no stray files: the zip archive and
-  `_tmp_unzip/` are tracked intentionally; `Archive/` is the only
-  git-ignored path.
-- Do not commit editor junk, screenshots of working states, or temporary
-  files. Do not `git push` unless explicitly asked.
-- If it declares a license change, update the missing `LICENSE` only after
-  the owner confirms the intended license — there is no LICENSE file today.
-
-## Architecture Constraints
-
-- **Pages & anchors:** navigation links target `index.html`, `about.html`,
-  `services.html` (+ `#excel`, `#pdf`, `#web` anchors), `portfolio.html`,
-  `pricing.html`, `contact.html`. The footer links to `privacy-policy.html`
-  and `terms.html`. Do not rename pages without updating `sitemap.xml`,
-  `home.html`, and every navigation/footer across all pages.
-- **Contact form flow:** `contact.html` → Formspree POST (hidden `_next` =
-  `thank-you.html`) → success page. Preserve this flow.
-- **Portfolio data:** `.project-card[data-category]` + `.btn-filter`
-  buttons drive the client-side filter. Download links reference
-  `assets/projects/<file>` (files currently absent — flagged gap).
-- **Theme system:** `script.js` toggles `body.light-mode`; `theme.css`
-  overrides the CSS variables; `theme.js` persists across pages. Keep the
-  three files coherent when changing theming.
-- **External services (all public):**
-  - Formspree endpoint: `https://formspree.io/f/xzdqnoez`
-  - WhatsApp: `wa.me/918825183628`
-  - Email: `gahonsh@gmail.com`
-  - Google Maps embed + `maps.app.goo.gl/bPxXtFfKWn3NzwhJ7`
-  - Font Awesome 6.4.0 via cdnjs
-  - Social: LinkedIn, Instagram, YouTube, Facebook, X (URLs in page
-    footers and index JSON-LD)
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full technical reference and
-[docs/SETUP.md](docs/SETUP.md) for environment/deployment steps.
+See [ARCHITECTURE.md](ARCHITECTURE.md), [docs/SETUP.md](docs/SETUP.md), and [docs/DATABASE.md](docs/DATABASE.md) for full technical references.

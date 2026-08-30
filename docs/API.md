@@ -1,92 +1,97 @@
-# API / Integration Reference
+# API & Integration Reference
 
-This repository is a **static front-end only**. `docs/API.md` therefore
-documents the *external* endpoints the site talks to from the browser,
-plus the data each one receives. There is no in-house API server.
+This document outlines all external APIs, backend services, and client-side data access layers utilized by **Gahonsh Freelancing & Marketplace**.
 
-## 1. Contact Form → Formspree
+---
 
-| Field     | Value                                   |
-| --------- | --------------------------------------- |
-| Endpoint  | `https://formspree.io/f/xzdqnoez`       |
-| Method    | `POST`                                  |
-| EncType   | default `application/x-www-form-urlencoded` (HTML form) |
-| Security  | HTTPS from browser to Formspree         |
-| Handler   | `contact.html` → `<form id="project-contact-form">` |
+## 1. Supabase Cloud API (`supabase-client.js` & `auth.js`)
 
-### Payload fields
+The application integrates with Supabase via the client-side JavaScript SDK (`@supabase/supabase-js`) and PostgREST endpoints.
 
-| Field name    | Source element       | Type      | Purpose                         |
-| ------------- | -------------------- | --------- | ------------------------------- |
-| `_next`       | hidden input         | string    | Redirect target after submit (`thank-you.html`) |
-| `name`        | `#client-name`       | text      | Contact name / company           |
-| `email`       | `#client-email`      | email     | Business email                   |
-| `service`     | `#client-service`    | select    | Chosen service category          |
-| `budget`      | `#client-budget`     | select    | Estimated budget range (INR)     |
-| `message`     | `#client-message`    | textarea  | Project description              |
+### Authentication API (`auth.js`)
 
-### Behavior
+| Operation | SDK Method | Description |
+| :--- | :--- | :--- |
+| **User Sign Up** | `supabase.auth.signUp({ email, password, options: { data: { full_name, role } } })` | Registers user with email & password, triggers `handle_new_user()` to populate `public.profiles`. |
+| **User Sign In** | `supabase.auth.signInWithPassword({ email, password })` | Authenticates existing user and establishes active JWT session. |
+| **User Sign Out** | `supabase.auth.signOut()` | Clears active session and triggers UI auth state update. |
+| **Get Active Session** | `supabase.auth.getSession()` / `getUser()` | Retrieves currently logged-in user profile and role. |
 
-- On submit the browser POSTs the form; Formspree handles the message and
-  the browser follows `_next` to `thank-you.html`.
-- There is **no client-side AJAX** and no custom success handler in the
-  code.
-- Formspree account-side delivery (email forwarding, storage, GDPR
-  handling) is *Needs Verification* — it lives in the Formspree account,
-  not in this repository.
+### Marketplace Service API (`supabase-client.js`)
 
-## 2. WhatsApp Deep Links
+| Function | Endpoint / Table | Description |
+| :--- | :--- | :--- |
+| `getJobs(filters)` | `SELECT * FROM jobs` | Retrieves open jobs with keyword search, category, budget, and sort filters. |
+| `getJobById(id)` | `SELECT *, profiles(...) FROM jobs` | Retrieves specific job details along with client verification metadata. |
+| `createJob(jobData)` | `INSERT INTO jobs (...)` | Creates a new job posting for authenticated clients. |
+| `getProposals(jobId)` | `SELECT *, profiles(...) FROM proposals` | Retrieves proposals submitted for a specific job (Client only) or by a freelancer. |
+| `submitProposal(data)` | `INSERT INTO proposals (...)` | Submits a proposal with bid amount, delivery days, and cover letter. |
+| `acceptProposal(proposalId, jobId)` | `rpc('accept_proposal_and_create_contract', ...)` | Executes atomic transaction to hire freelancer and generate an active contract. |
+| `getContracts(userId)` | `SELECT * FROM contracts` | Fetches active and past contracts for the authenticated user. |
+| `getTalents(filters)` | `SELECT * FROM public_profiles` | Retrieves verified freelancer profiles with skill and rate filtering. |
+| `getProfile(userId)` | `SELECT * FROM profiles WHERE id = ...` | Retrieves user profile data. |
+| `updateProfile(userId, data)` | `UPDATE profiles SET ... WHERE id = ...` | Updates full name, title, hourly rate, bio, and skills array. |
 
-Every CTA is a plain link, `https://wa.me/<number>?text=<url-encoded string>`:
+---
 
-- Number: `918825183628`
-- Used by: pricing (per-plan quotes), services (per-service quotes),
-  contact (project consultation), index/contact footer (newsletter), and
-  the floating WhatsApp button.
+## 2. Contact Form → Formspree
 
-### Pre-filled messages
+| Attribute | Specification |
+| :--- | :--- |
+| **Endpoint** | `https://formspree.io/f/xzdqnoez` |
+| **Method** | `POST` |
+| **Encoding** | `application/x-www-form-urlencoded` |
+| **Handler** | `contact.html` → `<form id="project-contact-form">` |
+| **Redirect Target** | `thank-you.html` (via hidden `<input name="_next" value="thank-you.html">`) |
 
-| Context          | `text` parameter                        |
-| ---------------- | --------------------------------------- |
-| Newsletter       | `Hello Gahonsh, I would like to subscribe my email <email> to your newsletter pipeline.` (built client-side with `encodeURIComponent`) |
-| Starter plan     | `Hello Gahonsh, I want to get a custom quote for the Starter Plan.` |
-| Professional     | `Hello Gahonsh, I am interested in the Professional Plan milestones.` |
-| Business         | `Hello Gahonsh, I want to discuss the Enterprise Business Plan parameters.` |
-| Excel service    | `Hello Gahonsh, I am interested in Excel Automation services.` |
-| General consult  | `Hello Gahonsh, I want to start a project consultation.` |
+### Submitted Payload Fields
 
-No API key is needed; these are consumer deep links.
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `text` | Client / company representative name |
+| `email` | `email` | Client business email |
+| `service` | `select` | Selected service pillar (Excel Automation, Web Dev, PDF, AI Workflows, etc.) |
+| `budget` | `select` | Estimated budget tier (INR) |
+| `message` | `textarea` | Detailed scope / project description |
 
-## 3. Google Maps
+---
 
-- **Embed:** `<iframe src="https://www.google.com/maps/embed?pb=...">` in
-  `contact.html` — renders an interactive map (coordinates around
-  Jharkhand, India; exact region *Needs Verification* from the iframe's
-  `pb` parameter).
-- **Link:** `https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7` ("Open in Google
-  Maps").
-- No API key is present; the embed uses Google's public iframe endpoint.
+## 3. WhatsApp Deep Links
 
-## 4. Font Awesome (CDN)
+All instant inquiry CTAs utilize direct URL-encoded WhatsApp deep links:
+- **Phone Number:** `+91 88251 83628` (`wa.me/918825183628`)
+- **Format:** `https://wa.me/918825183628?text=<encoded-string>`
 
-- `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`
-- Loaded in `<head>` of `index.html`, `about.html`, `services.html`,
-  `portfolio.html`, `pricing.html`, `contact.html`, `thank-you.html`.
-- Loaded by `terms.html` and `privacy-policy.html` since the footer
-  WhatsApp link (with `fa-brands fa-whatsapp` icon) was added there.
+### Context-Specific Messages
 
-## 5. Structured Data (JSON-LD)
+| Context | Generated Message |
+| :--- | :--- |
+| **Newsletter** | `Hello Gahonsh, I would like to subscribe my email <email> to your newsletter pipeline.` |
+| **Starter Plan** | `Hello Gahonsh, I want to get a custom quote for the Starter Plan.` |
+| **Professional Plan** | `Hello Gahonsh, I am interested in the Professional Plan milestones.` |
+| **Enterprise Plan** | `Hello Gahonsh, I want to discuss the Enterprise Business Plan parameters.` |
+| **Excel Service** | `Hello Gahonsh, I am interested in Excel Automation services.` |
+| **Web Service** | `Hello Gahonsh, I am interested in Custom Full-Stack Web Development.` |
+| **General Consultation** | `Hello Gahonsh, I want to start a project consultation.` |
 
-Schema.org JSON-LD blocks embedded in the pages (no external call):
+---
 
-- **`index.html`**: `@graph` with `Organization` (including `sameAs`
-  social URLs), `WebSite`, and `FAQPage` (2 Q&As).
-- **`portfolio.html`, `thank-you.html`, `terms.html`,
-  `privacy-policy.html`**: small `Organization` blocks with name/url/logo.
+## 4. Google Maps Embed
 
-## 6. No Internal API
+- **Location:** `contact.html`
+- **Embed Source:** Standard public Google Maps iframe (`https://www.google.com/maps/embed?pb=...`)
+- **Direct Navigation Link:** `https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7`
 
-There is no REST/GraphQL endpoint, no function, and no server in this
-repository. If a backend is added later, document its endpoints here and in
-`ARCHITECTURE.md`, and keep the "no secrets in the client" rule
-(`SECURITY.md`).
+---
+
+## 5. Font Awesome CDN
+
+- **Resource:** `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`
+- Loaded across all pages for consistent iconography.
+
+---
+
+## 6. Structured Data (JSON-LD)
+
+- **`index.html`**: Schema.org `@graph` with `Organization`, `WebSite`, and `FAQPage` entities.
+- **`portfolio.html`, `pricing.html`, `services.html`, `contact.html`**: `Organization` metadata.

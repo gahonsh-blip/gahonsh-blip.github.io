@@ -1,62 +1,49 @@
 # Security Policy
 
-## Supported
+## 1. Supported Versions
 
-The latest commit on `main` is the supported version. GitHub Pages serves
-the repository directly, so this is also the deployed production version.
+The latest commit on the `main` branch of `gahonsh-blip/gahonsh-blip.github.io` is the supported production release served directly by GitHub Pages.
 
-## Reporting a Vulnerability
+---
 
-This is a public static marketing website. There is no software
-vulnerability-disclosure program configured for this repository.
+## 2. Reporting a Vulnerability
 
-If you believe you have found a security issue, report it privately to the
-site owner rather than opening a public issue:
+If you discover a security vulnerability, please report it privately to the site administrator rather than opening a public issue:
 
-- Email: **gahonsh@gmail.com** (as listed publicly on the site)
-- Please include: the page/URL affected, a description of the issue, and
-  steps to reproduce. Do not include personal or client data.
+- **Email:** `gahonsh@gmail.com`
+- **WhatsApp:** `+91 88251 83628`
+- Please include the affected URL/component, vulnerability description, and reproduction steps.
 
-## Security Posture
+---
 
-### What this site does not have
+## 3. Security Architecture & Threat Model
 
-- **No backend server, no API, no database** — there is no server-side
-  code, injection surface, or stored data in this repository.
-- **No authentication.** The site is intentionally public, read-only
-  content.
-- **No secrets stored in the repository.** Never add API keys, tokens,
-  passwords, or customer data to any file. The Formspree endpoint ID
-  (`/f/xzdqnoez`) and the WhatsApp number
-  (`wa.me/918825183628`) are **public business contact points**, not
-  credentials — do not treat them as secret material.
+### 3.1 Client-Side Credentials & Supabase Keys
+- **Public Anon Key Only:** The application strictly utilizes the Supabase `anon` public key in `supabase-config.js` or browser `localStorage`.
+- **Zero Secrets in Repository:** The `service_role` secret key, database master passwords, and administrative tokens must **NEVER** be committed to Git or exposed to client-side code.
+- **Row-Level Security (RLS):** All data access permissions, role boundaries (Client vs. Freelancer), and write restrictions are enforced at the PostgreSQL database level via RLS policies in `docs/marketplace-schema.sql`. Compromising client-side JavaScript cannot bypass PostgreSQL RLS.
 
-### What the site does with user data
+### 3.2 Authentication & Session Management
+- **Supabase Auth:** Leverages industry-standard JSON Web Tokens (JWT) signed and validated by Supabase Auth with secure cookie/localStorage storage.
+- **Role Verification:** User roles (`client` or `freelancer`) are bound to `public.profiles` upon account creation and verified on database mutations.
+- **Atomic Operations:** Critical operations (such as proposal acceptance and contract creation) are performed inside PostgreSQL RPC transactions (`accept_proposal_and_create_contract`) to prevent race conditions or partial writes.
 
-- **Contact form** (`contact.html`) sends name/email/service/budget/message
-  to the external **Formspree** service over HTTPS. Privacy (retention,
-  access, deletion) is governed by the Formspree account configuration —
-  see [docs/DATABASE.md](docs/DATABASE.md).
-- **Newsletter** box does not transmit anything; it opens WhatsApp with the
-  typed email embedded in the message text.
+### 3.3 Form & External Integrations Security
+- **Formspree Inquiries:** Contact inquiries (`contact.html`) are transmitted over TLS/HTTPS directly to Formspree (`https://formspree.io/f/xzdqnoez`).
+- **WhatsApp Deep Links:** All dynamic query strings (e.g. newsletter email, plan inquiries) are strictly validated and sanitized using `encodeURIComponent()` to mitigate URI injection risks.
+- **Third-Party CDN Integrity:** External scripts and stylesheets are limited to trusted providers:
+  - Font Awesome 6.4.0 (cdnjs)
+  - Google Maps official embed iframe
+  - Supabase JS SDK (CDN / bundled)
 
-### Rules for contributors
+### 3.4 Fallback Demo Mode Security
+- When live Supabase credentials are absent, the application operates in an interactive local demo sandbox (`MockDataEngine`). Demo data resides entirely in the user's local browser memory/localStorage and does not communicate with external servers.
 
-- Never log, echo, or commit personal identifiers beyond what the site's
-  public forms intentionally collect.
-- Never add third-party scripts/CDNs without evaluating supply-chain risk;
-  the only external scripts are Font Awesome (cdnjs), the Google Maps
-  embed, and the Formspree form action.
-- Keep all user input client-side validated and URL-encoded
-  (`encodeURIComponent`) wherever it flows into generated links.
-- Do not weaken the current no-credentials posture if dynamic features are
-  added later. Follow OWASP Top 10 practices for any future backend.
+---
 
-## Known Open Items (not vulnerabilities, but follow-ups)
+## 4. Security Best Practices for Contributors
 
-- ~~Favicon~~ — fixed: `assets/logo.png` generated and committed.
-- Portfolio download links reference unavailable `assets/projects/` files.
-- `images/` and `*-full.txt` are largely orphaned legacy assets
-  (`images/og-image.jpg` is now used for share previews).
-- There is no `.github/` config, CSP header, or custom-domain file. GitHub
-  Pages does not allow custom response headers.
+1. **Never commit secrets:** Do not add API keys, access tokens, or private customer records.
+2. **Never disable RLS:** Do not create PostgreSQL tables without `ENABLE ROW LEVEL SECURITY;`.
+3. **Prevent XSS:** Always sanitize and escape user-provided strings before rendering dynamic HTML elements.
+4. **Enforce Touch-Target Ergonomics:** Maintain minimum 44px (recommended 48px) touch targets for interactive controls.

@@ -1,48 +1,48 @@
 # Changelog
 
-All notable changes to this repository. Format based on
-[Keep a Changelog](https://keepachangelog.com/).
+All notable changes to the **Gahonsh Freelancing & Marketplace** repository. Format based on [Keep a Changelog](https://keepachangelog.com/).
 
-The local clone is a shallow, grafted copy whose history contains a single
-commit (`65ecbc5`). Entries before that commit cannot be reconstructed
-from available history.
+---
 
-## [Unreleased]
+## [1.2.0] - 2026-08-30
 
 ### Added
-
-- Initial repository documentation audit & complete reference files: `README.md`, `AGENTS.md`,
-  `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`, `.env.example`,
-  and `docs/` (`SETUP.md`, `API.md`, `DATABASE.md`).
-- Node.js preview server configuration (`server.js`, `package.json`, `metadata.json`) for zero-configuration container and local runs.
-- `assets/logo.png` favicon generated from `assets/logo.jpeg` (fixes 404 on
-  every page).
-- Open Graph and Twitter Card share-preview tags in `index.html` using
-  `images/og-image.jpg`.
-
-### Fixed
-
-- Removed the broken hardcoded Light/Dark button in `index.html` (called a
-  non-existent `changeMode()` and showed mojibake); only the working button
-  injected by `script.js` remains.
-- Replaced stray typographic-quote characters in the `contact.html` budget
-  dropdown options with clean `-` separators.
-- Added missing `fa-brands fa-whatsapp` footer link (and Font Awesome CSS)
-  to `terms.html` and `privacy-policy.html` for parity with the other
-  pages.
-
-## [2026-08-29] — 65ecbc5
+- **Upwork-Style Freelance Marketplace Modules:**
+  - `jobs.html` — Comprehensive job feed with multi-criteria filtering, search, and proposal counters.
+  - `job-details.html` — Detailed job requirements, client trust profile, proposal bidding form, and contract hiring workflow.
+  - `post-job.html` — Intuitive job creation wizard for clients with budget, duration, and dynamic skill tags.
+  - `find-talent.html` — Verified talent directory with skill clouds, hourly rates, and hiring actions.
+  - `marketplace-dashboard.html` — Dual-role dashboard for clients (jobs, proposals, contracts) and freelancers (bids, active projects, stats).
+- **Authentication & Database System (`auth.js`, `supabase-client.js`, `supabase-config.js`):**
+  - Supabase Auth integration with role selection (`Client` or `Freelancer`).
+  - Dynamic user profile management, avatar badges, and toast notification system.
+  - `MockDataEngine` providing complete interactive fallback testing when Supabase credentials are not yet configured.
+  - PostgreSQL schema definition (`docs/marketplace-schema.sql`) with Row-Level Security (RLS), triggers, and atomic contract creation RPC.
+- **Enhanced Mobile Navigation & Accessibility:**
+  - 48px minimum touch targets across all mobile navigation links and auth buttons.
+  - Ergonomic 48×48px circular close buttons with smooth tap animations and high-contrast styling in `theme.css`.
 
 ### Changed
+- Comprehensive synchronization of all repository documentation (`README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/API.md`, `docs/DATABASE.md`, `docs/SETUP.md`).
+- Unified light/dark theme persistence across all marketing and marketplace pages.
 
-- Enhanced `contact.html` with animation effects (scroll-reveal classes,
-  animated stat counters, hover-lift panels).
+---
 
-### Notes
+## [1.1.0] - 2026-08-29
 
-- The repository is a static GitHub Pages site. There is no versioned
-  release process; every commit to `main` is a production deploy.
-- Assets referenced but currently missing (favicon `assets/logo.png`,
-  portfolio samples under `assets/projects/`) are tracked as known gaps in
-  `ARCHITECTURE.md` — they are **not** listed as "removed" because they are
-  simply absent from the repository.
+### Added
+- Animated stat counters and scroll-reveal interactions on `contact.html` and `index.html`.
+- Open Graph and Twitter Card share metadata with `images/og-image.jpg`.
+- Generated favicon asset `assets/logo.png` from `assets/logo.jpeg`.
+
+### Fixed
+- Replaced non-functioning theme button on `index.html` with unified `script.js` theme injector.
+- Resolved typographic quote anomalies in `contact.html` budget options.
+- Added missing WhatsApp footer links and Font Awesome stylesheet to `terms.html` and `privacy-policy.html`.
+
+---
+
+## [1.0.0] - Initial Release
+
+- Core agency website with `index.html`, `about.html`, `services.html`, `portfolio.html`, `pricing.html`, `contact.html`, and `thank-you.html`.
+- Static Formspree contact form integration and WhatsApp inquiry deep links.
