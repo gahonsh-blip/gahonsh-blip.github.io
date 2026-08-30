@@ -18,6 +18,8 @@
             --accent-cyan: #00ffcc;
             --accent-blue: #0077ff;
             --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
             --text-main: #f8fafc;
             --text-slate: #94a3b8;
         }
@@ -55,7 +57,7 @@
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 36px 30px;
-            max-width: 420px;
+            max-width: 440px;
             width: 100%;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 204, 0.15);
@@ -73,9 +75,11 @@
             outline: none;
             text-align: center;
             letter-spacing: 2px;
+            transition: border-color 0.2s;
         }
         .auth-input:focus {
             border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
         }
 
         .btn-main {
@@ -92,6 +96,11 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-main:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
         }
 
         /* 2. TOP MASTER CONTROL BAR */
@@ -132,11 +141,11 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1.5px solid var(--accent-cyan);
             border-radius: 10px;
-            padding: 4px 12px;
+            padding: 4px 10px;
         }
 
         .page-dropdown-label {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: var(--accent-cyan);
             display: flex;
@@ -149,13 +158,14 @@
             background: #020617;
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 7px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             outline: none;
             cursor: pointer;
-            min-width: 220px;
+            min-width: 200px;
+            transition: border-color 0.2s;
         }
         .page-select:focus {
             border-color: var(--accent-cyan);
@@ -164,16 +174,17 @@
         .master-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .btn-ctrl {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 8px 14px;
+            padding: 7px 12px;
             border-radius: 8px;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -210,6 +221,11 @@
             color: var(--text-slate);
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-device:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
         }
         .btn-device.active {
             background: rgba(0, 255, 204, 0.15);
@@ -221,19 +237,20 @@
         .instruction-banner {
             background: #060d1d;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 8px 18px;
+            padding: 6px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             color: var(--text-slate);
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .instruction-chips {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -242,10 +259,10 @@
             align-items: center;
             gap: 6px;
             background: rgba(255, 255, 255, 0.04);
-            padding: 4px 10px;
+            padding: 3px 9px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: #cbd5e1;
         }
         .inst-chip i {
@@ -259,7 +276,7 @@
             align-items: center;
             justify-content: center;
             background: #030712;
-            padding: 12px;
+            padding: 10px;
             overflow: hidden;
             position: relative;
         }
@@ -284,7 +301,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.78);
+            background: rgba(0, 0, 0, 0.82);
             backdrop-filter: blur(6px);
             display: none;
             align-items: center;
@@ -297,15 +314,29 @@
             background: var(--bg-panel);
             border: 1.5px solid var(--accent-cyan);
             border-radius: 14px;
-            padding: 24px;
-            max-width: 500px;
+            padding: 22px;
+            max-width: 540px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 204, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 255, 204, 0.2);
             animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* Custom Modal Scrollbar */
+        .modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-box::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        .modal-box::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 204, 0.3);
+            border-radius: 3px;
+        }
+
         @keyframes modalPop {
-            from { transform: scale(0.94); opacity: 0; }
+            from { transform: scale(0.95); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
 
@@ -313,13 +344,13 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .modal-head h3 {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #fff;
             display: flex;
             align-items: center;
@@ -337,7 +368,7 @@
         }
 
         .form-label {
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: var(--text-slate);
         }
@@ -347,9 +378,9 @@
             background: #020617;
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 10px 12px;
+            padding: 9px 12px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             outline: none;
             transition: border-color 0.2s;
         }
@@ -360,14 +391,14 @@
         .upload-dropzone {
             border: 2px dashed rgba(0, 255, 204, 0.4);
             background: rgba(0, 255, 204, 0.03);
-            padding: 18px;
+            padding: 16px;
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .upload-dropzone:hover {
-            background: rgba(0, 255, 204, 0.08);
+        .upload-dropzone:hover, .upload-dropzone.drag-active {
+            background: rgba(0, 255, 204, 0.1);
             border-color: var(--accent-cyan);
         }
 
@@ -382,9 +413,10 @@
             border: 1px solid var(--border-color);
             padding: 3px 8px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             color: var(--text-slate);
             cursor: pointer;
+            transition: all 0.15s;
         }
         .preset-badge:hover {
             background: rgba(0, 255, 204, 0.12);
@@ -396,7 +428,9 @@
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 18px;
+            margin-top: 16px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
         }
 
         /* TOAST NOTIFICATION */
@@ -407,15 +441,25 @@
             background: #0f172a;
             border: 1px solid var(--accent-cyan);
             color: #fff;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 15px rgba(0, 255, 204, 0.2);
             display: none;
             align-items: center;
             gap: 10px;
             z-index: 1000000;
+            animation: modalPop 0.2s ease;
+        }
+
+        .shortcut-hint {
+            font-size: 0.72rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #cbd5e1;
+            margin-left: 4px;
         }
     </style>
 </head>
@@ -876,16 +920,16 @@
         function checkAuth() {
             if (sessionStorage.getItem("owner_auth") === "true") {
                 authScreen.style.display = "none";
-                loadPage(currentPage);
+                initDashboard();
             }
         }
 
         btnUnlock.addEventListener("click", () => {
-            if (passInput.value === AUTH_PASS) {
+            if (passInput.value.trim() === AUTH_PASS) {
                 sessionStorage.setItem("owner_auth", "true");
                 authScreen.style.display = "none";
-                showToast("स्वागत है! एडिटर तैयार है।");
-                loadPage(currentPage);
+                showToast("स्वागत है! एडिटर तैयार है।", "success");
+                initDashboard();
             } else {
                 alert("गलत पासकोड! कृपया सही पासकोड दर्ज करें (डिफ़ॉल्ट: 8825)");
             }
@@ -897,10 +941,38 @@
             location.reload();
         });
 
+        async function initDashboard() {
+            await fetchPagesList();
+            loadPage(currentPage);
+        }
+
+        // Dynamic page listing
+        async function fetchPagesList() {
+            try {
+                const res = await fetch("/api/pages-list");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.pages) && data.pages.length > 0) {
+                        const existingValues = Array.from(pageSelectDropdown.options).map(o => o.value);
+                        data.pages.forEach(p => {
+                            if (!existingValues.includes(p)) {
+                                const opt = document.createElement("option");
+                                opt.value = p;
+                                opt.textContent = `${p}`;
+                                pageSelectDropdown.appendChild(opt);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.log("Pages list fetch skipped:", e);
+            }
+        }
+
         // 2. PAGE SELECTION DROPDOWN
         pageSelectDropdown.addEventListener("change", (e) => {
             if (isDirty) {
-                if (!confirm("आपने बदलाव किए हैं। क्या आप बिना सेव किए दूसरा पेज खोलना चाहते हैं?")) {
+                if (!confirm("आपने इस पेज पर बदलाव किए हैं। क्या आप बिना सेव किए दूसरा पेज खोलना चाहते हैं?")) {
                     pageSelectDropdown.value = currentPage;
                     return;
                 }
@@ -941,6 +1013,10 @@
         function setupIframeInteractions(doc) {
             if (!doc || !doc.body) return;
 
+            // Remove existing helper styles if already present
+            const oldStyle = doc.getElementById("editor-helper-styles");
+            if (oldStyle) oldStyle.remove();
+
             // Inject Visual helper styles inside iframe
             const style = doc.createElement("style");
             style.id = "editor-helper-styles";
@@ -956,24 +1032,24 @@
                 }
                 [contenteditable="true"]:focus {
                     outline: 2px solid #00ffcc !important;
-                    background: rgba(0, 255, 204, 0.12) !important;
+                    background: rgba(0, 255, 204, 0.14) !important;
                 }
                 img.editable-img, .project-card img, .hero-img, .logo img {
                     cursor: pointer !important;
                     transition: transform 0.2s, outline 0.2s !important;
                 }
-                img:hover {
+                img.editable-img:hover {
                     outline: 3px solid #00ffcc !important;
                     outline-offset: 2px !important;
                 }
-                a.editable-link, a.btn, a.cta-btn, .nav-menu a {
-                    position: relative;
+                a.editable-link, a.btn, a.cta-btn, .nav-menu a, .btn-download-sample, .btn-pricing {
+                    cursor: pointer !important;
                 }
                 a:hover {
                     outline: 2px dashed #38bdf8 !important;
                 }
                 
-                /* Floating Card Quick Actions (Duplicate & Delete) */
+                /* Floating Card Quick Actions (Move Up, Move Down, Duplicate & Delete) */
                 .project-card, .service-card, .pricing-card, .feature-card, .step-card, .faq-item {
                     position: relative !important;
                 }
@@ -983,12 +1059,12 @@
                     right: 10px !important;
                     display: none !important;
                     align-items: center !important;
-                    gap: 6px !important;
+                    gap: 4px !important;
                     z-index: 9999 !important;
                     background: #0f172a !important;
                     border: 1.5px solid #00ffcc !important;
                     border-radius: 8px !important;
-                    padding: 4px 8px !important;
+                    padding: 4px 6px !important;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,255,204,0.3) !important;
                 }
                 .project-card:hover > .card-editor-toolbar,
@@ -1006,12 +1082,15 @@
                     font-size: 11px !important;
                     font-weight: 700 !important;
                     cursor: pointer !important;
-                    padding: 3px 8px !important;
+                    padding: 3px 6px !important;
                     border-radius: 4px !important;
                     display: inline-flex !important;
                     align-items: center !important;
-                    gap: 4px !important;
+                    gap: 3px !important;
                     transition: all 0.2s !important;
+                }
+                .card-tool-btn:hover {
+                    background: rgba(255, 255, 255, 0.2) !important;
                 }
                 .card-tool-btn.add:hover {
                     background: rgba(0, 255, 204, 0.3) !important;
@@ -1026,12 +1105,16 @@
             `;
             doc.head.appendChild(style);
 
+            // Listen for keyboard shortcuts inside iframe
+            doc.addEventListener("keydown", handleGlobalShortcuts);
+
             // 1. MAKE ALL TEXT & HEADINGS EDITABLE
             const textNodes = doc.querySelectorAll("h1, h2, h3, h4, h5, h6, p, span, li, dt, dd, b, strong, em, .stat-number, .stat-label, .badge");
             textNodes.forEach(el => {
                 if (el.closest('.card-editor-toolbar')) return;
                 if (el.children.length === 0 || el.tagName.startsWith('H') || el.tagName === 'P') {
                     el.contentEditable = "true";
+                    el.dataset.editorBound = "true";
                     el.addEventListener("input", () => {
                         isDirty = true;
                         saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
@@ -1043,7 +1126,7 @@
             const images = doc.querySelectorAll("img");
             images.forEach(img => {
                 img.classList.add("editable-img");
-                img.title = "फोटो या फाइल बदलने के लिए क्लिक करें";
+                img.dataset.editorImg = "true";
                 img.addEventListener("click", (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1055,7 +1138,7 @@
             const links = doc.querySelectorAll("a");
             links.forEach(a => {
                 if (a.closest('.card-editor-toolbar')) return;
-                a.title = "लिंक URL और नाम बदलने के लिए क्लिक करें";
+                a.dataset.editorLink = "true";
                 a.addEventListener("click", (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1067,35 +1150,68 @@
             const iframes = doc.querySelectorAll("iframe");
             iframes.forEach(ifr => {
                 if (ifr.src && (ifr.src.includes("youtube") || ifr.src.includes("youtu.be") || ifr.src.includes("vimeo"))) {
-                    ifr.title = "वीडियो लिंक बदलने के लिए क्लिक करें";
-                    ifr.parentElement.addEventListener("click", (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openVideoModal(ifr);
-                    });
+                    ifr.dataset.editorVideo = "true";
+                    if (ifr.parentElement) {
+                        ifr.parentElement.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openVideoModal(ifr);
+                        });
+                    }
                 }
             });
 
-            // 5. ATTACH CARD HOVER TOOLBARS (DUPLICATE & DELETE)
+            // 5. ATTACH CARD HOVER TOOLBARS (MOVE UP, MOVE DOWN, DUPLICATE & DELETE)
             attachCardToolbars(doc);
         }
 
         function attachCardToolbars(doc) {
             const cards = doc.querySelectorAll(".project-card, .service-card, .pricing-card, .feature-card, .step-card, .faq-item");
             cards.forEach(card => {
-                // Prevent duplicate toolbar injection
-                if (card.querySelector(".card-editor-toolbar")) return;
+                // Remove existing toolbar to avoid duplicate injection
+                const existing = card.querySelector(".card-editor-toolbar");
+                if (existing) existing.remove();
 
                 const toolbar = doc.createElement("div");
                 toolbar.className = "card-editor-toolbar";
                 toolbar.innerHTML = `
-                    <button type="button" class="card-tool-btn add" title="इस कार्ड की तरह नया कार्ड जोड़ें">
-                        <i class="fa-solid fa-clone"></i> + जोड़ें (Duplicate)
+                    <button type="button" class="card-tool-btn move-up" title="ऊपर ले जाएं (Move Up)">
+                        <i class="fa-solid fa-arrow-up"></i>
                     </button>
-                    <button type="button" class="card-tool-btn del" title="यह कार्ड हटाएं">
-                        <i class="fa-solid fa-trash-can"></i> हटाएं (Delete)
+                    <button type="button" class="card-tool-btn move-down" title="नीचे ले जाएं (Move Down)">
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                    <button type="button" class="card-tool-btn add" title="इस कार्ड की तरह नया कार्ड जोड़ें (Duplicate)">
+                        <i class="fa-solid fa-clone"></i> Duplicate
+                    </button>
+                    <button type="button" class="card-tool-btn del" title="यह कार्ड हटाएं (Delete)">
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                 `;
+
+                // Move Up Handler
+                toolbar.querySelector(".card-tool-btn.move-up").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (card.previousElementSibling) {
+                        card.parentNode.insertBefore(card, card.previousElementSibling);
+                        isDirty = true;
+                        saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                        showToast("कार्ड ऊपर खिसका दिया गया!", "info");
+                    }
+                });
+
+                // Move Down Handler
+                toolbar.querySelector(".card-tool-btn.move-down").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (card.nextElementSibling) {
+                        card.parentNode.insertBefore(card.nextElementSibling, card);
+                        isDirty = true;
+                        saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
+                        showToast("कार्ड नीचे खिसका दिया गया!", "info");
+                    }
+                });
 
                 // Clone Card Handler
                 toolbar.querySelector(".card-tool-btn.add").addEventListener("click", (e) => {
@@ -1112,7 +1228,7 @@
                         card.remove();
                         isDirty = true;
                         saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                        showToast("कार्ड हटा दिया गया!");
+                        showToast("कार्ड हटा दिया गया!", "warning");
                     }
                 });
 
@@ -1142,7 +1258,7 @@
 
             isDirty = true;
             saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-            showToast("✅ नया कार्ड उसी साइज़ और डिज़ाइन में जुड़ गया!");
+            showToast("✅ नया कार्ड उसी साइज़ और डिज़ाइन में जुड़ गया!", "success");
         }
 
         // 6. ADD NEW SECTION / CARD FROM TOP MENU
@@ -1316,7 +1432,7 @@
 
                 isDirty = true;
                 saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                showToast("✅ नया सेक्शन / कार्ड जुड़ गया! आप इसे एडिट कर सकते हैं।");
+                showToast("✅ नया सेक्शन / कार्ड जुड़ गया! आप इसे एडिट कर सकते हैं।", "success");
             }
 
             closeModal("modalAddSection");
@@ -1341,21 +1457,44 @@
                 if (alt) targetImgElement.setAttribute("alt", alt);
                 isDirty = true;
                 saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                showToast("फोटो सफलतापूर्वक बदल दी गई!");
+                showToast("फोटो सफलतापूर्वक बदल दी गई!", "success");
             }
             closeModal("modalImage");
         });
 
-        // FILE UPLOAD HANDLER
+        // FILE UPLOAD HANDLER FOR IMAGES
         const dropzone = document.getElementById("imageDropzone");
         const fileInput = document.getElementById("imageFileInput");
 
-        dropzone.addEventListener("click", () => fileInput.click());
-        fileInput.addEventListener("change", async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        function setupDragAndDrop(dropEl, inputEl, onFileSelected) {
+            if (!dropEl) return;
+            dropEl.addEventListener("click", () => inputEl && inputEl.click());
+            dropEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropEl.classList.add("drag-active");
+            });
+            dropEl.addEventListener("dragleave", (e) => {
+                e.preventDefault();
+                dropEl.classList.remove("drag-active");
+            });
+            dropEl.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropEl.classList.remove("drag-active");
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    onFileSelected(e.dataTransfer.files[0]);
+                }
+            });
+            if (inputEl) {
+                inputEl.addEventListener("change", (e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                        onFileSelected(e.target.files[0]);
+                    }
+                });
+            }
+        }
 
-            showToast("फाइल अपलोड हो रही है...");
+        setupDragAndDrop(dropzone, fileInput, async (file) => {
+            showToast("फोटो अपलोड हो रही है...", "info");
             const reader = new FileReader();
             reader.onload = async () => {
                 try {
@@ -1371,7 +1510,7 @@
                     const result = await res.json();
                     if (result.success) {
                         document.getElementById("imgSrcInput").value = result.url;
-                        showToast("✅ फाइल अपलोड हो गई: " + result.url);
+                        showToast("✅ फोटो अपलोड हो गई: " + result.url, "success");
                     } else {
                         alert("अपलोड विफल: " + result.message);
                     }
@@ -1499,74 +1638,68 @@
         const linkFileDropzone = document.getElementById("linkFileDropzone");
         const linkFileInput = document.getElementById("linkFileInput");
 
-        if (linkFileDropzone && linkFileInput) {
-            linkFileDropzone.addEventListener("click", () => linkFileInput.click());
-            linkFileInput.addEventListener("change", async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+        setupDragAndDrop(linkFileDropzone, linkFileInput, async (file) => {
+            const statusEl = document.getElementById("linkUploadStatus");
+            const statusText = document.getElementById("linkUploadStatusText");
+            statusEl.style.display = "flex";
+            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> अपलोड हो रहा है: ${file.name}...`;
 
-                const statusEl = document.getElementById("linkUploadStatus");
-                const statusText = document.getElementById("linkUploadStatusText");
-                statusEl.style.display = "flex";
-                statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> अपलोड हो रहा है: ${file.name}...`;
-
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        const res = await fetch("/api/upload-file", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                fileName: file.name,
-                                fileData: reader.result
-                            })
-                        });
-                        const result = await res.json();
-                        if (result.success) {
-                            document.getElementById("linkHrefInput").value = result.url;
-                            document.getElementById("linkDownloadCheck").checked = true;
-                            
-                            // Auto suggest clean text and select type
-                            const cleanName = file.name.replace(/\.[^/.]+$/, "");
-                            const ext = (result.extension || "").toLowerCase();
-                            
-                            if (['.xlsx', '.xls', '.csv', '.tsv', '.ods'].includes(ext)) {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (Excel)";
-                                detectAndHighlightFileType(".xlsx");
-                            } else if (ext === '.pdf') {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (PDF)";
-                                detectAndHighlightFileType(".pdf");
-                            } else if (['.docx', '.doc', '.rtf', '.txt', '.odt'].includes(ext)) {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (Word)";
-                                detectAndHighlightFileType(".docx");
-                            } else if (['.pptx', '.ppt', '.odp'].includes(ext)) {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (PPT)";
-                                detectAndHighlightFileType(".pptx");
-                            } else if (['.zip', '.rar', '.7z', '.tar', '.gz'].includes(ext)) {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (.ZIP)";
-                                detectAndHighlightFileType(".zip");
-                            } else if (['.mp4', '.webm', '.avi', '.mov', '.mp3', '.wav'].includes(ext)) {
-                                document.getElementById("linkTextInput").value = "Download " + cleanName + " (Media)";
-                                detectAndHighlightFileType(".mp4");
-                            } else {
-                                document.getElementById("linkTextInput").value = "Download " + file.name;
-                                detectAndHighlightFileType(ext);
-                            }
-
-                            statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> ✅ फ़ाइल सुरक्षित रूप से अपलोड हो गई: <strong>${result.url}</strong> (${result.size || ''})`;
-                            showToast("✅ फ़ाइल अपलोड हो गई और लिंक सेट हो गया!");
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const res = await fetch("/api/upload-file", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            fileName: file.name,
+                            fileData: reader.result
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        document.getElementById("linkHrefInput").value = result.url;
+                        document.getElementById("linkDownloadCheck").checked = true;
+                        
+                        // Auto suggest clean text and select type
+                        const cleanName = file.name.replace(/\.[^/.]+$/, "");
+                        const ext = (result.extension || "").toLowerCase();
+                        
+                        if (['.xlsx', '.xls', '.csv', '.tsv', '.ods'].includes(ext)) {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (Excel)";
+                            detectAndHighlightFileType(".xlsx");
+                        } else if (ext === '.pdf') {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (PDF)";
+                            detectAndHighlightFileType(".pdf");
+                        } else if (['.docx', '.doc', '.rtf', '.txt', '.odt'].includes(ext)) {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (Word)";
+                            detectAndHighlightFileType(".docx");
+                        } else if (['.pptx', '.ppt', '.odp'].includes(ext)) {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (PPT)";
+                            detectAndHighlightFileType(".pptx");
+                        } else if (['.zip', '.rar', '.7z', '.tar', '.gz'].includes(ext)) {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (.ZIP)";
+                            detectAndHighlightFileType(".zip");
+                        } else if (['.mp4', '.webm', '.avi', '.mov', '.mp3', '.wav'].includes(ext)) {
+                            document.getElementById("linkTextInput").value = "Download " + cleanName + " (Media)";
+                            detectAndHighlightFileType(".mp4");
                         } else {
-                            alert("फ़ाइल अपलोड विफल: " + result.message);
-                            statusEl.style.display = "none";
+                            document.getElementById("linkTextInput").value = "Download " + file.name;
+                            detectAndHighlightFileType(ext);
                         }
-                    } catch (err) {
-                        alert("फ़ाइल अपलोड एरर: " + err.message);
+
+                        statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> ✅ फ़ाइल सुरक्षित रूप से अपलोड हो गई: <strong>${result.url}</strong> (${result.size || ''})`;
+                        showToast("✅ फ़ाइल अपलोड हो गई और लिंक सेट हो गया!", "success");
+                    } else {
+                        alert("फ़ाइल अपलोड विफल: " + result.message);
                         statusEl.style.display = "none";
                     }
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+                } catch (err) {
+                    alert("फ़ाइल अपलोड एरर: " + err.message);
+                    statusEl.style.display = "none";
+                }
+            };
+            reader.readAsDataURL(file);
+        });
 
         document.getElementById("btnApplyLink").addEventListener("click", () => {
             if (targetLinkElement) {
@@ -1642,7 +1775,7 @@
                 
                 isDirty = true;
                 saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                showToast("✅ फ़ाइल व लिंक सफलतापूर्वक अपडेट हो गया!");
+                showToast("✅ फ़ाइल व लिंक सफलतापूर्वक अपडेट हो गया!", "success");
             }
             closeModal("modalLink");
         });
@@ -1664,44 +1797,38 @@
             });
         }
 
-        if (uniDropzone && uniFileInput) {
-            uniDropzone.addEventListener("click", () => uniFileInput.click());
-            uniFileInput.addEventListener("change", async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                showToast("फ़ाइल अपलोड हो रही है...");
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        const res = await fetch("/api/upload-file", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                fileName: file.name,
-                                fileData: reader.result
-                            })
-                        });
-                        const result = await res.json();
-                        if (result.success) {
-                            uniUploadedUrl.value = result.url;
-                            if (uniFileSizeBadge) uniFileSizeBadge.textContent = `${result.size || ''} (${result.extension || 'file'})`;
-                            if (uniTestDownloadLink) {
-                                uniTestDownloadLink.href = result.url;
-                                uniTestDownloadLink.setAttribute("download", result.fileName || file.name);
-                            }
-                            uniResultBox.style.display = "block";
-                            showToast("✅ फ़ाइल अपलोड हो गई: " + result.url);
-                        } else {
-                            alert("अपलोड विफल: " + result.message);
+        setupDragAndDrop(uniDropzone, uniFileInput, async (file) => {
+            showToast("फ़ाइल अपलोड हो रही है...", "info");
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const res = await fetch("/api/upload-file", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            fileName: file.name,
+                            fileData: reader.result
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        uniUploadedUrl.value = result.url;
+                        if (uniFileSizeBadge) uniFileSizeBadge.textContent = `${result.size || ''} (${result.extension || 'file'})`;
+                        if (uniTestDownloadLink) {
+                            uniTestDownloadLink.href = result.url;
+                            uniTestDownloadLink.setAttribute("download", result.fileName || file.name);
                         }
-                    } catch (err) {
-                        alert("अपलोड एरर: " + err.message);
+                        uniResultBox.style.display = "block";
+                        showToast("✅ फ़ाइल अपलोड हो गई: " + result.url, "success");
+                    } else {
+                        alert("अपलोड विफल: " + result.message);
                     }
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+                } catch (err) {
+                    alert("अपलोड एरर: " + err.message);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
 
         if (btnCopyUniUrl) {
             btnCopyUniUrl.addEventListener("click", () => {
@@ -1723,8 +1850,11 @@
         document.getElementById("btnApplyVideo").addEventListener("click", () => {
             if (targetVideoElement) {
                 let url = document.getElementById("videoUrlInput").value.trim();
-                // Format youtube link into embed format
-                if (url.includes("watch?v=")) {
+                // Format youtube link into embed format (supports shorts, youtu.be, and regular watch)
+                if (url.includes("youtube.com/shorts/")) {
+                    const videoId = url.split("youtube.com/shorts/")[1].split("?")[0].split("&")[0];
+                    url = "https://www.youtube.com/embed/" + videoId;
+                } else if (url.includes("watch?v=")) {
                     const videoId = url.split("watch?v=")[1].split("&")[0];
                     url = "https://www.youtube.com/embed/" + videoId;
                 } else if (url.includes("youtu.be/")) {
@@ -1738,7 +1868,7 @@
                 }
                 isDirty = true;
                 saveStatus.innerHTML = `<i class="fa-solid fa-circle-dot" style="color: #f59e0b;"></i> Unsaved Changes`;
-                showToast("वीडियो अपडेट हो गया!");
+                showToast("वीडियो लिंक अपडेट हो गया!", "success");
             }
             closeModal("modalVideo");
         });
@@ -1751,27 +1881,54 @@
             document.getElementById("linkHrefInput").value = url;
         };
 
-        // 9. MODAL HELPERS
+        // 9. MODAL HELPERS & BACKDROP DISMISSAL
         window.openModal = function(id) {
-            document.getElementById(id).style.display = "flex";
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.style.display = "flex";
+                // Click on overlay background to close
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        closeModal(id);
+                    }
+                };
+            }
         };
         window.closeModal = function(id) {
-            document.getElementById(id).style.display = "none";
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = "none";
         };
 
-        // 10. SAVE PAGE TO LIVE SERVER
+        // KEYBOARD SHORTCUTS (Ctrl+S / Cmd+S to Save, Escape to close modals)
+        function handleGlobalShortcuts(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                e.preventDefault();
+                btnSaveLive.click();
+            } else if (e.key === "Escape") {
+                document.querySelectorAll(".modal-overlay").forEach(m => {
+                    m.style.display = "none";
+                });
+            }
+        }
+        document.addEventListener("keydown", handleGlobalShortcuts);
+
+        // 10. SAVE PAGE TO LIVE SERVER (WITH CLEAN SERIALIZATION)
         btnSaveLive.addEventListener("click", async () => {
             saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-cyan);"></i> लाइव सेव हो रहा है...`;
 
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             
-            // Clean helper styling tag, toolbars, and contenteditables before saving clean HTML
+            // Clean helper styling tag, toolbars, contenteditable, and injected dataset before saving clean HTML
             const helperTag = doc.getElementById("editor-helper-styles");
             if (helperTag) helperTag.remove();
 
             doc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
             doc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
             doc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
+            doc.querySelectorAll("[data-editor-bound]").forEach(el => el.removeAttribute("data-editor-bound"));
+            doc.querySelectorAll("[data-editor-img]").forEach(el => el.removeAttribute("data-editor-img"));
+            doc.querySelectorAll("[data-editor-link]").forEach(el => el.removeAttribute("data-editor-link"));
+            doc.querySelectorAll("[data-editor-video]").forEach(el => el.removeAttribute("data-editor-video"));
 
             // Serialize clean HTML
             const updatedHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
@@ -1790,7 +1947,7 @@
                 if (data.success) {
                     isDirty = false;
                     saveStatus.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> लाइव सेव हो गया!`;
-                    showToast("🎉 " + currentPage + " लाइव सर्वर पर सेव हो गया है!");
+                    showToast("🎉 " + currentPage + " लाइव सर्वर पर सेव हो गया है!", "success");
                     // Re-render to restore interactive editing hooks
                     renderEditablePage(updatedHTML);
                 } else {
@@ -1805,7 +1962,7 @@
             }
         });
 
-        // 11. DOWNLOAD CURRENT FILE
+        // 11. DOWNLOAD CURRENT FILE (CLEAN SERIALIZATION)
         btnDownload.addEventListener("click", () => {
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             const cloneDoc = doc.cloneNode(true);
@@ -1814,6 +1971,10 @@
             cloneDoc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
             cloneDoc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
             cloneDoc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
+            cloneDoc.querySelectorAll("[data-editor-bound]").forEach(el => el.removeAttribute("data-editor-bound"));
+            cloneDoc.querySelectorAll("[data-editor-img]").forEach(el => el.removeAttribute("data-editor-img"));
+            cloneDoc.querySelectorAll("[data-editor-link]").forEach(el => el.removeAttribute("data-editor-link"));
+            cloneDoc.querySelectorAll("[data-editor-video]").forEach(el => el.removeAttribute("data-editor-video"));
 
             const updatedHTML = "<!DOCTYPE html>\n" + cloneDoc.documentElement.outerHTML;
             const blob = new Blob([updatedHTML], { type: "text/html" });
@@ -1823,7 +1984,7 @@
             a.download = currentPage;
             a.click();
             URL.revokeObjectURL(url);
-            showToast(currentPage + " डाउनलोड हो गया!");
+            showToast(currentPage + " डाउनलोड हो गया!", "success");
         });
 
         // 12. VIEW LIVE PAGE
@@ -1851,8 +2012,14 @@
         }
 
         // 14. TOAST NOTIFICATION
-        function showToast(msg) {
+        function showToast(msg, type = "info") {
             toastMsg.textContent = msg;
+            const icon = toast.querySelector("i");
+            if (icon) {
+                if (type === "success") icon.className = "fa-solid fa-circle-check";
+                else if (type === "warning") icon.className = "fa-solid fa-triangle-exclamation";
+                else if (type === "info") icon.className = "fa-solid fa-circle-info";
+            }
             toast.style.display = "flex";
             setTimeout(() => { toast.style.display = "none"; }, 3000);
         }
