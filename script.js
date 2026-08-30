@@ -70,3 +70,56 @@
     }
 })();
 
+// ============================================
+// SCROLL-TRIGGERED FADE-IN (INTERSECTION OBSERVER)
+// Applies to .why-card, .port-card, .process-card
+// ============================================
+(function() {
+    function initScrollAnimations() {
+        const targetElements = document.querySelectorAll('.why-card, .port-card, .process-card');
+        if (!targetElements.length) return;
+
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!('IntersectionObserver' in window) || prefersReducedMotion) {
+            targetElements.forEach(function(el) {
+                el.classList.add('revealed');
+            });
+            return;
+        }
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -40px 0px',
+            threshold: 0.12
+        };
+
+        const observer = new IntersectionObserver(function(entries, obs) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        targetElements.forEach(function(el, index) {
+            // If already in viewport on initial load, reveal with slight natural stagger
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                setTimeout(function() {
+                    el.classList.add('revealed');
+                }, (index % 4) * 80);
+            } else {
+                observer.observe(el);
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initScrollAnimations);
+    } else {
+        initScrollAnimations();
+    }
+})();
+

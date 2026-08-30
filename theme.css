@@ -344,3 +344,49 @@ body.light-mode .gahonsh-tab-btn.active {
     color: #0284c7 !important;
     border-bottom-color: #0284c7 !important;
 }
+
+/* ============================================
+   SCROLL-TRIGGERED FADE-IN ANIMATIONS
+   Targeting: .why-card, .port-card, .process-card
+   ============================================ */
+.why-card,
+.port-card,
+.process-card {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease,
+                background 0.3s ease,
+                box-shadow 0.3s ease;
+    will-change: opacity, transform;
+}
+
+.why-card.revealed,
+.port-card.revealed,
+.process-card.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.why-card.revealed:hover {
+    transform: translateY(-5px);
+}
+
+.port-card.revealed:hover {
+    transform: translateY(-5px);
+}
+
+.process-card.revealed:hover {
+    transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .why-card,
+    .port-card,
+    .process-card {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
