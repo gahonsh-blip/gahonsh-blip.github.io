@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#0077FF"/>
+   <Interior ss:Color="#070D19" ss:Pattern="Solid"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Sheet1">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Gahonsh Freelancing - ATTENDANCE MANAGER SAMPLE</Data></Cell>
+    <Cell><Data ss:Type="String">Category</Data></Cell>
+    <Cell><Data ss:Type="String">Status</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Metric 1</Data></Cell>
+    <Cell><Data ss:Type="String">Finance / Ops</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Metric 2</Data></Cell>
+    <Cell><Data ss:Type="String">Automation</Data></Cell>
+    <Cell><Data ss:Type="String">Optimized</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>

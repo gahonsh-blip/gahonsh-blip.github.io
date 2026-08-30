@@ -548,6 +548,8 @@
             document.getElementById('mobile-menu-container').classList.remove('active');
         };
 
+        window.initDashboard = initDashboard;
+
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(initDashboard, 300);
         });

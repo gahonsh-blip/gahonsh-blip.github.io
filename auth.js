@@ -811,6 +811,9 @@
             window.GahonshDB.Auth.onAuthStateChange((event, session, user) => {
                 _currentUser = user;
                 updateHeaderNav(user);
+                if (typeof window.initDashboard === 'function') {
+                    window.initDashboard();
+                }
             });
         }
     }

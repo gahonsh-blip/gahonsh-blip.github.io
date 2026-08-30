@@ -731,10 +731,10 @@
                     <label for="client-budget">Estimated Project Budget (INR)</label>
                     <select id="client-budget" name="budget" required>
                         <option value="" disabled selected>Select budget range...</option>
-                        <option value="Under IN 5,000">Under IN 5,000</option>
-                        <option value="IN 5,000 - IN 20,000">IN 5,000 - IN 20,000</option>
-                        <option value="IN 20,000 - IN 50,000">IN 20,000 - IN 50,000</option>
-                        <option value="IN 50,000+">IN 50,000+</option>
+                        <option value="Under ₹5,000 (INR)">Under ₹5,000 (INR)</option>
+                        <option value="₹5,000 - ₹20,000 (INR)">₹5,000 - ₹20,000 (INR)</option>
+                        <option value="₹20,000 - ₹50,000 (INR)">₹20,000 - ₹50,000 (INR)</option>
+                        <option value="₹50,000+ (INR)">₹50,000+ (INR)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -902,9 +902,32 @@
         });
 
         // ============================================
-        // SCROLL REVEAL ANIMATION (स्क्रॉल करने पर चले)
+        // SCROLL REVEAL ANIMATION & URL PARAMS PRE-FILL
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            // URL Param Pre-filling (e.g. ?invite=talent-1 or ?service=excel or ?plan=professional)
+            const urlParams = new URLSearchParams(window.location.search);
+            const serviceParam = urlParams.get('service');
+            const inviteParam = urlParams.get('invite');
+            const planParam = urlParams.get('plan');
+
+            const serviceSelect = document.getElementById('client-service');
+            const messageArea = document.getElementById('client-message');
+
+            if (serviceParam && serviceSelect) {
+                if (serviceParam.toLowerCase().includes('excel')) serviceSelect.value = 'Excel Dashboards & Automation';
+                else if (serviceParam.toLowerCase().includes('pdf')) serviceSelect.value = 'Interactive PDF Layout Design';
+                else if (serviceParam.toLowerCase().includes('web')) serviceSelect.value = 'Website Development & Setup';
+                else if (serviceParam.toLowerCase().includes('ai')) serviceSelect.value = 'AI Content & Workflow Solutions';
+                else if (serviceParam.toLowerCase().includes('powerpoint') || serviceParam.toLowerCase().includes('ppt')) serviceSelect.value = 'PowerPoint Presentation Design';
+            }
+
+            if (inviteParam && messageArea) {
+                messageArea.value = `Hello, I would like to consult with and invite specialist ID [${inviteParam}] for an upcoming project.`;
+            } else if (planParam && messageArea) {
+                messageArea.value = `Inquiry regarding the ${planParam.toUpperCase()} Plan subscription/project package.`;
+            }
+
             const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
             
             if (revealElements.length > 0) {
