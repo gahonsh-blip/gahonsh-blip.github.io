@@ -1,3 +1,6 @@
 Archive/
 node_modules/
 .DS_Store
+*.zip
+*-full.txt
+_tmp_unzip/
