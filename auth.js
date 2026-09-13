@@ -824,12 +824,25 @@
         init();
     }
 
+    /**
+     * Returns the current authenticated user. If the cached state has not been
+     * loaded yet (e.g. a page script runs before refreshUserState completes),
+     * this awaits a fresh refresh so consumers always get the resolved user.
+     */
+    async function ensureCurrentUser() {
+        if (!_currentUser && window.GahonshDB?.Auth?.getCurrentUser) {
+            await refreshUserState();
+        }
+        return _currentUser;
+    }
+
     window.GahonshAuthUI = {
         openAuthModal,
         openConfigModal,
         openProfileModal,
         showToast,
         refreshUserState,
-        getCurrentUser: () => _currentUser
+        getCurrentUser: () => _currentUser,
+        ensureCurrentUser
     };
 })();

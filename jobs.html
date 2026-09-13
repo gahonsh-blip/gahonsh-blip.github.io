@@ -754,8 +754,9 @@
                 console.warn('[Jobs Feed] Supabase fetch error or not initialized:', err);
             }
 
-            // If database has no jobs yet or is unconfigured, display demo initial feed
-            if (!jobs || jobs.length === 0) {
+            // Demo feed ONLY when Supabase is not configured yet.
+            // When configured, the real (possibly empty) database is the source of truth.
+            if ((!jobs || jobs.length === 0) && !window.isSupabaseConfigured()) {
                 jobs = DEMO_JOBS.filter(j => {
                     if (categoryVal !== 'all' && j.category !== categoryVal) return false;
                     if (typeVal !== 'all' && j.job_type !== typeVal) return false;
