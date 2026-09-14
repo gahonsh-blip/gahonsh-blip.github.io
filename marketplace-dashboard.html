@@ -497,17 +497,26 @@
                 return;
             }
 
-            container.innerHTML = contracts.map(c => `
+            const isClient = currentUser?.profile?.role === 'client';
+            container.innerHTML = contracts.map(c => {
+                const otherParty = isClient ? c.freelancer : c.client;
+                const otherName = otherParty?.full_name || (isClient ? 'Freelancer' : 'Client');
+                const otherLabel = isClient ? 'Freelancer' : 'Client';
+                return `
                 <div class="portal-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
                             <h3 style="font-size:1.15rem; margin-bottom:6px;">${c.job?.title || 'Contract'}</h3>
-                            <span class="status-badge status-${c.status}">${c.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Total: $${c.total_amount}</span>
+                            <span class="status-badge status-${c.status}">${c.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${c.agreed_amount}</span>
+                            <p style="font-size:0.85rem; color:var(--text-slate); margin-top:6px;">
+                                ${otherLabel}: <strong>${otherName}</strong> • Hired on ${new Date(c.created_at).toLocaleDateString()}
+                            </p>
                         </div>
                         <a href="job-details.html?id=${c.job?.id || ''}" class="btn-outline">View Project Details</a>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // Tab Switching

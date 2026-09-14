@@ -77,10 +77,11 @@
             const { data, error } = await client.auth.getUser();
             if (error || !data?.user) return null;
 
-            // Fetch user profile from public.profiles
+            // Fetch user profile from public.profiles (public-safe columns only;
+            // email/phone_number are column-restricted in the database)
             const { data: profile } = await client
                 .from('profiles')
-                .select('*')
+                .select('id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at')
                 .eq('id', data.user.id)
                 .maybeSingle();
 
@@ -160,7 +161,7 @@
 
             const { data, error } = await client
                 .from('profiles')
-                .select('*')
+                .select('id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at')
                 .eq('id', user.id)
                 .single();
 
@@ -459,6 +460,27 @@
 
             if (error) throw error;
             return data;
+        },
+
+        /**
+         * Returns the current authenticated freelancer's proposal for a job,
+         * or null when they have not applied yet. Uses auth.uid() server-side via RLS.
+         */
+        async getMyProposalForJob(jobId) {
+            const client = await getClient();
+            if (!client) return null;
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) return null;
+
+            const { data, error } = await client
+                .from('proposals')
+                .select('*')
+                .eq('job_id', jobId)
+                .eq('freelancer_id', user.id)
+                .maybeSingle();
+
+            if (error) throw error;
+            return data;
         }
     };
 
@@ -477,6 +499,31 @@
 
             if (error) throw error;
             return data; // Returns newly created contract_id
+        },
+
+        /**
+         * Returns the contract tied to a job for the authenticated participant
+         * (client or hired freelancer), or null when none exists yet.
+         */
+        async getContractForJob(jobId) {
+            const client = await getClient();
+            if (!client) return null;
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) return null;
+
+            const { data, error } = await client
+                .from('contracts')
+                .select(`
+                    *,
+                    job:jobs (id, title, status),
+                    client:profiles!contracts_client_id_fkey (id, full_name, avatar_url),
+                    freelancer:profiles!contracts_freelancer_id_fkey (id, full_name, avatar_url, title)
+                `)
+                .eq('job_id', jobId)
+                .maybeSingle();
+
+            if (error) throw error;
+            return data;
         },
 
         async getMyContracts() {

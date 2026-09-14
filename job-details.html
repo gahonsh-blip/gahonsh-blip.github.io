@@ -348,6 +348,101 @@
         }
 
         .btn-hire:hover { opacity: 0.9; }
+        .btn-hire:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-hire-outline {
+            background: none;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-hire-outline:hover { background: rgba(16, 185, 129, 0.1); }
+
+        /* STATUS MESSAGE AREA */
+        .proposal-info-box {
+            background: rgba(0, 119, 255, 0.08);
+            border: 1px solid rgba(0, 119, 255, 0.3);
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-size: 0.92rem;
+            color: var(--text-slate);
+            margin-bottom: 18px;
+            line-height: 1.55;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .proposal-info-box i { color: var(--accent-blue); margin-top: 2px; }
+        .proposal-error-box {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+        }
+        .proposal-error-box i { color: #ef4444; }
+        .proposal-success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+        .proposal-success-box i { color: var(--accent-green); }
+
+        /* FREELANCER'S OWN PROPOSAL STATUS CARD */
+        .my-proposal-status-card {
+            background: rgba(0, 255, 204, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* CONTRACT CARD (AFTER HIRING) */
+        .contract-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(0, 255, 204, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 14px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        .contract-card h4 {
+            color: var(--accent-green);
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .contract-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+        .contract-detail-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+        .contract-detail-item .cd-label {
+            font-size: 0.72rem;
+            color: var(--text-slate);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+        .contract-detail-item .cd-value {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
 
         @media (max-width: 900px) {
             .details-container { grid-template-columns: 1fr; }
@@ -419,12 +514,15 @@
             <h3 class="section-header-title">Skills & Expertise Needed</h3>
             <div class="skills-cloud" id="skillsCloud"></div>
 
-            <!-- PROPOSALS SECTION (DYNAMIC FOR FREELANCER OR CLIENT) -->
+                        <!-- PROPOSALS SECTION (DYNAMIC FOR FREELANCER OR CLIENT) -->
             <div class="proposal-form-section" id="proposalInteractionSection">
                 <h3 class="section-header-title" id="proposalSectionHeading">Submit a Proposal for this Project</h3>
-                
+
+                <!-- STATUS / INFO MESSAGE AREA -->
+                <div id="proposalMessage" style="display:none;"></div>
+
                 <!-- FREELANCER PROPOSAL FORM -->
-                <form id="proposalForm">
+                <form id="proposalForm" style="display:none;">
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:16px;">
                         <div class="form-group">
                             <label for="bidAmount">Your Bid Amount ($ USD) *</label>
@@ -450,7 +548,16 @@
                 <div id="clientProposalsView" style="display:none;">
                     <div id="clientProposalsList"></div>
                 </div>
+
+                <!-- FREELANCER'S OWN PROPOSAL STATUS VIEW -->
+                <div id="myProposalView" style="display:none;">
+                    <div id="myProposalDetails"></div>
+                </div>
+
+                <!-- CONTRACT DISPLAY (AFTER HIRING) -->
+                <div id="contractCard" style="display:none;"></div>
             </div>
+
         </div>
 
         <!-- SIDEBAR: CLIENT CREDIBILITY -->
@@ -530,165 +637,7 @@
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const jobId = urlParams.get('id') || 'demo-job-1';
-        let currentJob = null;
-
-        async function loadJobDetails() {
-            try {
-                if (window.isSupabaseConfigured()) {
-                    currentJob = await window.GahonshDB.Jobs.getJobById(jobId);
-                }
-            } catch (err) {
-                console.warn('Supabase getJobById fallback:', err);
-            }
-
-            if (!currentJob) {
-                // Fallback demo job
-                currentJob = {
-                    id: jobId,
-                    title: 'Corporate Excel VBA Automated Financial Reporting Dashboard',
-                    category: 'Excel Automation',
-                    job_type: 'fixed',
-                    budget_min: 450,
-                    experience_level: 'intermediate',
-                    estimated_duration: 'Less than 1 month',
-                    description: `We are looking for an expert Excel and VBA automation specialist to architect an end-to-end financial dashboard.\n\nKey Requirements:\n• Automated multi-branch data aggregation via macros\n• Dynamic monthly P&L charts and variance indicators\n• Protected output formulas with clean modern styling\n• Turnaround within 7-10 days with documentation`,
-                    required_skills: ['Excel VBA', 'Financial Modeling', 'Pivot Tables', 'Macro Security'],
-                    proposals_count: 3,
-                    client: { full_name: 'Apex Global Logistics', location: 'London, UK', is_verified: true }
-                };
-            }
-
-            // Populate UI
-            document.getElementById('jobTitle').innerText = currentJob.title;
-            document.getElementById('jobBudgetBadge').innerHTML = currentJob.job_type === 'fixed'
-                ? `<i class="fa-solid fa-dollar-sign"></i> Fixed Budget: $${currentJob.budget_min || 0}`
-                : `<i class="fa-solid fa-dollar-sign"></i> Hourly: $${currentJob.hourly_rate_min || 20} - $${currentJob.hourly_rate_max || 50}/hr`;
-
-            document.getElementById('jobCategoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${currentJob.category}`;
-            document.getElementById('jobExpBadge').innerHTML = `<i class="fa-solid fa-gauge-high"></i> ${currentJob.experience_level}`;
-            document.getElementById('jobDurationBadge').innerHTML = `<i class="fa-regular fa-clock"></i> ${currentJob.estimated_duration || '1 to 3 months'}`;
-            document.getElementById('jobProposalsBadge').innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentJob.proposals_count || 0} Proposals`;
-            document.getElementById('jobDescription').innerText = currentJob.description;
-
-            // Skills
-            const skillsCloud = document.getElementById('skillsCloud');
-            skillsCloud.innerHTML = (currentJob.required_skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
-
-            // Client Info
-            const clientName = currentJob.client?.full_name || 'Verified Client';
-            document.getElementById('clientName').innerText = clientName;
-            document.getElementById('clientAvatarLetter').innerText = clientName.charAt(0).toUpperCase();
-            document.getElementById('clientLocation').innerText = currentJob.client?.location || 'Remote / Worldwide';
-
-            // Check if current user is the owner of this job
-            const currentUser = window.GahonshAuthUI.getCurrentUser();
-            if (currentUser && currentJob.client_id === currentUser.id) {
-                renderClientProposalsView();
-            }
-        }
-
-        async function renderClientProposalsView() {
-            document.getElementById('proposalSectionHeading').innerText = 'Received Proposals for Your Review';
-            document.getElementById('proposalForm').style.display = 'none';
-            const clientView = document.getElementById('clientProposalsView');
-            clientView.style.display = 'block';
-
-            let proposals = [];
-            if (window.isSupabaseConfigured()) {
-                try {
-                    proposals = await window.GahonshDB.Proposals.getProposalsForJob(currentJob.id);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-
-            const listContainer = document.getElementById('clientProposalsList');
-            if (proposals.length === 0) {
-                listContainer.innerHTML = '<p style="color:var(--text-slate);">No proposals received yet for this project.</p>';
-                return;
-            }
-
-            listContainer.innerHTML = proposals.map(p => `
-                <div class="proposal-card" id="prop-${p.id}">
-                    <div class="proposal-card-header">
-                        <div>
-                            <strong>${p.freelancer?.full_name || 'Freelancer'}</strong>
-                            <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${p.bid_amount}</span> • <span>${p.delivery_time_days} days</span>
-                        </div>
-                        <div>
-                            ${p.status === 'accepted' ? '<span style="color:var(--accent-green); font-weight:700;">Hired ✓</span>' : `<button class="btn-hire" onclick="hireFreelancer('${p.id}')">Accept & Hire</button>`}
-                        </div>
-                    </div>
-                    <p style="font-size:0.9rem; color:var(--text-slate);">${p.cover_letter}</p>
-                </div>
-            `).join('');
-        }
-
-        window.hireFreelancer = async function(proposalId) {
-            if (!confirm('Accept this proposal and establish the contract?')) return;
-            try {
-                const contractId = await window.GahonshDB.Contracts.acceptProposalAndHire(proposalId);
-                window.GahonshAuthUI.showToast('🎉 Contract created and freelancer hired!');
-                setTimeout(() => window.location.reload(), 1500);
-            } catch (err) {
-                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Hiring failed'));
-            }
-        };
-
-        // Handle Proposal Submit
-        document.getElementById('proposalForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitProposal');
-            const currentUser = window.GahonshAuthUI.getCurrentUser();
-
-            if (!currentUser) {
-                window.GahonshAuthUI.openAuthModal('signup');
-                window.GahonshAuthUI.showToast('Please sign in as a Freelancer to bid.');
-                return;
-            }
-
-            const bidAmount = document.getElementById('bidAmount').value;
-            const deliveryDays = document.getElementById('deliveryDays').value;
-            const coverLetter = document.getElementById('coverLetter').value;
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
-
-            try {
-                if (window.isSupabaseConfigured()) {
-                    await window.GahonshDB.Proposals.submitProposal(currentJob.id, coverLetter, bidAmount, deliveryDays);
-                    window.GahonshAuthUI.showToast('🎉 Proposal submitted successfully!');
-                    document.getElementById('proposalForm').reset();
-                } else {
-                    window.GahonshAuthUI.showToast('Proposal validated! Connect Supabase to persist proposals to database.');
-                }
-            } catch (err) {
-                console.error(err);
-                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Submission failed.'));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Proposal to Client';
-            }
-        };
-
-        // Mobile Nav Trigger
-        document.getElementById('mobile-menu-open-btn').onclick = () => {
-            document.getElementById('menu-overlay').classList.add('active');
-            document.getElementById('mobile-menu-container').classList.add('active');
-        };
-        document.getElementById('menu-close-btn').onclick = () => {
-            document.getElementById('menu-overlay').classList.remove('active');
-            document.getElementById('mobile-menu-container').classList.remove('active');
-        };
-        document.getElementById('menu-overlay').onclick = () => {
-            document.getElementById('menu-overlay').classList.remove('active');
-            document.getElementById('mobile-menu-container').classList.remove('active');
-        };
-
-        document.addEventListener('DOMContentLoaded', loadJobDetails);
-    </script>
+    <!-- Role-aware client/freelancer logic lives in assets/js/job-details-flow.js -->
+    <script src="assets/js/job-details-flow.js"></script>
 </body>
 </html>

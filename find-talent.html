@@ -444,7 +444,9 @@
                 }
             }
 
-            if (!talentList || talentList.length === 0) {
+            // Demo profiles only when Supabase is not configured yet.
+            // When configured, the real (possibly empty) profiles table is the source of truth.
+            if ((!talentList || talentList.length === 0) && !window.isSupabaseConfigured()) {
                 talentList = DEMO_TALENT.filter(t => {
                     if (!searchVal) return true;
                     return t.full_name.toLowerCase().includes(searchVal) ||

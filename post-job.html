@@ -483,20 +483,92 @@
             }
         };
 
+        // Helper: resolve authenticated user safely (await auth refresh if needed)
+        async function resolveCurrentUser() {
+            if (window.GahonshAuthUI?.ensureCurrentUser) {
+                return await window.GahonshAuthUI.ensureCurrentUser();
+            }
+            return window.GahonshAuthUI?.getCurrentUser() || null;
+        }
+
+        // Show a blocking message in the post-job card
+        function showPostJobBlocked(messageHtml, showForm) {
+            const form = document.getElementById('postJobForm');
+            const postCard = form.closest('.post-card');
+            form.style.display = showForm ? 'block' : 'none';
+
+            let banner = document.getElementById('postJobBlockedBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'postJobBlockedBanner';
+                banner.style.cssText = 'margin-top:18px; padding:16px 18px; background:rgba(0,119,255,0.08); border:1px solid rgba(0,119,255,0.35); color:#bfdbfe; border-radius:10px; font-size:0.95rem; line-height:1.6; display:flex; gap:12px; align-items:flex-start;';
+                postCard.insertBefore(banner, form.nextSibling);
+            }
+            banner.innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent-blue); margin-top:2px;"></i><span>${messageHtml}</span>`;
+            banner.style.display = 'flex';
+        }
+
+        // Enforce role access on page load: only clients / admins may post jobs.
+        // The Supabase RLS policy remains the authoritative security boundary.
+        async function enforcePostJobAccess() {
+            const user = await resolveCurrentUser();
+            document.getElementById('postJobForm').style.display = 'block';
+
+            if (!user) {
+                showPostJobBlocked(
+                    'Please <a href="#" onclick="window.GahonshAuthUI.openAuthModal(\'signup\'); return false;" style="color:var(--accent-cyan);">sign in</a> as a Client to post a project. Freelancer accounts cannot create client jobs.',
+                    false
+                );
+                return;
+            }
+
+            const role = user.profile?.role || 'freelancer';
+            if (role !== 'client' && role !== 'admin') {
+                showPostJobBlocked(
+                    'Only <strong>Client</strong> accounts can post projects. Your account role is <strong>'+ role.toUpperCase() +'</strong>. ' +
+                    'If you are looking for freelance work, browse open projects on the <a href="jobs.html" style="color:var(--accent-cyan);">Jobs Feed</a> or switch account type in the sign-up flow.',
+                    false
+                );
+                return;
+            }
+
+            const banner = document.getElementById('postJobBlockedBanner');
+            if (banner) banner.style.display = 'none';
+        }
+
         // Form Submit
         document.getElementById('postJobForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnPublishJob');
 
-            const currentUser = window.GahonshAuthUI.getCurrentUser();
+            const currentUser = await resolveCurrentUser();
             if (!currentUser) {
                 window.GahonshAuthUI.openAuthModal('signup');
                 window.GahonshAuthUI.showToast('Please sign in or create a Client account first.');
                 return;
             }
 
+            const role = currentUser.profile?.role || 'freelancer';
+            if (role !== 'client' && role !== 'admin') {
+                showPostJobBlocked(
+                    'Only <strong>Client</strong> accounts can post projects. Your account role is <strong>'+ role.toUpperCase() +'</strong>.',
+                    false
+                );
+                window.GahonshAuthUI.showToast('❌ Only Client accounts can post projects.');
+                return;
+            }
+
+            if (!window.isSupabaseConfigured()) {
+                showPostJobBlocked(
+                    '<strong>Supabase is not configured yet.</strong> Please connect your database (click "Connect Database" above) to publish real projects. Jobs cannot be published to demo mode.',
+                    false
+                );
+                window.GahonshAuthUI.showToast('❌ Connect Supabase to publish a real project.');
+                return;
+            }
+
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing Project...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Posting job...';
 
             const payload = {
                 title: document.getElementById('jobTitle').value.trim(),
@@ -510,21 +582,20 @@
             };
 
             try {
-                if (window.isSupabaseConfigured()) {
-                    const newJob = await window.GahonshDB.Jobs.createJob(payload);
-                    window.GahonshAuthUI.showToast('🎉 Project published successfully!');
-                    setTimeout(() => {
-                        window.location.href = `job-details.html?id=${newJob.id}`;
-                    }, 1200);
-                } else {
-                    window.GahonshAuthUI.showToast('Project verified! Please connect Supabase in production to store live database records.');
-                    setTimeout(() => {
-                        window.location.href = 'jobs.html';
-                    }, 1500);
-                }
+                const newJob = await window.GahonshDB.Jobs.createJob(payload);
+                window.GahonshAuthUI.showToast('🎉 Job posted successfully!');
+                setTimeout(() => {
+                    window.location.href = `job-details.html?id=${newJob.id}`;
+                }, 1200);
             } catch (err) {
                 console.error(err);
-                window.GahonshAuthUI.showToast('❌ ' + (err.message || 'Failed to publish job.'));
+                let message = err.message || 'Failed to publish job.';
+                if (/row-level security/i.test(message) || /permission denied/i.test(message)) {
+                    message = 'Your account is not allowed to post jobs. Client accounts only.';
+                } else if (/violates check constraint/i.test(message)) {
+                    message = 'Please fill in all required fields correctly before publishing.';
+                }
+                window.GahonshAuthUI.showToast('❌ ' + message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publish Project & Start Receiving Bids';
@@ -544,6 +615,9 @@
             document.getElementById('menu-overlay').classList.remove('active');
             document.getElementById('mobile-menu-container').classList.remove('active');
         };
+
+        // Enforce role access once the auth state resolves
+        enforcePostJobAccess();
     </script>
 </body>
 </html>
