@@ -1,20 +1,24 @@
 /**
  * Gahonsh Freelancing Marketplace - Supabase Configuration
- * 
- * Instructions:
- * 1. Create a free project at https://supabase.com
- * 2. Run the SQL in docs/marketplace-schema.sql in Supabase SQL Editor
- * 3. Enter your Project URL and Anon Public Key below (or configure via UI modal in browser)
- * 
+ *
+ * Production defaults are baked in below so every visitor can use the live
+ * Supabase project immediately — no manual browser setup required.
+ *
+ * A per-browser override can still be saved via the in-app "Connect Supabase"
+ * modal (stored in localStorage) for local development/testing, but it is no
+ * longer required for production use.
+ *
  * NEVER put service_role secret key in this or any public file!
  */
 
 window.GAHONSH_CONFIG = window.GAHONSH_CONFIG || {
     // ------------------------------------------------------------------------
-    // REPLACE THESE PLACEHOLDERS WITH YOUR ACTUAL SUPABASE CREDENTIALS:
+    // PRODUCTION SUPABASE PROJECT DEFAULTS
     // ------------------------------------------------------------------------
-    SUPABASE_URL: localStorage.getItem('GAHONSH_SUPABASE_URL') || "",
-    SUPABASE_ANON_KEY: localStorage.getItem('GAHONSH_SUPABASE_ANON_KEY') || "",
+    SUPABASE_URL: localStorage.getItem('GAHONSH_SUPABASE_URL') || "https://evdpbombgymthzqgegqwr.supabase.co",
+
+    // Production public anon (publishable) key.
+    SUPABASE_ANON_KEY: localStorage.getItem('GAHONSH_SUPABASE_ANON_KEY') || "sb_publishable_2r2qEViIYoChRsXGFvpGqg__PeH8GFy",
     STORAGE_BUCKET: "job-attachments"
 };
 
