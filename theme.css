@@ -363,35 +363,42 @@ body.light-mode .gahonsh-tab-btn.active {
    SCROLL-TRIGGERED FADE-IN ANIMATIONS
    Targeting: .why-card, .port-card, .process-card
    ============================================ */
-.why-card,
-.port-card,
-.process-card {
+/* Nothing is hidden by CSS alone. script.js adds .gs-hide only to cards
+   that start below the fold, so the first paint is always correct and a
+   JS failure can never leave a card blank. */
+html.gs-anim .why-card.gs-hide,
+html.gs-anim .port-card.gs-hide,
+html.gs-anim .process-card.gs-hide {
     opacity: 0;
     transform: translateY(28px);
+}
+
+html.gs-anim .why-card,
+html.gs-anim .port-card,
+html.gs-anim .process-card {
     transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.3s ease,
                 background 0.3s ease,
                 box-shadow 0.3s ease;
-    will-change: opacity, transform;
 }
 
-.why-card.revealed,
-.port-card.revealed,
-.process-card.revealed {
+html.gs-anim .why-card.gs-visible,
+html.gs-anim .port-card.gs-visible,
+html.gs-anim .process-card.gs-visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-.why-card.revealed:hover {
+html.gs-anim .why-card.gs-visible:hover {
     transform: translateY(-5px);
 }
 
-.port-card.revealed:hover {
+html.gs-anim .port-card.gs-visible:hover {
     transform: translateY(-5px);
 }
 
-.process-card.revealed:hover {
+html.gs-anim .process-card.gs-visible:hover {
     transform: translateY(-4px);
 }
 
@@ -593,4 +600,171 @@ body.light-mode .mobile-nav-menu a.active {
     color: #0284c7 !important;
     background: rgba(2, 132, 199, 0.08) !important;
     border-color: rgba(2, 132, 199, 0.25) !important;
+}
+
+/* ============================================
+   SOFT MOTION SYSTEM
+   Shared, opt-in animations. Everything here is
+   additive polish: it never hides content on its
+   own, and html.gs-anim (set by script.js) is the
+   only switch that enables entrance animations.
+   ============================================ */
+
+/* --- 1. Scroll-reveal primitives (JS-gated) --- */
+/* Opt-in reveal for any element marked data-gs-reveal. Nothing is hidden by
+   CSS alone: script.js adds .gs-hide only to elements that start below the
+   fold, so the first paint is always correct and there is no flash of
+   content appearing then disappearing. The movement is a keyframe animation
+   with fill-mode backwards rather than a transform transition, so once it
+   finishes the element reverts to its own styles and page-specific :hover
+   transforms keep working (a transition would leave a translateY(0) that
+   outranks the hover rule). */
+@keyframes gsRevealUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes gsRevealLeft {
+    from { opacity: 0; transform: translateX(-28px); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes gsRevealRight {
+    from { opacity: 0; transform: translateX(28px); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes gsRevealScale {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: none; }
+}
+
+html.gs-anim [data-gs-reveal].gs-hide {
+    opacity: 0;
+}
+
+html.gs-anim [data-gs-reveal].gs-visible {
+    animation: gsRevealUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+html.gs-anim [data-gs-reveal="left"].gs-visible  { animation-name: gsRevealLeft; }
+html.gs-anim [data-gs-reveal="right"].gs-visible { animation-name: gsRevealRight; }
+html.gs-anim [data-gs-reveal="scale"].gs-visible { animation-name: gsRevealScale; }
+
+/* --- 2. Dynamic lists (JS-rendered) ---
+   Injected after load, so these must never be pre-hidden by CSS. They
+   fade in via an animation at insert time and end fully visible even if
+   the animation never runs (fill-mode both). No JS gate needed. */
+@keyframes gsCardIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.job-card,
+.talent-card,
+.portal-card {
+    animation: gsCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger the first few cards in a freshly rendered list. */
+.job-card:nth-child(2),
+.talent-card:nth-child(2),
+.portal-card:nth-child(2) { animation-delay: 0.06s; }
+.job-card:nth-child(3),
+.talent-card:nth-child(3),
+.portal-card:nth-child(3) { animation-delay: 0.12s; }
+.job-card:nth-child(4),
+.talent-card:nth-child(4),
+.portal-card:nth-child(4) { animation-delay: 0.18s; }
+.job-card:nth-child(n+5),
+.talent-card:nth-child(n+5),
+.portal-card:nth-child(n+5) { animation-delay: 0.22s; }
+
+/* --- 3. Hero entrance ---
+   Pure CSS so it needs no JS; fill-mode both always settles on opacity 1. */
+@keyframes gsHeroUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero > * {
+    animation: gsHeroUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero > *:nth-child(2) { animation-delay: 0.08s; }
+.hero > *:nth-child(3) { animation-delay: 0.16s; }
+.hero > *:nth-child(4) { animation-delay: 0.24s; }
+.hero > *:nth-child(n+5) { animation-delay: 0.32s; }
+
+/* --- 4. FAQ accordion ---
+   Gated on gs-anim, which script.js always sets (even under reduced
+   motion). Without JS the pages' own display:none applies and the FAQ
+   behaves exactly as before; with JS this replaces the un-animatable
+   display toggle with a class-driven max-height. script.js sets an exact
+   pixel height, so panels of any length animate correctly. Padding-bottom
+   is zeroed while collapsed, otherwise the page's own 20px would leave a
+   visible strip under a closed panel. */
+html.gs-anim .faq-answer {
+    display: block;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.35s ease,
+                padding-bottom 0.35s ease;
+}
+
+html.gs-anim .faq-answer.gs-open {
+    padding-bottom: 20px;
+    opacity: 1;
+}
+
+/* --- 5. Interactive micro-polish ---
+   Only elements whose page CSS does not already define a transition,
+   so page-specific hover effects keep working unchanged. */
+.faq-item,
+.filter-option,
+.preset-badge,
+.stat-item {
+    transition: border-color 0.3s ease,
+                background 0.3s ease,
+                box-shadow 0.3s ease,
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-item:hover,
+.filter-option:hover {
+    border-color: var(--border-hover, rgba(0, 119, 255, 0.4));
+}
+
+/* --- 6. Respect the user's motion preference ---
+   Last in the cascade so it overrides everything above. */
+@media (prefers-reduced-motion: reduce) {
+    html.gs-anim [data-gs-reveal],
+    html.gs-anim [data-gs-reveal].gs-hide,
+    .job-card,
+    .talent-card,
+    .portal-card,
+    .hero > * {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    html.gs-anim .why-card.gs-hide,
+    html.gs-anim .port-card.gs-hide,
+    html.gs-anim .process-card.gs-hide {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .faq-answer {
+        transition: none !important;
+    }
+
+    .faq-item,
+    .filter-option,
+    .preset-badge,
+    .stat-item {
+        transition: none !important;
+    }
 }

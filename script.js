@@ -71,55 +71,133 @@
 })();
 
 // ============================================
-// SCROLL-TRIGGERED FADE-IN (INTERSECTION OBSERVER)
-// Applies to .why-card, .port-card, .process-card
+// SOFT MOTION ENGINE
+// Progressive enhancement. html.gs-anim is what enables the entrance
+// animations and the FAQ accordion styles in theme.css, so it is set
+// unconditionally: if this script never runs, nothing is pre-hidden and
+// the site renders exactly as it did before.
 // ============================================
 (function() {
-    function initScrollAnimations() {
-        const targetElements = document.querySelectorAll('.why-card, .port-card, .process-card');
-        if (!targetElements.length) return;
+    document.documentElement.classList.add('gs-anim');
 
-        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (REDUCED || !('IntersectionObserver' in window)) return;
 
-        if (!('IntersectionObserver' in window) || prefersReducedMotion) {
-            targetElements.forEach(function(el) {
-                el.classList.add('revealed');
+    function initMotion() {
+        // Elements that opt in via data-gs-reveal, plus the legacy card
+        // classes that already relied on a .revealed class.
+        const legacy = document.querySelectorAll('.why-card, .port-card, .process-card');
+        const opts = document.querySelectorAll('[data-gs-reveal]');
+        // Skip targets nested inside another target, otherwise the inner
+        // element would animate separately and be hidden by the outer one.
+        const targets = Array.from(new Set([...legacy, ...opts]))
+            .filter(function(el) {
+                return !el.parentElement || !el.parentElement.closest('[data-gs-reveal]');
             });
-            return;
-        }
-
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px 0px -40px 0px',
-            threshold: 0.12
-        };
+        if (!targets.length) return;
 
         const observer = new IntersectionObserver(function(entries, obs) {
             entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                    obs.unobserve(entry.target);
-                }
+                if (!entry.isIntersecting) return;
+                // Remove the hiding class as we reveal. Leaving it in place
+                // would re-apply opacity:0 once the animation finishes, since
+                // the keyframes do not fill forwards.
+                entry.target.classList.remove('gs-hide');
+                entry.target.classList.add('gs-visible');
+                entry.target.classList.add('revealed'); // legacy hook
+                obs.unobserve(entry.target);
             });
-        }, observerOptions);
+        }, { root: null, rootMargin: '0px 0px -40px 0px', threshold: 0.12 });
 
-        targetElements.forEach(function(el, index) {
-            // If already in viewport on initial load, reveal with slight natural stagger
+        targets.forEach(function(el) {
             const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                setTimeout(function() {
-                    el.classList.add('revealed');
-                }, (index % 4) * 80);
-            } else {
-                observer.observe(el);
-            }
+            // Only elements that start below the fold are hidden, and only
+            // after this runs. Anything already on screen stays visible, so
+            // the first paint is never wrong and nothing can flash.
+            if (rect.top < window.innerHeight) return;
+            el.classList.add('gs-hide');
+            observer.observe(el);
         });
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initScrollAnimations);
+        document.addEventListener('DOMContentLoaded', initMotion);
     } else {
-        initScrollAnimations();
+        initMotion();
+    }
+})();
+
+// ============================================
+// FAQ ACCORDION (smooth max-height animation)
+// The pages used display:none/block, which cannot animate. This replaces
+// that with the .gs-open class plus a measured pixel max-height. The inline
+// height is deliberately kept after opening: clearing it would fall back to
+// the stylesheet's max-height:0 and collapse the panel again.
+// ============================================
+(function() {
+    function initFaq() {
+        const questions = document.querySelectorAll('.faq-question');
+        if (!questions.length) return;
+
+        function measureOpenHeight(panel) {
+            // Measure in the fully-open state with transitions suppressed.
+            // box-sizing is border-box, so max-height includes padding: if we
+            // measure while the 20px bottom padding is still animating in,
+            // the value is too small and the text gets clipped.
+            const prev = panel.style.transition;
+            panel.style.transition = 'none';
+            panel.classList.add('gs-open');
+            const h = panel.scrollHeight;
+            void panel.offsetHeight;
+            panel.style.transition = prev;
+            return h;
+        }
+
+        function openPanel(panel) {
+            panel.style.maxHeight = measureOpenHeight(panel) + 'px';
+        }
+
+        function closePanel(panel) {
+            // Pin the current height first, then animate down to 0.
+            panel.style.maxHeight = panel.scrollHeight + 'px';
+            void panel.offsetHeight; // force reflow so the change animates
+            panel.classList.remove('gs-open');
+            panel.style.maxHeight = '0px';
+        }
+
+        questions.forEach(function(q) {
+            const answer = q.nextElementSibling;
+            if (answer && answer.classList.contains('faq-answer')) {
+                answer.style.display = ''; // drop leftover inline display
+            }
+
+            q.addEventListener('click', function() {
+                const panel = q.nextElementSibling;
+                const icon = q.querySelector('i');
+                if (!panel || !panel.classList.contains('faq-answer')) return;
+
+                if (panel.classList.contains('gs-open')) {
+                    closePanel(panel);
+                    if (icon) icon.className = 'fa-solid fa-plus';
+                } else {
+                    openPanel(panel);
+                    if (icon) icon.className = 'fa-solid fa-minus';
+                }
+            });
+        });
+
+        // Re-measure open panels so longer/shorter content still fits.
+        window.addEventListener('resize', function() {
+            document.querySelectorAll('.faq-answer.gs-open').forEach(function(panel) {
+                panel.style.maxHeight = measureOpenHeight(panel) + 'px';
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFaq);
+    } else {
+        initFaq();
     }
 })();
 

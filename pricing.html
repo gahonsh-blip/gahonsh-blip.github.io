@@ -859,8 +859,8 @@
 
     <!-- STRATEGIC FEATURE COMPARISON MATRIX TABLE (CONSISTENT NAMES) -->
     <section class="comparison-section">
-        <h2 class="section-title">Features Comparison Matrix</h2>
-        <p class="section-subtitle">Analyze standard parameters across our tiered development models.</p>
+        <h2 class="section-title" data-gs-reveal>Features Comparison Matrix</h2>
+        <p class="section-subtitle" data-gs-reveal>Analyze standard parameters across our tiered development models.</p>
         
         <table class="comp-table">
             <thead>
@@ -908,8 +908,8 @@
 
     <!-- INTEGRATED SYSTEM FAQs SECTION (PRICING SPECIFIC UPGRADE) -->
     <section class="faq-section">
-        <h2 class="section-title">Pricing Frequently Asked Questions</h2>
-        <p class="section-subtitle">Clear answers to help you understand our operational onboarding and payment loops.</p>
+        <h2 class="section-title" data-gs-reveal>Pricing Frequently Asked Questions</h2>
+        <p class="section-subtitle" data-gs-reveal>Clear answers to help you understand our operational onboarding and payment loops.</p>
         <div class="faq-container">
             <div class="faq-item">
                 <div class="faq-question">What's included in revisions? <i class="fa-solid fa-plus"></i></div>
@@ -1017,21 +1017,8 @@
         menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
         menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
 
-        // FAQ SLIDE SYSTEM
-        const faqQuestions = document.querySelectorAll('.faq-question');
-        faqQuestions.forEach(q => {
-            q.addEventListener('click', () => {
-                const answer = q.nextElementSibling;
-                const icon = q.querySelector('i');
-                if(answer.style.display === 'block') {
-                    answer.style.display = 'none';
-                    icon.className = 'fa-solid fa-plus';
-                } else {
-                    answer.style.display = 'block';
-                    icon.className = 'fa-solid fa-minus';
-                }
-            });
-        });
+        // FAQ accordion is handled centrally in script.js (.gs-open class)
+        // so the panels can animate instead of snapping open and shut.
 
         const btnTop = document.getElementById('btn-top');
         window.addEventListener('scroll', () => {

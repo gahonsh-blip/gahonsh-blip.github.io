@@ -992,8 +992,8 @@
     </section>
 
     <section class="comparison-section">
-        <h2 class="section-title">Service Features Blueprint</h2>
-        <p class="section-subtitle">Compare our service features across different plans.</p>
+        <h2 class="section-title" data-gs-reveal>Service Features Blueprint</h2>
+        <p class="section-subtitle" data-gs-reveal>Compare our service features across different plans.</p>
         
         <table class="comp-table">
             <thead>
@@ -1034,8 +1034,8 @@
     </section>
 
     <section class="faq-section">
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        <p class="section-subtitle">Quick answers to standard operational questions regarding our delivery channels.</p>
+        <h2 class="section-title" data-gs-reveal>Frequently Asked Questions</h2>
+        <p class="section-subtitle" data-gs-reveal>Quick answers to standard operational questions regarding our delivery channels.</p>
         <div class="faq-container">
             <div class="faq-item">
                 <div class="faq-question">How long does delivery take? <i class="fa-solid fa-plus"></i></div>
@@ -1146,21 +1146,8 @@
         menuCloseBtn.addEventListener('click', () => toggleMobileMenu(false));
         menuOverlay.addEventListener('click', () => toggleMobileMenu(false));
 
-        // FAQ SLIDE SYSTEM
-        const faqQuestions = document.querySelectorAll('.faq-question');
-        faqQuestions.forEach(q => {
-            q.addEventListener('click', () => {
-                const answer = q.nextElementSibling;
-                const icon = q.querySelector('i');
-                if(answer.style.display === 'block') {
-                    answer.style.display = 'none';
-                    icon.className = 'fa-solid fa-plus';
-                } else {
-                    answer.style.display = 'block';
-                    icon.className = 'fa-solid fa-minus';
-                }
-            });
-        });
+        // FAQ accordion is handled centrally in script.js (.gs-open class)
+        // so the panels can animate instead of snapping open and shut.
 
         const btnTop = document.getElementById('btn-top');
         window.addEventListener('scroll', () => {
