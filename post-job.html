@@ -277,15 +277,15 @@
     <div class="mobile-nav-menu" id="mobile-menu-container">
         <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
         <a href="index.html">Home</a>
-        <a href="jobs.html">Find Work (Jobs)</a>
+        <a href="jobs.html">Find Work</a>
         <a href="find-talent.html">Find Talent</a>
-        <a href="post-job.html" style="color:var(--accent-cyan);">Post a Job</a>
-        <a href="marketplace-dashboard.html">Marketplace Portal</a>
-        <a href="about.html">About Us</a>
+        <a href="post-job.html" class="active">Post a Job</a>
+        <a href="marketplace-dashboard.html">Portal</a>
+        <a href="about.html">About</a>
         <a href="services.html">Services</a>
-        <a href="portfolio.html">Our Portfolio</a>
-        <a href="pricing.html">Pricing Matrix</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
     </div>
 
     <header>
@@ -298,8 +298,16 @@
             <a href="post-job.html" class="active">Post a Job</a>
             <a href="marketplace-dashboard.html">Portal</a>
             <a href="about.html">About</a>
-            <a href="services.html">Services</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
             <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
             <a href="contact.html">Contact</a>
         </nav>
     </header>
@@ -354,6 +362,18 @@
                             <option value="3 to 6 months">3 to 6 months</option>
                             <option value="More than 6 months">More than 6 months</option>
                         </select>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" id="budgetRowHourly" style="display:none;">
+                    <div class="form-group">
+                        <label for="hourlyRateMin">Hourly Rate From (USD $/hr) *</label>
+                        <input type="number" id="hourlyRateMin" class="form-control" placeholder="e.g. 25" min="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hourlyRateMax">Hourly Rate Up To (USD $/hr) *</label>
+                        <input type="number" id="hourlyRateMax" class="form-control" placeholder="e.g. 60" min="5">
                     </div>
                 </div>
 
@@ -448,7 +468,6 @@
     <script>
         // Skills selection handling
         const selectedSkills = new Set(['Excel VBA', 'Financial Modeling']);
-
         document.querySelectorAll('.skill-chip').forEach(chip => {
             chip.onclick = () => {
                 const skill = chip.dataset.skill;
@@ -536,6 +555,32 @@
             if (banner) banner.style.display = 'none';
         }
 
+        // Pricing model: fixed-price and hourly are mutually exclusive, so the
+        // inactive row is hidden and its inputs are disabled to keep the form's
+        // native validation from blocking submission on hidden required fields.
+        const jobTypeSelect = document.getElementById('jobType');
+        const budgetRowFixed = document.getElementById('budgetRowFixed');
+        const budgetRowHourly = document.getElementById('budgetRowHourly');
+        const budgetMinInput = document.getElementById('budgetMin');
+        const hourlyRateMinInput = document.getElementById('hourlyRateMin');
+        const hourlyRateMaxInput = document.getElementById('hourlyRateMax');
+
+        function syncPricingModel() {
+            const isHourly = jobTypeSelect.value === 'hourly';
+            budgetRowFixed.style.display = isHourly ? 'none' : 'grid';
+            budgetRowHourly.style.display = isHourly ? 'grid' : 'none';
+
+            budgetMinInput.disabled = isHourly;
+            budgetMinInput.required = !isHourly;
+            hourlyRateMinInput.disabled = !isHourly;
+            hourlyRateMinInput.required = isHourly;
+            hourlyRateMaxInput.disabled = !isHourly;
+            hourlyRateMaxInput.required = isHourly;
+        }
+
+        jobTypeSelect.addEventListener('change', syncPricingModel);
+        syncPricingModel();
+
         // Form Submit
         document.getElementById('postJobForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -567,14 +612,32 @@
                 return;
             }
 
+            const jobType = jobTypeSelect.value;
+            const isHourly = jobType === 'hourly';
+
+            const hourlyRateMin = parseFloat(hourlyRateMinInput.value);
+            const hourlyRateMax = parseFloat(hourlyRateMaxInput.value);
+
+            if (isHourly) {
+                if (!hourlyRateMin || !hourlyRateMax || hourlyRateMax < hourlyRateMin) {
+                    window.GahonshAuthUI.showToast('❌ Please enter a valid hourly range (the maximum must be at least the minimum).');
+                    return;
+                }
+            } else if (!budgetMinInput.value || parseFloat(budgetMinInput.value) < 20) {
+                window.GahonshAuthUI.showToast('❌ Please enter a total budget of at least $20.');
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Posting job...';
 
             const payload = {
                 title: document.getElementById('jobTitle').value.trim(),
                 category: document.getElementById('jobCategory').value,
-                job_type: document.getElementById('jobType').value,
-                budget_min: parseFloat(document.getElementById('budgetMin').value) || 0,
+                job_type: jobType,
+                budget_min: isHourly ? 0 : (parseFloat(budgetMinInput.value) || 0),
+                hourly_rate_min: isHourly ? hourlyRateMin : null,
+                hourly_rate_max: isHourly ? hourlyRateMax : null,
                 estimated_duration: document.getElementById('estimatedDuration').value,
                 description: document.getElementById('jobDescription').value.trim(),
                 required_skills: Array.from(selectedSkills),

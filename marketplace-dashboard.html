@@ -274,15 +274,15 @@
     <div class="mobile-nav-menu" id="mobile-menu-container">
         <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
         <a href="index.html">Home</a>
-        <a href="jobs.html">Find Work (Jobs)</a>
+        <a href="jobs.html">Find Work</a>
         <a href="find-talent.html">Find Talent</a>
         <a href="post-job.html">Post a Job</a>
-        <a href="marketplace-dashboard.html" style="color:var(--accent-cyan);">Marketplace Portal</a>
-        <a href="about.html">About Us</a>
+        <a href="marketplace-dashboard.html" class="active">Portal</a>
+        <a href="about.html">About</a>
         <a href="services.html">Services</a>
-        <a href="portfolio.html">Our Portfolio</a>
-        <a href="pricing.html">Pricing Matrix</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
     </div>
 
     <header>
@@ -295,8 +295,16 @@
             <a href="post-job.html">Post a Job</a>
             <a href="marketplace-dashboard.html" class="active">Portal</a>
             <a href="about.html">About</a>
-            <a href="services.html">Services</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
             <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
             <a href="contact.html">Contact</a>
         </nav>
     </header>
@@ -387,6 +395,12 @@
         let currentUser = null;
         let currentTab = 'primary'; // 'primary' or 'contracts'
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
         async function initDashboard() {
             currentUser = window.GahonshAuthUI.getCurrentUser();
             if (!currentUser && window.isSupabaseConfigured()) {
@@ -426,7 +440,11 @@
                 document.getElementById('tabJobsOrProposals').innerText = 'My Posted Projects';
                 let jobs = [];
                 if (window.isSupabaseConfigured()) {
-                    jobs = await window.GahonshDB.Jobs.getMyJobs();
+                    try {
+                        jobs = await window.GahonshDB.Jobs.getMyJobs();
+                    } catch (err) {
+                        console.warn('[marketplace-dashboard] getMyJobs failed:', err);
+                    }
                 }
 
                 if (!jobs || jobs.length === 0) {
@@ -443,10 +461,10 @@
                     <div class="portal-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div>
-                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${j.id}" style="color:var(--text-main); text-decoration:none;">${j.title}</a></h3>
-                                <span class="status-badge status-${j.status}">${j.status}</span> • <span style="color:var(--text-slate); font-size:0.85rem;">${j.category}</span>
+                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(j.id)}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(j.title)}</a></h3>
+                                <span class="status-badge status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span> • <span style="color:var(--text-slate); font-size:0.85rem;">${escapeHtml(j.category)}</span>
                             </div>
-                            <a href="job-details.html?id=${j.id}" class="btn-outline">Manage Proposals (${j.proposals_count || 0})</a>
+                            <a href="job-details.html?id=${encodeURIComponent(j.id)}" class="btn-outline">Manage Proposals (${j.proposals_count || 0})</a>
                         </div>
                     </div>
                 `).join('');
@@ -454,7 +472,11 @@
                 document.getElementById('tabJobsOrProposals').innerText = 'My Submitted Proposals';
                 let proposals = [];
                 if (window.isSupabaseConfigured()) {
-                    proposals = await window.GahonshDB.Proposals.getMyProposals();
+                    try {
+                        proposals = await window.GahonshDB.Proposals.getMyProposals();
+                    } catch (err) {
+                        console.warn('[marketplace-dashboard] getMyProposals failed:', err);
+                    }
                 }
 
                 if (!proposals || proposals.length === 0) {
@@ -471,10 +493,10 @@
                     <div class="portal-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div>
-                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${p.job?.id || ''}" style="color:var(--text-main); text-decoration:none;">${p.job?.title || 'Project'}</a></h3>
-                                <span class="status-badge status-${p.status}">${p.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${p.bid_amount}</span>
+                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(p.job?.title || 'Project')}</a></h3>
+                                <span class="status-badge status-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${p.bid_amount}</span>
                             </div>
-                            <a href="job-details.html?id=${p.job?.id || ''}" class="btn-outline">View Project</a>
+                            <a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" class="btn-outline">View Project</a>
                         </div>
                     </div>
                 `).join('');
@@ -485,7 +507,11 @@
             const container = document.getElementById('tabListingsContainer');
             let contracts = [];
             if (window.isSupabaseConfigured()) {
-                contracts = await window.GahonshDB.Contracts.getMyContracts();
+                try {
+                    contracts = await window.GahonshDB.Contracts.getMyContracts();
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] getMyContracts failed:', err);
+                }
             }
 
             if (!contracts || contracts.length === 0) {
@@ -500,19 +526,19 @@
             const isClient = currentUser?.profile?.role === 'client';
             container.innerHTML = contracts.map(c => {
                 const otherParty = isClient ? c.freelancer : c.client;
-                const otherName = otherParty?.full_name || (isClient ? 'Freelancer' : 'Client');
+                const otherName = escapeHtml(otherParty?.full_name || (isClient ? 'Freelancer' : 'Client'));
                 const otherLabel = isClient ? 'Freelancer' : 'Client';
                 return `
                 <div class="portal-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
-                            <h3 style="font-size:1.15rem; margin-bottom:6px;">${c.job?.title || 'Contract'}</h3>
-                            <span class="status-badge status-${c.status}">${c.status}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${c.agreed_amount}</span>
+                            <h3 style="font-size:1.15rem; margin-bottom:6px;">${escapeHtml(c.job?.title || 'Contract')}</h3>
+                            <span class="status-badge status-${escapeHtml(c.status)}">${escapeHtml(c.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${c.agreed_amount}</span>
                             <p style="font-size:0.85rem; color:var(--text-slate); margin-top:6px;">
                                 ${otherLabel}: <strong>${otherName}</strong> • Hired on ${new Date(c.created_at).toLocaleDateString()}
                             </p>
                         </div>
-                        <a href="job-details.html?id=${c.job?.id || ''}" class="btn-outline">View Project Details</a>
+                        <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
                     </div>
                 </div>
             `;

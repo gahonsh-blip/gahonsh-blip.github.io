@@ -535,15 +535,15 @@
     <div class="mobile-nav-menu" id="mobile-menu-container">
         <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
         <a href="index.html">Home</a>
-        <a href="jobs.html" style="color:var(--accent-cyan);">Find Work (Jobs)</a>
+        <a href="jobs.html" class="active">Find Work</a>
         <a href="find-talent.html">Find Talent</a>
         <a href="post-job.html">Post a Job</a>
-        <a href="marketplace-dashboard.html">Marketplace Portal</a>
-        <a href="about.html">About Us</a>
+        <a href="marketplace-dashboard.html">Portal</a>
+        <a href="about.html">About</a>
         <a href="services.html">Services</a>
-        <a href="portfolio.html">Our Portfolio</a>
-        <a href="pricing.html">Pricing Matrix</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
     </div>
 
     <!-- MAIN HEADER -->
@@ -555,6 +555,8 @@
             <a href="jobs.html" class="active">Find Work</a>
             <a href="find-talent.html">Find Talent</a>
             <a href="post-job.html">Post a Job</a>
+            <a href="marketplace-dashboard.html">Portal</a>
+            <a href="about.html">About</a>
             <div class="dropdown">
                 <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
                 <div class="dropdown-content">
@@ -563,7 +565,9 @@
                     <a href="services.html#web">Web Engineering</a>
                 </div>
             </div>
-            <a href="marketplace-dashboard.html">Portal</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
@@ -730,6 +734,12 @@
             }
         ];
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
         async function loadJobs() {
             const container = document.getElementById('jobsListContainer');
             const countDisplay = document.getElementById('jobsCountDisplay');
@@ -790,26 +800,27 @@
                     ? `Fixed Budget: $${job.budget_min || 0}`
                     : `Hourly: $${job.hourly_rate_min || 20} - $${job.hourly_rate_max || 50}/hr`;
 
-                const clientName = job.client?.full_name || 'Verified Client';
-                const clientLocation = job.client?.location || 'Remote';
-                const skillsHtml = (job.required_skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+                const clientName = escapeHtml(job.client?.full_name || 'Verified Client');
+                const clientLocation = escapeHtml(job.client?.location || 'Remote');
+                const skillsHtml = (job.required_skills || []).map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
+                const jobId = encodeURIComponent(job.id);
 
                 return `
-                    <article class="job-card" id="job-card-${job.id}">
+                    <article class="job-card" id="job-card-${escapeHtml(job.id)}">
                         <div class="job-card-header">
                             <div>
-                                <a href="job-details.html?id=${job.id}" class="job-card-title">${job.title}</a>
+                                <a href="job-details.html?id=${jobId}" class="job-card-title">${escapeHtml(job.title)}</a>
                                 <div class="job-meta-row" style="margin-top:6px;">
-                                    <span class="job-meta-item"><i class="fa-solid fa-layer-group"></i> ${job.category}</span>
-                                    <span class="job-meta-item"><i class="fa-solid fa-gauge-high"></i> ${job.experience_level}</span>
-                                    <span class="job-meta-item"><i class="fa-regular fa-clock"></i> ${job.estimated_duration || '1 to 3 months'}</span>
+                                    <span class="job-meta-item"><i class="fa-solid fa-layer-group"></i> ${escapeHtml(job.category || 'General')}</span>
+                                    <span class="job-meta-item"><i class="fa-solid fa-gauge-high"></i> ${escapeHtml(job.experience_level || 'intermediate')}</span>
+                                    <span class="job-meta-item"><i class="fa-regular fa-clock"></i> ${escapeHtml(job.estimated_duration || '1 to 3 months')}</span>
                                     <span class="job-meta-item"><i class="fa-solid fa-paperclip"></i> ${job.proposals_count || 0} Proposals</span>
                                 </div>
                             </div>
-                            <div class="job-budget-badge">${budgetText}</div>
+                            <div class="job-budget-badge">${escapeHtml(budgetText)}</div>
                         </div>
 
-                        <p class="job-description-preview">${job.description}</p>
+                        <p class="job-description-preview">${escapeHtml(job.description)}</p>
 
                         <div class="skills-tag-cloud">${skillsHtml}</div>
 
@@ -818,7 +829,7 @@
                                 <i class="fa-solid fa-shield-check" style="color:var(--accent-cyan);"></i>
                                 <strong>${clientName}</strong> • ${clientLocation}
                             </div>
-                            <a href="job-details.html?id=${job.id}" class="btn-view-job">View & Apply</a>
+                            <a href="job-details.html?id=${jobId}" class="btn-view-job">View & Apply</a>
                         </div>
                     </article>
                 `;

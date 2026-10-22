@@ -27,6 +27,26 @@ Repository guide for AI agents and human contributors working on the
 - **JS:** Plain ES6 functions, modules, and clear comments.
 - **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls.
 
+## Main Menu Contract
+
+The header nav is duplicated in every page's inline markup, so the main menu
+must be kept in sync manually. The shared behaviour lives in `theme.css`
+(the `SHARED MAIN MENU` block); each page only needs the matching markup.
+
+- **Items and order:** Home, Find Work, Find Talent, Post a Job, Portal, About,
+  Services (dropdown), Portfolio, Pricing, Contact.
+- **Active state:** mark exactly one desktop `<a>` and one mobile drawer `<a>`
+  with `class="active"`. `job-details.html` marks Find Work; `home.html` marks Home.
+- **Dropdown:** Services is a `.dropdown` wrapper containing `.dropdown-content`
+  with `services.html#excel`, `#pdf`, `#web`.
+- **Responsive:** the full nav needs about 1100px to fit on one line (home.html
+  renders in a wider webfont), so `theme.css` collapses it below 1101px and
+  shows the `.menu-toggle` hamburger. Do not rely on page-local breakpoints for
+  the menu.
+- **theme.css order:** the `theme.css` link must stay *after* the page's inline
+  `<style>` block so the shared rules win the cascade. Do not add a second copy
+  in `<head>`.
+
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).

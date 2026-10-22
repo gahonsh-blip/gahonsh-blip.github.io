@@ -466,15 +466,15 @@
     <div class="mobile-nav-menu" id="mobile-menu-container">
         <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
         <a href="index.html">Home</a>
-        <a href="jobs.html" style="color:var(--accent-cyan);">Find Work (Jobs)</a>
+        <a href="jobs.html" class="active">Find Work</a>
         <a href="find-talent.html">Find Talent</a>
         <a href="post-job.html">Post a Job</a>
-        <a href="marketplace-dashboard.html">Marketplace Portal</a>
-        <a href="about.html">About Us</a>
+        <a href="marketplace-dashboard.html">Portal</a>
+        <a href="about.html">About</a>
         <a href="services.html">Services</a>
-        <a href="portfolio.html">Our Portfolio</a>
-        <a href="pricing.html">Pricing Matrix</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
     </div>
 
     <header>
@@ -482,13 +482,21 @@
         <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
         <nav>
             <a href="index.html">Home</a>
-            <a href="jobs.html">Find Work</a>
+            <a href="jobs.html" class="active">Find Work</a>
             <a href="find-talent.html">Find Talent</a>
             <a href="post-job.html">Post a Job</a>
             <a href="marketplace-dashboard.html">Portal</a>
             <a href="about.html">About</a>
-            <a href="services.html">Services</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
             <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
             <a href="contact.html">Contact</a>
         </nav>
     </header>

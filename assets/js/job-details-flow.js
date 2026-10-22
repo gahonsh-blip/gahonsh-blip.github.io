@@ -160,7 +160,7 @@ async function renderClientProposalsView() {
         return;
     }
 
-    listContainer.innerHTML = proposals.map(proposalCardHtml);
+    listContainer.innerHTML = proposals.map(proposalCardHtml).join('');
 
     if (currentJob.status !== 'open') {
         showProposalMessage('<i class="fa-solid fa-circle-info"></i><span>This project is no longer open for hiring (current status: <strong>' + currentJob.status + '</strong>), so proposals can no longer be accepted.</span>');
@@ -415,10 +415,8 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
         }
         showProposalMessage('<i class="fa-solid fa-circle-exclamation"></i><span>' + message + '</span>', 'error');
     } finally {
-        if (!btn.disabled) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Proposal to Client';
-        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Proposal to Client';
     }
 };
 

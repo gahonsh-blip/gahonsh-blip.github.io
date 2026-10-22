@@ -10,6 +10,20 @@
     let _initPromise = null;
 
     /**
+     * Neutralizes PostgREST filter syntax inside a user-supplied search term.
+     * Without this, characters such as `,` `.` `(` `)` let a visitor inject
+     * extra filter conditions into the generated `or()` expression.
+     */
+    function sanitizeSearchTerm(term) {
+        if (typeof term !== 'string') return '';
+        return term
+            .trim()
+            .replace(/[,().*:%]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .slice(0, 100);
+    }
+
+    /**
      * Initializes the Supabase JS client safely
      */
     async function getClient() {
@@ -198,8 +212,9 @@
                 .select('*')
                 .eq('role', 'freelancer');
 
-            if (filters.search) {
-                query = query.or(`full_name.ilike.%${filters.search}%,title.ilike.%${filters.search}%,bio.ilike.%${filters.search}%`);
+            const search = sanitizeSearchTerm(filters.search);
+            if (search) {
+                query = query.or(`full_name.ilike.%${search}%,title.ilike.%${search}%,bio.ilike.%${search}%`);
             }
 
             if (filters.skill) {
@@ -260,8 +275,9 @@
                 query = query.eq('experience_level', filters.experience_level);
             }
 
-            if (filters.search) {
-                query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+            const search = sanitizeSearchTerm(filters.search);
+            if (search) {
+                query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
             }
 
             if (filters.minBudget) {
