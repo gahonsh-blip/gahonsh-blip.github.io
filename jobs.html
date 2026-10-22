@@ -773,8 +773,8 @@
                     if (expVal !== 'all' && j.experience_level !== expVal) return false;
                     if (searchVal) {
                         const q = searchVal.toLowerCase();
-                        const titleMatch = j.title.toLowerCase().includes(q);
-                        const skillMatch = j.required_skills.some(s => s.toLowerCase().includes(q));
+                        const titleMatch = (j.title || '').toLowerCase().includes(q);
+                        const skillMatch = (j.required_skills || []).some(s => String(s || '').toLowerCase().includes(q));
                         if (!titleMatch && !skillMatch) return false;
                     }
                     return true;
