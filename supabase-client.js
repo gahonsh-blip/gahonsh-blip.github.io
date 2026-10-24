@@ -564,13 +564,121 @@
         }
     };
 
+    // ========================================================================
+    // REMOTE REACHABILITY + LOCAL FALLBACK
+    // ------------------------------------------------------------------------
+    // The committed Supabase project URL may point at a project that is not
+    // (or no longer) reachable. Rather than leaving the marketplace showing an
+    // empty feed and blocking every action, we probe the project once and fall
+    // back to the browser-local engine (marketplace-local.js) when it is down.
+    // When a reachable Supabase project is configured, Supabase is used as-is.
+    // ========================================================================
+    const REACH_TTL_MS = 30000;
+    let _reach = { value: null, at: 0 };
+
+    function localEngine() {
+        return window.GahonshLocal || null;
+    }
+
+    async function remoteReachable() {
+        if (!window.isSupabaseConfigured()) return false;
+
+        const now = Date.now();
+        if (_reach.value !== null && (now - _reach.at) < REACH_TTL_MS) {
+            return _reach.value;
+        }
+
+        const base = String(window.GAHONSH_CONFIG.SUPABASE_URL || '').replace(/\/+$/, '');
+        let reachable = false;
+
+        if (base) {
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 4000);
+                // A plain no-cors GET avoids a CORS preflight. It resolves (as an
+                // opaque response) for any reachable host — even a 401 — and only
+                // rejects when the host is genuinely unreachable (DNS/connection).
+                await fetch(base + '/rest/v1/', {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                reachable = true;
+                clearTimeout(timer);
+            } catch (err) {
+                reachable = false;
+            }
+        }
+
+        _reach = { value: reachable, at: Date.now() };
+        if (!reachable) {
+            console.warn('[GahonshDB] Supabase project unreachable — using the local marketplace engine.');
+        }
+        return reachable;
+    }
+
+    /**
+     * True when the marketplace can serve data: either a reachable Supabase
+     * project or the local fallback engine. Pages use this to decide whether to
+     * attempt real operations (instead of the old isSupabaseConfigured gate,
+     * which was true even for a dead project).
+     */
+    window.isMarketplaceReady = function () {
+        return !!localEngine() || window.isSupabaseConfigured();
+    };
+
+    /**
+     * Wraps a service so each method prefers Supabase, then transparently
+     * degrades to the local engine when Supabase is unreachable or the request
+     * fails at the network layer. Genuine server-side errors (validation, RLS,
+     * duplicates) are surfaced instead of being masked by a local write.
+     */
+    function isNetworkError(err) {
+        if (!err) return false;
+        const msg = String(err.message || err);
+        return /failed to fetch|networkerror|network error|load failed|aborted|timeout|err_/i.test(msg);
+    }
+
+    function withFallback(remoteService, localService, label) {
+        const wrapped = {};
+        Object.keys(remoteService).forEach(function (name) {
+            wrapped[name] = async function () {
+                const args = Array.prototype.slice.call(arguments);
+
+                if (await remoteReachable()) {
+                    try {
+                        return await remoteService[name].apply(remoteService, args);
+                    } catch (err) {
+                        if (!isNetworkError(err)) throw err;
+                        console.warn('[GahonshDB] ' + label + '.' + name + ' network failure — falling back locally:', err && err.message);
+                    }
+                }
+
+                if (localService && typeof localService[name] === 'function') {
+                    return await localService[name].apply(localService, args);
+                }
+                throw new Error('Marketplace service is unavailable.');
+            };
+        });
+        return wrapped;
+    }
+
+    const _local = localEngine();
+    const AuthProxy = withFallback(Auth, _local && _local.Auth, 'Auth');
+    const ProfilesProxy = withFallback(Profiles, _local && _local.Profiles, 'Profiles');
+    const JobsProxy = withFallback(Jobs, _local && _local.Jobs, 'Jobs');
+    const ProposalsProxy = withFallback(Proposals, _local && _local.Proposals, 'Proposals');
+    const ContractsProxy = withFallback(Contracts, _local && _local.Contracts, 'Contracts');
+
     // Export services onto global GahonshDB namespace
     window.GahonshDB = {
         getClient,
-        Auth,
-        Profiles,
-        Jobs,
-        Proposals,
-        Contracts
+        remoteReachable,
+        Auth: AuthProxy,
+        Profiles: ProfilesProxy,
+        Jobs: JobsProxy,
+        Proposals: ProposalsProxy,
+        Contracts: ContractsProxy
     };
 })();

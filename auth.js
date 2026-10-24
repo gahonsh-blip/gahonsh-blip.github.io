@@ -482,7 +482,7 @@
                 const btn = document.getElementById('btnSubmitSignIn');
 
                 if (!window.GahonshDB || !window.GahonshDB.Auth) {
-                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    showToast('❌ Marketplace service not ready. Please try again shortly.');
                     return;
                 }
 
@@ -519,7 +519,7 @@
                 const btn = document.getElementById('btnSubmitSignUp');
 
                 if (!window.GahonshDB || !window.GahonshDB.Auth) {
-                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    showToast('❌ Marketplace service not ready. Please try again shortly.');
                     return;
                 }
 
@@ -553,7 +553,7 @@
                 const btn = document.getElementById('btnSaveProfile');
 
                 if (!window.GahonshDB || !window.GahonshDB.Profiles) {
-                    showToast('❌ Database service not ready. Please connect Supabase.');
+                    showToast('❌ Marketplace service not ready. Please try again shortly.');
                     return;
                 }
 
@@ -782,13 +782,15 @@
     }
 
     function checkConfigBanner() {
-        const isConfigured = typeof window.isSupabaseConfigured === 'function' ? window.isSupabaseConfigured() : false;
-        if (!isConfigured && !document.getElementById('cfgNoticeBanner')) {
+        // The local marketplace engine keeps the site usable without Supabase,
+        // so this banner only appears when neither backend nor fallback exists.
+        const marketplaceReady = typeof window.isMarketplaceReady === 'function' ? window.isMarketplaceReady() : false;
+        if (!marketplaceReady && !document.getElementById('cfgNoticeBanner')) {
             const banner = document.createElement('div');
             banner.id = 'cfgNoticeBanner';
             banner.className = 'config-banner-notice';
             banner.innerHTML = `
-                <span><i class="fa-solid fa-triangle-exclamation" style="color:#00ffcc;"></i> <strong>Supabase Setup Needed:</strong> Connect your Supabase project to activate live Auth, Job Posting & Bidding.</span>
+                <span><i class="fa-solid fa-triangle-exclamation" style="color:#00ffcc;"></i> <strong>Marketplace Unavailable:</strong> Connect a Supabase project to activate live Auth, Job Posting &amp; Bidding.</span>
                 <button class="config-banner-btn" id="btnOpenConfigNotice">Connect Database</button>
             `;
             document.body.prepend(banner);

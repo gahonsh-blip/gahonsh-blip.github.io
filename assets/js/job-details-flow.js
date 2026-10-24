@@ -44,7 +44,7 @@ function statusBadge(status) {
 }
 
 async function loadJobDetails() {
-    const isConfigured = window.isSupabaseConfigured();
+    const isConfigured = window.isMarketplaceReady();
 
     if (isConfigured && jobId) {
         try {
@@ -54,8 +54,8 @@ async function loadJobDetails() {
         }
     }
 
-    // Demo fallback ONLY when Supabase is not configured at all.
-    // When configured, the real (possibly empty) database is the source of truth.
+    // Last-resort demo card only when no marketplace backend is available at all.
+    // Normally the local/Supabase engine supplies the data above.
     if (!currentJob && !isConfigured) {
         const targetId = jobId || 'demo-job-1';
         currentJob = {
@@ -124,7 +124,7 @@ async function renderClientProposalsView() {
     clientView.style.display = 'block';
 
     let contract = null;
-    if (window.isSupabaseConfigured()) {
+    if (window.isMarketplaceReady()) {
         try {
             contract = await window.GahonshDB.Contracts.getContractForJob(currentJob.id);
         } catch (e) {
@@ -133,7 +133,7 @@ async function renderClientProposalsView() {
     }
 
     let proposals = [];
-    if (window.isSupabaseConfigured()) {
+    if (window.isMarketplaceReady()) {
         try {
             proposals = await window.GahonshDB.Proposals.getProposalsForJob(currentJob.id);
         } catch (e) {
@@ -204,8 +204,8 @@ window.hireFreelancer = async function (proposalId, btn) {
     }
 
     try {
-        if (!window.isSupabaseConfigured()) {
-            throw new Error('Supabase is not configured yet. Please connect your database first.');
+        if (!window.isMarketplaceReady()) {
+            throw new Error('The marketplace service is unavailable. Please try again shortly.');
         }
         await window.GahonshDB.Contracts.acceptProposalAndHire(proposalId);
         window.GahonshAuthUI.showToast('\u{1F389} Hired successfully! Contract created.');
@@ -236,7 +236,7 @@ async function renderFreelancerOrGuestView(user) {
 
     if (currentJob.status && currentJob.status !== 'open') {
         document.getElementById('proposalSectionHeading').innerText = 'Project Status';
-        if (user && user.profile?.role === 'freelancer' && window.isSupabaseConfigured()) {
+        if (user && user.profile?.role === 'freelancer' && window.isMarketplaceReady()) {
             try {
                 const myProposal = await window.GahonshDB.Proposals.getMyProposalForJob(currentJob.id);
                 if (myProposal) {
@@ -264,7 +264,7 @@ async function renderFreelancerOrGuestView(user) {
         return;
     }
 
-    if (user.profile?.role === 'freelancer' && window.isSupabaseConfigured()) {
+    if (user.profile?.role === 'freelancer' && window.isMarketplaceReady()) {
         try {
             const myProposal = await window.GahonshDB.Proposals.getMyProposalForJob(currentJob.id);
             if (myProposal) {
@@ -282,7 +282,7 @@ async function renderFreelancerOrGuestView(user) {
 
     document.getElementById('proposalSectionHeading').innerText = 'Submit a Proposal for this Project';
     form.style.display = 'block';
-    if (window.isSupabaseConfigured()) {
+    if (window.isMarketplaceReady()) {
         try {
             const contract = await window.GahonshDB.Contracts.getContractForJob(currentJob.id);
             if (contract) {
@@ -295,7 +295,7 @@ async function renderFreelancerOrGuestView(user) {
 }
 
 async function renderFreelancerContractIfAny(contractCard) {
-    if (!window.isSupabaseConfigured()) return;
+    if (!window.isMarketplaceReady()) return;
     try {
         const contract = await window.GahonshDB.Contracts.getContractForJob(currentJob.id);
         if (contract) {
@@ -381,8 +381,8 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
         return;
     }
 
-    if (!window.isSupabaseConfigured()) {
-        window.GahonshAuthUI.showToast('\u274C Supabase is not configured yet. Please connect your database to submit proposals.');
+    if (!window.isMarketplaceReady()) {
+        window.GahonshAuthUI.showToast('\u274C Marketplace service unavailable. Please try again shortly.');
         return;
     }
 

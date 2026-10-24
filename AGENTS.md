@@ -7,7 +7,7 @@ Repository guide for AI agents and human contributors working on the
 
 - **Type:** Agency Website & Freelance Marketplace.
 - **Frontend Runtime:** Vanilla HTML5 / CSS3 / JavaScript (ES6+), zero heavy build bundlers required.
-- **Backend & Database:** [Supabase](https://supabase.com) (PostgreSQL 15+, Auth, Row-Level Security, Triggers, RPC) with built-in `MockDataEngine` client-side fallback for instant zero-config testing.
+- **Backend & Database:** [Supabase](https://supabase.com) (PostgreSQL 15+, Auth, Row-Level Security, Triggers, RPC) with a built-in browser-local fallback engine (`marketplace-local.js`) so the marketplace stays fully usable — browse, post, apply, hire — even when no Supabase project is reachable.
 - **Hosting:** Hosted directly on **GitHub Pages** (`https://gahonsh-blip.github.io/`) from the `main` branch.
 - **Preview Server:** Node.js static preview server (`server.js`) on Port 3000.
 
@@ -18,7 +18,7 @@ Repository guide for AI agents and human contributors working on the
 3. **No secrets in code.** Never commit database service-role secret keys, admin passwords, or personal credentials. The public Supabase `anon` key, Formspree endpoint, and WhatsApp number are public client-side contact points.
 4. **Preserve SEO & Metadata assets.** `sitemap.xml`, `robots.txt`, `metadata.json`, Open Graph meta tags, Google verification file (`googleb9deb43124fcee02.html`), and JSON-LD structured data must remain intact and updated when URLs change.
 5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
-6. **Preserve Demo Fallback Capability.** `supabase-client.js` and `auth.js` must maintain fallback functionality so the marketplace remains fully testable even before live Supabase credentials are provided.
+6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine when the project is unreachable. Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
 
 ## Code Conventions
 

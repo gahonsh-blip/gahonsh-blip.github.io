@@ -402,6 +402,7 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
+    <script src="marketplace-local.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
 
@@ -450,7 +451,7 @@
             const searchVal = document.getElementById('talentSearchInput').value.trim().toLowerCase();
 
             let talentList = [];
-            if (window.isSupabaseConfigured()) {
+            if (window.isMarketplaceReady()) {
                 try {
                     talentList = await window.GahonshDB.Profiles.getPublicFreelancers({ search: searchVal });
                 } catch (e) {
@@ -458,9 +459,9 @@
                 }
             }
 
-            // Demo profiles only when Supabase is not configured yet.
+            // Last-resort demo profiles only when no marketplace backend is available.
             // When configured, the real (possibly empty) profiles table is the source of truth.
-            if ((!talentList || talentList.length === 0) && !window.isSupabaseConfigured()) {
+            if ((!talentList || talentList.length === 0) && !window.isMarketplaceReady()) {
                 talentList = DEMO_TALENT.filter(t => {
                     if (!searchVal) return true;
                     return (t.full_name || '').toLowerCase().includes(searchVal) ||
