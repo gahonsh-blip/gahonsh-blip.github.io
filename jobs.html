@@ -683,6 +683,7 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
+    <script src="marketplace-local.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
 
@@ -752,7 +753,7 @@
             let jobs = [];
 
             try {
-                if (window.isSupabaseConfigured()) {
+                if (window.isMarketplaceReady()) {
                     jobs = await window.GahonshDB.Jobs.getOpenJobs({
                         search: searchVal,
                         category: categoryVal,
@@ -764,9 +765,9 @@
                 console.warn('[Jobs Feed] Supabase fetch error or not initialized:', err);
             }
 
-            // Demo feed ONLY when Supabase is not configured yet.
-            // When configured, the real (possibly empty) database is the source of truth.
-            if ((!jobs || jobs.length === 0) && !window.isSupabaseConfigured()) {
+            // Last-resort demo feed only when no marketplace backend is available.
+            // The engine (Supabase or the local fallback) is the normal source of truth.
+            if ((!jobs || jobs.length === 0) && !window.isMarketplaceReady()) {
                 jobs = DEMO_JOBS.filter(j => {
                     if (categoryVal !== 'all' && j.category !== categoryVal) return false;
                     if (typeVal !== 'all' && j.job_type !== typeVal) return false;

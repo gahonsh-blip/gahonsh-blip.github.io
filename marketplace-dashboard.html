@@ -388,6 +388,7 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
+    <script src="marketplace-local.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
 
@@ -403,7 +404,7 @@
 
         async function initDashboard() {
             currentUser = window.GahonshAuthUI.getCurrentUser();
-            if (!currentUser && window.isSupabaseConfigured()) {
+            if (!currentUser && window.isMarketplaceReady()) {
                 currentUser = await window.GahonshDB.Auth.getCurrentUser();
             }
 
@@ -439,7 +440,7 @@
             if (role === 'client') {
                 document.getElementById('tabJobsOrProposals').innerText = 'My Posted Projects';
                 let jobs = [];
-                if (window.isSupabaseConfigured()) {
+                if (window.isMarketplaceReady()) {
                     try {
                         jobs = await window.GahonshDB.Jobs.getMyJobs();
                     } catch (err) {
@@ -471,7 +472,7 @@
             } else {
                 document.getElementById('tabJobsOrProposals').innerText = 'My Submitted Proposals';
                 let proposals = [];
-                if (window.isSupabaseConfigured()) {
+                if (window.isMarketplaceReady()) {
                     try {
                         proposals = await window.GahonshDB.Proposals.getMyProposals();
                     } catch (err) {
@@ -506,7 +507,7 @@
         async function loadContracts() {
             const container = document.getElementById('tabListingsContainer');
             let contracts = [];
-            if (window.isSupabaseConfigured()) {
+            if (window.isMarketplaceReady()) {
                 try {
                     contracts = await window.GahonshDB.Contracts.getMyContracts();
                 } catch (err) {

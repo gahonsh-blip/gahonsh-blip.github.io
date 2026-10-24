@@ -462,6 +462,7 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
+    <script src="marketplace-local.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
 
@@ -603,12 +604,12 @@
                 return;
             }
 
-            if (!window.isSupabaseConfigured()) {
+            if (!window.isMarketplaceReady()) {
                 showPostJobBlocked(
-                    '<strong>Supabase is not configured yet.</strong> Please connect your database (click "Connect Database" above) to publish real projects. Jobs cannot be published to demo mode.',
+                    '<strong>The marketplace service is unavailable.</strong> Please try again shortly, or connect a Supabase project (click "Connect Database" above) to publish real projects.',
                     false
                 );
-                window.GahonshAuthUI.showToast('❌ Connect Supabase to publish a real project.');
+                window.GahonshAuthUI.showToast('❌ Marketplace service unavailable. Please try again.');
                 return;
             }
 
