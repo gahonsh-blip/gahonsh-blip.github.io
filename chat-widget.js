@@ -640,10 +640,16 @@
             .sort(function (x, y) { return y.s - x.s; });
         var intent = ranked.length ? ranked[0].i : null;
         var extra = '';
-        if (intent && ranked[1] && ranked[1].s >= 3) {
-            var other = ranked[1].i;
-            var pair = (SERVICEISH[intent.id] && MODIFIER[other.id]) || (MODIFIER[intent.id] && SERVICEISH[other.id]);
-            if (pair && other.b_en) extra = lang === 'hi' ? other.b_hi : other.b_en;
+        if (intent) {
+            // A question often covers a service and a price or a timeline at the
+            // same time. Answer the main one fully, then add one compact line for
+            // the other so nothing asked is left out.
+            var topService = ranked.filter(function (x) { return SERVICEISH[x.i.id]; })[0];
+            var topMod = ranked.filter(function (x) { return MODIFIER[x.i.id]; })[0];
+            var other = null;
+            if (SERVICEISH[intent.id] && topMod && topMod.i.id !== intent.id) other = topMod.i;
+            else if (MODIFIER[intent.id] && topService && topService.i.id !== intent.id) other = topService.i;
+            if (other && other.b_en) extra = lang === 'hi' ? other.b_hi : other.b_en;
         }
         if (intent) {
             // "price" while talking about excel should keep excel context, but the
