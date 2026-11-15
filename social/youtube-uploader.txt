@@ -1,0 +1,84 @@
+/**
+ * GAHONSH — daily YouTube uploader (Apps Script)
+ * ================================================
+ * Reads https://gahonsh-blip.github.io/social/daily.json and uploads that day's video
+ * to your own YouTube channel ONCE per day, as a public YouTube Short.
+ *
+ * ONE-TIME SETUP (about 3 minutes, on your own device — no phone approval loop, no API key)
+ * 1. script.google.com  ->  New project
+ * 2. Delete the sample code, paste this whole file.
+ * 3. Left sidebar "Services" (+)  ->  YouTube Data API v3  ->  Add
+ * 4. File > Project Settings > Time zone: (GMT+05:30) India Standard Time
+ * 5. Select function "installDailyTrigger" and press Run, and approve the Google prompt
+ *    ("See, edit and permanently delete your YouTube videos" — that is the upload permission).
+ * 6. Done. From then on it uploads every day at ~08:45 IST on its own.
+ *
+ * To test right now: choose function "uploadToday" and press Run.
+ */
+
+var MANIFEST_URL = 'https://gahonsh-blip.github.io/social/daily.json';
+var PROP_LAST_DATE = 'last_upload_date';
+var PROP_LAST_VIDEO = 'last_video_id';
+
+function manifest() {
+  // cache-buster so GitHub Pages never serves yesterday's copy
+  var url = MANIFEST_URL + '?v=' + new Date().getTime();
+  var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+  if (res.getResponseCode() !== 200) {
+    throw new Error('Manifest not reachable: HTTP ' + res.getResponseCode());
+  }
+  return JSON.parse(res.getContentText());
+}
+
+function todayIstanbul() {
+  return Utilities.formatDate(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd');
+}
+
+function uploadToday() {
+  var props = PropertiesService.getScriptProperties();
+  var m = manifest();
+
+  if (!m || !m.date || !m.video_url) {
+    return 'Manifest incomplete, nothing uploaded.';
+  }
+  if (props.getProperty(PROP_LAST_DATE) === m.date) {
+    return 'Already uploaded for ' + m.date + ' (video ' + props.getProperty(PROP_LAST_VIDEO) + ').';
+  }
+
+  var blob = UrlFetchApp.fetch(m.video_url, { muteHttpExceptions: true, followRedirects: true }).getBlob();
+  if (blob.getBytes().length < 10000) {
+    throw new Error('Video download looks empty (' + blob.getBytes().length + ' bytes)');
+  }
+
+  var resource = {
+    snippet: {
+      title: m.title || ('GAHONSH ' + m.date),
+      description: m.description || '',
+      tags: m.tags || ['GAHONSH'],
+      categoryId: '22'
+    },
+    status: {
+      privacyStatus: 'public',
+      selfDeclaredMadeForKids: false
+    }
+  };
+
+  var video = YouTube.Videos.insert(resource, 'snippet,status', blob);
+  props.setProperty(PROP_LAST_DATE, m.date);
+  props.setProperty(PROP_LAST_VIDEO, video.id);
+
+  Logger.log('Uploaded ' + m.date + ' -> https://youtu.be/' + video.id);
+  return 'https://youtu.be/' + video.id;
+}
+
+function installDailyTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'uploadToday') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  ScriptApp.newTrigger('uploadToday').timeBased().atHour(9).nearMinute(0).everyDays(1).create();
+  var check = uploadToday();   // first run also proves the permission works
+  Logger.log('Daily trigger installed. First check: ' + check);
+  return check;
+}
