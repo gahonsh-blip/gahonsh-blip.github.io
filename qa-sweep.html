@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>QA Sweep</title>
+<style>
+  body{background:#0b1220;color:#e2e8f0;font-family:ui-monospace,monospace;padding:16px;font-size:13px}
+  h1{font-size:16px;margin:0 0 12px}
+  .row{border-left:3px solid #334155;padding:6px 10px;margin-bottom:8px;white-space:pre-wrap}
+  .bad{border-color:#ef4444}
+  .good{border-color:#10b981}
+  .warn{border-color:#f59e0b}
+</style>
+</head>
+<body>
+<h1>QA Sweep</h1>
+<div id="out">running…</div>
+<script>
+const PAGES = [
+  ['index.html', ['header','footer']],
+  ['home.html', ['header','footer']],
+  ['jobs.html', ['#jobsGrid','header']],
+  ['find-talent.html', ['header','footer']],
+  ['post-job.html', ['form','header']],
+  ['marketplace-dashboard.html', ['header','footer']],
+  ['job-details.html', ['header','footer']],
+  ['about.html', ['header','footer']],
+  ['services.html', ['header','footer']],
+  ['portfolio.html', ['header','footer']],
+  ['pricing.html', ['header','footer']],
+  ['contact.html', ['form','header']],
+  ['privacy-policy.html', ['header','footer']],
+  ['terms.html', ['header','footer']],
+  ['thank-you.html', ['header','footer']]
+];
+
+const out = document.getElementById('out');
+out.textContent = '';
+
+function checkPage(file, mustHave) {
+  return new Promise(resolve => {
+    const frame = document.createElement('iframe');
+    frame.style.cssText = 'width:1200px;height:900px;position:absolute;left:-3000px;';
+    const errors = [];
+    const failed = [];
+    let loaded = false;
+
+    frame.onload = () => {
+      loaded = true;
+      try {
+        const w = frame.contentWindow;
+        const d = w.document || frame.contentDocument;
+        w.addEventListener('error', e => errors.push('ERR ' + (e.message || e.type)));
+        const origErr = w.console.error;
+        w.console.error = function(){ errors.push('CONSOLE ' + Array.from(arguments).map(String).join(' ')); origErr && origErr.apply(w.console, arguments); };
+
+        setTimeout(() => {
+          const missing = mustHave.filter(sel => !d.querySelector(sel));
+          // collect failed resource loads
+          try {
+            d.querySelectorAll('img').forEach(img => {
+              if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) failed.push('img ' + img.getAttribute('src'));
+            });
+            d.querySelectorAll('link[rel=stylesheet]').forEach(l => { if (l.sheet === null) failed.push('css ' + l.getAttribute('href')); });
+          } catch (e) { failed.push('scan:' + e.message); }
+
+          const emptyText = (d.body ? d.body.innerText.replace(/\s+/g,' ').trim() : '');
+          resolve({
+            file,
+            errors: errors.slice(0, 5),
+            failed: failed.slice(0, 5),
+            missing,
+            textLen: emptyText.length,
+            loading: /Loading [a-z ]+\.\.\./i.test(emptyText)
+          });
+          frame.remove();
+        }, 3200);
+      } catch (e) {
+        resolve({ file, errors: ['access:' + e.message], failed: [], missing: [], textLen: 0 });
+        frame.remove();
+      }
+    };
+
+    setTimeout(() => { if (!loaded) { resolve({ file, errors: ['timeout'], failed: [], missing: [], textLen: 0 }); frame.remove(); } }, 12000);
+    frame.src = file + (file.includes('?') ? '&' : '?') + 'qa=' + Date.now();
+    document.body.appendChild(frame);
+  });
+}
+
+(async () => {
+  for (const [file, must] of PAGES) {
+    const r = await checkPage(file, must);
+    const problems = [];
+    if (r.errors.length) problems.push('errors: ' + r.errors.join(' | '));
+    if (r.failed.length) problems.push('failed loads: ' + r.failed.join(' | '));
+    if (r.missing.length) problems.push('missing: ' + r.missing.join(', '));
+    if (r.loading) problems.push('stuck on a loading placeholder');
+    if (r.textLen < 400) problems.push('almost empty page (' + r.textLen + ' chars)');
+    const div = document.createElement('div');
+    div.className = 'row ' + (problems.length ? 'bad' : 'good');
+    div.textContent = file + ' :: ' + (problems.length ? problems.join(' ;; ') : 'clean');
+    out.appendChild(div);
+  }
+  const done = document.createElement('div');
+  done.className = 'row good';
+  done.textContent = 'SWEEP COMPLETE';
+  out.appendChild(done);
+})();
+</script>
+</body>
+</html>
