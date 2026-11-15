@@ -703,8 +703,7 @@
         <!-- ✅ LEFT: FORM – एनिमेशन क्लासेस -->
         <div class="contact-card-box" data-gs-reveal>
             <h2>Submit Project Inquiry</h2>
-            <form id="project-contact-form" action="https://formspree.io/f/xzdqnoez" method="POST">
-                <input type="hidden" name="_next" value="thank-you.html">
+            <form id="project-contact-form" novalidate>
                 <div class="form-group">
                     <label for="client-name">Your Full Name / Company</label>
                     <input type="text" id="client-name" name="name" placeholder="Enter name or brand name" required>
@@ -728,13 +727,14 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="client-budget">Estimated Project Budget (INR)</label>
+                    <label for="client-budget">Estimated Project Budget</label>
                     <select id="client-budget" name="budget" required>
                         <option value="" disabled selected>Select budget range...</option>
-                        <option value="Under ₹5,000 (INR)">Under ₹5,000 (INR)</option>
-                        <option value="₹5,000 - ₹20,000 (INR)">₹5,000 - ₹20,000 (INR)</option>
-                        <option value="₹20,000 - ₹50,000 (INR)">₹20,000 - ₹50,000 (INR)</option>
-                        <option value="₹50,000+ (INR)">₹50,000+ (INR)</option>
+                        <option value="Under $100 USD">Under $100 USD</option>
+                        <option value="$100 - $300 USD">$100 - $300 USD</option>
+                        <option value="$300 - $1,000 USD">$300 - $1,000 USD</option>
+                        <option value="$1,000+ USD">$1,000+ USD</option>
+                        <option value="Not decided yet">Not decided yet</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -951,9 +951,78 @@
         });
     </script>
 
+<script src="supabase-config.js"></script>
+
+    <!-- Enquiry submission: saved to the owner dashboard and emailed instantly -->
+    <script>
+        (function () {
+            const form = document.getElementById('project-contact-form');
+            if (!form) return;
+
+            const statusBox = document.createElement('div');
+            statusBox.style.cssText = 'margin-top:14px;font-size:0.9rem;line-height:1.5;';
+            form.appendChild(statusBox);
+
+            const showError = (text) => {
+                statusBox.style.color = '#fca5a5';
+                statusBox.textContent = text;
+            };
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const name = document.getElementById('client-name').value.trim();
+                const email = document.getElementById('client-email').value.trim();
+                const service = document.getElementById('client-service').value;
+                const budget = document.getElementById('client-budget').value;
+                const message = document.getElementById('client-message').value.trim();
+                const btn = form.querySelector('button[type="submit"]');
+
+                if (name.length < 2) return showError('Please enter your name.');
+                if (!email.includes('@') || email.length < 5) return showError('Please enter a valid email address.');
+                if (message.length < 5) return showError('Please describe your project in a few words.');
+
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = 'Sending…';
+                statusBox.textContent = '';
+
+                try {
+                    const res = await fetch(GAHONSH_PRODUCTION_URL + '/rest/v1/contact_messages', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': GAHONSH_PUBLISHABLE_KEY,
+                            'Authorization': 'Bearer ' + GAHONSH_PUBLISHABLE_KEY,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            email: email,
+                            service: service,
+                            budget: budget,
+                            message: message,
+                            source: 'contact-page'
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const detail = await res.text();
+                        throw new Error(detail.slice(0, 200) || 'Request failed');
+                    }
+
+                    window.location.href = 'thank-you.html';
+                } catch (err) {
+                    showError('Could not send your message just now. Please email gahonsh@gmail.com or WhatsApp us instead.');
+                    console.warn('[contact] submit failed:', err);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            });
+        })();
+    </script>
 <script src="theme.js"></script>
 <script src="script.js"></script>
-<script src="supabase-config.js"></script>
 <script src="marketplace-local.js"></script>
 <script src="supabase-client.js"></script>
 <script src="auth.js"></script>

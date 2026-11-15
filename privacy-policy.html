@@ -65,8 +65,41 @@
   "logo": "https://gahonsh-blip.github.io/assets/logo.png"
 }
 </script>
+
+    <style>
+        .legal-topbar{
+            position:sticky; top:0; z-index:50;
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            padding:14px 6vw; background:#050a14; border-bottom:1px solid rgba(255,255,255,.08);
+            flex-wrap:wrap;
+        }
+        .legal-topbar .lb-brand{font-weight:800; letter-spacing:.4px; font-size:1rem; color:#ffffff; text-decoration:none; white-space:nowrap}
+        .legal-topbar .lb-brand span{color:#00ffcc}
+        .legal-topbar nav{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+        .legal-topbar nav a{color:#94a3b8; text-decoration:none; font-size:.88rem; font-weight:600}
+        .legal-topbar nav a:hover{color:#00ffcc}
+        .legal-topbar .lb-cta{
+            background:linear-gradient(135deg,#00ffcc,#0077ff); color:#04121c !important;
+            padding:8px 16px; border-radius:999px; font-weight:800 !important;
+        }
+        @media (max-width:640px){
+            .legal-topbar{padding:12px 5vw}
+            .legal-topbar nav{gap:12px}
+            .legal-topbar nav a{font-size:.8rem}
+        }
+    </style>
 </head>
 <body>
+    <header class="legal-topbar">
+        <a href="index.html" class="lb-brand">GAHONSH <span>FREELANCING</span></a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="services.html">Services</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+            <a href="contact.html" class="lb-cta">Get a quote</a>
+        </nav>
+    </header>
     <div class="container">
         <h1>Privacy Policy</h1>
         <p>Last Updated: June 2026</p>

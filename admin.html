@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Dashboard | Gahonsh Freelancing</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root{
+        --bg:#070c19; --panel:#0f172a; --panel2:#131f36; --line:rgba(255,255,255,.09);
+        --cyan:#00ffcc; --blue:#0077ff; --green:#10b981; --amber:#f59e0b; --red:#ef4444;
+        --text:#f1f5f9; --slate:#94a3b8;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+    body{background:var(--bg);color:var(--text);min-height:100vh}
+    a{color:inherit}
+    .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;border-bottom:1px solid var(--line);background:#050a14;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+    .brand{font-weight:800;letter-spacing:.5px;font-size:1.05rem}
+    .brand span{color:var(--cyan)}
+    .bar-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .who{font-size:.85rem;color:var(--slate)}
+    .btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:.15s}
+    .btn:hover{background:var(--panel2);border-color:rgba(0,255,204,.4)}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#04121c;border:none;font-weight:700}
+    .btn-sm{padding:5px 10px;font-size:.78rem;border-radius:7px}
+    .wrap{max-width:1280px;margin:0 auto;padding:26px 22px 60px}
+    h1{font-size:1.5rem;margin-bottom:4px}
+    .sub{color:var(--slate);font-size:.9rem;margin-bottom:22px}
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px}
+    .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+    .kpi .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--slate)}
+    .kpi .value{font-size:1.7rem;font-weight:800;margin-top:6px}
+    .kpi .value.cyan{color:var(--cyan)} .kpi .value.green{color:var(--green)} .kpi .value.amber{color:var(--amber)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+    .tab{padding:9px 16px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--slate);cursor:pointer;font-size:.88rem;font-weight:600}
+    .tab.active{background:var(--panel);border-color:var(--line);color:var(--text)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    input[type=search],select{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:9px 12px;border-radius:9px;font-size:.85rem;min-width:200px}
+    table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:12px;overflow:hidden;font-size:.85rem}
+    th{text-align:left;padding:11px 14px;background:#0b1524;color:var(--slate);font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+    td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+    .pill.open,.pill.active,.pill.verified{background:rgba(16,185,129,.15);color:#34d399}
+    .pill.client{background:rgba(0,119,255,.16);color:#60a5fa}
+    .pill.freelancer,.pill.pending{background:rgba(245,158,11,.16);color:#fbbf24}
+    .pill.admin{background:rgba(0,255,204,.16);color:var(--cyan)}
+    .pill.completed,.pill.accepted{background:rgba(16,185,129,.15);color:#34d399}
+    .pill.cancelled,.pill.rejected,.pill.withdrawn,.pill.disputed{background:rgba(239,68,68,.16);color:#fca5a5}
+    .pill.in_progress,.pill.shortlisted{background:rgba(139,92,246,.18);color:#c4b5fd}
+    .empty{padding:34px;text-align:center;color:var(--slate);background:var(--panel);border:1px dashed var(--line);border-radius:12px}
+    .gate{max-width:420px;margin:12vh auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}
+    .gate h2{font-size:1.2rem;margin-bottom:6px}
+    .gate p{color:var(--slate);font-size:.87rem;margin-bottom:18px}
+    .gate input{width:100%;margin-bottom:10px;background:#0b1524;border:1px solid var(--line);color:var(--text);padding:11px 13px;border-radius:9px;font-size:.9rem}
+    .gate button{width:100%;margin-top:6px;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#04121c;font-weight:800;cursor:pointer}
+    .msg{font-size:.83rem;margin-top:12px;color:#fca5a5}
+    .muted{color:var(--slate)}
+    .trunc{max-width:420px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="bar">
+    <div class="brand">GAHONSH <span>OWNER</span></div>
+    <div class="bar-right">
+        <span class="who" id="whoAmI"></span>
+        <a class="btn" href="index.html"><i class="fa-solid fa-arrow-left"></i> Website</a>
+        <button class="btn" id="btnSignOutHidden" onclick="signOut()" style="display:none">Sign out</button>
+    </div>
+</div>
+
+<div id="gate" class="gate hidden">
+    <h2>Owner sign in</h2>
+    <p>This dashboard is private. Sign in with the owner account.</p>
+    <form id="gateForm">
+        <input type="email" id="gateEmail" placeholder="Email address" autocomplete="username" required>
+        <input type="password" id="gatePass" placeholder="Password" autocomplete="current-password" required>
+        <button type="submit">Sign in</button>
+    </form>
+    <div class="msg" id="gateMsg"></div>
+</div>
+
+<div id="app" class="wrap hidden">
+    <h1>Owner dashboard</h1>
+    <div class="sub">Everything happening on the marketplace, in one place.</div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="enquiries">Enquiries</button>
+        <button class="tab" data-tab="people">People</button>
+        <button class="tab" data-tab="jobs">Projects</button>
+        <button class="tab" data-tab="proposals">Proposals</button>
+        <button class="tab" data-tab="contracts">Contracts</button>
+    </div>
+
+    <div class="toolbar">
+        <input type="search" id="search" placeholder="Search…">
+        <select id="roleFilter" class="hidden">
+            <option value="">All account types</option>
+            <option value="freelancer">Workers</option>
+            <option value="client">Clients</option>
+        </select>
+        <button class="btn btn-sm" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+    </div>
+
+    <div id="tableArea"></div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="marketplace-local.js"></script>
+<script src="supabase-client.js"></script>
+<script>
+let client = null;
+let me = null;
+let tab = 'enquiries';
+let cache = { people: [], jobs: [], proposals: [], contracts: [], enquiries: [] };
+
+const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money = v => { const n = Number(v); return isFinite(n) && n > 0 ? '$' + n.toLocaleString('en-US', {maximumFractionDigits: 0}) : '—'; };
+const date = v => v ? new Date(v).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : '—';
+const pill = v => `<span class="pill ${esc(v)}">${esc(v)}</span>`;
+
+async function boot(){
+    try { client = await window.GahonshDB.getClient(); } catch(e){ client = null; }
+    if(!client){ showGate('Marketplace service is not reachable right now.'); return; }
+
+    const { data: { session } } = await client.auth.getSession();
+    if(!session){ showGate(); return; }
+
+    const { data: profile, error } = await client.from('profiles').select('id, full_name, email, role').eq('id', session.user.id).single();
+    if(error || !profile){ showGate('Could not load your profile.'); return; }
+    if(profile.role !== 'admin'){ showGate('This account is not the owner. Sign in with the owner account.', true); return; }
+
+    me = profile;
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('whoAmI').textContent = profile.email;
+    document.getElementById('btnSignOutHidden').style.display = 'inline-block';
+    await loadAll();
+}
+
+function showGate(msg, signedInAsOther){
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('gate').classList.remove('hidden');
+    document.getElementById('whoAmI').textContent = '';
+    if(msg){
+        document.getElementById('gateMsg').textContent = msg;
+        if(signedInAsOther){
+            document.getElementById('btnSignOutHidden').style.display = 'inline-block';
+        }
+    }
+}
+
+document.getElementById('gateForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('gateEmail').value.trim();
+    const pass = document.getElementById('gatePass').value;
+    const msg = document.getElementById('gateMsg');
+    msg.textContent = '';
+    try {
+        const { error } = await client.auth.signInWithPassword({ email, password: pass });
+        if(error) throw error;
+        location.reload();
+    } catch(err){
+        msg.textContent = err.message || 'Sign in failed.';
+    }
+};
+
+async function signOut(){
+    try { await client.auth.signOut(); } catch(e){}
+    location.reload();
+}
+
+async function loadAll(){
+    const q = async (fn) => { try { const r = await fn(); if(r.error) throw r.error; return r.data || []; } catch(e){ console.warn(e.message); return []; } };
+
+    const [overview, people, jobs, proposals, contracts, enquiries] = await Promise.all([
+        q(() => client.rpc('admin_overview')),
+        q(() => client.from('profiles').select('id, full_name, email, role, is_verified, location, title, hourly_rate, created_at').order('created_at', {ascending:false}).limit(500)),
+        q(() => client.from('jobs').select('id, title, status, category, budget_min, proposals_count, created_at, client_id').order('created_at', {ascending:false}).limit(300)),
+        q(() => client.from('proposals').select('id, job_id, freelancer_id, bid_amount, delivery_time_days, status, created_at').order('created_at', {ascending:false}).limit(300)),
+        q(() => client.from('contracts').select('id, job_id, client_id, freelancer_id, agreed_amount, status, created_at').order('created_at', {ascending:false}).limit(300)),
+        q(() => client.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(300))
+    ]);
+
+    cache = { people, jobs, proposals, contracts, enquiries };
+    renderKpis(overview || {});
+    renderTable();
+}
+
+function renderKpis(o){
+    const items = [
+        ['Workers', o.workers ?? 0, 'cyan'],
+        ['Clients', o.clients ?? 0, ''],
+        ['Open projects', o.open_jobs ?? 0, 'green'],
+        ['Proposals', o.proposals ?? 0, ''],
+        ['Active contracts', o.active_contracts ?? 0, 'green'],
+        ['Contract value', money(o.contract_value), 'cyan'],
+        ['Enquiries', cache.enquiries.filter(e => !e.is_handled).length, 'amber'],
+        ['Verified workers', o.verified_workers ?? 0, '']
+    ];
+    document.getElementById('kpis').innerHTML = items.map(([l,v,c]) =>
+        `<div class="kpi"><div class="label">${esc(l)}</div><div class="value ${c}">${esc(v)}</div></div>`).join('');
+}
+
+document.getElementById('tabs').addEventListener('click', e => {
+    const b = e.target.closest('.tab');
+    if(!b) return;
+    tab = b.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === b));
+    document.getElementById('roleFilter').classList.toggle('hidden', tab !== 'people');
+    document.getElementById('search').value = '';
+    renderTable();
+});
+document.getElementById('search').oninput = renderTable;
+document.getElementById('roleFilter').onchange = renderTable;
+
+function renderTable(){
+    const term = (document.getElementById('search').value || '').toLowerCase();
+    const area = document.getElementById('tableArea');
+    let rows = '';
+
+    if(tab === 'people'){
+        const role = document.getElementById('roleFilter').value;
+        let list = cache.people.filter(p => !role || p.role === role);
+        if(term) list = list.filter(p => (p.full_name||'').toLowerCase().includes(term) || (p.email||'').toLowerCase().includes(term) || (p.skills||[]).join(' ').toLowerCase().includes(term));
+        rows = list.length ? `<table><thead><tr><th>Name</th><th>Type</th><th>Location</th><th>Rate</th><th>Joined</th><th></th></tr></thead><tbody>` +
+            list.map(p => `<tr>
+                <td><strong>${esc(p.full_name)}</strong><div class="muted" style="font-size:.78rem">${esc(p.email)}</div></td>
+                <td>${pill(p.role)}${p.is_verified ? ' ' + pill('verified') : ''}</td>
+                <td>${esc(p.location || '—')}</td>
+                <td>${p.role === 'freelancer' ? money(p.hourly_rate) : '—'}</td>
+                <td>${date(p.created_at)}</td>
+                <td>${p.role === 'freelancer' ? `<button class="btn btn-sm" onclick="toggleVerify('${p.id}', ${!p.is_verified})">${p.is_verified ? 'Remove badge' : 'Verify'}</button>` : ''}</td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No accounts yet.</div>`;
+    }
+
+    if(tab === 'jobs'){
+        const nameOf = id => (cache.people.find(p => p.id === id) || {}).full_name || 'Client';
+        let list = cache.jobs;
+        if(term) list = list.filter(j => (j.title||'').toLowerCase().includes(term) || (j.category||'').toLowerCase().includes(term));
+        rows = list.length ? `<table><thead><tr><th>Project</th><th>Client</th><th>Budget</th><th>Proposals</th><th>Status</th><th>Posted</th><th></th></tr></thead><tbody>` +
+            list.map(j => `<tr>
+                <td><a href="job-details.html?id=${esc(j.id)}" style="text-decoration:none"><strong>${esc(j.title)}</strong></a><div class="muted" style="font-size:.78rem">${esc(j.category || '')}</div></td>
+                <td>${esc(nameOf(j.client_id))}</td>
+                <td>${money(j.budget_min)}</td>
+                <td>${esc(j.proposals_count ?? 0)}</td>
+                <td>${pill(j.status)}</td>
+                <td>${date(j.created_at)}</td>
+                <td>${j.status === 'open' ? `<button class="btn btn-sm" onclick="closeJob('${j.id}')">Close</button>` : ''}</td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No projects posted yet.</div>`;
+    }
+
+    if(tab === 'proposals'){
+        const nameOf = id => (cache.people.find(p => p.id === id) || {}).full_name || 'Worker';
+        const jobOf = id => (cache.jobs.find(j => j.id === id) || {}).title || 'Project';
+        let list = cache.proposals;
+        if(term) list = list.filter(p => nameOf(p.freelancer_id).toLowerCase().includes(term) || jobOf(p.job_id).toLowerCase().includes(term));
+        rows = list.length ? `<table><thead><tr><th>Worker</th><th>Project</th><th>Bid</th><th>Delivery</th><th>Status</th><th>Sent</th></tr></thead><tbody>` +
+            list.map(p => `<tr>
+                <td>${esc(nameOf(p.freelancer_id))}</td>
+                <td><a href="job-details.html?id=${esc(p.job_id)}" style="text-decoration:none">${esc(jobOf(p.job_id))}</a></td>
+                <td>${money(p.bid_amount)}</td>
+                <td>${esc(p.delivery_time_days ? p.delivery_time_days + ' days' : '—')}</td>
+                <td>${pill(p.status)}</td>
+                <td>${date(p.created_at)}</td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No proposals yet.</div>`;
+    }
+
+    if(tab === 'contracts'){
+        const nameOf = id => (cache.people.find(p => p.id === id) || {}).full_name || '—';
+        const jobOf = id => (cache.jobs.find(j => j.id === id) || {}).title || 'Project';
+        let list = cache.contracts;
+        if(term) list = list.filter(c => jobOf(c.job_id).toLowerCase().includes(term) || nameOf(c.freelancer_id).toLowerCase().includes(term));
+        rows = list.length ? `<table><thead><tr><th>Project</th><th>Worker</th><th>Client</th><th>Amount</th><th>Status</th><th>Started</th></tr></thead><tbody>` +
+            list.map(c => `<tr>
+                <td>${esc(jobOf(c.job_id))}</td>
+                <td>${esc(nameOf(c.freelancer_id))}</td>
+                <td>${esc(nameOf(c.client_id))}</td>
+                <td>${money(c.agreed_amount)}</td>
+                <td>${pill(c.status)}</td>
+                <td>${date(c.created_at)}</td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No contracts yet.</div>`;
+    }
+
+    if(tab === 'enquiries'){
+        let list = cache.enquiries;
+        if(term) list = list.filter(m => (m.name||'').toLowerCase().includes(term) || (m.email||'').toLowerCase().includes(term) || (m.message||'').toLowerCase().includes(term));
+        rows = list.length ? `<table><thead><tr><th>Person</th><th>Service</th><th>Message</th><th>Status</th><th>Received</th><th></th></tr></thead><tbody>` +
+            list.map(m => `<tr>
+                <td><strong>${esc(m.name)}</strong><div class="muted" style="font-size:.78rem">${esc(m.email)}${m.company ? ' · ' + esc(m.company) : ''}</div></td>
+                <td>${esc(m.service || '—')}</td>
+                <td class="trunc">${esc(m.message)}</td>
+                <td>${m.is_handled ? pill('completed') : pill('pending')}</td>
+                <td>${date(m.created_at)}</td>
+                <td><button class="btn btn-sm" onclick="toggleHandled('${m.id}', ${!m.is_handled})">${m.is_handled ? 'Reopen' : 'Mark handled'}</button></td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No enquiries yet. Messages sent from the contact page will appear here and in your email.</div>`;
+    }
+
+    area.innerHTML = rows;
+}
+
+async function toggleVerify(id, value){
+    const { error } = await client.from('profiles').update({ is_verified: value }).eq('id', id);
+    if(error){ alert(error.message); return; }
+    await loadAll();
+}
+
+async function closeJob(id){
+    if(!confirm('Close this project? It will leave the public job feed.')) return;
+    const { error } = await client.from('jobs').update({ status: 'cancelled' }).eq('id', id);
+    if(error){ alert(error.message); return; }
+    await loadAll();
+}
+
+async function toggleHandled(id, value){
+    const { error } = await client.from('contact_messages').update({ is_handled: value }).eq('id', id);
+    if(error){ alert(error.message); return; }
+    await loadAll();
+}
+
+boot();
+</script>
+</body>
+</html>
