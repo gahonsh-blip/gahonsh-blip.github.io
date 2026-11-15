@@ -338,6 +338,45 @@
             gap: 30px;
         }
 
+
+        .bundle-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin: 0 0 28px;
+            padding: 18px 22px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: rgba(0, 255, 204, 0.04);
+        }
+        .bundle-strip strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+        .bundle-strip span { color: var(--text-slate); font-size: 0.88rem; }
+        .file-meta {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            color: var(--text-slate);
+            margin: 10px 0 2px;
+        }
+        .file-meta i { color: var(--accent-cyan); }
+        .project-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+            align-items: center;
+        }
+        .source-private {
+            font-size: 0.76rem;
+            color: var(--text-slate);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .project-card {
             background: #070c19;
             border: 1px solid var(--border-color);
@@ -747,22 +786,30 @@
     <!-- PORTFOLIO HERO SECTION -->
     <section class="portfolio-hero">
         <h1>Our Case Log <span>Portfolio</span></h1>
-        <p>Explore verified project samples and download live workflow templates compiled across our active service tracks.</p>
+        <p>Every card below opens something real: a working Excel workbook, a print-ready PDF, a Word or PowerPoint file, or a live deployed website. No mock-ups and no empty placeholders.</p>
         
         <!-- CATEGORY FILTER BUTTONS -->
         <div class="filter-container">
             <button class="btn-filter active" data-filter="all">All Logs</button>
             <button class="btn-filter" data-filter="excel">Excel Sheets</button>
             <button class="btn-filter" data-filter="pdf">PDF Layouts</button>
+            <button class="btn-filter" data-filter="doc">Word &amp; Decks</button>
             <button class="btn-filter" data-filter="web">Web Portals</button>
         </div>
     </section>
 
-    <!-- DYNAMIC PORTFOLIO GRID EXPANSION (12 LOGS ADDED) -->
+        <!-- PORTFOLIO GRID - every card ships a real, openable file or a live link -->
     <section class="portfolio-section">
+        <div class="bundle-strip">
+            <div>
+                <strong>Want all of it at once?</strong>
+                <span>Ten working files in one archive, with a README that explains each one.</span>
+            </div>
+            <a href="assets/projects/project-bundle.zip" class="btn-download-sample" download>
+                <i class="fa-solid fa-file-zipper"></i> Download all 10 files
+            </a>
+        </div>
         <div class="portfolio-grid">
-            
-            <!-- EXCEL LAYER 1 -->
             <div class="project-card" data-category="excel">
                 <div class="project-thumb">
                     <i class="fa-solid fa-file-excel"></i>
@@ -770,29 +817,39 @@
                 </div>
                 <div class="project-body">
                     <h3>Finance Dashboard</h3>
-                    <p>Advanced calculation sheets utilizing automated macros and dynamic visual matrix structures to reduce manual tracking lag.</p>
-                    <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Sample Sheet
-                    </a>
+                    <p>A three-sheet revenue workbook: type transactions once, and the dashboard totals, tax and category split recalculate themselves.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 3 sheets · SUMIF / COUNTIF formulas · notes tab · 9 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download workbook
+                        </a>
+                        <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- EXCEL LAYER 2 -->
             <div class="project-card" data-category="excel">
                 <div class="project-thumb">
                     <i class="fa-solid fa-calculator"></i>
-                    <div class="project-tag">Excel Tracker</div>
+                    <div class="project-tag">Excel Calculator</div>
                 </div>
                 <div class="project-body">
-                    <h3>Loan Calculator</h3>
-                    <p>Smart installment tracking systems built specifically to monitor outstanding billing structures and warning lines safely.</p>
-                    <a href="assets/projects/loan-calculator-sample.xlsx" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Calculator
-                    </a>
+                    <h3>Loan &amp; EMI Calculator</h3>
+                    <p>Change the loan amount, rate or tenure in the yellow cells and the full month-by-month schedule rebuilds with PMT, IPMT and PPMT.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 2 sheets · live amortisation schedule · 7 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/loan-calculator-sample.xlsx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download calculator
+                        </a>
+                        <a href="assets/projects/loan-calculator-sample.xlsx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- EXCEL LAYER 3 -->
             <div class="project-card" data-category="excel">
                 <div class="project-thumb">
                     <i class="fa-solid fa-boxes-stacked"></i>
@@ -800,14 +857,19 @@
                 </div>
                 <div class="project-body">
                     <h3>Inventory Tracker</h3>
-                    <p>Automated stock accounting spreadsheets featuring formula thresholds that alert your unit before manual shortages occur.</p>
-                    <a href="assets/projects/inventory-tracker-sample.xlsx" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Tracker
-                    </a>
+                    <p>Stock levels with reorder points. Rows turn amber at the reorder line and red at half of it, so shortages show up before they happen.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 2 sheets · conditional formatting · movement log · 7 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/inventory-tracker-sample.xlsx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download tracker
+                        </a>
+                        <a href="assets/projects/inventory-tracker-sample.xlsx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- EXCEL LAYER 4 -->
             <div class="project-card" data-category="excel">
                 <div class="project-thumb">
                     <i class="fa-solid fa-clipboard-user"></i>
@@ -815,14 +877,19 @@
                 </div>
                 <div class="project-body">
                     <h3>Attendance Manager</h3>
-                    <p>Clean operational sheet systems engineered perfectly to structure local grading metrics and attendance logs.</p>
-                    <a href="assets/projects/attendance-manager-sample.xlsx" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Manager
-                    </a>
+                    <p>A daily grid with P, L and A marks that colour themselves, plus an automatic attendance percentage for every person.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 2 sheets · COUNTIF summary · colour rules · 7 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/attendance-manager-sample.xlsx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download manager
+                        </a>
+                        <a href="assets/projects/attendance-manager-sample.xlsx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- PDF LAYER 1 -->
             <div class="project-card" data-category="pdf">
                 <div class="project-thumb">
                     <i class="fa-solid fa-building"></i>
@@ -830,59 +897,119 @@
                 </div>
                 <div class="project-body">
                     <h3>Company Profile</h3>
-                    <p>Premium corporate brochure structure crafted with precise typographical grids and absolute corporate visual alignment.</p>
-                    <a href="assets/projects/company-profile-sample.pdf" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Profile
-                    </a>
+                    <p>Three-page profile built on a strict grid: cover, service table and a how-we-work page. Print-ready and text-searchable, not a scanned image.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 3 pages · A4 · selectable text · 6 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/company-profile-sample.pdf" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download profile
+                        </a>
+                        <a href="assets/projects/company-profile-sample.pdf" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- PDF LAYER 2 -->
-            <div class="project-card" data-category="pdf">
-                <div class="project-thumb">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <div class="project-tag">PDF Layout</div>
-                </div>
-                <div class="project-body">
-                    <h3>Product Catalog</h3>
-                    <p>Clean typographical brand asset book configured with internal hyperlinked indices for fast digital distribution tracks.</p>
-                    <a href="assets/projects/corporate-catalog-sample.pdf" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Catalog
-                    </a>
-                </div>
-            </div>
-
-            <!-- PDF LAYER 3 -->
             <div class="project-card" data-category="pdf">
                 <div class="project-thumb">
                     <i class="fa-solid fa-book-open"></i>
                     <div class="project-tag">PDF Layout</div>
                 </div>
                 <div class="project-body">
-                    <h3>Service Brochure</h3>
-                    <p>Elegant layout structures detailing complete technical parameters cleanly to minimize customer onboarding lag.</p>
-                    <a href="assets/projects/service-brochure-sample.pdf" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Brochure
-                    </a>
+                    <h3>Product Catalogue</h3>
+                    <p>Category-per-page catalogue with a repeating specification table and prices locked to a right-hand column, so a printed page is easy to quote from.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 3 pages · A4 · price tables · 6 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/corporate-catalog-sample.pdf" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download catalogue
+                        </a>
+                        <a href="assets/projects/corporate-catalog-sample.pdf" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- PDF LAYER 4 -->
             <div class="project-card" data-category="pdf">
                 <div class="project-thumb">
-                    <i class="fa-solid fa-id-card"></i>
+                    <i class="fa-solid fa-file-lines"></i>
                     <div class="project-tag">PDF Layout</div>
                 </div>
                 <div class="project-body">
-                    <h3>Resume Design</h3>
-                    <p>Sleek visual layouts optimized systematically to highlight professional execution records across technical nodes.</p>
-                    <a href="assets/projects/resume-design-sample.pdf" class="btn-download-sample" download>
-                        <i class="fa-solid fa-download"></i> Download Resume
-                    </a>
+                    <h3>Service Brochure</h3>
+                    <p>Two-sided leave-behind: four service blocks with starting prices, the project steps, and one clear call to action.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 2 pages · A4 · double sided · 4 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/service-brochure-sample.pdf" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download brochure
+                        </a>
+                        <a href="assets/projects/service-brochure-sample.pdf" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- WEB LAYER 1 -->
+            <div class="project-card" data-category="pdf">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <div class="project-tag">PDF Layout</div>
+                </div>
+                <div class="project-body">
+                    <h3>Resume Layout</h3>
+                    <p>A single-page resume with a clean hierarchy, an experience table and room for selected work, without the usual cramped two-column squeeze.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 1 page · A4 · editable layout · 3 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/resume-design-sample.pdf" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download resume
+                        </a>
+                        <a href="assets/projects/resume-design-sample.pdf" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card" data-category="doc">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-file-word"></i>
+                    <div class="project-tag">Word Document</div>
+                </div>
+                <div class="project-body">
+                    <h3>Project Proposal</h3>
+                    <p>A real proposal document: scope, five numbered sections, a pricing table and a plain statement of what is not included.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> Word .docx · pricing table included · 37 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/sample-document.docx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download proposal
+                        </a>
+                        <a href="assets/projects/sample-document.docx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card" data-category="doc">
+                <div class="project-thumb">
+                    <i class="fa-solid fa-file-powerpoint"></i>
+                    <div class="project-tag">Presentation</div>
+                </div>
+                <div class="project-body">
+                    <h3>Proposal Deck</h3>
+                    <p>Six 16:9 slides: cover, problem, approach, timeline, fixed-price slide and next step. Everything reuses one type scale and one accent colour.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> 6 slides · 16:9 widescreen · 36 KB</div>
+                    <div class="project-actions">
+                        <a href="assets/projects/sample-presentation.pptx" class="btn-download-sample" download>
+                            <i class="fa-solid fa-download"></i> Download deck
+                        </a>
+                        <a href="assets/projects/sample-presentation.pptx" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-regular fa-eye"></i> Open preview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
                     <i class="fa-solid fa-paint-roller"></i>
@@ -890,19 +1017,19 @@
                 </div>
                 <div class="project-body">
                     <h3>Painter Plus</h3>
-                    <p>Complete service website for a premium painting contractor: service pages, gallery, warranty terms and a quote request flow. Built as a static front end and deployed straight from its Git repository to Vercel.</p>
+                    <p>Complete service website for a painting contractor: service pages, gallery, warranty terms and a quote request flow. Static front end, deployed from its Git repository to Vercel.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> Static site · Vercel · GitHub</div>
                     <div class="project-actions">
                         <a href="https://painter-plus-website.vercel.app/" class="btn-download-sample" target="_blank" rel="noopener">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Site
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View live site
                         </a>
                         <a href="https://github.com/gahonsh-blip/painter-plus-website" class="btn-source-link" target="_blank" rel="noopener">
-                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                            <i class="fa-brands fa-github"></i> Source on GitHub
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- WEB LAYER 2 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
                     <i class="fa-solid fa-video"></i>
@@ -910,19 +1037,19 @@
                 </div>
                 <div class="project-body">
                     <h3>Secure System Solution</h3>
-                    <p>Service site for a CCTV, biometric access and corporate AMC provider in Argora, Ranchi. Focused on local search visibility, with one clear enquiry path on every service block.</p>
+                    <p>Service site for a CCTV, biometric access and AMC provider in Argora, Ranchi. Built around local search visibility, with one enquiry path on every service block.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> Multi-page site · GitHub Pages</div>
                     <div class="project-actions">
                         <a href="https://gahonsh-blip.github.io/secure-system/" class="btn-download-sample" target="_blank" rel="noopener">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Site
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View live site
                         </a>
                         <a href="https://github.com/gahonsh-blip/secure-system" class="btn-source-link" target="_blank" rel="noopener">
-                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                            <i class="fa-brands fa-github"></i> Source on GitHub
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- WEB LAYER 3 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
                     <i class="fa-solid fa-diagram-project"></i>
@@ -930,17 +1057,17 @@
                 </div>
                 <div class="project-body">
                     <h3>Gahonsh Platform Dashboard</h3>
-                    <p>Full-stack automation dashboard: lead discovery, qualification scoring, a draft queue with approval gates, follow-up scheduling and a weekly digest. Node.js API routes over a Postgres database.</p>
+                    <p>Automation dashboard: lead discovery, qualification scoring, a draft queue with approval gates, follow-up scheduling and a weekly digest. Node.js API routes over a Postgres database.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> Node.js · Postgres · cron jobs · source private</div>
                     <div class="project-actions">
                         <a href="https://gahonsh-platform.vercel.app/" class="btn-download-sample" target="_blank" rel="noopener">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live App
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View live app
                         </a>
                         <span class="source-private"><i class="fa-solid fa-lock"></i> Source private, walkthrough on request</span>
                     </div>
                 </div>
             </div>
 
-            <!-- WEB LAYER 4 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
                     <i class="fa-solid fa-layer-group"></i>
@@ -948,19 +1075,18 @@
                 </div>
                 <div class="project-body">
                     <h3>Gahonsh UI Kit</h3>
-                    <p>Zero-dependency component kit built on a liquid glass style: cards, navigation, forms and buttons in pure CSS, with keyboard focus states and readable contrast in both themes.</p>
+                    <p>Zero-dependency component kit on a liquid-glass style: cards, navigation, forms and buttons in pure CSS, with keyboard focus states and readable contrast in both themes.</p>
+                    <div class="file-meta"><i class="fa-regular fa-circle-check"></i> HTML · CSS · no framework</div>
                     <div class="project-actions">
                         <a href="https://gahonsh-blip.github.io/gahonsh-project/" class="btn-download-sample" target="_blank" rel="noopener">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Demo
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View live demo
                         </a>
                         <a href="https://github.com/gahonsh-blip/gahonsh-project" class="btn-source-link" target="_blank" rel="noopener">
-                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                            <i class="fa-brands fa-github"></i> Source on GitHub
                         </a>
                     </div>
                 </div>
             </div>
-
-        
         </div>
     </section>
 
@@ -969,16 +1095,16 @@
         <h2>Why Clients Choose Us</h2>
         <div class="trust-grid">
             <div>
-                <h3>99+</h3>
-                <p>Projects Delivered</p>
+                <h3>4</h3>
+                <p>Live Projects In Production</p>
             </div>
             <div>
-                <h3>100%</h3>
-                <p>Client Support</p>
+                <h3>10</h3>
+                <p>Sample Files You Can Open Right Now</p>
             </div>
             <div>
-                <h3>Fast</h3>
-                <p>Delivery Time</p>
+                <h3>7-day</h3>
+                <p>Bug Support After Delivery</p>
             </div>
         </div>
     </section>

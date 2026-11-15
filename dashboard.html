@@ -1595,11 +1595,11 @@
                 const downloadCheck = document.getElementById("linkDownloadCheck");
 
                 if (type === "excel") {
-                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-tracker.xlsx";
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/finance-dashboard-sample.xlsx";
                     if (!textInput.value || textInput.value === "View Project" || textInput.value === "Get Started") textInput.value = "Download Sample Sheet";
                     downloadCheck.checked = true;
                 } else if (type === "pdf") {
-                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-document.pdf";
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/company-profile-sample.pdf";
                     if (!textInput.value || textInput.value === "View Project" || textInput.value === "Get Started") textInput.value = "Download Sample PDF";
                     downloadCheck.checked = true;
                 } else if (type === "word") {
@@ -1611,11 +1611,11 @@
                     if (!textInput.value || textInput.value === "View Project") textInput.value = "Download Presentation";
                     downloadCheck.checked = true;
                 } else if (type === "zip") {
-                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/sample-files.zip";
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/project-bundle.zip";
                     if (!textInput.value || textInput.value === "View Project") textInput.value = "Download ZIP Archive";
                     downloadCheck.checked = true;
                 } else if (type === "media") {
-                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/media/sample-video.mp4";
+                    if (!hrefInput.value || hrefInput.value.startsWith("http")) hrefInput.value = "assets/projects/project-bundle.zip";
                     if (!textInput.value || textInput.value === "View Project") textInput.value = "Watch Media / Video";
                     downloadCheck.checked = false;
                 } else if (type === "custom_file") {
