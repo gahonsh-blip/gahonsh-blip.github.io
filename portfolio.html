@@ -430,6 +430,52 @@
             border-color: transparent;
         }
 
+        .project-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .project-actions .btn-download-sample {
+            margin: 0;
+        }
+
+        .btn-source-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            padding: 10px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: all 0.3s;
+        }
+
+        .btn-source-link:hover {
+            color: var(--text-main);
+            border-color: var(--accent-cyan);
+        }
+
+        .source-private {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 50px;
+            border: 1px dashed var(--border-color);
+            color: var(--text-slate);
+            font-size: 0.78rem;
+        }
+
         /* TRUST SECTION BLOCK */
         .trust-section {
             padding: 70px 8%;
@@ -839,63 +885,82 @@
             <!-- WEB LAYER 1 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
-                    <i class="fa-solid fa-globe"></i>
-                    <div class="project-tag">Web Portal</div>
+                    <i class="fa-solid fa-paint-roller"></i>
+                    <div class="project-tag">Live Client Site</div>
                 </div>
                 <div class="project-body">
-                    <h3>Business Website</h3>
-                    <p>Complete structural deployment models configuring clean navigation systems to align your corporate goals online.</p>
-                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
-                        <i class="fa-solid fa-eye"></i> View Live Site
-                    </a>
+                    <h3>Painter Plus</h3>
+                    <p>Complete service website for a premium painting contractor: service pages, gallery, warranty terms and a quote request flow. Built as a static front end and deployed straight from its Git repository to Vercel.</p>
+                    <div class="project-actions">
+                        <a href="https://painter-plus-website.vercel.app/" class="btn-download-sample" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Site
+                        </a>
+                        <a href="https://github.com/gahonsh-blip/painter-plus-website" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <!-- WEB LAYER 2 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
-                    <i class="fa-solid fa-laptop-code"></i>
-                    <div class="project-tag">Web Portal</div>
+                    <i class="fa-solid fa-video"></i>
+                    <div class="project-tag">Local Business Site</div>
                 </div>
                 <div class="project-body">
-                    <h3>Landing Page</h3>
-                    <p>High-converting layout setup using light script compilation rows optimized perfectly to scale local brand conversions.</p>
-                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
-                        <i class="fa-solid fa-eye"></i> View Interface
-                    </a>
+                    <h3>Secure System Solution</h3>
+                    <p>Service site for a CCTV, biometric access and corporate AMC provider in Argora, Ranchi. Focused on local search visibility, with one clear enquiry path on every service block.</p>
+                    <div class="project-actions">
+                        <a href="https://gahonsh-blip.github.io/secure-system/" class="btn-download-sample" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Site
+                        </a>
+                        <a href="https://github.com/gahonsh-blip/secure-system" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <!-- WEB LAYER 3 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <div class="project-tag">Web Portal</div>
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <div class="project-tag">Full-Stack App</div>
                 </div>
                 <div class="project-body">
-                    <h3>Coaching Website</h3>
-                    <p>Custom online educational interfaces mapping class timetables, grading modules, and course structures flawlessly.</p>
-                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
-                        <i class="fa-solid fa-eye"></i> View Live Portal
-                    </a>
+                    <h3>Gahonsh Platform Dashboard</h3>
+                    <p>Full-stack automation dashboard: lead discovery, qualification scoring, a draft queue with approval gates, follow-up scheduling and a weekly digest. Node.js API routes over a Postgres database.</p>
+                    <div class="project-actions">
+                        <a href="https://gahonsh-platform.vercel.app/" class="btn-download-sample" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live App
+                        </a>
+                        <span class="source-private"><i class="fa-solid fa-lock"></i> Source private, walkthrough on request</span>
+                    </div>
                 </div>
             </div>
 
             <!-- WEB LAYER 4 -->
             <div class="project-card" data-category="web">
                 <div class="project-thumb">
-                    <i class="fa-solid fa-user-gear"></i>
-                    <div class="project-tag">Web Portal</div>
+                    <i class="fa-solid fa-layer-group"></i>
+                    <div class="project-tag">UI Component Kit</div>
                 </div>
                 <div class="project-body">
-                    <h3>Portfolio Website</h3>
-                    <p>Premium dark-mode personal asset showcases engineered to compile active service archives beautifully.</p>
-                    <a href="https://gahonsh-blip.github.io/" class="btn-download-sample" target="_blank">
-                        <i class="fa-solid fa-eye"></i> View Archive
-                    </a>
+                    <h3>Gahonsh UI Kit</h3>
+                    <p>Zero-dependency component kit built on a liquid glass style: cards, navigation, forms and buttons in pure CSS, with keyboard focus states and readable contrast in both themes.</p>
+                    <div class="project-actions">
+                        <a href="https://gahonsh-blip.github.io/gahonsh-project/" class="btn-download-sample" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Live Demo
+                        </a>
+                        <a href="https://github.com/gahonsh-blip/gahonsh-project" class="btn-source-link" target="_blank" rel="noopener">
+                            <i class="fa-brands fa-github"></i> View Source on GitHub
+                        </a>
+                    </div>
                 </div>
             </div>
 
+        
         </div>
     </section>
 
