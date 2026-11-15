@@ -470,22 +470,39 @@
                 });
             }
 
+            if (!talentList || talentList.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1; padding:44px 24px; text-align:center; background:rgba(255,255,255,0.02); border:1px dashed var(--border-color); border-radius:16px;">
+                        <i class="fa-solid fa-user-group" style="font-size:2rem; color:var(--accent-cyan); margin-bottom:14px;"></i>
+                        <h3 style="margin-bottom:8px; font-size:1.15rem;">${searchVal ? 'No specialist matches that search' : 'Our specialist bench is opening up'}</h3>
+                        <p style="color:var(--text-slate); font-size:0.92rem; max-width:520px; margin:0 auto 18px;">
+                            ${searchVal ? 'Try a different skill or clear the search to see everyone.' : 'New freelancers are joining. If you need a specific skill right now, tell us and we will match you with the right specialist.'}
+                        </p>
+                        <a href="contact.html" class="btn-hire-talent" style="display:inline-flex; padding:11px 22px;">
+                            <i class="fa-solid fa-paper-plane"></i> Tell us what you need
+                        </a>
+                    </div>`;
+                return;
+            }
+
             grid.innerHTML = talentList.map(t => {
                 const name = escapeHtml(t.full_name || 'Freelancer');
                 const initials = (t.full_name || 'F').trim().split(/\s+/).map(n => n[0]).join('').toUpperCase();
                 const skillsHtml = (t.skills || []).map(s => `<span class="talent-skill">${escapeHtml(s)}</span>`).join('');
+                const verifiedBadge = t.is_verified ? ' <i class="fa-solid fa-circle-check" title="Verified" style="color:var(--accent-cyan); font-size:0.9rem;"></i>' : '';
+                const rate = Number(t.hourly_rate) > 0 ? '$' + Number(t.hourly_rate) + '/hr' : 'Rate on request';
 
                 return `
                     <div class="talent-card">
                         <div class="talent-card-header">
                             <div class="talent-avatar">${initials}</div>
                             <div>
-                                <div class="talent-name">${name} <i class="fa-solid fa-circle-check" style="color:var(--accent-cyan); font-size:0.9rem;"></i></div>
+                                <div class="talent-name">${name}${verifiedBadge}</div>
                                 <div class="talent-title">${escapeHtml(t.title || 'Freelance Specialist')}</div>
                             </div>
-                            <div class="talent-rate-badge">$${t.hourly_rate || 35}/hr</div>
+                            <div class="talent-rate-badge">${escapeHtml(rate)}</div>
                         </div>
-                        <p class="talent-bio">${escapeHtml(t.bio || 'Verified freelance professional ready to deliver top-tier results.')}</p>
+                        <p class="talent-bio">${escapeHtml(t.bio || 'Available for new projects. Ask for details and recent work samples.')}</p>
                         <div class="talent-skills">${skillsHtml}</div>
                         <a href="contact.html?invite=${encodeURIComponent(t.id)}" class="btn-hire-talent">
                             <i class="fa-solid fa-paper-plane"></i> Contact & Hire
