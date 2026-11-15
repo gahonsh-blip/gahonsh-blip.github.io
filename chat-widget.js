@@ -62,6 +62,8 @@
         },
         {
             id: 'excel',
+            b_en: 'Excel: dashboards, macros, formulas and trackers, from $25.',
+            b_hi: 'Excel: dashboard, macro, formula और tracker, $25 से.',
             kw: ['excel', 'spreadsheet', 'dashboard', 'macro', 'vba', 'formula', 'tracker', 'एक्सेल', 'मैक्रो', 'डैशबोर्ड', 'sheet', 'google sheet', 'data entry'],
             chips: ['excelSamples', 'pricing', 'timeline', 'quote'],
             en: 'Excel is our strongest area. We build:<br><br>• Automated dashboards with KPI cards and native charts<br>• Macro and VBA workflows that remove manual copy-paste<br>• Formula repair on messy existing sheets<br>• Stock, attendance, loan and finance trackers<br><br>Sample with 1,000 rows, live formulas and 5 charts: ' + a(L.xlFinance, 'Finance Dashboard (xlsx)') + '<br><br>From *$25* per sheet. Tell me your sheet and I will suggest the right build.',
@@ -69,6 +71,8 @@
         },
         {
             id: 'pdf',
+            b_en: 'PDF: profiles, catalogues and brochures, from $25, usually 2-4 days.',
+            b_hi: 'PDF: profile, catalogue और brochure, $25 से, आम तौर पर 2-4 दिन.',
             kw: ['pdf', 'brochure', 'catalogue', 'catalog', 'profile', 'document design', 'पीडीएफ', 'ब्रोशर', 'कैटलॉग', 'print', 'layout'],
             chips: ['pdfSamples', 'pricing', 'timeline', 'quote'],
             en: 'We design print-ready, text-searchable PDFs: company profiles, product catalogues, service brochures and resume layouts.<br><br>Live samples:<br>• ' + a(L.pdfProfile, 'Company Profile (3 pages)') + '<br>• ' + a(L.pdfCatalog, 'Product Catalogue (price tables + chart)') + '<br>• ' + a(L.pdfBrochure, 'Service Brochure (2 pages)') + '<br>• ' + a(L.pdfResume, 'Resume Layout') + '<br><br>From *$25*, usually 2-4 days.',
@@ -76,6 +80,8 @@
         },
         {
             id: 'ppt',
+            b_en: 'Decks: investor and sales slides, from $25, 3-5 days.',
+            b_hi: 'Deck: investor और sales slide, $25 से, 3-5 दिन.',
             kw: ['ppt', 'presentation', 'deck', 'slide', 'powerpoint', 'pitch', 'प्रेजेंटेशन', 'स्लाइड', 'deck banao'],
             chips: ['deckSample', 'pricing', 'quote'],
             en: 'Investor pitch decks, sales decks and corporate slide sets: clean grid, your brand colours, editable charts.<br><br>8-slide editable sample: ' + a(L.pptx, 'Proposal Deck (pptx)') + '<br><br>From *$25*. Send your content and I will confirm the slide count and price.',
@@ -83,6 +89,8 @@
         },
         {
             id: 'web',
+            b_en: 'Websites: landing page from $69, full application from $249.',
+            b_hi: 'Website: landing page $69 से, पूरा application $249 से.',
             kw: ['website', 'web', 'landing', 'site', 'web development', 'frontend', 'react', 'node', 'api', 'वेबसाइट', 'वेब', 'html', 'shopify', 'wordpress', 'app'],
             chips: ['portfolio', 'pricing', 'quote', 'timeline'],
             en: 'Web work we do:<br><br>• Landing pages and business websites (mobile-first)<br>• Node.js and Express APIs, JWT auth, admin panels<br>• Database design (MySQL, PostgreSQL, MongoDB)<br>• Fixes and monthly content updates on an existing site<br><br>Live examples: ' + a(L.portfolio, 'portfolio') + '<br><br>Starter site from *$69*, full application from *$249*. What is the scope?',
@@ -90,6 +98,8 @@
         },
         {
             id: 'ai',
+            b_en: 'AI: prompt systems and automation workflows, from $25.',
+            b_hi: 'AI: prompt system और automation workflow, $25 से.',
             kw: ['ai', 'automation', 'chatbot', 'gpt', 'prompt', 'एआई', 'ऑटोमेशन', 'workflow', 'zapier', 'script'],
             chips: ['services', 'pricing', 'quote'],
             en: 'AI and automation work includes:<br><br>• Prompt systems and content workflows that cut drafting time<br>• Scripts that move data between sheets, mail and databases<br>• Reply engines that sort inbox mail into categories<br><br>From *$25* for a small workflow. Describe the repetitive task and I will say what is realistic.',
@@ -97,6 +107,8 @@
         },
         {
             id: 'branding',
+            b_en: 'Branding: logo plus identity pack, from $25.',
+            b_hi: 'Branding: logo और identity pack, $25 से.',
             kw: ['logo', 'branding', 'brand', 'colour', 'color', 'identity', 'लोगो', 'ब्रांडिंग'],
             chips: ['pricing', 'portfolio', 'quote'],
             en: 'Branding packs give you a vector logo, typography rules, a colour palette and consistent assets for print and web.<br><br>From *$25*. See the layouts in our ' + a(L.portfolio, 'portfolio') + '.',
@@ -104,6 +116,8 @@
         },
         {
             id: 'pricing',
+            b_en: 'Price: one service from $25, Starter from $69, Professional from $249.',
+            b_hi: 'कीमत: एक service $25 से, Starter $69 से, Professional $249 से.',
             kw: ['price', 'pricing', 'cost', 'how much', 'rate', 'budget', 'charge', 'kitna', 'kitne', 'kimat', 'कीमत', 'कितना', 'कितने', 'पैसा', 'paisa', 'fees', 'quote price'],
             chips: ['starter', 'professional', 'services', 'quote'],
             en: 'Prices are fixed and quoted before work starts:<br><br>• *Starter*: from $69 (PDF formatting, data entry, standard slides, email support)<br>• *Professional*: from $249 (Excel macro dashboards, interactive PDFs, pitch decks, web updates, priority support)<br>• *Business*: custom quote (branding identity, web architecture, AI assistants, full automation)<br>• *Single service cards*: from $25<br><br>Full matrix: ' + a(L.pricing, 'pricing page') + '<br><br>No hourly surprises, no hidden fees.',
@@ -154,6 +168,8 @@
         },
         {
             id: 'timeline',
+            b_en: 'Timing: PDF 2-4 days, Excel dashboard 3-6 days, landing page 5-7 days, full app 2-3 weeks.',
+            b_hi: 'समय: PDF 2-4 दिन, Excel dashboard 3-6 दिन, landing page 5-7 दिन, पूरा app 2-3 हफ्ते.',
             kw: ['how long', 'timeline', 'delivery', 'time', 'days', 'deadline', 'kitne din', 'kitna time', 'कितना समय', 'कितने दिन', 'कब', 'jaldi', 'urgent', 'fast'],
             chips: ['pricing', 'process', 'quote'],
             en: 'Typical delivery:<br><br>• PDF layout or small fix: *2-4 days*<br>• Excel dashboard or tracker: *3-6 days*<br>• Deck: *3-5 days*<br>• Landing page: *5-7 days*<br>• Full web application: *2-3 weeks*<br><br>Urgent work is possible when the scope is small. Share your date and I will confirm what fits.',
@@ -161,6 +177,8 @@
         },
         {
             id: 'process',
+            b_en: 'Process: requirement, fixed quote, build, delivery with 7-day support.',
+            b_hi: 'प्रक्रिया: requirement, पक्की कीमत, निर्माण, delivery और 7 दिन support.',
             kw: ['process', 'how it works', 'how do you work', 'steps', 'kaise kaam', 'कैसे काम', 'प्रक्रिया', 'workflow steps'],
             en: 'Four steps:<br><br>1. *Consultation*: you share the requirement, we confirm scope<br>2. *Planning*: fixed quote, file structure and milestones<br>3. *Build*: we develop and send a draft for review<br>4. *Delivery*: final files, walkthrough and 7-day free bug support<br><br>See it on ' + a(L.about, 'about page') + '. Start with ' + a(L.contact, 'your requirement') + '.',
             hi: 'चार step:<br><br>1. *Consultation*: आप requirement बताइए, हम scope confirm करते हैं<br>2. *Planning*: पक्की कीमत, file structure और milestone<br>3. *Build*: हम बनाकर draft भेजते हैं<br>4. *Delivery*: final file, walkthrough और 7 दिन मुफ्त bug support<br><br>देखिए ' + a(L.about, 'about page') + '. शुरुआत: ' + a(L.contact, 'अपनी requirement') + '.'
@@ -173,6 +191,8 @@
         },
         {
             id: 'payment',
+            b_en: 'Payment is milestone based: a deposit to start, the balance on delivery.',
+            b_hi: 'भुगतान milestone पर: शुरू में deposit, delivery पर बाकी.',
             kw: ['payment', 'pay', 'advance', 'deposit', 'upi', 'bank', 'invoice', 'escrow', 'milestone', 'पेमेंट', 'पैसे कैसे', 'भुगतान', 'card'],
             en: 'Payment works on milestones: a deposit to start, the balance on delivery. Bank transfer, UPI and international transfer are all accepted, and every invoice is documented. Nothing is charged before the quote is confirmed in writing.',
             hi: 'भुगतान milestone पर: शुरू में deposit, delivery पर बाकी. Bank transfer, UPI और international transfer सब चलता है, और हर invoice का record रहता है. Quote लिखित में पक्का होने से पहले कुछ नहीं लिया जाता.'
@@ -264,6 +284,9 @@
             hi: 'आने के लिए धन्यवाद. Sample ' + a(L.portfolio, 'portfolio') + ' पर हमेशा खुले हैं, जब ज़रूरत हो देख लीजिए.'
         }
     ];
+
+    var SERVICEISH = { excel: 1, pdf: 1, ppt: 1, web: 1, ai: 1, branding: 1 };
+    var MODIFIER = { pricing: 1, timeline: 1, payment: 1, process: 1 };
 
     var INTENTS = {};
     KB.forEach(function (i) { INTENTS[i.id] = i; });
@@ -478,13 +501,15 @@
         answerIntent(intent);
     }
 
-    function answerIntent(intent) {
+    function answerIntent(intent, extra) {
         lastIntent = intent.id;
         if (intent.id === 'quote') flow = { step: 'name', name: '', email: '', project: '' };
         addTyping();
         setTimeout(function () {
             killTyping();
-            addMsg('bot', lang === 'hi' ? intent.hi : intent.en);
+            var body = lang === 'hi' ? intent.hi : intent.en;
+            if (extra) body += '<br><br>' + extra;
+            addMsg('bot', body);
             setChips(intent.chips);
         }, 380 + Math.min(500, intent.id.length * 12));
     }
@@ -610,11 +635,20 @@
         }
 
         // plain question routing
-        var intent = best(clean);
+        var ranked = KB.map(function (i) { return { i: i, s: score(clean, i) }; })
+            .filter(function (x) { return x.s >= 2; })
+            .sort(function (x, y) { return y.s - x.s; });
+        var intent = ranked.length ? ranked[0].i : null;
+        var extra = '';
+        if (intent && ranked[1] && ranked[1].s >= 3) {
+            var other = ranked[1].i;
+            var pair = (SERVICEISH[intent.id] && MODIFIER[other.id]) || (MODIFIER[intent.id] && SERVICEISH[other.id]);
+            if (pair && other.b_en) extra = lang === 'hi' ? other.b_hi : other.b_en;
+        }
         if (intent) {
             // "price" while talking about excel should keep excel context, but the
             // pricing answer is complete on its own, so no special casing needed.
-            answerIntent(intent);
+            answerIntent(intent, extra);
             return;
         }
 
