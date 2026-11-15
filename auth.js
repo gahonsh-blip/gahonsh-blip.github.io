@@ -527,8 +527,11 @@
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
 
-                    await window.GahonshDB.Auth.signUp(email, password, fullName, _selectedRole);
-                    showToast('🎉 Account created! Please check your email or sign in.');
+                    const signUpResult = await window.GahonshDB.Auth.signUp(email, password, fullName, _selectedRole);
+                    const hasSession = !!(signUpResult && signUpResult.session);
+                    showToast(hasSession
+                        ? '🎉 Account created. Welcome to Gahonsh!'
+                        : '🎉 Account created! Check your email to confirm, then sign in.');
                     authBackdrop.classList.remove('active');
                     signUpForm.reset();
                     await refreshUserState();
