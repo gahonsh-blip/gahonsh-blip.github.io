@@ -1,0 +1,55 @@
+{
+  "count": 8,
+  "duration_seconds": 15.0,
+  "videos": [
+    {
+      "id": 1,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-1.mp4",
+      "headline": "Fixed price. Fixed date.",
+      "bytes": 147698
+    },
+    {
+      "id": 2,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-2.mp4",
+      "headline": "You own everything.",
+      "bytes": 146981
+    },
+    {
+      "id": 3,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-3.mp4",
+      "headline": "Shipped in days, not months.",
+      "bytes": 148692
+    },
+    {
+      "id": 4,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-4.mp4",
+      "headline": "Built to survive real use.",
+      "bytes": 146508
+    },
+    {
+      "id": 5,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-5.mp4",
+      "headline": "One developer, direct answers.",
+      "bytes": 150172
+    },
+    {
+      "id": 6,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-6.mp4",
+      "headline": "Seven days of bug support.",
+      "bytes": 148421
+    },
+    {
+      "id": 7,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-7.mp4",
+      "headline": "Dashboards that reconcile.",
+      "bytes": 146104
+    },
+    {
+      "id": 8,
+      "video_url": "https://gahonsh-blip.github.io/social/media/pool-8.mp4",
+      "headline": "Working across time zones.",
+      "bytes": 149033
+    }
+  ],
+  "updated": "2026-11-16T10:54:36+05:30"
+}

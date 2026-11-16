@@ -20,6 +20,7 @@ Apps Script posts, so the video never contradicts a festival day.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -158,6 +159,11 @@ def card_cta():
     return img
 
 
+def variant_index(day: str) -> int:
+    """Deterministic across machines and Python runs (hash() is salted)."""
+    return int(hashlib.sha1(day.encode("utf-8")).hexdigest(), 16)
+
+
 def synth_voice(text: str, out_path: Path) -> bool:
     """Free Microsoft neural voice through edge-tts. Silent video if unavailable."""
     if not shutil.which("edge-tts"):
@@ -212,14 +218,20 @@ def main():
     ap.add_argument("--root", default=".", help="repo root")
     ap.add_argument("--seconds-per-card", type=float, default=5.0)
     ap.add_argument("--no-voice", action="store_true")
+    ap.add_argument("--pool", type=int, default=0,
+                    help="render N rotating brand Shorts (pool-N.mp4) plus social/videos.json")
     args = ap.parse_args()
 
     root = Path(args.root).resolve()
+
+    if args.pool:
+        return build_pool(root, args.pool, args.seconds_per_card, args.no_voice)
+
     day = args.date or datetime.now(IST).date().isoformat()
     media_dir = root / "social" / "media"
     media_dir.mkdir(parents=True, exist_ok=True)
 
-    proof = PROOF[abs(hash(day)) % len(PROOF)]
+    proof = PROOF[variant_index(day) % len(PROOF)]
     cards = [card_intro(), card_proof(*proof), card_cta()]
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -257,6 +269,50 @@ def main():
     out.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     print(json.dumps({"ok": True, "video": str(video), "bytes": size, "manifest": str(out)}))
+    return 0
+
+
+def build_pool(root: Path, count: int, seconds_per_card: float, no_voice: bool) -> int:
+    """Render the rotating brand Shorts once, so YouTube never depends on a cron
+    running on a particular morning. social/videos.json is the index."""
+    media_dir = root / "social" / "media"
+    media_dir.mkdir(parents=True, exist_ok=True)
+    entries = []
+    count = max(1, min(count, len(PROOF)))
+
+    for i in range(count):
+        title, body = PROOF[i]
+        cards = [card_intro(), card_proof(title, body), card_cta()]
+        with tempfile.TemporaryDirectory() as tmp:
+            tmpdir = Path(tmp)
+            paths = []
+            for j, card in enumerate(cards, start=1):
+                fp = tmpdir / f"card{j}.png"
+                card.save(fp, "PNG", optimize=True)
+                paths.append(fp)
+            audio = None
+            if not no_voice:
+                audio = tmpdir / "voice.mp3"
+                if not synth_voice(f"{BRAND}. {title} {body} {SITE}", audio):
+                    audio = None
+            video = media_dir / f"pool-{i + 1}.mp4"
+            render(paths, video, audio, per_card=seconds_per_card)
+        entries.append({
+            "id": i + 1,
+            "video_url": f"https://gahonsh-blip.github.io/social/media/{video.name}",
+            "headline": title,
+            "bytes": video.stat().st_size,
+        })
+        print(f"pool-{i + 1}.mp4  {video.stat().st_size} bytes  {title}")
+
+    index = root / "social" / "videos.json"
+    index.write_text(json.dumps({
+        "count": len(entries),
+        "duration_seconds": round(seconds_per_card * 3, 1),
+        "videos": entries,
+        "updated": datetime.now(IST).isoformat(timespec="seconds"),
+    }, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"ok": True, "pool": len(entries), "index": str(index)}))
     return 0
 
 
