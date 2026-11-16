@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,12 +10,30 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// The editor writes straight to disk, so its API must never be reachable
+// without the owner's passcode. Set STUDIO_PASS in the environment; if it is
+// not set a random one is generated and printed on start (no secret is ever
+// committed to the repository).
+const STUDIO_PASS = process.env.STUDIO_PASS || String(crypto.randomInt(100000, 1000000));
+
+// Constant-time comparison so the passcode cannot be guessed by timing.
+function passMatches(candidate) {
+    const a = Buffer.from(String(candidate || ''));
+    const b = Buffer.from(STUDIO_PASS);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function requireStudioAuth(req, res, next) {
+    if (passMatches(req.get('x-studio-pass'))) return next();
+    return res.status(401).json({ success: false, message: 'Unauthorized: passcode required' });
+}
+
 // Body parser for JSON with large limit for all file types (Docs, Spreadsheets, Media, Archives)
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // API to save updated page directly to disk
-app.post('/api/save-page', (req, res) => {
+app.post('/api/save-page', requireStudioAuth, (req, res) => {
     try {
         const { filename, content } = req.body;
         if (!filename || typeof content !== 'string') {
@@ -47,7 +66,7 @@ app.post('/api/save-page', (req, res) => {
 });
 
 // API to upload ANY file type (Excel, PDF, Word, PPT, Zip, Media, Images, Code, etc.)
-app.post('/api/upload-file', (req, res) => {
+app.post('/api/upload-file', requireStudioAuth, (req, res) => {
     try {
         const { fileName, fileData, folder } = req.body;
         if (!fileName || !fileData) {
@@ -107,8 +126,13 @@ app.post('/api/upload-file', (req, res) => {
     }
 });
 
+// Verify the editor passcode without exposing any data.
+app.get('/api/verify', requireStudioAuth, (req, res) => {
+    return res.json({ success: true });
+});
+
 // API to list all manageable site pages
-app.get('/api/pages-list', (req, res) => {
+app.get('/api/pages-list', requireStudioAuth, (req, res) => {
     try {
         const files = fs.readdirSync(__dirname);
         const pages = files.filter(f => f.endsWith('.html') && f !== 'dashboard.html' && f !== 'dasbord.html');
@@ -131,5 +155,10 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Gahonsh Freelancing static server running on http://0.0.0.0:${PORT}`);
+    console.log(`Owner Studio editor: http://localhost:${PORT}/dashboard.html`);
+    if (!process.env.STUDIO_PASS) {
+        console.log(`  Editor passcode for this run: ${STUDIO_PASS}`);
+        console.log('  Set STUDIO_PASS to reuse your own passcode.');
+    }
 });
 

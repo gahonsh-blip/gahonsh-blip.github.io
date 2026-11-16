@@ -29,13 +29,19 @@ async function ensureUser() {
 }
 
 function moneyText(job) {
+    // Budget fields are numeric in the schema but arrive as strings from
+    // PostgREST; coerce them so a crafted value cannot inject markup later.
+    const min = Number(job.budget_min) || 0;
+    const max = Number(job.budget_max) || 0;
     if (job.job_type === 'hourly') {
-        return `Hourly: $${job.hourly_rate_min || 20} - $${job.hourly_rate_max || 50}/hr`;
+        const lo = Number(job.hourly_rate_min) || 20;
+        const hi = Number(job.hourly_rate_max) || 50;
+        return `Hourly: $${lo} - $${hi}/hr`;
     }
-    if (job.budget_max && Number(job.budget_max) > Number(job.budget_min || 0)) {
-        return `Fixed Budget: $${job.budget_min || 0} - $${job.budget_max}`;
+    if (max > min) {
+        return `Fixed Budget: $${min} - $${max}`;
     }
-    return `Fixed Budget: $${job.budget_min || 0}`;
+    return `Fixed Budget: $${min}`;
 }
 
 function statusBadge(status) {
@@ -85,14 +91,14 @@ async function loadJobDetails() {
 
     document.getElementById('jobTitle').innerText = currentJob.title;
     document.getElementById('jobBudgetBadge').innerHTML = `<i class="fa-solid fa-dollar-sign"></i> ${moneyText(currentJob)}`;
-    document.getElementById('jobCategoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${currentJob.category || 'General'}`;
-    document.getElementById('jobExpBadge').innerHTML = `<i class="fa-solid fa-gauge-high"></i> ${currentJob.experience_level || 'intermediate'}`;
-    document.getElementById('jobDurationBadge').innerHTML = `<i class="fa-regular fa-clock"></i> ${currentJob.estimated_duration || '1 to 3 months'}`;
+    document.getElementById('jobCategoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${escapeHtml(currentJob.category || 'General')}`;
+    document.getElementById('jobExpBadge').innerHTML = `<i class="fa-solid fa-gauge-high"></i> ${escapeHtml(currentJob.experience_level || 'intermediate')}`;
+    document.getElementById('jobDurationBadge').innerHTML = `<i class="fa-regular fa-clock"></i> ${escapeHtml(currentJob.estimated_duration || '1 to 3 months')}`;
     document.getElementById('jobProposalsBadge').innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentJob.proposals_count || 0} Proposals`;
     document.getElementById('jobDescription').innerText = currentJob.description;
 
     const skillsCloud = document.getElementById('skillsCloud');
-    skillsCloud.innerHTML = (currentJob.required_skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+    skillsCloud.innerHTML = (currentJob.required_skills || []).map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
 
     const clientName = currentJob.client?.full_name || 'Verified Client';
     document.getElementById('clientName').innerText = clientName;
@@ -163,7 +169,7 @@ async function renderClientProposalsView() {
     listContainer.innerHTML = proposals.map(proposalCardHtml).join('');
 
     if (currentJob.status !== 'open') {
-        showProposalMessage('<i class="fa-solid fa-circle-info"></i><span>This project is no longer open for hiring (current status: <strong>' + currentJob.status + '</strong>), so proposals can no longer be accepted.</span>');
+        showProposalMessage('<i class="fa-solid fa-circle-info"></i><span>This project is no longer open for hiring (current status: <strong>' + escapeHtml(currentJob.status) + '</strong>), so proposals can no longer be accepted.</span>');
     }
 }
 
@@ -174,15 +180,15 @@ function proposalCardHtml(p) {
         : (p.status === 'rejected'
             ? '<span style="color:#f87171; font-weight:600;">Rejected</span>'
             : (canHire
-                ? `<button class="btn-hire" onclick="hireFreelancer('${p.id}', this)">Accept &amp; Hire</button>`
-                : `<span style="color:var(--text-slate); font-weight:600;">${p.status}</span>`));
+                ? `<button class="btn-hire" data-proposal-id="${escapeHtml(p.id)}">Accept &amp; Hire</button>`
+                : `<span style="color:var(--text-slate); font-weight:600;">${escapeHtml(statusBadge(p.status))}</span>`));
 
     return `
-        <div class="proposal-card" id="prop-${p.id}">
+        <div class="proposal-card" id="prop-${escapeHtml(p.id)}">
             <div class="proposal-card-header">
                 <div>
                     <strong>${escapeHtml(p.freelancer?.full_name) || 'Freelancer'}</strong>
-                    <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${p.bid_amount}</span> &bull; <span>${p.delivery_time_days} days</span> &bull; <span>${new Date(p.created_at).toLocaleDateString()}</span>
+                    <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${Number(p.bid_amount) || 0}</span> &bull; <span>${Number(p.delivery_time_days) || 0} days</span> &bull; <span>${new Date(p.created_at).toLocaleDateString()}</span>
                 </div>
                 <div>${actionHtml}</div>
             </div>
@@ -192,6 +198,7 @@ function proposalCardHtml(p) {
 }
 
 window.hireFreelancer = async function (proposalId, btn) {
+    /* Called via event delegation so proposal ids never enter an inline handler. */
     if (currentJob && currentJob.status !== 'open') {
         window.GahonshAuthUI.showToast('\u274C This project is no longer open for hiring.');
         return;
@@ -313,10 +320,10 @@ function renderMyProposalStatus(proposal) {
     box.innerHTML = `
         <div class="my-proposal-status-card">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <strong style="${statusStyles[proposal.status] || ''}">${statusBadge(proposal.status)}</strong>
-                <span style="color:var(--accent-cyan); font-weight:700;">Bid: $${proposal.bid_amount}</span>
+                <strong style="${statusStyles[proposal.status] || ''}">${escapeHtml(statusBadge(proposal.status))}</strong>
+                <span style="color:var(--accent-cyan); font-weight:700;">Bid: $${Number(proposal.bid_amount) || 0}</span>
             </div>
-            <p style="color:var(--text-slate); font-size:0.85rem; margin-top:6px;">Submitted on ${new Date(proposal.created_at).toLocaleDateString()} &bull; Estimated delivery: ${proposal.delivery_time_days} days</p>
+            <p style="color:var(--text-slate); font-size:0.85rem; margin-top:6px;">Submitted on ${new Date(proposal.created_at).toLocaleDateString()} &bull; Estimated delivery: ${Number(proposal.delivery_time_days) || 0} days</p>
         </div>
     `;
 }
@@ -340,11 +347,11 @@ function renderContractCard(contract, isClientView) {
                 </div>
                 <div class="contract-detail-item">
                     <div class="cd-label">Agreed Amount</div>
-                    <div class="cd-value">$${contract.agreed_amount}</div>
+                    <div class="cd-value">$${Number(contract.agreed_amount) || 0}</div>
                 </div>
                 <div class="contract-detail-item">
                     <div class="cd-label">Contract Status</div>
-                    <div class="cd-value" style="color:var(--accent-green); text-transform:capitalize;">${contract.status}</div>
+                    <div class="cd-value" style="color:var(--accent-green); text-transform:capitalize;">${escapeHtml(contract.status)}</div>
                 </div>
                 <div class="contract-detail-item">
                     <div class="cd-label">Started</div>
@@ -413,12 +420,19 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
         } else if (/row-level security/i.test(message) || /permission denied/i.test(message)) {
             message = 'Your account is not allowed to submit a proposal for this project.';
         }
-        showProposalMessage('<i class="fa-solid fa-circle-exclamation"></i><span>' + message + '</span>', 'error');
+        showProposalMessage('<i class="fa-solid fa-circle-exclamation"></i><span>' + escapeHtml(message) + '</span>', 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Proposal to Client';
     }
 };
+
+// Delegated hire button. The proposal id is read from a data attribute so it
+// can never break out of an inline onclick attribute.
+document.addEventListener('click', (e) => {
+    const hireBtn = e.target.closest && e.target.closest('[data-proposal-id]');
+    if (hireBtn) window.hireFreelancer(hireBtn.dataset.proposalId, hireBtn);
+});
 
 document.getElementById('mobile-menu-open-btn').onclick = () => {
     document.getElementById('menu-overlay').classList.add('active');

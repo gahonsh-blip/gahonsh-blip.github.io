@@ -473,7 +473,7 @@
             <p style="color: var(--text-slate); font-size: 0.9rem; margin-bottom: 20px;">
                 आसान वेबसाइट विज़ुअल एडिटर। ड्रॉपडाउन से पेज चुनें और सीधे क्लिक करके टेक्स्ट, फोटो, वीडियो और लिंक बदलें।
             </p>
-            <input type="password" id="passInput" class="auth-input" placeholder="पासकोड दर्ज करें (Default: 8825)" autocomplete="off">
+            <input type="password" id="passInput" class="auth-input" placeholder="पासकोड दर्ज करें (Enter passcode)" autocomplete="off">
             <button type="button" class="btn-main" id="btnUnlock">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i> एडिटर खोलें (Open Editor)
             </button>
@@ -562,7 +562,11 @@
 
     <!-- 4. LIVE VISUAL EDITOR CANVAS -->
     <main class="editor-container">
-        <iframe id="editorFrame" class="preview-iframe" title="Live page preview editor" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        <!-- The preview is same-origin content written by the parent via document.write, and the
+             parent reads contentDocument to attach editor listeners. A sandbox carrying both
+             allow-scripts and allow-same-origin provides no isolation (the frame can drop its
+             own sandbox) and only logs a browser warning, so it is intentionally omitted. -->
+        <iframe id="editorFrame" class="preview-iframe" title="Live page preview editor"></iframe>
     </main>
 
     <!-- 5. MODAL: EDIT IMAGE & FILE UPLOAD (फोटो और फाइल अपलोड) -->
@@ -746,7 +750,7 @@
                     <span id="uniFileSizeBadge" style="color: var(--accent-cyan); font-size: 0.75rem;"></span>
                 </div>
                 <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <input type="text" id="uniUploadedUrl" class="form-input" readonly style="font-size: 0.8rem;">
+                    <input type="text" id="uniUploadedUrl" class="form-input" readonly style="font-size: 0.8rem;" aria-label="अपलोड की गई फ़ाइल का URL (Uploaded file URL)">
                     <button class="btn-ctrl" id="btnCopyUniUrl" style="white-space: nowrap;"><i class="fa-solid fa-copy"></i> कॉपी करें</button>
                 </div>
                 <div style="display: flex; gap: 8px;">
@@ -880,7 +884,14 @@
 
     <!-- MAIN JAVASCRIPT CONTROLLER -->
     <script>
-        const AUTH_PASS = "8825";
+        // The passcode is never stored in this file. It is verified by the
+        // server (/api/verify) and kept only in sessionStorage for the tab, so
+        // the write APIs can be called with it.
+        const getPass = () => sessionStorage.getItem("studio_pass") || "";
+        const authHeaders = () => ({ "Content-Type": "application/json", "x-studio-pass": getPass() });
+        // File names, upload URLs and link labels are operator-supplied and can
+        // contain markup, so escape them before they reach innerHTML.
+        const escHtml = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         let currentPage = "index.html";
         let currentRawHTML = "";
         let isDirty = false;
@@ -925,20 +936,31 @@
             }
         }
 
-        btnUnlock.addEventListener("click", () => {
-            if (passInput.value.trim() === AUTH_PASS) {
-                sessionStorage.setItem("owner_auth", "true");
-                authScreen.style.display = "none";
-                showToast("स्वागत है! एडिटर तैयार है।", "success");
-                initDashboard();
-            } else {
-                alert("गलत पासकोड! कृपया सही पासकोड दर्ज करें (डिफ़ॉल्ट: 8825)");
+        btnUnlock.addEventListener("click", async () => {
+            const candidate = passInput.value.trim();
+            if (!candidate) { alert("कृपया पासकोड दर्ज करें।"); return; }
+            try {
+                const res = await fetch("/api/verify", { headers: { "x-studio-pass": candidate } });
+                if (res.ok) {
+                    sessionStorage.setItem("owner_auth", "true");
+                    sessionStorage.setItem("studio_pass", candidate);
+                    authScreen.style.display = "none";
+                    showToast("स्वागत है! एडिटर तैयार है।", "success");
+                    initDashboard();
+                } else if (res.status === 404) {
+                    alert("एडिटर सर्वर उपलब्ध नहीं है। कृपया 'npm run dev' से सर्वर चालू करें और http://localhost:3000/dashboard.html खोलें।");
+                } else {
+                    alert("गलत पासकोड! कृपया सही पासकोड दर्ज करें।");
+                }
+            } catch (err) {
+                alert("सर्वर से संपर्क नहीं हो पाया। कृपया 'npm run dev' से सर्वर चालू करें।");
             }
         });
         passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") btnUnlock.click(); });
 
         btnLock.addEventListener("click", () => {
             sessionStorage.removeItem("owner_auth");
+            sessionStorage.removeItem("studio_pass");
             location.reload();
         });
 
@@ -950,7 +972,7 @@
         // Dynamic page listing
         async function fetchPagesList() {
             try {
-                const res = await fetch("/api/pages-list");
+                const res = await fetch("/api/pages-list", { headers: authHeaders() });
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success && Array.isArray(data.pages) && data.pages.length > 0) {
@@ -1501,7 +1523,7 @@
                 try {
                     const res = await fetch("/api/upload-file", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: authHeaders(),
                         body: JSON.stringify({
                             fileName: file.name,
                             fileData: reader.result,
@@ -1643,14 +1665,14 @@
             const statusEl = document.getElementById("linkUploadStatus");
             const statusText = document.getElementById("linkUploadStatusText");
             statusEl.style.display = "flex";
-            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> अपलोड हो रहा है: ${file.name}...`;
+            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> अपलोड हो रहा है: ${escHtml(file.name)}...`;
 
             const reader = new FileReader();
             reader.onload = async () => {
                 try {
                     const res = await fetch("/api/upload-file", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: authHeaders(),
                         body: JSON.stringify({
                             fileName: file.name,
                             fileData: reader.result
@@ -1688,7 +1710,7 @@
                             detectAndHighlightFileType(ext);
                         }
 
-                        statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> ✅ फ़ाइल सुरक्षित रूप से अपलोड हो गई: <strong>${result.url}</strong> (${result.size || ''})`;
+                        statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> ✅ फ़ाइल सुरक्षित रूप से अपलोड हो गई: <strong>${escHtml(result.url)}</strong> (${escHtml(result.size || '')})`;
                         showToast("✅ फ़ाइल अपलोड हो गई और लिंक सेट हो गया!", "success");
                     } else {
                         alert("फ़ाइल अपलोड विफल: " + result.message);
@@ -1733,7 +1755,7 @@
 
                 if (text) {
                     const iconPrefix = iconClass.startsWith("fa-brands") ? iconClass : `fa-solid ${iconClass}`;
-                    targetLinkElement.innerHTML = `<i class="${iconPrefix}"></i> ${text}`;
+                    targetLinkElement.innerHTML = `<i class="${iconPrefix}"></i> ${escHtml(text)}`;
                 }
 
                 if (href) targetLinkElement.setAttribute("href", href);
@@ -1805,7 +1827,7 @@
                 try {
                     const res = await fetch("/api/upload-file", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: authHeaders(),
                         body: JSON.stringify({
                             fileName: file.name,
                             fileData: reader.result
@@ -1937,7 +1959,7 @@
             try {
                 const res = await fetch("/api/save-page", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: authHeaders(),
                     body: JSON.stringify({
                         filename: currentPage,
                         content: updatedHTML

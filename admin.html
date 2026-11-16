@@ -239,7 +239,7 @@ function renderTable(){
                 <td>${esc(p.location || '—')}</td>
                 <td>${p.role === 'freelancer' ? money(p.hourly_rate) : '—'}</td>
                 <td>${date(p.created_at)}</td>
-                <td>${p.role === 'freelancer' ? `<button class="btn btn-sm" onclick="toggleVerify('${p.id}', ${!p.is_verified})">${p.is_verified ? 'Remove badge' : 'Verify'}</button>` : ''}</td>
+                <td>${p.role === 'freelancer' ? `<button class="btn btn-sm" data-action="verify" data-id="${esc(p.id)}" data-value="${!p.is_verified}">${p.is_verified ? 'Remove badge' : 'Verify'}</button>` : ''}</td>
             </tr>`).join('') + '</tbody></table>'
             : `<div class="empty">No accounts yet.</div>`;
     }
@@ -256,7 +256,7 @@ function renderTable(){
                 <td>${esc(j.proposals_count ?? 0)}</td>
                 <td>${pill(j.status)}</td>
                 <td>${date(j.created_at)}</td>
-                <td>${j.status === 'open' ? `<button class="btn btn-sm" onclick="closeJob('${j.id}')">Close</button>` : ''}</td>
+                <td>${j.status === 'open' ? `<button class="btn btn-sm" data-action="close-job" data-id="${esc(j.id)}">Close</button>` : ''}</td>
             </tr>`).join('') + '</tbody></table>'
             : `<div class="empty">No projects posted yet.</div>`;
     }
@@ -305,13 +305,23 @@ function renderTable(){
                 <td class="trunc">${esc(m.message)}</td>
                 <td>${m.is_handled ? pill('completed') : pill('pending')}</td>
                 <td>${date(m.created_at)}</td>
-                <td><button class="btn btn-sm" onclick="toggleHandled('${m.id}', ${!m.is_handled})">${m.is_handled ? 'Reopen' : 'Mark handled'}</button></td>
+                <td><button class="btn btn-sm" data-action="handled" data-id="${esc(m.id)}" data-value="${!m.is_handled}">${m.is_handled ? 'Reopen' : 'Mark handled'}</button></td>
             </tr>`).join('') + '</tbody></table>'
             : `<div class="empty">No enquiries yet. Messages sent from the contact page will appear here and in your email.</div>`;
     }
 
     area.innerHTML = rows;
 }
+
+document.getElementById('tableArea').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    const value = btn.dataset.value === 'true';
+    if(btn.dataset.action === 'verify') toggleVerify(id, value);
+    else if(btn.dataset.action === 'close-job') closeJob(id);
+    else if(btn.dataset.action === 'handled') toggleHandled(id, value);
+});
 
 async function toggleVerify(id, value){
     const { error } = await client.from('profiles').update({ is_verified: value }).eq('id', id);

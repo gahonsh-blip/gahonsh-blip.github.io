@@ -613,7 +613,15 @@
     function showToast(message) {
         const toast = document.createElement('div');
         toast.className = 'gahonsh-toast';
-        toast.innerHTML = `<i class="fa-solid fa-circle-info" style="color:#00ffcc;"></i> <span>${message}</span>`;
+        // Message text comes from user input and server errors, so it is set as
+        // text content rather than interpolated into innerHTML.
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-circle-info';
+        icon.style.color = '#00ffcc';
+        const span = document.createElement('span');
+        span.textContent = String(message == null ? '' : message);
+        toast.appendChild(icon);
+        toast.appendChild(span);
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';

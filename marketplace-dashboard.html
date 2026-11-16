@@ -10,7 +10,6 @@
     <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css">
     <style>
         :root {
             --bg-dark: #0b1120;
@@ -261,6 +260,7 @@
             .user-profile-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -544,7 +544,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div>
                                 <h2 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(p.job?.title || 'Project')}</a></h2>
-                                <span class="status-badge status-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${p.bid_amount}</span>
+                                <span class="status-badge status-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${Number(p.bid_amount) || 0}</span>
                             </div>
                             <a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" class="btn-outline">View Project</a>
                         </div>
@@ -583,7 +583,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
                             <h2 style="font-size:1.15rem; margin-bottom:6px;">${escapeHtml(c.job?.title || 'Contract')}</h2>
-                            <span class="status-badge status-${escapeHtml(c.status)}">${escapeHtml(c.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${c.agreed_amount}</span>
+                            <span class="status-badge status-${escapeHtml(c.status)}">${escapeHtml(c.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${Number(c.agreed_amount) || 0}</span>
                             <p style="font-size:0.85rem; color:var(--text-slate); margin-top:6px;">
                                 ${otherLabel}: <strong>${otherName}</strong> • Hired on ${new Date(c.created_at).toLocaleDateString()}
                             </p>

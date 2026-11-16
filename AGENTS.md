@@ -74,10 +74,37 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
+- **Automated checks:** `npm test` runs both suites.
+  - `npm run test:a11y` — static accessibility contract across all pages.
+  - `npm run test:security` — flags inline-handler interpolation, unescaped
+    `innerHTML` sinks, and hardcoded studio passcodes. Run it after touching any
+    rendering code.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`).
   - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
+
+## Owner Studio Editor (local only)
+
+`dashboard.html` is a private visual editor served by `server.js`. Its write
+APIs (`/api/save-page`, `/api/upload-file`, `/api/pages-list`) require the
+`STUDIO_PASS` passcode, sent as the `x-studio-pass` header and checked in
+constant time. The passcode is never stored in the page or committed: the page
+verifies it against `/api/verify` and keeps it in `sessionStorage` for the tab.
+If `STUDIO_PASS` is unset the server generates a random one and prints it on
+startup. Never reintroduce a hardcoded passcode — `npm run test:security`
+fails the build if one appears.
+
+## Security Notes
+
+- User- and DB-supplied values must never reach `innerHTML` unescaped. Escape
+  with `escapeHtml()`/`escHtml()`, or set the value with `textContent`.
+- Never place interpolated values inside inline `onclick`/`onchange`
+  attributes — HTML entity decoding happens before the JS parser, so escaping
+  is not enough. Use `data-*` attributes with event delegation instead.
+- Numeric fields (budgets, bids, amounts) must be coerced with `Number(...)`
+  before interpolation; PostgREST returns them as strings.
+
 
 ## External Services & Endpoints
 

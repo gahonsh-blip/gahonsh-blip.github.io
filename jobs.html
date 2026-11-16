@@ -10,7 +10,6 @@
     <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css">
     <style>
         :root {
             --bg-dark: #0b1120;
@@ -522,6 +521,7 @@
             .menu-toggle { display: block; }
         }
     </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -837,8 +837,8 @@
 
             container.innerHTML = jobs.map(job => {
                 const budgetText = job.job_type === 'fixed' 
-                    ? `Fixed Budget: $${job.budget_min || 0}`
-                    : `Hourly: $${job.hourly_rate_min || 20} - $${job.hourly_rate_max || 50}/hr`;
+                    ? `Fixed Budget: $${Number(job.budget_min) || 0}`
+                    : `Hourly: $${Number(job.hourly_rate_min) || 20} - $${Number(job.hourly_rate_max) || 50}/hr`;
 
                 const clientName = escapeHtml(job.client?.full_name || 'Verified Client');
                 const clientLocation = escapeHtml(job.client?.location || 'Remote');
