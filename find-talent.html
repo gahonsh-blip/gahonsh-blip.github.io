@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Verified Freelancers & Talent | Gahonsh Freelancing</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
     <meta name="description" content="Discover top verified freelance talent in Excel engineering, web development, PDF design, and AI automation on Gahonsh.">
     <link rel="canonical" href="https://gahonsh-blip.github.io/find-talent.html">
     <meta name="robots" content="index, follow">
@@ -268,7 +269,7 @@
         }
 
         .btn-hire-talent {
-            background: var(--accent-blue);
+            background: #0062cc;
             color: white;
             padding: 10px 18px;
             border-radius: 8px;
@@ -432,11 +433,11 @@
         <div style="padding-top:25px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; color:var(--text-slate); font-size:0.85rem;">
             <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
             <div style="display:flex; gap:15px; font-size:1.1rem;">
-                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
-                <a href="mailto:gahonsh@gmail.com" style="color:var(--text-slate);"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com" style="color:var(--text-slate);" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
             </div>
         </div>
     </footer>
@@ -516,7 +517,7 @@
                 grid.innerHTML = `
                     <div style="grid-column:1/-1; padding:44px 24px; text-align:center; background:rgba(255,255,255,0.02); border:1px dashed var(--border-color); border-radius:16px;">
                         <i class="fa-solid fa-user-group" style="font-size:2rem; color:var(--accent-cyan); margin-bottom:14px;"></i>
-                        <h3 style="margin-bottom:8px; font-size:1.15rem;">${searchVal ? 'No specialist matches that search' : 'Our specialist bench is opening up'}</h3>
+                        <h2 style="margin-bottom:8px; font-size:1.15rem;">${searchVal ? 'No specialist matches that search' : 'Our specialist bench is opening up'}</h2>
                         <p style="color:var(--text-slate); font-size:0.92rem; max-width:520px; margin:0 auto 18px;">
                             ${searchVal ? 'Try a different skill or clear the search to see everyone.' : 'New freelancers are joining. If you need a specific skill right now, tell us and we will match you with the right specialist.'}
                         </p>

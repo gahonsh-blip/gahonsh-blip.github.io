@@ -46,6 +46,13 @@
             transition: color 0.3s;
         }
         .back-link:hover { color: #fff; }
+        /* Footer links on the legal pages had no rule, so the browser default
+           (#0000ee) was used — 2.14:1 on the dark background. */
+        footer { margin-top: 40px; text-align: center; }
+        .footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 16px; }
+        .footer-links a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; font-size: .9rem; }
+        .footer-links a:hover { color: #fff; text-decoration: underline; }
+        footer p { color: var(--text-slate); font-size: .85rem; }
     </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -100,6 +107,8 @@
             <a href="contact.html" class="lb-cta">Get a quote</a>
         </nav>
     </header>
+
+    <main>
     <div class="container">
         <h1>Privacy Policy</h1>
         <p>Last Updated: June 2026</p>
@@ -137,6 +146,8 @@
         <p>We retain enquiry records while they are useful for delivering or supporting a service, and account data for as long as the account remains open. After that, records are removed or anonymised unless a legal or accounting obligation requires us to keep them for longer.</p>
         <p>You may request a copy of the personal data we hold about you, ask for corrections, or ask us to delete information that is no longer needed. Requests are handled through the details on our <a href="contact.html">contact page</a>.</p>
     </section>
+
+</main>
 
 <footer>
     <div class="footer-links">

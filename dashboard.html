@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website Visual Editor | Gahonsh Freelancing</title>
+    <meta name="description" content="Private visual editor for previewing and updating the Gahonsh Freelancing website pages.">
     
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="assets/logo.png">
@@ -488,7 +489,7 @@
         <!-- 🌟 PAGE SELECTOR DROPDOWN (आसान पेज सेलेक्टर) -->
         <div class="page-dropdown-wrap">
             <span class="page-dropdown-label"><i class="fa-solid fa-file-lines"></i> पेज चुनें (Select Page):</span>
-            <select id="pageSelectDropdown" class="page-select">
+            <select id="pageSelectDropdown" class="page-select" aria-label="Select page to edit">
                 <option value="index.html">1. होम पेज (index.html)</option>
                 <option value="about.html">2. हमारे बारे में (about.html)</option>
                 <option value="services.html">3. सेवाएँ (services.html)</option>
@@ -561,7 +562,7 @@
 
     <!-- 4. LIVE VISUAL EDITOR CANVAS -->
     <main class="editor-container">
-        <iframe id="editorFrame" class="preview-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        <iframe id="editorFrame" class="preview-iframe" title="Live page preview editor" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </main>
 
     <!-- 5. MODAL: EDIT IMAGE & FILE UPLOAD (फोटो और फाइल अपलोड) -->
@@ -569,7 +570,7 @@
         <div class="modal-box">
             <div class="modal-head">
                 <h3><i class="fa-solid fa-image"></i> फोटो बदलें या फाइल अपलोड करें</h3>
-                <button class="btn-ctrl" onclick="closeModal('modalImage')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn-ctrl" onclick="closeModal('modalImage')" style="padding: 2px 6px;" aria-label="Close image dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <!-- FILE UPLOAD DROPZONE -->
@@ -616,7 +617,7 @@
         <div class="modal-box" style="max-width: 600px;">
             <div class="modal-head">
                 <h3><i class="fa-solid fa-file-arrow-up"></i> फ़ाइल अपलोड या लिंक बदलें (Universal File Upload & Link)</h3>
-                <button class="btn-ctrl" onclick="closeModal('modalLink')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn-ctrl" onclick="closeModal('modalLink')" style="padding: 2px 6px;" aria-label="Close link dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <!-- 1. DIRECT UNIVERSAL FILE UPLOAD DROPZONE -->
@@ -708,7 +709,7 @@
 
                 <div class="form-group">
                     <label class="form-label">खोलने का तरीका:</label>
-                    <select id="linkTargetSelect" class="form-input">
+                    <select id="linkTargetSelect" class="form-input" aria-label="Link open behaviour">
                         <option value="_self">उसी पेज में (_self)</option>
                         <option value="_blank">नए टैब में खोलें (_blank)</option>
                     </select>
@@ -727,7 +728,7 @@
         <div class="modal-box" style="max-width: 560px;">
             <div class="modal-head">
                 <h3><i class="fa-solid fa-cloud-arrow-up"></i> किसी भी प्रकार की फ़ाइल अपलोड करें (Universal Uploader)</h3>
-                <button class="btn-ctrl" onclick="closeModal('modalUniversalUpload')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn-ctrl" onclick="closeModal('modalUniversalUpload')" style="padding: 2px 6px;" aria-label="Close upload dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <div class="form-group">
@@ -766,7 +767,7 @@
         <div class="modal-box">
             <div class="modal-head">
                 <h3><i class="fa-solid fa-video"></i> वीडियो लिंक (YouTube / MP4) बदलें</h3>
-                <button class="btn-ctrl" onclick="closeModal('modalVideo')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn-ctrl" onclick="closeModal('modalVideo')" style="padding: 2px 6px;" aria-label="Close video dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <div class="form-group">
@@ -787,7 +788,7 @@
         <div class="modal-box" style="max-width: 580px;">
             <div class="modal-head">
                 <h3><i class="fa-solid fa-plus-circle"></i> नया सेक्शन या प्रोजेक्ट कार्ड जोड़ें</h3>
-                <button class="btn-ctrl" onclick="closeModal('modalAddSection')" style="padding: 2px 6px;"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn-ctrl" onclick="closeModal('modalAddSection')" style="padding: 2px 6px;" aria-label="Close add section dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <p style="color: var(--text-slate); font-size: 0.85rem; margin-bottom: 14px;">

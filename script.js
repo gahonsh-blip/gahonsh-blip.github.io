@@ -9,14 +9,17 @@
 
         const btn = document.createElement("button");
         btn.id = "themeToggleBtn";
-        btn.setAttribute("aria-label", "Toggle color theme");
+        // WCAG 2.5.3 "Label in Name": the accessible name must contain the
+        // visible text ("Light"/"Dark"), so voice-control users can say what
+        // they see. It is kept in step with the label as the theme changes.
         const isCurrentLight = document.body.classList.contains("light-mode") || localStorage.getItem("theme") === "light";
         
         if (isCurrentLight && !document.body.classList.contains("light-mode")) {
             document.body.classList.add("light-mode");
         }
 
-        btn.innerHTML = isCurrentLight ? '<i class="fa-solid fa-moon"></i> Dark' : '<i class="fa-solid fa-sun"></i> Light';
+        btn.innerHTML = isCurrentLight ? '<i class="fa-solid fa-moon" aria-hidden="true"></i> Dark' : '<i class="fa-solid fa-sun" aria-hidden="true"></i> Light';
+        btn.setAttribute("aria-label", "Switch to " + (isCurrentLight ? "Dark" : "Light") + " theme");
         btn.style.position = "fixed";
         btn.style.bottom = "35px";
         btn.style.left = "90px";
@@ -52,10 +55,12 @@
             localStorage.setItem("theme", isLight ? "light" : "dark");
             
             if (isLight) {
-                this.innerHTML = '<i class="fa-solid fa-moon"></i> Dark';
+                this.innerHTML = '<i class="fa-solid fa-moon" aria-hidden="true"></i> Dark';
+                this.setAttribute("aria-label", "Switch to Dark theme");
                 this.style.background = "#0284c7";
             } else {
-                this.innerHTML = '<i class="fa-solid fa-sun"></i> Light';
+                this.innerHTML = '<i class="fa-solid fa-sun" aria-hidden="true"></i> Light';
+                this.setAttribute("aria-label", "Switch to Light theme");
                 this.style.background = "#0f172a";
             }
         };

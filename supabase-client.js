@@ -595,16 +595,18 @@
             try {
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 4000);
-                // A plain no-cors GET avoids a CORS preflight. It resolves (as an
-                // opaque response) for any reachable host — even a 401 — and only
-                // rejects when the host is genuinely unreachable (DNS/connection).
-                await fetch(base + '/rest/v1/', {
+                // Probe the auth health endpoint with the public publishable key.
+                // It is CORS-enabled and answers 200, so the check stays silent in
+                // the console. A keyless request to /rest/v1/ returns 401, which
+                // the browser logs as a console error and fails the Lighthouse
+                // "no browser errors" audit even though the project is healthy.
+                const res = await fetch(base + '/auth/v1/health', {
                     method: 'GET',
-                    mode: 'no-cors',
                     cache: 'no-store',
+                    headers: { apikey: String(window.GAHONSH_CONFIG.SUPABASE_ANON_KEY || '') },
                     signal: controller.signal
                 });
-                reachable = true;
+                reachable = res.ok;
                 clearTimeout(timer);
             } catch (err) {
                 reachable = false;
