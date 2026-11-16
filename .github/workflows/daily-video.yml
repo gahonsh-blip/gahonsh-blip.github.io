@@ -1,9 +1,8 @@
 name: Daily Short
 
 # Renders one vertical Short every morning at 08:00 IST and publishes it to
-# GitHub Pages, where social/daily.json is already the manifest the Google Apps
-# Script reads at 08:30 IST. Free: Pillow and ffmpeg ship on the runner, and the
-# voice uses edge-tts. No API key, no card, no phone.
+# GitHub Pages, where social/daily.json is the manifest the Google Apps Script
+# reads at 08:30 IST. Free: Pillow and ffmpeg on the runner, voice via edge-tts.
 #
 # If the render fails, nothing is published and the Apps Script keeps uploading
 # from the pre-rendered pool (social/videos.json), so YouTube is never empty.
@@ -33,26 +32,31 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install ffmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          test -x "$(command -v ffmpeg)"
+          ffmpeg -hide_banner -version | head -1
+
       - name: Install renderer dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pillow edge-tts
-          ffmpeg -version | head -1
+          set -euo pipefail
+          python -m pip install --upgrade pip -q
+          pip install -q pillow edge-tts
+          python -c "import PIL, edge_tts; print('pillow', PIL.__version__)"
 
       - name: Render today's Short
         run: |
+          set -euo pipefail
           python3 social/render.py --root .
           test -s social/daily.json
-          python3 - <<'PY'
-          import json, pathlib
-          m = json.load(open('social/daily.json'))
-          p = pathlib.Path('social/media') / pathlib.Path(m['video_url']).name
-          print(m['date'], m['bytes'], 'bytes', p)
-          assert p.exists() and p.stat().st_size > 20000, 'render too small'
-          PY
+          python3 -c "import json,pathlib,sys; m=json.load(open('social/daily.json')); p=pathlib.Path('social/media')/pathlib.Path(m['video_url']).name; print(m['date'], m['bytes'], 'bytes', p); sys.exit(0 if p.exists() and p.stat().st_size>20000 else 1)"
 
       - name: Publish to GitHub Pages
         run: |
+          set -euo pipefail
           git config user.name "GAHONSH autopilot"
           git config user.email "gahonsh@gmail.com"
           git add social/media social/daily.json
