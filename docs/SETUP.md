@@ -37,10 +37,30 @@ The marketplace features client-side Supabase integration with Row Level Securit
 2. Click **"New query"**.
 3. Open the file `docs/marketplace-schema.sql` from this repository and copy its entire content into the SQL Editor.
 4. Click **"Run"**.
-   - This creates all necessary tables: `profiles`, `jobs`, `proposals`, `contracts`, `reviews`, and views `public_profiles`.
-   - It configures Row Level Security (RLS) policies ensuring users can only edit their own data.
+   - This creates all necessary tables: `profiles`, `jobs`, `proposals`, `contracts`, `contact_messages`, and the `public_profiles` view.
+   - It configures Row Level Security (RLS) policies ensuring users can only edit their own data, and that contact leads can only be read by the owner.
    - It sets up database triggers for automatic profile creation upon signup and proposal count synchronizations.
-   - It defines atomic RPC procedures like `accept_proposal_and_create_contract`.
+   - It defines atomic RPC procedures like `accept_proposal_and_create_contract`, plus `admin_overview` and `provision_admin_user`.
+
+### Step 2b: Create the Owner Account
+
+`admin.html` is owner-only and the site ships no owner credentials, so create
+one before you need the dashboard:
+
+1. Open the site and sign up normally with the email you want to own the site.
+   Every new signup becomes a `freelancer` or `client` — never an admin.
+2. In the Supabase Dashboard, go to **SQL Editor → New query** and promote that
+   account with your `service_role` privileges. Replace the email:
+   ```sql
+   SELECT public.provision_admin_user(id)
+   FROM public.profiles
+   WHERE email = 'you@example.com';
+   ```
+   Run this in the SQL Editor only. Never expose the `service_role` key on the
+   frontend. The `provision_admin_user` function is granted to `service_role`
+   alone, which is what allows the first owner to be created while no admin
+   exists yet.
+3. Open `admin.html` and sign in with that email and password.
 
 ### Step 3: Configure Frontend Credentials
 1. In the Supabase Dashboard, go to **Project Settings → API**.

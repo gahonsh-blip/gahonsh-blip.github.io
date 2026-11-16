@@ -22,7 +22,11 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 | `jobs` | `id` (`UUID`) | `client_id` → `profiles(id)` | Client job postings with category, budget type (`fixed`/`hourly`), budget min/max, duration, experience level, status (`open`, `in_progress`, `completed`, `cancelled`), proposal counters. |
 | `proposals` | `id` (`UUID`) | `job_id` → `jobs(id)`, `freelancer_id` → `profiles(id)` | Freelancer bids containing bid amount ($), estimated delivery days, cover letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`). |
 | `contracts` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `client_id` → `profiles(id)`, `freelancer_id` → `profiles(id)` | Active working agreements with agreed amount, start date, completion date, and status (`active`, `completed`, `disputed`, `cancelled`). |
-| `reviews` | `id` (`UUID`) | `contract_id` → `contracts(id)`, `reviewer_id` → `profiles(id)`, `reviewee_id` → `profiles(id)` | 1-5 star ratings and written feedback left after contract completion. |
+| `contact_messages` | `id` (`UUID`) | — | Public lead intake written by `contact.html` and `chat-widget.js`: `name`, `email`, `service`, `budget`, `message`, `source`, `is_handled`, `created_at`. Visitors may insert only; the owner reads and marks handled from `admin.html`. |
+
+> The `reviews` table is not part of the current schema. Ratings shown on the
+> talent directory come from `public_profiles`; add a `reviews` table and its
+> policies before wiring up any review UI.
 
 ### Public Views
 
@@ -47,9 +51,9 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
   - `UPDATE`: Proposal owners can update/withdraw proposals before acceptance.
 - **Contracts**:
   - `SELECT` / `UPDATE`: Only the participating Client and Freelancer (`auth.uid() IN (client_id, freelancer_id)`) can access contract details.
-- **Reviews**:
-  - `SELECT`: Publicly readable.
-  - `INSERT`: Only contract participants can submit a review.
+- **Contact messages**:
+  - `INSERT`: Anyone (anonymous visitors included) may submit a lead.
+  - `SELECT` / `UPDATE` / `DELETE`: Owner only (`public.is_admin()`). Leads can never be read back with the public key.
 
 ---
 
@@ -63,6 +67,8 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
    - Marks all other competing proposals for that job as `rejected`.
    - Updates the job status to `in_progress`.
    - Inserts a new row in `contracts` with agreed parameters.
+4. **`provision_admin_user(target_user_id)` (RPC Function)**: Promotes a user to `admin` and marks them verified. Executable by `service_role` only, and the only supported way to create the first owner. The `protect_profile_immutable_fields` trigger allows this path because it also accepts callers whose PostgREST role is `service_role`, which is required while no admin exists yet.
+5. **`admin_overview()` (RPC Function)**: Returns the owner KPI counters (`workers`, `clients`, `verified_workers`, `open_jobs`, `proposals`, `active_contracts`, `contract_value`) as JSONB for `admin.html`. Raises `42501` for anyone who is not the owner.
 
 ---
 

@@ -19,6 +19,10 @@ Repository guide for AI agents and human contributors working on the
 4. **Preserve SEO & Metadata assets.** `sitemap.xml`, `robots.txt`, `metadata.json`, Open Graph meta tags, Google verification file (`googleb9deb43124fcee02.html`), and JSON-LD structured data must remain intact and updated when URLs change.
 5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
 6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine when the project is unreachable. Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
+7. **Keep the schema and the client in step.** Any table, view or function the
+   client reaches through PostgREST must exist in `docs/marketplace-schema.sql`
+   (`npm run test:schema` enforces this). New tables need RLS plus policies, and
+   new policies must be declared after the helper functions they call.
 
 ## Code Conventions
 
@@ -74,11 +78,15 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
-- **Automated checks:** `npm test` runs both suites.
+- **Automated checks:** `npm test` runs all three suites.
   - `npm run test:a11y` — static accessibility contract across all pages.
   - `npm run test:security` — flags inline-handler interpolation, unescaped
     `innerHTML` sinks, and hardcoded studio passcodes. Run it after touching any
     rendering code.
+  - `npm run test:schema` — verifies every table/view/function the client
+    reaches through PostgREST exists in `docs/marketplace-schema.sql`. Run it
+    after adding a `.from(...)`, `.rpc(...)` or `/rest/v1/...` call, or after
+    editing the schema. A missing object otherwise 404s only at runtime.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`).

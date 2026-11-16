@@ -27,6 +27,10 @@ regression check `npm run test:security`.
 | 11 | Low | Privacy | `contact.html` Maps embed lacked `referrerpolicy` | Fixed |
 | 12 | Medium | CSS cascade | 5 marketplace pages loaded `theme.css` before their inline `<style>`, inverting the documented cascade order | Fixed |
 | 13 | Info | A11y | `dashboard.html` heading order skips `h1` → `h3` | Not a bug (private page) |
+| 14 | High | Database | `contact_messages` table was missing from the committed schema, so every contact-form and chat-lead submission 404'd | Fixed |
+| 15 | High | Database | `admin_overview()` RPC was missing, so the admin dashboard KPIs failed to load | Fixed |
+| 16 | High | Database | `provision_admin_user()` could never promote the first owner — the immutability trigger rejected its own write, so `admin.html` was unreachable | Fixed |
+| 17 | Low | Docs | `docs/DATABASE.md` documented a `reviews` table that the schema never created | Fixed |
 
 ## 1. Stored XSS in the job marketplace (High)
 
@@ -158,11 +162,82 @@ just after the inline `</style>` on those five pages.
 `noindex` tool, so the SEO impact is nil; left unchanged to avoid churning the
 editor markup.
 
+## 14. `contact_messages` missing from the schema (High)
+
+`contact.html` posts leads to `/rest/v1/contact_messages`, and
+`chat-widget.js` posts quote requests to the same table, but
+`docs/marketplace-schema.sql` never created it. On a project built from the
+committed schema, every contact-form and website-chat submission failed with a
+404 from PostgREST, so the site silently lost all enquiries. `admin.html` also
+reads the table for its Enquiries list, which failed the same way.
+
+The table was added with RLS enabled: anonymous and authenticated visitors may
+`INSERT` a lead, and only the owner (`public.is_admin()`) may `SELECT`,
+`UPDATE` or `DELETE`. A visitor can never read other people's submissions back
+with the public key. The policies are declared in section 11, after
+`is_admin()` exists, because a policy that references a function before it is
+created fails to compile.
+
+## 15. `admin_overview()` missing from the schema (High)
+
+`admin.html` fills its KPI tiles by calling `client.rpc('admin_overview')`, but
+no such function existed, so the dashboard's counters never loaded. Added as a
+`SECURITY DEFINER` function returning JSONB with the exact keys the page reads
+(`workers`, `clients`, `verified_workers`, `open_jobs`, `proposals`,
+`active_contracts`, `contract_value`). It raises `42501` unless
+`public.is_admin()`, so the aggregate counts are never exposed to non-owners.
+Execute is granted to `authenticated` only.
+
+## 16. The first owner could never be created (High)
+
+`provision_admin_user()` is the documented, `service_role`-only way to promote
+a user to `admin`. It was unusable: `protect_profile_immutable_fields` (a
+`BEFORE UPDATE` trigger) guards `role`, `is_verified` and `email` with
+`IF NOT public.is_admin() THEN RAISE`, and it is `SECURITY DEFINER`. Two
+independent reasons made that check always fail for this call:
+
+1. `current_user` inside a `SECURITY DEFINER` function is the function's owner,
+   not the caller, so a role check on it cannot work at all.
+2. During bootstrap there is no admin yet, so `is_admin()` is false by
+   definition — the function that creates the first admin was blocked by the
+   rule that only an admin may set a role.
+
+Net effect: `admin.html` was unreachable on any project built from this schema.
+Verified by running the schema against a real PostgreSQL 17 instance and
+calling `provision_admin_user()` as `service_role`; it raised
+`Unauthorized: Direct modification of role…`.
+
+Fixed by also accepting callers whose PostgREST role is `service_role`, read
+from the `role` GUC (`current_setting('role', true)`), which PostgREST sets to
+the JWT role and which survives into a `SECURITY DEFINER` function. A normal
+signed-in user's role is `authenticated`, and an anonymous visitor's is `anon`,
+so self-promotion stays blocked. Confirmed both ways: `service_role` promotes
+the first owner, while an `authenticated` freelancer updating their own row to
+`admin` is still rejected.
+
+## 17. `reviews` table documented but never created (Low)
+
+`docs/DATABASE.md` listed a `reviews` table with its RLS policies, but the
+schema never created it and no client code uses it. The documentation row was
+replaced with the real `contact_messages` table, and a note records that
+`reviews` is not implemented so nobody builds a review UI against a
+non-existent table.
+
 ## Verification
 
 - `npm run test:a11y` — 19 pages, passes.
 - `npm run test:security` — new check: inline-handler interpolation, unescaped
-  `innerHTML` sinks, and hardcoded studio passcodes. 29 files, passes.
+  `innerHTML` sinks, and hardcoded studio passcodes. 30 files, passes.
+- `npm run test:schema` — new check: every `.from('x')` / `.rpc('x')` /
+  `/rest/v1/x` reference in the client resolves to an object in
+  `docs/marketplace-schema.sql`. 30 references, passes. Negative-tested by
+  removing the table and confirming it fails on all four call sites.
+- `docs/marketplace-schema.sql` executed against PostgreSQL 17 (with `auth`
+  stubbed) — loads clean and is idempotent on a second run.
+- RLS and bootstrap verified end-to-end in that database: anon inserts a lead
+  but reads none back; signup creates a freelancer; `service_role` promotes the
+  first owner; the owner reads leads and gets the `admin_overview()` KPI keys;
+  a non-admin can neither read leads, call `admin_overview()`, nor self-promote.
 - Headless-Chromium sweep of all pages: 0 console errors, warnings or failed
   requests.
 - Server auth exercised with `curl`: no/wrong passcode → 401, correct → 200,

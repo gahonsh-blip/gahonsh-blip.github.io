@@ -95,6 +95,30 @@ FROM public.profiles;
 GRANT SELECT ON public.public_profiles TO anon, authenticated;
 
 -- ----------------------------------------------------------------------------
+-- 3b. CONTACT MESSAGES TABLE (PUBLIC LEAD INTAKE - WRITE-ONLY FOR ANON)
+-- ----------------------------------------------------------------------------
+-- Written by contact.html and chat-widget.js with the public publishable key.
+-- Anonymous visitors may INSERT a lead but can never read it back; only the
+-- owner (admin) can SELECT, mark handled or delete. Without this table the
+-- contact form and website chat lead capture fail with a 404 from PostgREST.
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    service TEXT,
+    budget TEXT,
+    message TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'contact-page',
+    is_handled BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW())
+);
+
+CREATE INDEX IF NOT EXISTS contact_messages_created_at_idx
+    ON public.contact_messages (created_at DESC);
+
+-- RLS is enabled and policies are declared in section 11, after is_admin().
+
+-- ----------------------------------------------------------------------------
 -- 4. JOBS TABLE
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.jobs (
@@ -226,7 +250,14 @@ BEGIN
     IF (NEW.role IS DISTINCT FROM OLD.role OR 
         NEW.is_verified IS DISTINCT FROM OLD.is_verified OR 
         NEW.email IS DISTINCT FROM OLD.email) THEN
-        IF NOT public.is_admin() THEN
+        -- Only the owner, or trusted server-side code, may touch these fields.
+        -- is_admin() covers a signed-in owner. current_user cannot be used
+        -- here because a SECURITY DEFINER function runs as its owner, so the
+        -- invoker's role is read from the role GUC that PostgREST sets. This is
+        -- what lets provision_admin_user() create the very first owner, when no
+        -- admin exists yet and is_admin() is still false.
+        IF NOT public.is_admin()
+           AND current_setting('role', true) IS DISTINCT FROM 'service_role' THEN
             RAISE EXCEPTION 'Unauthorized: Direct modification of role, email, or verification status is prohibited.';
         END IF;
     END IF;
@@ -374,6 +405,39 @@ REVOKE ALL ON FUNCTION public.provision_admin_user(UUID) FROM anon, authenticate
 GRANT EXECUTE ON FUNCTION public.provision_admin_user(UUID) TO service_role;
 
 -- ----------------------------------------------------------------------------
+-- 10b. ADMIN OVERVIEW RPC (OWNER KPI COUNTERS)
+-- ----------------------------------------------------------------------------
+-- admin.html calls this on load to fill its KPI tiles. Aggregates in the
+-- database so the dashboard does not have to pull every row, and refuses to
+-- run for anyone who is not the owner.
+CREATE OR REPLACE FUNCTION public.admin_overview()
+RETURNS JSONB AS $$
+DECLARE
+    result JSONB;
+BEGIN
+    IF NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Unauthorized: admin_overview is owner-only.' USING ERRCODE = '42501';
+    END IF;
+
+    SELECT jsonb_build_object(
+        'workers',          (SELECT COUNT(*) FROM public.profiles WHERE role = 'freelancer'),
+        'clients',          (SELECT COUNT(*) FROM public.profiles WHERE role = 'client'),
+        'verified_workers', (SELECT COUNT(*) FROM public.profiles WHERE role = 'freelancer' AND is_verified),
+        'open_jobs',        (SELECT COUNT(*) FROM public.jobs WHERE status = 'open'),
+        'proposals',        (SELECT COUNT(*) FROM public.proposals),
+        'active_contracts', (SELECT COUNT(*) FROM public.contracts WHERE status = 'active'),
+        'contract_value',   (SELECT COALESCE(SUM(agreed_amount), 0) FROM public.contracts)
+    ) INTO result;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
+
+REVOKE ALL ON FUNCTION public.admin_overview() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.admin_overview() FROM anon;
+GRANT EXECUTE ON FUNCTION public.admin_overview() TO authenticated;
+
+-- ----------------------------------------------------------------------------
 -- 11. ROW LEVEL SECURITY (RLS) POLICIES
 -- ----------------------------------------------------------------------------
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -381,6 +445,7 @@ ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.job_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Public Directory Read for non-sensitive data, Owner/Admin Update
 DROP POLICY IF EXISTS "Public can view basic profiles" ON public.profiles;
@@ -519,3 +584,30 @@ CREATE POLICY "No direct client insert on contracts"
 ON public.contracts FOR INSERT 
 TO authenticated 
 WITH CHECK (public.is_admin());
+
+-- Contact messages: write-only for visitors, owner-only to read or manage.
+DROP POLICY IF EXISTS "Anyone can submit a contact message" ON public.contact_messages;
+CREATE POLICY "Anyone can submit a contact message"
+ON public.contact_messages FOR INSERT
+TO anon, authenticated
+WITH CHECK (TRUE);
+
+DROP POLICY IF EXISTS "Only admin can read contact messages" ON public.contact_messages;
+CREATE POLICY "Only admin can read contact messages"
+ON public.contact_messages FOR SELECT
+TO authenticated
+USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Only admin can update contact messages" ON public.contact_messages;
+CREATE POLICY "Only admin can update contact messages"
+ON public.contact_messages FOR UPDATE
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Only admin can delete contact messages" ON public.contact_messages;
+CREATE POLICY "Only admin can delete contact messages"
+ON public.contact_messages FOR DELETE
+TO authenticated
+USING (public.is_admin());
+
