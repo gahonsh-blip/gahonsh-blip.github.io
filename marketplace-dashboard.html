@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marketplace Portal & Dashboard | Gahonsh Freelancing</title>
     <meta name="description" content="Manage your active projects, submitted proposals, contracts, and freelance profile on Gahonsh Marketplace Portal.">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/marketplace-dashboard.html">
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
@@ -262,7 +264,7 @@
 <body>
 
     <!-- FLOATING ACTIONS -->
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -340,15 +342,61 @@
         </div>
     </main>
 
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="portal-info">
+        <h1 id="portal-info">Marketplace Portal and Dashboard</h1>
+        <h2>How the Gahonsh Portal Works</h2>
+        <p>The Gahonsh marketplace portal is the single place to manage everything you do on the platform, whether you hire talent or deliver work. Sign in to see your own activity; the overview below explains what each area covers.</p>
+        <h3>For clients</h3>
+        <ul>
+            <li><strong>My projects</strong> &mdash; every brief you have posted, with status and proposal counts.</li>
+            <li><strong>Proposals</strong> &mdash; compare bids, delivery times and approaches, then accept the one that fits.</li>
+            <li><strong>Active contracts</strong> &mdash; work in progress, agreed amounts and delivery milestones.</li>
+        </ul>
+        <h3>For freelancers</h3>
+        <ul>
+            <li><strong>My proposals</strong> &mdash; the bids you have submitted and their current status.</li>
+            <li><strong>Contracts</strong> &mdash; accepted engagements and the amounts agreed with each client.</li>
+            <li><strong>Profile</strong> &mdash; your headline, skills, hourly rate and verification badge.</li>
+        </ul>
+        <h3>Getting started</h3>
+        <ol>
+            <li>Create an account and choose whether you are hiring or freelancing.</li>
+            <li>Complete your profile so proposals and briefs carry the right context.</li>
+            <li>Start from the <a href="jobs.html">Find Work</a> feed or <a href="post-job.html">post a project</a>.</li>
+        </ol>
+        <p>Looking for people to hire? Browse <a href="find-talent.html">verified talent</a>. Want to understand how Gahonsh prices and delivers work? Read our <a href="services.html">services</a> and <a href="pricing.html">pricing plans</a>.</p>
+
+        <h3>Account types and what each one sees</h3>
+        <p>A client account lists the projects you have published, the proposals you have received and the contracts you have agreed. A freelancer account lists the proposals you have submitted, their current status and the engagements you have won. Switching role changes the view but keeps your history, so you can hire and work from a single login.</p>
+        <h3>What the status labels mean</h3>
+        <ul>
+            <li><strong>Open</strong> &mdash; a project is published and still accepting proposals.</li>
+            <li><strong>Shortlisted</strong> &mdash; a proposal has been marked as a strong candidate by the client.</li>
+            <li><strong>Accepted</strong> &mdash; the client has hired the freelancer and a contract now exists.</li>
+            <li><strong>In progress</strong> &mdash; the contract is active and milestones are being delivered.</li>
+            <li><strong>Completed</strong> &mdash; all agreed milestones have been delivered and accepted.</li>
+        </ul>
+        <h3>Keeping your profile strong</h3>
+        <p>For freelancers, a complete profile matters more than a long one. A clear headline role, a short description of what you deliver, an accurate skills list and a sensible hourly rate will win more invitations than a wall of text. Clients, meanwhile, get better proposals when the brief states the deliverable, the tools and the deadline rather than a vague description of a problem.</p>
+        <p>Ready to begin? Start from the <a href="jobs.html">Find Work</a> feed, <a href="post-job.html">post a project</a> or <a href="find-talent.html">browse verified talent</a>.</p>
+
+        <h3>Profile, verification and trust</h3>
+        <p>Trust on the marketplace comes from two places: a verified badge on the freelancer side, and a payment-verified guarantee on the client side. Together they mean the person you hire has had their work reviewed, and the client hiring you has committed to paying for delivered work.</p>
+        <p>Keep your profile current as your work changes. A specialist who updates their headline, skills and rate as they take on new disciplines receives more relevant invitations than one whose profile has not moved in a year. Clients should likewise keep briefs specific, because a clear brief attracts proposals from people who can actually do the job.</p>
+        <p>Questions about a project or a proposal? Use the details on the <a href="contact.html">contact page</a>, or review <a href="about.html">how Gahonsh runs engagements</a> before you commit.</p>
+    </section>
+
     <!-- FOOTER -->
     <footer style="background:#02040a; padding:60px 8% 30px; border-top:1px solid var(--border-color); margin-top:60px;">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:35px; margin-bottom:40px;">
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Verified marketplace connecting ambitious clients with elite technical freelancers worldwide.</p>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">One portal for projects, proposals, contracts and your profile, whether you hire or deliver.</p>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
@@ -357,7 +405,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="services.html#excel" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Excel Intelligence</a></li>
                     <li style="margin-bottom:10px;"><a href="services.html#pdf" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">PDF Engineering</a></li>
@@ -365,7 +413,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="privacy-policy.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Privacy Policy</a></li>
                     <li style="margin-bottom:10px;"><a href="terms.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Terms Structure</a></li>
@@ -376,11 +424,11 @@
         <div style="padding-top:25px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; color:var(--text-slate); font-size:0.85rem;">
             <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
             <div style="display:flex; gap:15px; font-size:1.1rem;">
-                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com" style="color:var(--text-slate);"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
             </div>
         </div>
     </footer>
@@ -462,7 +510,7 @@
                     <div class="portal-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div>
-                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(j.id)}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(j.title)}</a></h3>
+                                <h2 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(j.id)}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(j.title)}</a></h2>
                                 <span class="status-badge status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span> • <span style="color:var(--text-slate); font-size:0.85rem;">${escapeHtml(j.category)}</span>
                             </div>
                             <a href="job-details.html?id=${encodeURIComponent(j.id)}" class="btn-outline">Manage Proposals (${j.proposals_count || 0})</a>
@@ -494,7 +542,7 @@
                     <div class="portal-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                             <div>
-                                <h3 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(p.job?.title || 'Project')}</a></h3>
+                                <h2 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(p.job?.title || 'Project')}</a></h2>
                                 <span class="status-badge status-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${p.bid_amount}</span>
                             </div>
                             <a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" class="btn-outline">View Project</a>
@@ -533,7 +581,7 @@
                 <div class="portal-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
-                            <h3 style="font-size:1.15rem; margin-bottom:6px;">${escapeHtml(c.job?.title || 'Contract')}</h3>
+                            <h2 style="font-size:1.15rem; margin-bottom:6px;">${escapeHtml(c.job?.title || 'Contract')}</h2>
                             <span class="status-badge status-${escapeHtml(c.status)}">${escapeHtml(c.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Agreed: $${c.agreed_amount}</span>
                             <p style="font-size:0.85rem; color:var(--text-slate); margin-top:6px;">
                                 ${otherLabel}: <strong>${otherName}</strong> • Hired on ${new Date(c.created_at).toLocaleDateString()}

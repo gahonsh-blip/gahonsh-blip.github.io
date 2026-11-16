@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gahonsh Freelancing | Smart Digital Solutions Worldwide</title>
     
-    <meta name="description" content="We deliver elite Excel intelligence, professional corporate brand assets, high-converting web applications, and data automation workflows built to drive performance.">
+    <meta name="description" content="Elite Excel automation, corporate brand assets, high-converting web apps and data automation workflows built to drive measurable business performance worldwide.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gahonsh-blip.github.io/">
     <link rel="icon" type="image/png" href="assets/logo.png">
@@ -391,7 +391,7 @@
             gap: 50px;
         }
 
-        .stat-item h2 {
+        .stat-item .stat-number {
             font-size: 2.8rem;
             font-weight: 800;
             margin-bottom: 5px;
@@ -602,7 +602,7 @@
             line-height: 1.6;
         }
 
-        .testimonial-card h4 {
+        .testimonial-card .testimonial-author {
             color: var(--accent-cyan);
             font-size: 0.95rem;
         }
@@ -710,7 +710,7 @@
             margin-bottom: 50px;
         }
 
-        .footer-col h4 {
+        .footer-col .footer-heading {
             color: var(--text-main);
             margin-bottom: 22px;
             font-size: 0.95rem;
@@ -827,7 +827,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -889,15 +889,15 @@
 
         <div class="hero-stats">
             <div class="stat-item">
-                <h2 class="counter-num" data-target="4">0</h2>
+                <p class="stat-number counter-num" data-target="4">0</p>
                 <p>Live Projects</p>
             </div>
             <div class="stat-item">
-                <h2><span class="counter-num" data-target="100">0</span>%</h2>
+                <p class="stat-number"><span class="counter-num" data-target="100">0</span>%</p>
                 <p>Fixed-Price Quotes</p>
             </div>
             <div class="stat-item">
-                <h2>7-day</h2>
+                <p class="stat-number">7-day</p>
                 <p>Free Bug Support</p>
             </div>
         </div>
@@ -1006,11 +1006,11 @@
         <div class="testimonial-grid">
             <div class="testimonial-card">
                 <p>"The complex multi-tier macro engine significantly optimized our internal workflow logging. Absolute operational precision."</p>
-                <h4><i class="fa-solid fa-building-columns"></i> Financial Services Partner - India</h4>
+                <p class="testimonial-author"><i class="fa-solid fa-building-columns"></i> Financial Services Partner - India</p>
             </div>
             <div class="testimonial-card">
                 <p>"The layout rules and digital corporate presentation structures completely transformed our remote pipeline visibility."</p>
-                <h4><i class="fa-solid fa-user-tie"></i> Independent Business Consultant - Jharkhand</h4>
+                <p class="testimonial-author"><i class="fa-solid fa-user-tie"></i> Independent Business Consultant - Jharkhand</p>
             </div>
         </div>
     </section>
@@ -1038,14 +1038,37 @@
         </div>
     </section>
 
-    <footer>
+    
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="home-info">
+        <h2 id="home-info">Smart Digital Solutions Tailored for Global Scale</h2>
+        <p>Gahonsh Freelancing delivers smart digital solutions tailored for global scale. We build the operational tools that small teams and growing businesses rely on every day: Excel models that calculate correctly, PDF documents that present well in print, web applications that load quickly, and automation that removes repetitive manual work.</p>
+        <h3>What we build</h3>
+        <ul>
+            <li><strong>Excel intelligence</strong> &mdash; automated dashboards, financial models, trackers and macro-driven reporting built on clean formulas.</li>
+            <li><strong>PDF and brand engineering</strong> &mdash; company profiles, catalogues, brochures and presentation decks prepared for print and screen.</li>
+            <li><strong>Web architecture</strong> &mdash; responsive sites and application interfaces designed to convert and to stay maintainable.</li>
+            <li><strong>AI and data solutions</strong> &mdash; reporting pipelines and workflow automation that turn raw exports into decisions.</li>
+        </ul>
+        <h3>How engagements run</h3>
+        <ol>
+            <li><strong>Consultation</strong> &mdash; we review the specification and confirm what success looks like.</li>
+            <li><strong>Planning</strong> &mdash; we architect the data, design or layout structure before building.</li>
+            <li><strong>Development</strong> &mdash; we write production-ready formulas, code and styles.</li>
+            <li><strong>Delivery</strong> &mdash; we test against the brief, deploy safely and provide a fix window.</li>
+        </ol>
+        <p>Every project is quoted at a fixed price once the scope is agreed, so there are no surprises at invoice time. Browse the <a href="portfolio.html">portfolio</a> for real deliverables, compare <a href="pricing.html">pricing plans</a>, or read <a href="about.html">about Gahonsh</a> to see how the studio works.</p>
+        <p>Hiring instead of buying a service? The <a href="jobs.html">Find Work</a> feed lists live freelance projects, <a href="find-talent.html">verified talent</a> lists specialists you can invite directly, and <a href="post-job.html">post a job</a> publishes your own brief in minutes.</p>
+    </section>
+
+<footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <h4>Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
+                <p class="footer-heading">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Smart digital solutions for global scale: Excel automation, premium PDF design, web development and AI workflows.</p>
             </div>
             <div class="footer-col">
-                <h4>Services</h4>
+                <p class="footer-heading">Services</p>
                 <ul>
                     <li><a href="services.html#excel">Excel Intelligence</a></li>
                     <li><a href="services.html#pdf">PDF Engineering</a></li>
@@ -1053,7 +1076,7 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Resources</h4>
+                <p class="footer-heading">Resources</p>
                 <ul>
                     <li><a href="portfolio.html">Case Log Files</a></li>
                     <li><a href="pricing.html">Price Matrix</a></li>
@@ -1061,14 +1084,14 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Legal Matrix</h4>
+                <p class="footer-heading">Legal Matrix</p>
                 <ul>
                     <li><a href="privacy-policy.html">Privacy Policy</a></li>
                     <li><a href="terms.html">Terms Structure</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Newsletter</h4>
+                <p class="footer-heading">Newsletter</p>
                 <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
                 <div class="newsletter-form">
                     <input type="email" id="newsletter-email" placeholder="Your corporate email">
@@ -1080,14 +1103,14 @@
         <div class="footer-bottom">
             <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
             <div class="social-icons">
-                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
                 <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
-                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
         </div>
     </footer>

@@ -47,6 +47,30 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   `<style>` block so the shared rules win the cascade. Do not add a second copy
   in `<head>`.
 
+## SEO & Crawlable Content
+
+- **Static content requirement.** JS-rendered listings (jobs, talent, portal,
+  proposals) must always be backed by real copy in the HTML. Every indexable
+  page carries a `.page-info` `<section>` just above the footer holding 500+
+  words of crawlable body text, because audits and non-JS crawlers see only the
+  raw HTML. Styles for it live in `theme.css` under `STATIC PAGE CONTENT`.
+- **Heading outline.** Keep exactly one `<h1>` per page and do not skip levels
+  (no `h2` -> `h4`). Footer column labels and card titles use
+  `<p class="footer-heading">` / `<p class="project-name">`, not `<h4>`/`<h3>`,
+  so they stay out of the outline.
+- **Indexability contract.** Every URL in `sitemap.xml` must be indexable and
+  must have at least one static inbound link from another page. Private pages
+  (`admin.html`, `dasbord.html`, `dashboard.html`, `home.html`, `thank-you.html`)
+  stay `noindex` and out of the sitemap.
+- **Meta.** Each indexable page needs a unique `<title>`, a unique
+  `<meta name="description">` (roughly 70-160 characters) and a
+  `<link rel="canonical">` pointing at its own URL.
+- **External links.** Any `target="_blank"` anchor must carry
+  `rel="noopener noreferrer"`.
+- **Known limitation.** The `www.` host does not resolve (`www.gahonsh-blip.github.io`
+  returns no response). A redirect cannot be added on GitHub Pages without a
+  custom domain, so link only to the apex `https://gahonsh-blip.github.io/`.
+
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).

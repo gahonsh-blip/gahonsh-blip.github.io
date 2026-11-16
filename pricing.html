@@ -639,7 +639,7 @@
             margin-bottom: 50px;
         }
 
-        .footer-col h4 {
+        .footer-col .footer-heading {
             color: var(--text-main);
             margin-bottom: 22px;
             font-size: 0.95rem;
@@ -726,7 +726,7 @@
 <body>
 
     <!-- INSTANT FLOATING INTERACTORS -->
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -813,7 +813,7 @@
                         <li><i class="fa-solid fa-circle-check"></i> Standard Email System Support</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20get%20a%20custom%20quote%20for%20the%20Starter%20Plan." class="btn-plan" target="_blank">Get Started</a>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20get%20a%20custom%20quote%20for%20the%20Starter%20Plan." class="btn-plan" target="_blank" rel="noopener noreferrer">Get Started</a>
             </div>
 
             <!-- PLAN 2: FEATURED PROFESSIONAL MODEL -->
@@ -830,7 +830,7 @@
                         <li><i class="fa-solid fa-circle-check"></i> Priority SLA Communication Support</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20am%20interested%20in%20the%20Professional%20Plan%20milestones." class="btn-plan" target="_blank">Choose Professional</a>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20am%20interested%20in%20the%20Professional%20Plan%20milestones." class="btn-plan" target="_blank" rel="noopener noreferrer">Choose Professional</a>
             </div>
 
             <!-- PLAN 3: ENTERPRISE AUTOMATION GRID (BUG FIXED CTA) -->
@@ -846,7 +846,7 @@
                         <li><i class="fa-solid fa-circle-check"></i> Ongoing Technical Infrastructure Support</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20discuss%20the%20Enterprise%20Business%20Plan%20parameters." class="btn-plan" target="_blank">Request Custom Quote</a>
+                <a href="https://wa.me/918825183628?text=Hello%20Gahonsh,%20I%20want%20to%20discuss%20the%20Enterprise%20Business%20Plan%20parameters." class="btn-plan" target="_blank" rel="noopener noreferrer">Request Custom Quote</a>
             </div>
 
         </div>
@@ -939,15 +939,32 @@
         </a>
     </section>
 
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="pricing-info">
+        <h2 id="pricing-info">Pricing Plans and How Quotes Work</h2>
+        <p>Pricing plans at Gahonsh Freelancing are structured to match the size of the job, not the size of your company. Small, well-defined tasks are quoted at a fixed price; larger or evolving scopes can be handled as a package or an hourly engagement.</p>
+        <h3>What influences a quote</h3>
+        <ul>
+            <li><strong>Scope</strong> &mdash; the number of deliverables, screens, sheets or document pages involved.</li>
+            <li><strong>Complexity</strong> &mdash; formulas, integrations, automation depth and design fidelity.</li>
+            <li><strong>Turnaround</strong> &mdash; standard schedules cost less than expedited delivery.</li>
+            <li><strong>Support</strong> &mdash; the length of the post-delivery fix window you need.</li>
+        </ul>
+        <h3>Why we quote fixed prices</h3>
+        <p>A fixed-price quote removes the risk of an open meter. Once the scope is agreed in writing, the price does not move unless you change the requirements. That is why the first step is always a short consultation: it lets us size the work honestly and explain exactly what you are paying for.</p>
+        <p>Compare the plans above, then read <a href="services.html">what each service includes</a> or browse the <a href="portfolio.html">portfolio</a> for real deliverables. When you are ready, <a href="contact.html">contact us</a> for a tailored quote or <a href="post-job.html">post a job</a> to let freelancers bid.</p>
+    </section>
+
     <!-- FOOTER MODULE LAYER (SIMPLIFIED & POWERFUL) -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <h4>Gahonsh</h4>
+                <p class="footer-heading">Gahonsh</p>
                 <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Professional digital solutions including Excel Automation, PDF Design, Presentation Design, Website Assistance and AI Content Services.</p>
             </div>
             <div class="footer-col">
-                <h4>Services</h4>
+                <p class="footer-heading">Services</p>
                 <ul>
                     <li><a href="services.html#excel">Excel Intelligence</a></li>
                     <li><a href="services.html#pdf">PDF Engineering</a></li>
@@ -955,7 +972,7 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Resources</h4>
+                <p class="footer-heading">Resources</p>
                 <ul>
                     <li><a href="portfolio.html">Case Log Files</a></li>
                     <li><a href="pricing.html">Price Matrix</a></li>
@@ -963,14 +980,14 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Legal Matrix</h4>
+                <p class="footer-heading">Legal Matrix</p>
                 <ul>
                     <li><a href="privacy-policy.html">Privacy Policy</a></li>
                     <li><a href="terms.html">Terms Structure</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Newsletter</h4>
+                <p class="footer-heading">Newsletter</p>
                 <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
                 <div class="newsletter-form">
                     <input type="email" id="newsletter-email" placeholder="Your corporate email">
@@ -982,14 +999,14 @@
         <div class="footer-bottom">
             <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
             <div class="social-icons">
-                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
                 <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
-                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
         </div>
     </footer>

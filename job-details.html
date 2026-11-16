@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details & Proposals | Gahonsh Freelancing</title>
     <meta name="description" content="View freelance project details, client requirements, budget, and submit proposals on Gahonsh Freelancing.">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/job-details.html">
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
@@ -454,7 +456,7 @@
 <body>
 
     <!-- FLOATING ACTIONS -->
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -506,7 +508,7 @@
         <div class="main-card" data-gs-reveal>
             <a href="jobs.html" class="back-nav-link"><i class="fa-solid fa-arrow-left"></i> Back to Jobs Feed</a>
 
-            <h1 class="project-title" id="jobTitle">Loading project details...</h1>
+            <h1 class="project-title" id="jobTitle">Project Details &amp; Proposals on Gahonsh Freelancing</h1>
             
             <div class="meta-badges-row">
                 <span class="meta-badge highlight" id="jobBudgetBadge"><i class="fa-solid fa-dollar-sign"></i> Budget: Loading...</span>
@@ -516,15 +518,15 @@
                 <span class="meta-badge" id="jobProposalsBadge"><i class="fa-solid fa-paperclip"></i> 0 Proposals</span>
             </div>
 
-            <h3 class="section-header-title">Project Overview & Deliverables</h3>
+            <h2 class="section-header-title">Project Overview &amp; Deliverables</h2>
             <p class="job-full-desc" id="jobDescription">Loading...</p>
 
-            <h3 class="section-header-title">Skills & Expertise Needed</h3>
+            <h2 class="section-header-title">Skills &amp; Expertise Needed</h2>
             <div class="skills-cloud" id="skillsCloud"></div>
 
                         <!-- PROPOSALS SECTION (DYNAMIC FOR FREELANCER OR CLIENT) -->
             <div class="proposal-form-section" id="proposalInteractionSection">
-                <h3 class="section-header-title" id="proposalSectionHeading">Submit a Proposal for this Project</h3>
+                <h2 class="section-header-title" id="proposalSectionHeading">Submit a Proposal for this Project</h2>
 
                 <!-- STATUS / INFO MESSAGE AREA -->
                 <div id="proposalMessage" style="display:none;"></div>
@@ -570,11 +572,11 @@
 
         <!-- SIDEBAR: CLIENT CREDIBILITY -->
         <aside class="side-card">
-            <h3 style="font-size:1.1rem; margin-bottom:16px; font-weight:700;">About the Client</h3>
+            <h2 style="font-size:1.1rem; margin-bottom:16px; font-weight:700;">About the Client</h2>
             <div class="client-avatar-block">
                 <div class="client-avatar" id="clientAvatarLetter">C</div>
                 <div>
-                    <h4 id="clientName" style="font-size:1.05rem;">Verified Client</h4>
+                    <p class="client-name" id="clientName" style="font-size:1.05rem; font-weight:700;">Verified Client</p>
                     <span style="font-size:0.8rem; color:var(--accent-cyan);" id="clientVerifiedTag"><i class="fa-solid fa-shield-check"></i> Identity Verified</span>
                 </div>
             </div>
@@ -594,15 +596,47 @@
         </aside>
     </main>
 
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="job-details-info">
+        <h2 id="job-details-info">Project Details, Proposals and Hiring</h2>
+        <p>This page holds the full project details for a single Gahonsh listing. The dynamic panel above loads the live record; the summary below explains what each section contains and how proposals and hiring work, so the page is useful even before the record loads.</p>
+        <h3>What the project record includes</h3>
+        <ul>
+            <li><strong>Overview and deliverables</strong> &mdash; the client's scope, expected output and acceptance criteria.</li>
+            <li><strong>Skills and expertise needed</strong> &mdash; the tools and disciplines the work requires.</li>
+            <li><strong>Budget and duration</strong> &mdash; fixed or hourly pricing plus the expected delivery window.</li>
+            <li><strong>Client profile</strong> &mdash; verification status, location and membership history.</li>
+        </ul>
+        <h3>Submitting a proposal</h3>
+        <p>Freelancers submit a bid amount, an estimated delivery time and a cover letter describing their technical approach. A specific, evidence-led proposal that references comparable work performs better than a generic pitch, because clients are comparing several bids side by side.</p>
+        <h3>Reviewing and hiring</h3>
+        <p>Clients see every proposal in one place, can compare price and delivery, and accept the bid that best fits the brief. Accepting a proposal creates a contract that both parties track from the <a href="marketplace-dashboard.html">marketplace portal</a>.</p>
+        <p>Return to the <a href="jobs.html">Find Work</a> feed to browse more projects, <a href="post-job.html">post a new project</a> as a client, or review <a href="find-talent.html">verified talent</a> if you would rather invite a specialist directly.</p>
+
+        <h3>Fees, milestones and payments</h3>
+        <p>Every engagement is priced either as a fixed amount for a defined deliverable or as an hourly rate for work that evolves. Fixed-price projects are broken into milestones so payment follows verified progress rather than promises. The agreed amount, the delivery window and the current status are visible to both parties at all times.</p>
+        <h3>After a proposal is accepted</h3>
+        <p>When a client accepts a proposal, the listing leaves the public feed and becomes a private contract. The client can then follow delivery against the milestones, and the freelancer can raise questions or share completed files in the same workspace. Both sides keep a shared history, which removes the usual email trail and the disputes that come with it.</p>
+        <h3>Tips for a stronger bid</h3>
+        <ul>
+            <li>Match the bid to the scope, not to the lowest number you think will win.</li>
+            <li>Give a realistic delivery time; an ambitious date that slips costs more trust than a slower honest one.</li>
+            <li>Explain how you will validate the work before handing it over.</li>
+            <li>Link to a comparable sample so the client can see the standard you deliver.</li>
+        </ul>
+        <p>If you are hiring rather than bidding, compare proposals on approach as well as price, then accept the one that best fits the brief. You can also browse <a href="find-talent.html">verified talent</a> and invite a specialist directly if you would rather not wait for bids.</p>
+    </section>
+
     <!-- FOOTER -->
     <footer style="background:#02040a; padding:60px 8% 30px; border-top:1px solid var(--border-color); margin-top:60px;">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:35px; margin-bottom:40px;">
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Verified marketplace connecting ambitious clients with elite technical freelancers worldwide.</p>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Read the full scope, compare proposals and hire with a shared contract record.</p>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
@@ -611,7 +645,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="services.html#excel" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Excel Intelligence</a></li>
                     <li style="margin-bottom:10px;"><a href="services.html#pdf" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">PDF Engineering</a></li>
@@ -619,7 +653,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="privacy-policy.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Privacy Policy</a></li>
                     <li style="margin-bottom:10px;"><a href="terms.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Terms Structure</a></li>
@@ -630,11 +664,11 @@
         <div style="padding-top:25px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; color:var(--text-slate); font-size:0.85rem;">
             <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
             <div style="display:flex; gap:15px; font-size:1.1rem;">
-                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com" style="color:var(--text-slate);"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
             </div>
         </div>
     </footer>

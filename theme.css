@@ -768,3 +768,77 @@ html.gs-anim .faq-answer.gs-open {
         transition: none !important;
     }
 }
+
+/* ============================================
+   STATIC PAGE CONTENT
+   Crawlable copy that stays in the HTML so search engines and bots that do
+   not run JavaScript still read real page content. Rendered identically in
+   both themes and never hidden.
+   ============================================ */
+.page-info {
+    max-width: 1180px;
+    margin: 70px auto 0;
+    padding: 0 8%;
+}
+
+.page-info h1,
+.page-info h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--text-main, #f8fafc);
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+}
+
+.page-info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main, #f8fafc);
+    margin: 26px 0 10px;
+}
+
+.page-info p {
+    color: var(--text-slate, #94a3b8);
+    font-size: 0.97rem;
+    line-height: 1.75;
+    margin-bottom: 14px;
+}
+
+.page-info ul,
+.page-info ol {
+    color: var(--text-slate, #94a3b8);
+    font-size: 0.97rem;
+    line-height: 1.75;
+    margin: 0 0 16px 20px;
+}
+
+.page-info li {
+    margin-bottom: 8px;
+}
+
+.page-info a {
+    color: var(--accent-cyan, #00ffcc);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.35);
+}
+
+.page-info a:hover {
+    border-bottom-color: var(--accent-cyan, #00ffcc);
+}
+
+@media (max-width: 768px) {
+    .page-info {
+        margin-top: 48px;
+        padding: 0 6%;
+    }
+
+    .page-info h2 {
+        font-size: 1.35rem;
+    }
+}
+
+/* Footer column headings are labels, not document headings, so they keep the
+   bold look of the previous <h4> while staying out of the heading outline. */
+.footer-heading {
+    font-weight: 700;
+}

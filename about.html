@@ -6,7 +6,7 @@
     <title>About Us | Gahonsh Freelancing</title>
     
     <!-- SEO & Advanced Metadata Archetype -->
-    <meta name="description" content="Discover Gahonsh Freelancing - a professional digital solutions provider dedicated to building digital excellence and automating enterprise operations worldwide.">
+    <meta name="description" content="Gahonsh Freelancing is a professional digital solutions provider building digital excellence and automating enterprise operations for businesses worldwide.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gahonsh-blip.github.io/about.html">
     <link rel="icon" type="image/png" href="assets/logo.png">
@@ -476,7 +476,7 @@
             line-height: 1.6;
         }
 
-        .testimonial-card h4 {
+        .testimonial-card .testimonial-author {
             color: var(--accent-cyan);
             font-size: 0.95rem;
         }
@@ -566,7 +566,7 @@
             margin-bottom: 50px;
         }
 
-        .footer-col h4 {
+        .footer-col .footer-heading {
             color: var(--text-main);
             margin-bottom: 22px;
             font-size: 0.95rem;
@@ -654,7 +654,7 @@
 <body>
 
     <!-- INTERACTIVE FLOATING ELEMENTS -->
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -710,15 +710,15 @@
         
         <div class="about-stats">
             <div class="stat-item">
-                <h2 class="counter-num" data-target="4">0</h2>
+                <p class="stat-number counter-num" data-target="4">0</p>
                 <p>Live Projects </p>
             </div>
             <div class="stat-item">
-                <h2 class="counter-num" data-target="100">0</h2>
+                <p class="stat-number counter-num" data-target="100">0</p>
                 <p>Fixed-Price Quotes </p>
             </div>
             <div class="stat-item">
-                <h2>100%</h2>
+                <p class="stat-number">100%</p>
                 <p>Remote Delivery </p>
             </div>
         </div>
@@ -746,28 +746,28 @@
 
     <!-- WORK ROADMAP METHODOLOGY SECTION -->
     <section>
-        <h2 class="section-title" data-gs-reveal>Our Working Process</h2>
-        <p class="section-subtitle" data-gs-reveal>A structured, secure, and milestone-based operational roadmap built for direct deployment.</p>
+        <h2 class="section-title" data-gs-reveal>How a Gahonsh Engagement Runs</h2>
+        <p class="section-subtitle" data-gs-reveal>Four documented stages, each confirmed in writing before the next one begins.</p>
         <div class="process-grid">
             <div class="process-card">
                 <div class="step-num">1</div>
-                <h3 style="margin-bottom:12px;">Consultation</h3>
-                <p style="color:var(--text-slate); font-size:0.9rem;">Reviewing core specifications and validating tracking expectations.</p>
+                <h3 style="margin-bottom:12px;">Discovery Call</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">We listen to the problem behind the request and agree what a finished result looks like.</p>
             </div>
             <div class="process-card">
                 <div class="step-num">2</div>
-                <h3 style="margin-bottom:12px;">Planning</h3>
-                <p style="color:var(--text-slate); font-size:0.9rem;">Architecting schema prototypes, design asset files, and layout logic.</p>
+                <h3 style="margin-bottom:12px;">Scope &amp; Architecture</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">We map the data, design or layout structure and send a written scope with a fixed price.</p>
             </div>
             <div class="process-card">
                 <div class="step-num">3</div>
-                <h3 style="margin-bottom:12px;">Development</h3>
-                <p style="color:var(--text-slate); font-size:0.9rem;">Writing production-ready validation code, clean formulas, and styles.</p>
+                <h3 style="margin-bottom:12px;">Build &amp; Review</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">We develop against the agreed scope and share progress so feedback arrives early, not late.</p>
             </div>
             <div class="process-card">
                 <div class="step-num">4</div>
-                <h3 style="margin-bottom:12px;">Delivery</h3>
-                <p style="color:var(--text-slate); font-size:0.9rem;">System checks followed by safe remote code deployments and setup rows.</p>
+                <h3 style="margin-bottom:12px;">Handover &amp; Support</h3>
+                <p style="color:var(--text-slate); font-size:0.9rem;">We test against the brief, deploy safely, document the result and stay available for fixes.</p>
             </div>
         </div>
     </section>
@@ -796,12 +796,12 @@
             <div class="testimonial-card">
                 <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                 <p>"Excellent PDF Design Service! The layout rules and digital corporate presentation structures completely transformed our pipeline visibility."</p>
-                <h4><i class="fa-solid fa-user-tie"></i> Independent Consultant - India</h4>
+                <p class="testimonial-author"><i class="fa-solid fa-user-tie"></i> Independent Consultant - India</p>
             </div>
             <div class="testimonial-card">
                 <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                 <p>"Professional Excel Automation. The complex multi-tier macro engine significantly optimized our internal workflow tracking."</p>
-                <h4><i class="fa-solid fa-building-columns"></i> Financial Services Partner - Jharkhand</h4>
+                <p class="testimonial-author"><i class="fa-solid fa-building-columns"></i> Financial Services Partner - Jharkhand</p>
             </div>
         </div>
     </section>
@@ -815,15 +815,42 @@
         </a>
     </section>
 
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="about-info">
+        <h2 id="about-info">About Gahonsh Freelancing</h2>
+        <p>Gahonsh Freelancing builds digital excellence for businesses that need dependable delivery rather than experiments. We are a remote-first studio working across Excel automation, PDF and brand design, web development and AI-assisted workflows, and we serve clients worldwide from India.</p>
+        <h3>How we work</h3>
+        <p>Every engagement follows the same four stages: consultation, planning, development and delivery. We confirm the specifications in writing, architect the data or design structure before building, write production-ready formulas and code, then run checks and deploy safely. Nothing is handed over until it has been reviewed against the brief.</p>
+        <h3>What we value</h3>
+        <ul>
+            <li><strong>Clarity</strong> &mdash; fixed-price quotes and written scopes so there are no surprises.</li>
+            <li><strong>Craft</strong> &mdash; models, layouts and code that a colleague can maintain later.</li>
+            <li><strong>Support</strong> &mdash; a defined post-delivery window for bug fixes and questions.</li>
+        </ul>
+        <p>Our portfolio covers finance dashboards, loan calculators, inventory trackers, company profiles, catalogues and web applications, alongside the Gahonsh marketplace itself. Explore the <a href="portfolio.html">case log portfolio</a>, review <a href="services.html">services</a> and <a href="pricing.html">pricing</a>, or <a href="contact.html">contact us</a> to discuss a requirement.</p>
+
+        <h3>Where we work from and who we serve</h3>
+        <p>Gahonsh Freelancing operates remotely and serves clients across India, Europe, the Middle East and North America. Working remotely means projects are scoped and documented clearly from the outset, because there is no corridor conversation to fall back on. Every decision that matters is written down and shared.</p>
+        <h3>What clients ask us for most</h3>
+        <ul>
+            <li>Workbooks that need to be rebuilt so the numbers can be trusted again.</li>
+            <li>Brand documents that must look professional in print as well as on screen.</li>
+            <li>Web pages and application interfaces that need to convert, not just exist.</li>
+            <li>Reporting routines that should run without anyone copying data by hand.</li>
+        </ul>
+        <p>We are equally comfortable working as a direct service provider and as the team behind the Gahonsh marketplace, where clients and freelancers meet. If you are hiring talent rather than commissioning the studio, start from <a href="find-talent.html">verified talent</a> or <a href="post-job.html">post a project</a>.</p>
+    </section>
+
     <!-- 5-COLUMN HIGH CONVERSION FOOTER LAYER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <h4>Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">Elite engineering and premium layouts built to optimize operations at international scales.</p>
+                <p class="footer-heading">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.85rem; line-height:1.6; margin-bottom:15px;">A remote-first studio building dependable digital tools for businesses across four continents.</p>
             </div>
             <div class="footer-col">
-                <h4>Services</h4>
+                <p class="footer-heading">Services</p>
                 <ul>
                     <li><a href="services.html#excel">Excel Intelligence</a></li>
                     <li><a href="services.html#pdf">PDF Engineering</a></li>
@@ -831,7 +858,7 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Resources</h4>
+                <p class="footer-heading">Resources</p>
                 <ul>
                     <li><a href="portfolio.html">Case Log Files</a></li>
                     <li><a href="pricing.html">Price Matrix</a></li>
@@ -839,14 +866,14 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Legal Matrix</h4>
+                <p class="footer-heading">Legal Matrix</p>
                 <ul>
                     <li><a href="privacy-policy.html">Privacy Policy</a></li>
                     <li><a href="terms.html">Terms Structure</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Newsletter</h4>
+                <p class="footer-heading">Newsletter</p>
                 <p style="color:var(--text-slate); font-size:0.85rem;">Subscribe for workflow insights.</p>
                 <div class="newsletter-form">
                     <input type="email" id="newsletter-email" placeholder="Your corporate email">
@@ -858,14 +885,14 @@
         <div class="footer-bottom">
             <p>&copy; <span id="dynamic-year"></span> GAHONSH FREELANCING. All Rights Reserved.</p>
             <div class="social-icons">
-                <a href="https://wa.me/918825183628" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com"><i class="fa-solid fa-envelope"></i></a>
                 <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank"><i class="fa-brands fa-youtube"></i></a>
-                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                <a href="https://x.com/GahonshC93491" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.facebook.com/gopinath.patar.73" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://x.com/GahonshC93491" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
         </div>
     </footer>

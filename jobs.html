@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Work & Freelance Jobs | Gahonsh Freelancing</title>
     <meta name="description" content="Explore high-paying freelance jobs in Excel automation, web development, PDF layout design, Python workflows, and digital business solutions on Gahonsh.">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/jobs.html">
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
@@ -305,8 +307,9 @@
             border-bottom: none;
         }
 
-        .filter-section h4 {
+        .filter-section .filter-label {
             font-size: 0.95rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             margin-bottom: 14px;
@@ -522,7 +525,7 @@
 <body>
 
     <!-- FLOATING ACTIONS -->
-    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;">
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;" rel="noopener noreferrer">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -591,7 +594,7 @@
         <!-- SIDEBAR FILTERS -->
         <aside class="filters-sidebar">
             <div class="filter-section">
-                <h4>Category</h4>
+                <p class="filter-label">Category</p>
                 <label class="filter-option"><input type="radio" name="filterCategory" value="all" checked> All Categories</label>
                 <label class="filter-option"><input type="radio" name="filterCategory" value="Excel Automation"> Excel & Spreadsheets</label>
                 <label class="filter-option"><input type="radio" name="filterCategory" value="Web Engineering"> Web Engineering</label>
@@ -601,14 +604,14 @@
             </div>
 
             <div class="filter-section">
-                <h4>Job Type</h4>
+                <p class="filter-label">Job Type</p>
                 <label class="filter-option"><input type="radio" name="filterType" value="all" checked> Any Type</label>
                 <label class="filter-option"><input type="radio" name="filterType" value="fixed"> Fixed Price</label>
                 <label class="filter-option"><input type="radio" name="filterType" value="hourly"> Hourly Rate</label>
             </div>
 
             <div class="filter-section">
-                <h4>Experience Level</h4>
+                <p class="filter-label">Experience Level</p>
                 <label class="filter-option"><input type="radio" name="filterExperience" value="all" checked> All Levels</label>
                 <label class="filter-option"><input type="radio" name="filterExperience" value="entry"> Entry Level</label>
                 <label class="filter-option"><input type="radio" name="filterExperience" value="intermediate"> Intermediate</label>
@@ -634,15 +637,50 @@
         </section>
     </main>
 
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="find-work-info">
+        <h2 id="find-work-info">Find Work and High-Impact Freelance Projects</h2>
+        <p>Find your next high-impact project on the Gahonsh Freelancing marketplace. Every listing is posted by a verified client and grouped by the skills that deliver the fastest return: Excel automation, full-stack web engineering, PDF and brand layouts, Python workflows and data analytics.</p>
+        <p>Use the search box and sidebar filters to narrow the feed by category, pricing model and experience level. Fixed-price briefs suit tightly scoped deliverables such as a financial dashboard or a branded catalogue, while hourly contracts fit ongoing development, reporting and maintenance work.</p>
+        <h3>What you can filter for</h3>
+        <ul>
+            <li><strong>Category</strong> &mdash; Excel and spreadsheets, web engineering, PDF and brand layouts, Python and AI systems, plus data and analytics.</li>
+            <li><strong>Job type</strong> &mdash; fixed-price budgets or hourly rates, so you can match the brief to how you bill.</li>
+            <li><strong>Experience level</strong> &mdash; entry, intermediate and expert projects so you only see work that fits your track record.</li>
+        </ul>
+        <h3>How applying works</h3>
+        <ol>
+            <li>Open any listing to reach its <a href="job-details.html">project details page</a>, where the full scope, deliverables, budget and client history are listed.</li>
+            <li>Submit a proposal with your bid amount, delivery time and a short technical approach.</li>
+            <li>When the client accepts, the engagement moves to your <a href="marketplace-dashboard.html">portal</a> as an active contract.</li>
+        </ol>
+        <p>No project suits you today? <a href="post-job.html">Post a job</a> as a client, or browse <a href="find-talent.html">verified talent</a> to see how the other side of the marketplace works. You can also review our <a href="services.html">services</a> and <a href="pricing.html">pricing</a> to understand how Gahonsh scopes and delivers paid work.</p>
+
+        <h3>Skill areas in demand</h3>
+        <p>The feed rotates constantly, but the same disciplines dominate. Excel and spreadsheet engineering appears most often, usually as dashboard builds, macro automation or financial models that must reconcile large transaction sets. Web engineering follows, covering marketing sites, application front ends and integration work. PDF and brand layout briefs arrive as company profiles, product catalogues and proposal decks. Python and AI automation projects focus on reporting pipelines and removing repetitive manual steps, while data and analytics briefs centre on turning raw exports into decision-ready dashboards.</p>
+        <h3>How to write a proposal that wins</h3>
+        <ul>
+            <li>Read the brief twice and answer the actual deliverable, not a generic service list.</li>
+            <li>State your bid and delivery time in the fields provided so the client can compare you directly.</li>
+            <li>Describe your approach in concrete steps: what you will build, in what order, and how you will test it.</li>
+            <li>Reference comparable work from your <a href="portfolio.html">portfolio</a> so the client can judge quality before hiring.</li>
+            <li>Ask one focused question if something is genuinely unclear; it shows you read the detail.</li>
+        </ul>
+        <h3>What happens after you are hired</h3>
+        <p>Once a client accepts your proposal, the engagement becomes an active contract and appears in your <a href="marketplace-dashboard.html">portal</a> alongside the agreed amount and delivery window. Milestones, files and status updates are tracked there, so both sides always have the same record of what was promised and what was delivered.</p>
+        <p>New listings are published throughout the week, so it pays to check the feed regularly and search by the exact skill you sell. If you offer a service rather than a single skill, review <a href="services.html">our services</a> to see how Gahonsh packages comparable work for clients.</p>
+    </section>
+
     <!-- FOOTER -->
     <footer style="background:#02040a; padding:60px 8% 30px; border-top:1px solid var(--border-color); margin-top:60px;">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:35px; margin-bottom:40px;">
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</h4>
-                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Verified marketplace connecting ambitious clients with elite technical freelancers worldwide.</p>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Browse verified freelance projects and submit proposals that win. New listings are added every week.</p>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Marketplace</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
@@ -651,7 +689,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Services</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="services.html#excel" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Excel Intelligence</a></li>
                     <li style="margin-bottom:10px;"><a href="services.html#pdf" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">PDF Engineering</a></li>
@@ -659,7 +697,7 @@
                 </ul>
             </div>
             <div>
-                <h4 style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</h4>
+                <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="privacy-policy.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Privacy Policy</a></li>
                     <li style="margin-bottom:10px;"><a href="terms.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Terms Structure</a></li>
@@ -670,11 +708,11 @@
         <div style="padding-top:25px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; color:var(--text-slate); font-size:0.85rem;">
             <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
             <div style="display:flex; gap:15px; font-size:1.1rem;">
-                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/918825183628" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com" style="color:var(--text-slate);"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" style="color:var(--text-slate);" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
             </div>
         </div>
     </footer>
