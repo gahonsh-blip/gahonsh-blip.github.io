@@ -586,10 +586,32 @@
         },
 
         async updateJobStatus(jobId, newStatus) {
+            const profile = requireUser('Please sign in to update this project.');
             const rows = readTable('jobs');
             const index = rows.findIndex((j) => j.id === jobId);
             if (index < 0) throw new Error('Job not found.');
-            rows[index] = Object.assign({}, rows[index], { status: newStatus });
+            const job = rows[index];
+            // Mirror the UPDATE policy: only the project owner or an admin.
+            if (job.client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the project owner can change its status.');
+            }
+            // Mirror validate_job_mutation(): the same state machine the trigger
+            // enforces, so the local engine cannot move a job to a state the
+            // database would reject.
+            const allowed = {
+                draft: ['open', 'cancelled'],
+                open: ['in_progress', 'cancelled'],
+                in_progress: ['completed', 'cancelled'],
+                completed: [],
+                cancelled: []
+            };
+            if (newStatus !== job.status) {
+                const next = allowed[job.status] || [];
+                if (!next.includes(newStatus)) {
+                    throw new Error('This project cannot move from ' + job.status + ' to ' + newStatus + '.');
+                }
+            }
+            rows[index] = Object.assign({}, job, { status: newStatus });
             writeTable('jobs', rows);
             return decorateJob(rows[index]);
         }
@@ -640,15 +662,32 @@
         },
 
         async getProposalsForJob(jobId) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const job = readTable('jobs').find((j) => j.id === jobId);
+            // Mirror the SELECT policy: the job owner and admins see every
+            // proposal; everyone else sees only their own, so one bidder can
+            // never read a competitor's cover letter or bid.
+            const seesAll = profile.role === 'admin' || (job && job.client_id === profile.id);
             return proposalsFor(jobId)
+                .filter((p) => seesAll || p.freelancer_id === profile.id)
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .map((p) => decorateProposal(p, { withFreelancer: true }));
         },
 
         async withdrawProposal(proposalId) {
+            const profile = requireUser('Please sign in as a Freelancer to withdraw a proposal.');
             const rows = readTable('proposals');
             const index = rows.findIndex((p) => p.id === proposalId);
             if (index < 0) throw new Error('Proposal not found.');
+            // Mirror the UPDATE policy: only the submitter (or an admin) may
+            // withdraw, and only while the proposal is still live.
+            if (rows[index].freelancer_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('You can only withdraw your own proposal.');
+            }
+            if (!['submitted', 'shortlisted'].includes(rows[index].status)) {
+                throw new Error('This proposal can no longer be withdrawn.');
+            }
             rows[index] = Object.assign({}, rows[index], { status: 'withdrawn' });
             writeTable('proposals', rows);
             return decorateProposal(rows[index]);
@@ -685,6 +724,11 @@
             }
             if (job.status !== 'open') {
                 throw new Error('This project is no longer open for hiring.');
+            }
+            // Mirror the RPC: a withdrawn, rejected or already-accepted
+            // proposal can never be hired.
+            if (['withdrawn', 'rejected', 'accepted'].includes(proposal.status)) {
+                throw new Error('This proposal can no longer be accepted.');
             }
 
             // One contract per job: reject if one already exists.
@@ -723,8 +767,16 @@
         },
 
         async getContractForJob(jobId) {
+            const profile = currentUserRecord();
+            if (!profile) return null;
             const contract = readTable('contracts').find((c) => c.job_id === jobId);
             if (!contract) return null;
+            // Mirror the SELECT policy: only the two parties or an admin may
+            // read a contract, so the agreed amount never leaks to a stranger.
+            if (contract.client_id !== profile.id && contract.freelancer_id !== profile.id
+                && profile.role !== 'admin') {
+                return null;
+            }
             return decorateContract(contract);
         },
 

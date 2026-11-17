@@ -79,7 +79,7 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
-- **Automated checks:** `npm test` runs all three suites.
+- **Automated checks:** `npm test` runs all four suites.
   - `npm run test:a11y` — static accessibility contract across all pages.
   - `npm run test:security` — flags inline-handler interpolation, unescaped
     `innerHTML` sinks, and hardcoded studio passcodes. Run it after touching any
@@ -88,6 +88,11 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     reaches through PostgREST exists in `docs/marketplace-schema.sql`. Run it
     after adding a `.from(...)`, `.rpc(...)` or `/rest/v1/...` call, or after
     editing the schema. A missing object otherwise 404s only at runtime.
+  - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
+    it enforces the same access rules as the SQL policies (who may hire,
+    withdraw, list proposals, read a contract, change a job status, and which
+    status transitions are legal). Run it after editing the offline engine or
+    the matching policies/RPCs in the schema.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards).

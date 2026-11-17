@@ -10,8 +10,9 @@
     "test:a11y": "node scripts/check-a11y.mjs",
     "build": "echo 'Build complete'",
     "test:security": "node scripts/check-security.mjs",
-    "test": "npm run test:a11y && npm run test:security && npm run test:schema",
-    "test:schema": "node scripts/check-schema.mjs"
+    "test": "npm run test:a11y && npm run test:security && npm run test:schema && npm run test:local",
+    "test:schema": "node scripts/check-schema.mjs",
+    "test:local": "node scripts/check-local-engine.mjs"
   },
   "dependencies": {
     "express": "^4.19.2"

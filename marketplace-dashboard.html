@@ -591,30 +591,37 @@
                         </div>
                         <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
                     </div>
-                    <div class="gft-host" data-job-id="${safeId}"></div>
+                    <div class="gft-host" data-job-id="${safeId}" data-can-upload="${(c.status === 'active' || isClient) ? '1' : '0'}"></div>
                 </div>
             `;
             }).join('');
             mountContractTransfers();
         }
 
-        // Attach an in-site send/receive panel to each active contract so a
-        // client and freelancer can exchange files without leaving the portal.
+        // Attach an in-site send/receive panel to each contract so a client and
+        // freelancer can exchange files without leaving the portal. A freelancer
+        // may upload only while the contract is active (the policies scope their
+        // write access to `status = 'active'`); the client owns the project and
+        // may always upload, so a finished engagement still shows the client a
+        // working box instead of one the policy would refuse.
         function mountContractTransfers() {
             if (!window.GahonshFileTransfer || !window.isMarketplaceReady()) return;
             const hosts = document.querySelectorAll('.gft-host');
             hosts.forEach((host, index) => {
                 const jobId = host.dataset.jobId;
                 if (!jobId) { host.remove(); return; }
+                const canUpload = host.dataset.canUpload === '1';
                 const hostId = 'gft-contract-' + index;
                 host.id = hostId;
                 window.GahonshFileTransfer.mount({
                     containerId: hostId,
                     jobId: jobId,
                     scope: 'job',
-                    canUpload: true,
+                    canUpload: canUpload,
                     title: 'Project Files',
-                    subtitle: 'Send and receive deliverables for this contract, right here in the portal.'
+                    subtitle: canUpload
+                        ? 'Send and receive deliverables for this contract, right here in the portal.'
+                        : 'Files shared on this contract. You can download anything the other party sent.'
                 });
             });
         }
