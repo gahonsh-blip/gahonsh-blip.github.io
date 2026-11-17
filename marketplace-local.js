@@ -78,6 +78,53 @@
         return value == null ? value : JSON.parse(JSON.stringify(value));
     }
 
+    // Reduce any user-supplied name to a single safe path segment.
+    function safeFileName(name) {
+        const base = String(name || 'file').split(/[\\/]/).pop().trim();
+        return base.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'file';
+    }
+
+    // ------------------------------------------------------------------
+    // IndexedDB blob store — localStorage holds text only, so uploaded file
+    // bytes live here while their metadata lives in the `file_transfers`
+    // table. This keeps offline uploads and downloads working end to end.
+    // ------------------------------------------------------------------
+    const IDB_NAME = 'gahonsh_file_blobs_v1';
+    const IDB_STORE = 'blobs';
+
+    function idbOpen() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) return reject(new Error('IndexedDB is unavailable in this browser.'));
+            const request = window.indexedDB.open(IDB_NAME, 1);
+            request.onupgradeneeded = () => {
+                const db = request.result;
+                if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error || new Error('Could not open the file store.'));
+        });
+    }
+
+    async function idbRun(mode, action) {
+        const db = await idbOpen();
+        try {
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(IDB_STORE, mode);
+                const store = tx.objectStore(IDB_STORE);
+                const req = action(store);
+                tx.oncomplete = () => resolve(req && req.result);
+                tx.onerror = () => reject(tx.error || new Error('File store transaction failed.'));
+                tx.onabort = () => reject(tx.error || new Error('File store transaction aborted.'));
+            });
+        } finally {
+            db.close();
+        }
+    }
+
+    function idbPut(key, blob) { return idbRun('readwrite', (store) => store.put(blob, key)); }
+    function idbGet(key) { return idbRun('readonly', (store) => store.get(key)); }
+    function idbDelete(key) { return idbRun('readwrite', (store) => store.delete(key)); }
+
     function delay(ms) {
         // Small async gap so callers behave like they do against a network API.
         return new Promise((resolve) => setTimeout(resolve, ms || 0));
@@ -235,6 +282,7 @@
         }
         if (readTable('proposals').length === 0) writeTable('proposals', []);
         if (readTable('contracts').length === 0) writeTable('contracts', []);
+        if (readTable('file_transfers').length === 0) writeTable('file_transfers', []);
     }
 
     // ------------------------------------------------------------------
@@ -700,6 +748,144 @@
     }
 
     // ------------------------------------------------------------------
+    // Files service (mirrors GahonshDB.Files)
+    // ------------------------------------------------------------------
+    // Metadata lives in the `file_transfers` table (localStorage) while the
+    // bytes live in IndexedDB. Both a job owner and the freelancer who
+    // uploaded a file can list and download it, which is what makes the
+    // send/receive flow work entirely inside the website.
+    const Files = {
+        async upload({ jobId, proposalId = null, scope = 'job', file }) {
+            const profile = requireUser('Please sign in to upload files.');
+            if (!jobId) throw new Error('A project is required before a file can be attached.');
+            if (!file) throw new Error('No file was selected.');
+
+            const job = readTable('jobs').find((j) => j.id === jobId);
+            if (!job) throw new Error('This project could not be found.');
+            if (!canUploadTransfer(job, profile)) {
+                throw new Error('You do not have permission to add files to this project.');
+            }
+
+            const id = newId('file');
+            const name = safeFileName(file.name);
+            const record = {
+                id,
+                job_id: jobId,
+                proposal_id: proposalId,
+                uploaded_by: profile.id,
+                file_name: name,
+                storage_path: 'local:' + id,
+                file_type: file.type || 'application/octet-stream',
+                file_size_bytes: file.size || 0,
+                scope: scope === 'proposal' ? 'proposal' : 'job',
+                created_at: nowIso()
+            };
+
+            await idbPut(id, file);
+            const rows = readTable('file_transfers');
+            rows.push(record);
+            writeTable('file_transfers', rows);
+            return clone(record);
+        },
+
+        async listForJob(jobId) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            // Mirror the Supabase RLS SELECT policy locally: a member only sees
+            // a file they uploaded or one on a project they participate in.
+            const rows = readTable('file_transfers')
+                .filter((f) => f.job_id === jobId && f.scope === 'job')
+                .filter((f) => f.uploaded_by === profile.id || canAccessTransfer(f, profile))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            return rows.map((r) => decorateTransfer(r, profile));
+        },
+
+        async listForProposal(proposalId) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const rows = readTable('file_transfers')
+                .filter((f) => f.proposal_id === proposalId)
+                .filter((f) => f.uploaded_by === profile.id || canAccessTransfer(f, profile))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            return rows.map((r) => decorateTransfer(r, profile));
+        },
+
+        async getDownload(id) {
+            const profile = requireUser('Please sign in to download files.');
+            const record = readTable('file_transfers').find((f) => f.id === id);
+            if (!record) throw new Error('This file is no longer available.');
+            if (!canAccessTransfer(record, profile)) {
+                throw new Error('You do not have permission to download this file.');
+            }
+            const blob = await idbGet(id);
+            if (!blob) throw new Error('The file contents could not be found in this browser.');
+            return { blob, fileName: record.file_name, mimeType: record.file_type };
+        },
+
+        async remove(id) {
+            const profile = requireUser('Please sign in to remove files.');
+            const rows = readTable('file_transfers');
+            const index = rows.findIndex((f) => f.id === id);
+            if (index < 0) throw new Error('This file is no longer available.');
+            if (!canRemoveTransfer(rows[index], profile)) {
+                throw new Error('You do not have permission to remove this file.');
+            }
+            rows.splice(index, 1);
+            writeTable('file_transfers', rows);
+            try { await idbDelete(id); } catch (e) { /* metadata is gone; orphan blob is harmless */ }
+            return true;
+        }
+    };
+
+    // Mirrors can_access_job_files() in the SQL schema: the project owner, the
+    // freelancer on an active contract for that job, and admins. A freelancer
+    // who has only *proposed* is deliberately excluded, matching the SELECT
+    // policy, so a bidder cannot read the client's files before being hired.
+    function isProjectParticipant(job, profile) {
+        if (!job || !profile) return false;
+        if (profile.role === 'admin') return true;
+        if (job.client_id === profile.id) return true;
+        return readTable('contracts').some(
+            (c) => c.job_id === job.id && c.freelancer_id === profile.id && c.status === 'active'
+        );
+    }
+
+    // A file is visible to its uploader and to project participants.
+    function canAccessTransfer(record, profile) {
+        if (!record || !profile) return false;
+        if (record.uploaded_by === profile.id) return true;
+        const job = readTable('jobs').find((j) => j.id === record.job_id);
+        return isProjectParticipant(job, profile);
+    }
+
+    // Mirrors can_upload_job_files() in the SQL schema: anyone who can read the
+    // workspace, plus a freelancer with a live proposal, so samples and briefs
+    // can be attached before a contract exists.
+    function canUploadTransfer(job, profile) {
+        if (isProjectParticipant(job, profile)) return true;
+        if (!job || !profile) return false;
+        return readTable('proposals').some(
+            (p) => p.job_id === job.id && p.freelancer_id === profile.id &&
+                ['submitted', 'shortlisted', 'accepted'].includes(p.status)
+        );
+    }
+
+    // Mirrors the SQL DELETE policy: only the uploader or an admin may remove a
+    // file, so one participant can never delete another participant's work.
+    function canRemoveTransfer(record, profile) {
+        if (!record || !profile) return false;
+        return record.uploaded_by === profile.id || profile.role === 'admin';
+    }
+
+    function decorateTransfer(record, profile) {
+        const out = clone(record);
+        const uploader = findProfile(record.uploaded_by);
+        out.uploader = uploader ? { id: uploader.id, full_name: uploader.full_name, role: uploader.role } : null;
+        out.can_remove = canRemoveTransfer(record, profile);
+        return out;
+    }
+
+    // ------------------------------------------------------------------
     // Boot: seed once, then expose the engine
     // ------------------------------------------------------------------
     let _ready = seedIfEmpty();
@@ -726,11 +912,12 @@
         Jobs: readyAware(Jobs),
         Proposals: readyAware(Proposals),
         Contracts: readyAware(Contracts),
+        Files: readyAware(Files),
         ready: () => _ready,
         // Test/demo helpers
         _demoPassword: DEMO_PASSWORD,
         _reset: function () {
-            ['profiles', 'jobs', 'proposals', 'contracts'].forEach((t) => {
+            ['profiles', 'jobs', 'proposals', 'contracts', 'file_transfers'].forEach((t) => {
                 try { localStorage.removeItem(PREFIX + t); } catch (e) { /* ignore */ }
             });
             writeSession(null);

@@ -565,6 +565,152 @@
     };
 
     // ========================================================================
+    // 6. FILES SERVICE (SUPABASE STORAGE + file_transfers METADATA)
+    // ========================================================================
+    // Files are stored in the public `job-attachments` bucket under a
+    // per-project folder, and their metadata lives in `public.file_transfers`
+    // (RLS restricts both to the client, the hired freelancer and admins).
+    // Bytes are streamed back to the browser with storage.download(), so a
+    // signed-in participant can fetch a shared file without leaving the site.
+    const Files = {
+        bucket() {
+            return (window.GAHONSH_CONFIG && window.GAHONSH_CONFIG.STORAGE_BUCKET) || 'job-attachments';
+        },
+
+        safeName(name) {
+            const base = String(name || 'file').split(/[\\/]/).pop().trim();
+            return base.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'file';
+        },
+
+        async upload({ jobId, proposalId = null, scope = 'job', file }) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to upload files.');
+            if (!jobId) throw new Error('A project is required before a file can be attached.');
+            if (!file) throw new Error('No file was selected.');
+
+            const safeName = Files.safeName(file.name);
+            const unique = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+            const path = `${jobId}/${unique}-${safeName}`;
+
+            const { error: uploadError } = await client.storage
+                .from(Files.bucket())
+                .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || 'application/octet-stream' });
+            if (uploadError) throw uploadError;
+
+            const payload = {
+                job_id: jobId,
+                proposal_id: proposalId,
+                uploaded_by: user.id,
+                file_name: safeName,
+                storage_path: path,
+                file_type: file.type || 'application/octet-stream',
+                file_size_bytes: file.size || 0,
+                scope: scope === 'proposal' ? 'proposal' : 'job'
+            };
+
+            const { data, error } = await client
+                .from('file_transfers')
+                .insert(payload)
+                .select()
+                .single();
+
+            if (error) {
+                // Do not leave an orphaned object behind if the row is rejected.
+                try { await client.storage.from(Files.bucket()).remove([path]); } catch (e) { /* best effort */ }
+                throw error;
+            }
+            return data;
+        },
+
+        async listForJob(jobId) {
+            const client = await getClient();
+            if (!client) return [];
+            const { data, error } = await client
+                .from('file_transfers')
+                .select('*')
+                .eq('job_id', jobId)
+                .eq('scope', 'job')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return Files.decorate(client, data || []);
+        },
+
+        async listForProposal(proposalId) {
+            const client = await getClient();
+            if (!client) return [];
+            const { data, error } = await client
+                .from('file_transfers')
+                .select('*')
+                .eq('proposal_id', proposalId)
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return Files.decorate(client, data || []);
+        },
+
+        // PostgREST returns raw rows, so the shared UI's `uploader` name and
+        // `can_remove` flag have to be added here to match the local engine.
+        async decorate(client, rows) {
+            if (!rows.length) return rows;
+            const me = (await client.auth.getUser())?.data?.user;
+            const ids = Array.from(new Set(rows.map((r) => r.uploaded_by).filter(Boolean)));
+            let names = {};
+            if (ids.length) {
+                const { data: profiles } = await client
+                    .from('profiles')
+                    .select('id, full_name')
+                    .in('id', ids);
+                (profiles || []).forEach((p) => { names[p.id] = p.full_name; });
+            }
+            return rows.map((r) => ({
+                ...r,
+                uploader: { full_name: names[r.uploaded_by] || 'Member' },
+                can_remove: !!(me && r.uploaded_by === me.id)
+            }));
+        },
+
+        async getDownload(id) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { data: record, error } = await client
+                .from('file_transfers')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (error) throw error;
+
+            const { data: blob, error: dlError } = await client.storage
+                .from(Files.bucket())
+                .download(record.storage_path);
+            if (dlError) throw dlError;
+            return { blob, fileName: record.file_name, mimeType: record.file_type };
+        },
+
+        async remove(id) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { data: record, error } = await client
+                .from('file_transfers')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (error) throw error;
+
+            const { error: delError } = await client
+                .from('file_transfers')
+                .delete()
+                .eq('id', id);
+            if (delError) throw delError;
+
+            await client.storage.from(Files.bucket()).remove([record.storage_path]);
+            return true;
+        }
+    };
+
+    // ========================================================================
     // REMOTE REACHABILITY + LOCAL FALLBACK
     // ------------------------------------------------------------------------
     // The committed Supabase project URL may point at a project that is not
@@ -642,6 +788,21 @@
         return /failed to fetch|networkerror|network error|load failed|aborted|timeout|err_/i.test(msg);
     }
 
+    /**
+     * True when the request failed because the remote project has not been
+     * provisioned with this feature yet — the table or the storage bucket is
+     * missing. That is a deployment gap, not a user error, so the caller may
+     * fall back to the local engine. Genuine RLS/validation failures do not
+     * match and are still surfaced.
+     */
+    function isBackendNotProvisioned(err) {
+        if (!err) return false;
+        const code = String(err.code || err.statusCode || '');
+        const msg = String(err.message || err);
+        return code === 'PGRST205' ||
+            /bucket not found|nosuchbucket|relation .* does not exist|could not find the table/i.test(msg);
+    }
+
     function withFallback(remoteService, localService, label) {
         const wrapped = {};
         Object.keys(remoteService).forEach(function (name) {
@@ -672,15 +833,18 @@
     const JobsProxy = withFallback(Jobs, _local && _local.Jobs, 'Jobs');
     const ProposalsProxy = withFallback(Proposals, _local && _local.Proposals, 'Proposals');
     const ContractsProxy = withFallback(Contracts, _local && _local.Contracts, 'Contracts');
+    const FilesProxy = withFallback(Files, _local && _local.Files, 'Files');
 
     // Export services onto global GahonshDB namespace
     window.GahonshDB = {
         getClient,
         remoteReachable,
+        isBackendNotProvisioned,
         Auth: AuthProxy,
         Profiles: ProfilesProxy,
         Jobs: JobsProxy,
         Proposals: ProposalsProxy,
-        Contracts: ContractsProxy
+        Contracts: ContractsProxy,
+        Files: FilesProxy
     };
 })();

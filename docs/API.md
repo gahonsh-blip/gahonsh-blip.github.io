@@ -32,6 +32,40 @@ The application integrates with Supabase via the client-side JavaScript SDK (`@s
 | `getProfile(userId)` | `SELECT * FROM profiles WHERE id = ...` | Retrieves user profile data. |
 | `updateProfile(userId, data)` | `UPDATE profiles SET ... WHERE id = ...` | Updates full name, title, hourly rate, bio, and skills array. |
 
+### File Transfer API (`window.GahonshDB.Files`)
+
+The in-site send/receive system. A client and a freelancer exchange files on a
+project without leaving the website. The same interface is served by Supabase
+Storage plus the `file_transfers` table when a project is reachable, and by the
+browser-local IndexedDB engine when it is not, so the panel works in every mode.
+
+| Function | Endpoint / Table | Description |
+| :--- | :--- | :--- |
+| `upload({ jobId, proposalId, scope, file })` | `storage.upload('<job_id>/<uuid>-<name>')` + `INSERT INTO file_transfers` | Stores the bytes in the private `job-attachments` bucket and records metadata. `scope` is `job` or `proposal`. |
+| `listForJob(jobId)` | `SELECT * FROM file_transfers WHERE job_id = ... AND scope = 'job'` | Lists a project's files, decorated with `uploader.full_name` and `can_remove`. |
+| `listForProposal(proposalId)` | `SELECT * FROM file_transfers WHERE proposal_id = ...` | Lists files attached to a single proposal. |
+| `getDownload(id)` | `storage.download(storage_path)` | Streams the bytes back to the browser; returns `{ blob, fileName, mimeType }`. |
+| `remove(id)` | `DELETE FROM file_transfers` + `storage.remove(...)` | Deletes the metadata row and the stored object. Only the uploader or an admin may do this. |
+
+**Access rule.** Reads are limited to the project owner, the freelancer on an
+active contract for that project, admins, and the uploader themselves. A
+freelancer who has only *proposed* cannot read the client's files before being
+hired. Writes are additionally open to a freelancer holding a live proposal on
+the project, so samples and briefs can be attached early. Deletes are restricted
+to the uploader or an admin. The rule is enforced in the database by
+`can_access_job_files()` / `can_upload_job_files()` (used by both the
+`file_transfers` policies and the storage-object policies, with the storage read
+policy also allowing the object owner), and mirrored in `marketplace-local.js`
+so the offline engine behaves the same way.
+
+**UI component.** `assets/js/file-transfer.js` exposes
+`window.GahonshFileTransfer.mount({ containerId, jobId, proposalId, scope, title, subtitle, canUpload })`.
+It renders the upload control and file list with DOM APIs (`textContent`), never
+`innerHTML`, so a crafted file name cannot become markup. It blocks
+OS-executable extensions and files over 25 MB, and allows up to 10 files per
+selection. It is mounted on `job-details.html` and on the active-contract cards
+in `marketplace-dashboard.html`.
+
 ---
 
 ## 2. Contact Form → Formspree

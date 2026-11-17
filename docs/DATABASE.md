@@ -22,6 +22,7 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 | `jobs` | `id` (`UUID`) | `client_id` → `profiles(id)` | Client job postings with category, budget type (`fixed`/`hourly`), budget min/max, duration, experience level, status (`open`, `in_progress`, `completed`, `cancelled`), proposal counters. |
 | `proposals` | `id` (`UUID`) | `job_id` → `jobs(id)`, `freelancer_id` → `profiles(id)` | Freelancer bids containing bid amount ($), estimated delivery days, cover letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`). |
 | `contracts` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `client_id` → `profiles(id)`, `freelancer_id` → `profiles(id)` | Active working agreements with agreed amount, start date, completion date, and status (`active`, `completed`, `disputed`, `cancelled`). |
+| `file_transfers` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `uploaded_by` → `profiles(id)` | In-site file send/receive metadata: `file_name`, `storage_path`, `file_type`, `file_size_bytes`, `scope` (`job` or `proposal`), `created_at`. The bytes live in the private `job-attachments` Storage bucket under `<job_id>/<uuid>-<name>`. |
 | `contact_messages` | `id` (`UUID`) | — | Public lead intake written by `contact.html` and `chat-widget.js`: `name`, `email`, `service`, `budget`, `message`, `source`, `is_handled`, `created_at`. Visitors may insert only; the owner reads and marks handled from `admin.html`. |
 
 > The `reviews` table is not part of the current schema. Ratings shown on the
@@ -51,6 +52,10 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
   - `UPDATE`: Proposal owners can update/withdraw proposals before acceptance.
 - **Contracts**:
   - `SELECT` / `UPDATE`: Only the participating Client and Freelancer (`auth.uid() IN (client_id, freelancer_id)`) can access contract details.
+- **File transfers** (`file_transfers` plus the `job-attachments` Storage objects):
+  - `SELECT`: A participant on the project — its owner, the freelancer on an active contract, an admin, or the uploader themselves — may read the row and download the object. A freelancer who has only *proposed* is deliberately excluded, so a bidder cannot read the client's files before being hired. `can_access_job_files(job_id)` encodes the rule and is reused by the Storage read policy, which checks the folder's first path segment against the same rule and additionally allows the object owner (`owner = auth.uid()`) to fetch back their own upload.
+  - `INSERT`: `can_upload_job_files(job_id)` restricts writes to the same participants plus a freelancer with a live proposal, so samples and briefs can be attached before a contract exists, and `uploaded_by` must equal `auth.uid()`. The Storage insert policy additionally requires `owner = auth.uid()`.
+  - `DELETE`: Only the uploader or an admin (`uploaded_by = auth.uid() OR is_admin()`); the Storage delete policy matches (`owner = auth.uid() OR is_admin()`).
 - **Contact messages**:
   - `INSERT`: Anyone (anonymous visitors included) may submit a lead.
   - `SELECT` / `UPDATE` / `DELETE`: Owner only (`public.is_admin()`). Leads can never be read back with the public key.

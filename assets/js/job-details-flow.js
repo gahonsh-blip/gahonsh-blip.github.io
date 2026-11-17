@@ -49,6 +49,28 @@ function statusBadge(status) {
     return map[status] || status;
 }
 
+// In-site send/receive. Mounted only for a participant on the project — the
+// owner, a freelancer who has proposed, or the hired freelancer — so a visitor
+// never sees an upload box they cannot use.
+function mountFileTransfer(canUpload) {
+    const host = document.getElementById('fileTransferSection');
+    if (!host) return;
+    if (!window.GahonshFileTransfer || !window.isMarketplaceReady() || !currentJob || !currentJob.id) {
+        host.textContent = '';
+        return;
+    }
+    window.GahonshFileTransfer.mount({
+        containerId: 'fileTransferSection',
+        jobId: currentJob.id,
+        scope: 'job',
+        canUpload: !!canUpload,
+        title: 'Project Files',
+        subtitle: canUpload
+            ? 'Send briefs, drafts and final deliverables securely. Files stay inside the site and are visible only to you and the other party on this project.'
+            : 'Files shared on this project. You can download anything the other party has sent you.'
+    });
+}
+
 async function loadJobDetails() {
     const isConfigured = window.isMarketplaceReady();
 
@@ -128,6 +150,7 @@ async function renderClientProposalsView() {
     hideProposalMessage();
     const clientView = document.getElementById('clientProposalsView');
     clientView.style.display = 'block';
+    mountFileTransfer(true);
 
     let contract = null;
     if (window.isMarketplaceReady()) {
@@ -250,6 +273,7 @@ async function renderFreelancerOrGuestView(user) {
                     renderMyProposalStatus(myProposal);
                     myProposalView.style.display = 'block';
                     await renderFreelancerContractIfAny(contractCard);
+                    mountFileTransfer(true);
                 }
             } catch (e) {
                 console.warn('[job-details] getMyProposalForJob', e);
@@ -280,6 +304,7 @@ async function renderFreelancerOrGuestView(user) {
                 document.getElementById('proposalSectionHeading').innerText = 'Your Proposal';
                 showProposalMessage('<i class="fa-solid fa-circle-check"></i><span>You have already submitted a proposal for this project. Its status is shown below. You can only submit one proposal per project.</span>', 'success');
                 await renderFreelancerContractIfAny(contractCard);
+                mountFileTransfer(true);
                 return;
             }
         } catch (e) {

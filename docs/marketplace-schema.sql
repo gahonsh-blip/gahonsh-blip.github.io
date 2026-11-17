@@ -178,6 +178,33 @@ ON public.proposals (job_id)
 WHERE (status = 'accepted');
 
 -- ----------------------------------------------------------------------------
+-- 6b. FILE TRANSFERS TABLE (IN-SITE SEND / RECEIVE)
+-- ----------------------------------------------------------------------------
+-- Metadata for every file a client and a freelancer exchange inside the site.
+-- The bytes themselves live in Supabase Storage (the `job-attachments` bucket,
+-- under a folder per project); this table holds the searchable record and is
+-- what RLS gates. `scope = 'proposal'` files belong to a proposal,
+-- `scope = 'job'` files belong to the project workspace and stay visible to
+-- the client and the hired freelancer for the life of the contract.
+CREATE TABLE IF NOT EXISTS public.file_transfers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    job_id UUID NOT NULL REFERENCES public.jobs(id) ON DELETE CASCADE,
+    proposal_id UUID REFERENCES public.proposals(id) ON DELETE SET NULL,
+    uploaded_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    file_name TEXT NOT NULL,
+    storage_path TEXT NOT NULL,
+    file_type TEXT,
+    file_size_bytes BIGINT NOT NULL DEFAULT 0 CHECK (file_size_bytes >= 0),
+    scope TEXT NOT NULL DEFAULT 'job' CHECK (scope IN ('job', 'proposal')),
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS file_transfers_job_idx
+    ON public.file_transfers (job_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS file_transfers_proposal_idx
+    ON public.file_transfers (proposal_id);
+
+-- ----------------------------------------------------------------------------
 -- 7. CONTRACTS TABLE
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.contracts (
@@ -203,6 +230,53 @@ BEGIN
     RETURN EXISTS (
         SELECT 1 FROM public.profiles 
         WHERE id = auth.uid() AND role = 'admin'
+    );
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- True when the current user may read files on a project: the client who owns
+-- it, a freelancer with an active contract on it, or an admin. Declared after
+-- is_admin() because it calls it, and used by the file_transfers policies.
+-- Takes the project id as TEXT so a malformed storage path segment can never
+-- raise a cast error inside a policy (it simply fails to match).
+CREATE OR REPLACE FUNCTION public.can_access_job_files(target_job_id TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF auth.uid() IS NULL OR target_job_id IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    IF public.is_admin() THEN
+        RETURN TRUE;
+    END IF;
+    RETURN EXISTS (
+        SELECT 1 FROM public.jobs
+        WHERE jobs.id::TEXT = target_job_id AND jobs.client_id = auth.uid()
+    ) OR EXISTS (
+        SELECT 1 FROM public.contracts
+        WHERE contracts.job_id::TEXT = target_job_id
+          AND contracts.freelancer_id = auth.uid()
+          AND contracts.status = 'active'
+    );
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- True when the current user may add files to a project: anyone who can read
+-- the workspace, plus a freelancer with a live proposal on the project, so
+-- samples and briefs can be attached before a contract exists.
+CREATE OR REPLACE FUNCTION public.can_upload_job_files(target_job_id TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF public.can_access_job_files(target_job_id) THEN
+        RETURN TRUE;
+    END IF;
+    IF auth.uid() IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    RETURN EXISTS (
+        SELECT 1 FROM public.proposals
+        WHERE proposals.job_id::TEXT = target_job_id
+          AND proposals.freelancer_id = auth.uid()
+          AND proposals.status IN ('submitted', 'shortlisted', 'accepted')
     );
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
@@ -443,6 +517,7 @@ GRANT EXECUTE ON FUNCTION public.admin_overview() TO authenticated;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.job_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.file_transfers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
@@ -534,6 +609,30 @@ USING (
     public.is_admin()
 );
 
+-- File Transfers RLS (in-site send / receive)
+-- A participant sees a file when they uploaded it, own the project, hold the
+-- active contract on it, or are an admin. Uploads are allowed to the project
+-- owner, an active-contract freelancer or a freelancer with a live proposal;
+-- only the uploader (or an admin) may remove a row, and storage objects are
+-- gated by the matching policies in section 12.
+DROP POLICY IF EXISTS "Participants can view project files" ON public.file_transfers;
+CREATE POLICY "Participants can view project files"
+ON public.file_transfers FOR SELECT
+TO authenticated
+USING (uploaded_by = auth.uid() OR public.can_access_job_files(job_id::TEXT));
+
+DROP POLICY IF EXISTS "Participants can upload project files" ON public.file_transfers;
+CREATE POLICY "Participants can upload project files"
+ON public.file_transfers FOR INSERT
+TO authenticated
+WITH CHECK (uploaded_by = auth.uid() AND public.can_upload_job_files(job_id::TEXT));
+
+DROP POLICY IF EXISTS "Uploaders can remove their files" ON public.file_transfers;
+CREATE POLICY "Uploaders can remove their files"
+ON public.file_transfers FOR DELETE
+TO authenticated
+USING (uploaded_by = auth.uid() OR public.is_admin());
+
 -- Proposals RLS
 DROP POLICY IF EXISTS "Proposals viewable by submitter, client, or admin" ON public.proposals;
 CREATE POLICY "Proposals viewable by submitter, client, or admin" 
@@ -610,4 +709,49 @@ CREATE POLICY "Only admin can delete contact messages"
 ON public.contact_messages FOR DELETE
 TO authenticated
 USING (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- 12. STORAGE BUCKET FOR IN-SITE FILE TRANSFER
+-- ----------------------------------------------------------------------------
+-- Objects live under a folder per project (`<job_id>/<uuid>-<name>`). The
+-- bucket is private: reading and writing require an authenticated participant,
+-- and the path's first segment is checked against the same participant rule
+-- used for the file_transfers table, so a client can only reach their own
+-- projects' files and a freelancer only the projects they hold a contract on.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('job-attachments', 'job-attachments', FALSE)
+ON CONFLICT (id) DO UPDATE SET public = FALSE;
+
+-- Reads: any authenticated user who is a participant on the folder's project,
+-- or the uploader themselves (mirrors the `uploaded_by = auth.uid()` clause on
+-- the metadata policy, so a bidder can always fetch back what they uploaded).
+DROP POLICY IF EXISTS "Project participants can read files" ON storage.objects;
+CREATE POLICY "Project participants can read files"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+    bucket_id = 'job-attachments'
+    AND (public.can_access_job_files((storage.foldername(name))[1]) OR owner = auth.uid())
+);
+
+-- Uploads: a participant may add files to their own project's folder.
+DROP POLICY IF EXISTS "Project participants can upload files" ON storage.objects;
+CREATE POLICY "Project participants can upload files"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+    bucket_id = 'job-attachments'
+    AND owner = auth.uid()
+    AND public.can_upload_job_files((storage.foldername(name))[1])
+);
+
+-- Removals: the uploader or an admin may delete an object.
+DROP POLICY IF EXISTS "Uploaders can delete their files" ON storage.objects;
+CREATE POLICY "Uploaders can delete their files"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+    bucket_id = 'job-attachments'
+    AND (owner = auth.uid() OR public.is_admin())
+);
 

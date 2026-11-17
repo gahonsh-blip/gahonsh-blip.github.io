@@ -123,6 +123,7 @@ Once Supabase is connected, verify the primary user flows:
 | **"Connect Supabase to persist..." notification** | Supabase credentials are not yet configured. The app is running in interactive demo mode. Provide your URL and anon key in the setup modal. |
 | **Cannot post job or submit proposal** | Ensure you are logged in. The authentication modal will open automatically when attempting an action as a guest. |
 | **Row Level Security (RLS) error** | Verify you have executed the complete `docs/marketplace-schema.sql` in your Supabase SQL editor. |
+| **"File transfer is not enabled on this deployment yet"** | The live Supabase project has not been migrated with the latest schema, so the `file_transfers` table and/or the private `job-attachments` Storage bucket are missing. Re-run the full `docs/marketplace-schema.sql` in the SQL editor. File transfer is intentionally not simulated in the browser against a live project, because a local-only copy could never reach the other party. |
 | **Theme resets on refresh** | Ensure your browser allows `localStorage` access for persisting user preferences. |
 
 For technical inquiries or business consultation, contact `gahonsh@gmail.com` or connect via WhatsApp at `+91 88251 83628`.

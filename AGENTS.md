@@ -18,7 +18,8 @@ Repository guide for AI agents and human contributors working on the
 3. **No secrets in code.** Never commit database service-role secret keys, admin passwords, or personal credentials. The public Supabase `anon` key, Formspree endpoint, and WhatsApp number are public client-side contact points.
 4. **Preserve SEO & Metadata assets.** `sitemap.xml`, `robots.txt`, `metadata.json`, Open Graph meta tags, Google verification file (`googleb9deb43124fcee02.html`), and JSON-LD structured data must remain intact and updated when URLs change.
 5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
-6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine when the project is unreachable. Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
+6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine only when the project is unreachable (or a live request fails at the network layer). Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
+   - Do **not** fall back to the local engine for a *reachable* project that has merely not been migrated yet (missing table or bucket). That splits the user's identity — Auth stays on Supabase while data goes to a per-browser store — so a signed-in user is told to sign in and an "uploaded" file never reaches the other party. Surface the deployment gap instead: `isBackendNotProvisioned()` classifies the error and the file-transfer panel shows a setup message. See `docs/SETUP.md` for the migration step.
 7. **Keep the schema and the client in step.** Any table, view or function the
    client reaches through PostgREST must exist in `docs/marketplace-schema.sql`
    (`npm run test:schema` enforces this). New tables need RLS plus policies, and
@@ -89,7 +90,7 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     editing the schema. A missing object otherwise 404s only at runtime.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
-  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`).
+  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards).
   - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
 
 ## Owner Studio Editor (local only)

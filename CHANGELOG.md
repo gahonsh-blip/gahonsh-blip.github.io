@@ -4,6 +4,26 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 
 ---
 
+## [Unreleased]
+
+### Added
+- **In-Site File Transfer (send / receive):**
+  - `assets/js/file-transfer.js` — shared panel that lets a client and a freelancer exchange files on a project without leaving the website. Built with DOM APIs (`textContent`), so a crafted file name cannot become markup. Blocks OS-executable extensions and files over 25 MB, and caps a selection at 10 files.
+  - `window.GahonshDB.Files` service in both `supabase-client.js` (Supabase Storage + the `file_transfers` table) and `marketplace-local.js` (IndexedDB blobs for offline mode), so upload, list, download and remove work in every mode.
+  - `file_transfers` table plus `can_access_job_files()` / `can_upload_job_files()` helpers, RLS policies, and a private `job-attachments` Storage bucket with matching object policies in `docs/marketplace-schema.sql`.
+  - Panel mounted on `job-details.html` for project participants and on the active-contract cards in `marketplace-dashboard.html`.
+
+### Changed
+- `withFallback()` in `supabase-client.js` now degrades to the local engine **only** when the Supabase project is unreachable, or when a live request fails at the network layer. Previously the `Files` service also fell back when a *reachable* project had not yet been migrated (missing table or bucket); that silently routed file metadata to the per-browser local engine and split the user's identity, so a signed-in user was told to sign in and an "uploaded" file never reached the other party. A reachable-but-unmigrated project now surfaces the deployment gap instead.
+- The file-transfer panel shows a clear setup message when the deployment has not been migrated yet, instead of leaking a raw `PGRST205` / `Bucket not found` error.
+
+### Fixed
+- **File permissions now match the SQL policies in the offline engine.** `marketplace-local.js` previously treated any freelancer with a live proposal as a full participant, so a bidder could list and delete the client's files. It now mirrors `can_access_job_files()` (owner, hired freelancer, admin) for view/download, `can_upload_job_files()` (the above plus a live bidder) for upload, and uploader-or-admin for delete.
+- The `job-attachments` Storage read policy now also allows the object owner (`owner = auth.uid()`), so a bidder can download a sample they uploaded before being hired. This mirrors the `uploaded_by = auth.uid()` clause already present on the metadata read policy.
+- Selecting more than 10 files at once silently dropped the extras; the panel now reports how many were not sent.
+
+---
+
 ## [1.2.0] - 2026-08-30
 
 ### Added
