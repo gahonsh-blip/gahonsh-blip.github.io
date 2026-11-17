@@ -80,7 +80,7 @@
                     <td>${escapeHtml(d.file_name || '-')}</td>
                     <td>${d.size_bytes ? Math.round(d.size_bytes / 1024) + ' KB' : '-'}</td>
                     <td>${formatDate(d.created_at)}</td>
-                    <td><button class="btn-secondary" onclick="downloadDoc('${d.id}', '${escapeHtml(d.file_name || 'document')}')">Download</button></td>
+                    <td><button class="btn-secondary" data-doc-id="${escapeHtml(d.id)}" data-doc-name="${escapeHtml(d.file_name || 'document')}">Download</button></td>
                 </tr>`).join('');
             } catch (err) { renderState('docRows', 'error', err.message); }
         }
@@ -122,6 +122,12 @@
                 loadDocuments();
             } catch (err) { renderState('docState', 'error', err.message); }
         }
+
+        // Delegated: the document id and file name never enter an inline handler.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('[data-doc-id]');
+            if (btn) downloadDoc(btn.dataset.docId, btn.dataset.docName);
+        });
 
         document.addEventListener('DOMContentLoaded', loadDocuments);
     </script>

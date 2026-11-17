@@ -131,8 +131,8 @@ function renderState(container, kind, message) {
     const el = typeof container === 'string' ? document.getElementById(container) : container;
     if (!el) return;
     const icons = { loading: '&#8987;', empty: '&#128203;', error: '&#9888;', denied: '&#128274;' };
-    const color = kind === 'error' || kind === 'denied' ? 'var(--color-danger)' : 'var(--color-text-muted)';
-    el.innerHTML = `<div style="text-align:center;padding:40px 16px;color:${color};">
+    el.style.color = kind === 'error' || kind === 'denied' ? 'var(--color-danger)' : 'var(--color-text-muted)';
+    el.innerHTML = `<div style="text-align:center;padding:40px 16px;">
         <div style="font-size:28px;margin-bottom:8px;">${icons[kind] || ''}</div>
         <div>${escapeHtml(message)}</div>
     </div>`;

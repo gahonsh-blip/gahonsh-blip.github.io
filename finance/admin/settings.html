@@ -97,7 +97,7 @@
                     <td><code>${escapeHtml(f.key)}</code></td>
                     <td class="text-muted">${escapeHtml(f.description || '')}</td>
                     <td>${f.enabled ? '<span class="badge badge-success">ON</span>' : '<span class="badge badge-warning">OFF</span>'}</td>
-                    <td><button class="btn-secondary" onclick="toggleFlag('${escapeHtml(f.key)}', ${f.enabled ? 'false' : 'true'})">${f.enabled ? 'Disable' : 'Enable'}</button></td>
+                    <td><button class="btn-secondary" data-flag-key="${escapeHtml(f.key)}" data-flag-enable="${f.enabled ? 'false' : 'true'}">${f.enabled ? 'Disable' : 'Enable'}</button></td>
                 </tr>`).join('');
             } catch (err) { renderState('flagRows', 'error', err.message); }
         }
@@ -127,6 +127,12 @@
                 loadFlags();
             } catch (err) { showToast(err.message, 'error'); }
         }
+
+        // Delegated: flag keys never enter an inline handler.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('[data-flag-key]');
+            if (btn) toggleFlag(btn.dataset.flagKey, btn.dataset.flagEnable === 'true');
+        });
 
         document.addEventListener('DOMContentLoaded', () => { loadSettings(); loadFlags(); });
     </script>

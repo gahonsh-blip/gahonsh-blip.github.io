@@ -96,12 +96,12 @@
                 rows.innerHTML = d.map(l => `
                     <tr>
                         <td><strong>${escapeHtml(l.loan_number)}</strong></td>
-                        <td>₹${l.principal_amount}</td>
+                        <td>₹${Number(l.principal_amount) || 0}</td>
                         <td><span class="badge ${getStatusBadge(l.status)}">${escapeHtml(l.status)}</span></td>
                         <td>
-                            <button class="btn-secondary" onclick="openLoanDetails('${l.id}')">View Details</button>
-                            ${l.status === 'APPROVED' ? `<button class="btn-secondary" onclick="changeStatus('${l.id}', 'DISBURSED')">Demo Disburse</button>` : ''}
-                            ${l.status === 'DISBURSED' ? `<button onclick="changeStatus('${l.id}', 'ACTIVE')">Activate</button>` : ''}
+                            <button class="btn-secondary" data-loan-id="${escapeHtml(l.id)}" data-loan-action="view">View Details</button>
+                            ${l.status === 'APPROVED' ? `<button class="btn-secondary" data-loan-id="${escapeHtml(l.id)}" data-loan-action="DISBURSED">Demo Disburse</button>` : ''}
+                            ${l.status === 'DISBURSED' ? `<button data-loan-id="${escapeHtml(l.id)}" data-loan-action="ACTIVE">Activate</button>` : ''}
                         </td>
                     </tr>
                 `).join('');
@@ -128,6 +128,15 @@
                 showToast(err.message, 'error');
             }
         }
+
+        // Delegated: the loan id from the API never enters an inline handler.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('[data-loan-id]');
+            if (!btn) return;
+            const id = btn.dataset.loanId;
+            if (btn.dataset.loanAction === 'view') window.openLoanDetails(id);
+            else changeStatus(id, btn.dataset.loanAction);
+        });
 
         document.addEventListener('DOMContentLoaded', load);
     </script>

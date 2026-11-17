@@ -71,6 +71,18 @@ function mountFileTransfer(canUpload) {
     });
 }
 
+// Mirrors can_upload_job_files() in the SQL schema so the upload control is
+// shown only to someone whose upload would actually be accepted: the project
+// owner, an admin, the freelancer on an active contract, or a freelancer whose
+// proposal is still live. A rejected bidder keeps read access to files already
+// shared, but must not be offered an upload box that the policy would deny.
+function userMayUploadFiles(user, proposal) {
+    if (!user) return false;
+    if (user.profile?.role === 'admin') return true;
+    if (currentJob && currentJob.client_id === user.id) return true;
+    return !!(proposal && ['submitted', 'shortlisted', 'accepted'].includes(proposal.status));
+}
+
 async function loadJobDetails() {
     const isConfigured = window.isMarketplaceReady();
 
@@ -273,7 +285,7 @@ async function renderFreelancerOrGuestView(user) {
                     renderMyProposalStatus(myProposal);
                     myProposalView.style.display = 'block';
                     await renderFreelancerContractIfAny(contractCard);
-                    mountFileTransfer(true);
+                    mountFileTransfer(userMayUploadFiles(user, myProposal));
                 }
             } catch (e) {
                 console.warn('[job-details] getMyProposalForJob', e);
@@ -304,7 +316,7 @@ async function renderFreelancerOrGuestView(user) {
                 document.getElementById('proposalSectionHeading').innerText = 'Your Proposal';
                 showProposalMessage('<i class="fa-solid fa-circle-check"></i><span>You have already submitted a proposal for this project. Its status is shown below. You can only submit one proposal per project.</span>', 'success');
                 await renderFreelancerContractIfAny(contractCard);
-                mountFileTransfer(true);
+                mountFileTransfer(userMayUploadFiles(user, myProposal));
                 return;
             }
         } catch (e) {

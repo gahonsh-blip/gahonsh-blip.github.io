@@ -300,20 +300,41 @@ function renderDocuments() {
   }).join('');
 }
 
+function reviewRow(label, value) {
+  const row = document.createElement('div');
+  row.className = 'review-row';
+  const dt = document.createElement('dt');
+  dt.textContent = label;
+  const dd = document.createElement('dd');
+  dd.textContent = value;
+  row.append(dt, dd);
+  return row;
+}
+
 function renderReview() {
-  const rows = state.sections.flatMap((s) => s.fields)
-    .map((f) => `<div class="review-row"><dt>${escapeHtml(f.label)}</dt><dd>${escapeHtml(f.value || 'Not provided')}</dd></div>`)
-    .join('');
   const kyc = state.kyc || {};
   const pan = state.pan || {};
   const mobile = state.mobile || {};
-  const kycRows = [
-    `<div class="review-row"><dt>Identity (Aadhaar)</dt><dd>${kyc.verified ? `Verified${kyc.maskedId ? ` · ${escapeHtml(kyc.maskedId)}` : ''}` : 'Not verified'}</dd></div>`,
-    `<div class="review-row"><dt>PAN</dt><dd>${pan.verified ? `Verified${pan.maskedId ? ` · ${escapeHtml(pan.maskedId)}` : ''}` : 'Not verified'}</dd></div>`,
-    `<div class="review-row"><dt>Mobile</dt><dd>${mobile.verified ? `Verified${mobile.maskedPhone ? ` · ${escapeHtml(mobile.maskedPhone)}` : ''}` : 'Not verified'}</dd></div>`,
-    `<div class="review-row"><dt>Documents</dt><dd>${state.documents.length} uploaded</dd></div>`,
-  ].join('');
-  el('reviewBody').innerHTML = `<dl>${rows}</dl><h3 style="font-size:0.95rem;margin:16px 0 8px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.05em;">Checks</h3><dl>${kycRows}</dl>`;
+  const body = el('reviewBody');
+  body.textContent = '';
+
+  const dl = document.createElement('dl');
+  state.sections.flatMap((s) => s.fields).forEach((f) => {
+    dl.append(reviewRow(f.label, f.value || 'Not provided'));
+  });
+  body.append(dl);
+
+  const heading = document.createElement('h3');
+  heading.style.cssText = 'font-size:0.95rem;margin:16px 0 8px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.05em;';
+  heading.textContent = 'Checks';
+  body.append(heading);
+
+  const kycDl = document.createElement('dl');
+  kycDl.append(reviewRow('Identity (Aadhaar)', kyc.verified ? `Verified${kyc.maskedId ? ` · ${kyc.maskedId}` : ''}` : 'Not verified'));
+  kycDl.append(reviewRow('PAN', pan.verified ? `Verified${pan.maskedId ? ` · ${pan.maskedId}` : ''}` : 'Not verified'));
+  kycDl.append(reviewRow('Mobile', mobile.verified ? `Verified${mobile.maskedPhone ? ` · ${mobile.maskedPhone}` : ''}` : 'Not verified'));
+  kycDl.append(reviewRow('Documents', `${state.documents.length} uploaded`));
+  body.append(kycDl);
 }
 
 function renderChecklist() {

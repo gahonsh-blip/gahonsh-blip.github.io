@@ -665,10 +665,22 @@
                     .in('id', ids);
                 (profiles || []).forEach((p) => { names[p.id] = p.full_name; });
             }
+            // Mirror the local engine and the SQL DELETE policy (uploader or
+            // admin), otherwise an admin sees no Remove control even though the
+            // database would let them delete the row.
+            let isAdmin = false;
+            if (me) {
+                const { data: mine } = await client
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', me.id)
+                    .maybeSingle();
+                isAdmin = !!(mine && mine.role === 'admin');
+            }
             return rows.map((r) => ({
                 ...r,
                 uploader: { full_name: names[r.uploaded_by] || 'Member' },
-                can_remove: !!(me && r.uploaded_by === me.id)
+                can_remove: !!(me && (r.uploaded_by === me.id || isAdmin))
             }));
         },
 

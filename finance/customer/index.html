@@ -915,7 +915,7 @@
                         <td style="font-weight: 600;">${formatINR(Number(a.requested_amount || 0))}</td>
                         <td><span class="badge ${a.status === 'APPLICATION_SUBMITTED' ? 'badge-success' : a.status === 'DRAFT' ? 'badge-warning' : ''}">${escapeHtml(a.status)}</span></td>
                         <td style="white-space: nowrap;">
-                            <button class="btn-secondary" onclick="printApplicationReport('${a.id}')" style="font-size:​ 11px; padding:​ 4px 8px;">🖨 Report</button>
+                            <button class="btn-secondary" data-app-id="${escapeHtml(a.id)}" style="font-size:​ 11px; padding:​ 4px 8px;">🖨 Report</button>
                         </td>
                     </tr>
                 `).join('');
@@ -959,7 +959,7 @@
                         <td>${escapeHtml(d.title || d.file_name || d.id)}</td>
                         <td><span class="badge">${escapeHtml(d.document_type || 'DOCUMENT')}</span></td>
                         <td>${new Date(d.created_at).toLocaleDateString()}</td>
-                        <td><button class="btn-action" onclick="downloadDocument('${d.id}','${escapeHtml(d.file_name || d.title || 'document')}')" style="font-size: 11px; padding: 4px 10px;">⬇ Download</button></td>
+                        <td><button class="btn-action" data-doc-id="${escapeHtml(d.id)}" data-doc-name="${escapeHtml(d.file_name || d.title || 'document')}" style="font-size: 11px; padding: 4px 10px;">⬇ Download</button></td>
                     </tr>
                 `).join('');
             } catch (e) {
@@ -1069,6 +1069,14 @@
                 notify('CSV export error: ' + err.message, 'error');
             }
         }
+
+        // Delegated: ids and file names never enter an inline handler.
+        document.addEventListener('click', (e) => {
+            const r = e.target.closest && e.target.closest('[data-app-id]');
+            if (r) { printApplicationReport(r.dataset.appId); return; }
+            const d = e.target.closest && e.target.closest('[data-doc-id]');
+            if (d) downloadDocument(d.dataset.docId, d.dataset.docName);
+        });
 
         document.addEventListener('DOMContentLoaded', async () => {
             // The dashboard is a signed-in surface. Verify the session against

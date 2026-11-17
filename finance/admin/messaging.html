@@ -191,7 +191,7 @@
                     <td>${escapeHtml(t.subject || '\u2014')}</td>
                     <td style="max-width:320px;font-size:12px;">${escapeHtml(t.body)}</td>
                     <td>${t.is_active ? '<span class="badge badge-success">ACTIVE</span>' : '<span class="badge badge-warning">DISABLED</span>'}</td>
-                    <td><button class="btn-secondary" onclick="deleteTemplate('${t.id}')">Disable</button></td>
+                    <td><button class="btn-secondary" data-template-id="${escapeHtml(t.id)}">Disable</button></td>
                 </tr>`).join('');
             } catch (err) { renderState('templateRows', 'error', err.message); }
         }
@@ -265,8 +265,8 @@
                     <td>${m.attempts || 0}</td>
                     <td>${escapeHtml(m.provider || '-')}</td>
                     <td style="font-size:12px;color:var(--color-danger);max-width:200px;">${escapeHtml(m.last_error || '')}</td>
-                    <td>${m.status === 'FAILED' ? `<button class="btn-secondary" onclick="retryMessage('${m.id}')">Retry</button>` : ''}
-                        <button class="btn-secondary" onclick="viewMessage('${m.id}')">View</button></td>
+                    <td>${m.status === 'FAILED' ? `<button class="btn-secondary" data-message-id="${escapeHtml(m.id)}" data-message-action="retry">Retry</button>` : ''}
+                        <button class="btn-secondary" data-message-id="${escapeHtml(m.id)}" data-message-action="view">View</button></td>
                 </tr>`).join('');
             } catch (err) { renderState('logRows', 'error', err.message); }
         }
@@ -299,6 +299,16 @@
                 `);
             } catch (err) { showToast(err.message, 'error'); }
         }
+
+        // Delegated: template/message ids never enter an inline handler.
+        document.addEventListener('click', (e) => {
+            const t = e.target.closest && e.target.closest('[data-template-id]');
+            if (t) { deleteTemplate(t.dataset.templateId); return; }
+            const m = e.target.closest && e.target.closest('[data-message-id]');
+            if (!m) return;
+            if (m.dataset.messageAction === 'retry') retryMessage(m.dataset.messageId);
+            else viewMessage(m.dataset.messageId);
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             const tplSelect = el('sendTemplate');

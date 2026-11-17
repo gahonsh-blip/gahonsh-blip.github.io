@@ -529,9 +529,9 @@
                         <label for="reviewNote" style="font-weight:600;font-size:13px;">Note (required to reject or request a correction)</label>
                         <textarea id="reviewNote" class="cc-share-message" style="min-height:80px;" placeholder="Explain what is needed"></textarea>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                            <button class="btn-primary" onclick="decideReview('${escapeHtml(linkId)}', 'APPROVE')">Approve</button>
-                            <button class="btn-secondary" onclick="decideReview('${escapeHtml(linkId)}', 'REQUEST_CORRECTION')">Request correction</button>
-                            <button class="btn-secondary" onclick="decideReview('${escapeHtml(linkId)}', 'REJECT')">Reject</button>
+                            <button class="btn-primary" data-review-id="${escapeHtml(linkId)}" data-review-decision="APPROVE">Approve</button>
+                            <button class="btn-secondary" data-review-id="${escapeHtml(linkId)}" data-review-decision="REQUEST_CORRECTION">Request correction</button>
+                            <button class="btn-secondary" data-review-id="${escapeHtml(linkId)}" data-review-decision="REJECT">Reject</button>
                         </div>
                     </div>`}
                 <div class="mt-4">
@@ -590,7 +590,7 @@
                             <td>${escapeHtml(d.fileName)}</td>
                             <td>${d.fileSize ? Math.round(d.fileSize / 1024) + ' KB' : '-'}</td>
                             <td>${formatDate(d.uploadedAt)}</td>
-                            <td><button class="btn-secondary" onclick="downloadDocument('${escapeHtml(d.id)}', '${escapeHtml(d.fileName)}')">Download</button></td>
+                            <td><button class="btn-secondary" data-doc-id="${escapeHtml(d.id)}" data-doc-name="${escapeHtml(d.fileName)}">Download</button></td>
                         </tr>`).join('')}
                         </tbody></table></div>
                     </div>` : ''}
@@ -611,8 +611,8 @@
                 <td>${l.accessCount}</td>
                 <td>${l.completedAt ? formatDate(l.completedAt) : '-'}</td>
                 <td>
-                    ${l.status === 'ACTIVE' ? `<button class="btn-secondary" onclick="revokeLink('${escapeHtml(l.id)}')">Revoke</button>` : ''}
-                    <button class="btn-secondary" onclick="regenerateLink('${escapeHtml(l.id)}')">Regenerate</button>
+                    ${l.status === 'ACTIVE' ? `<button class="btn-secondary" data-link-id="${escapeHtml(l.id)}" data-link-action="revoke">Revoke</button>` : ''}
+                    <button class="btn-secondary" data-link-id="${escapeHtml(l.id)}" data-link-action="regenerate">Regenerate</button>
                 </td>
             </tr>`).join('');
         }
@@ -810,6 +810,18 @@
                 showToast(err.message, 'error');
             }
         }
+
+        // Delegated: ids and file names from the API never enter an inline handler.
+        document.addEventListener('click', (e) => {
+            const r = e.target.closest && e.target.closest('[data-review-id]');
+            if (r) { decideReview(r.dataset.reviewId, r.dataset.reviewDecision); return; }
+            const d = e.target.closest && e.target.closest('[data-doc-id]');
+            if (d) { downloadDocument(d.dataset.docId, d.dataset.docName); return; }
+            const l = e.target.closest && e.target.closest('[data-link-id]');
+            if (!l) return;
+            if (l.dataset.linkAction === 'revoke') revokeLink(l.dataset.linkId);
+            else regenerateLink(l.dataset.linkId);
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             el('bulkChannel').addEventListener('change', () => {

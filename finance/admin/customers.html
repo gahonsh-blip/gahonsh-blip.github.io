@@ -288,26 +288,26 @@
                             ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" style="color: var(--color-text-main); text-decoration: none;">${escapeHtml(c.phone)}</a>` : '<span style="color: var(--color-text-muted);">-</span>'}
                         </td>
                         <td>
-                            <select onchange="changeStatus('${c.id}', this.value)" style="width: auto; padding: 4px 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-main);">
+                            <select data-cust-id="${escapeHtml(c.id)}" data-cust-action="status" style="width: auto; padding: 4px 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-main);">
                                 <option value="ACTIVE" ${c.status === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
                                 <option value="INACTIVE" ${c.status === 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                             </select>
                         </td>
                         <td class="actions-cell">
                             <div class="action-btn-group">
-                                <button class="btn-action btn-action-profile" onclick="viewCustomerProfile('${c.id}')" title="View Customer Profile" id="btn-profile-${c.id}">
+                                <button class="btn-action btn-action-profile" data-cust-id="${escapeHtml(c.id)}" data-cust-action="profile" title="View Customer Profile" id="btn-profile-${escapeHtml(c.id)}">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                     <span data-i18n="view_profile">View Profile</span>
                                 </button>
-                                <button class="btn-action btn-action-call" onclick="initiateCall('${c.id}')" title="Call Customer" id="btn-call-${c.id}">
+                                <button class="btn-action btn-action-call" data-cust-id="${escapeHtml(c.id)}" data-cust-action="call" title="Call Customer" id="btn-call-${escapeHtml(c.id)}">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                                     <span data-i18n="call">Call</span>
                                 </button>
-                                <button class="btn-action btn-action-message" onclick="openSendMessageModal('${c.id}')" title="Send Message" id="btn-message-${c.id}">
+                                <button class="btn-action btn-action-message" data-cust-id="${escapeHtml(c.id)}" data-cust-action="message" title="Send Message" id="btn-message-${escapeHtml(c.id)}">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                     <span data-i18n="send_message">Send Message</span>
                                 </button>
-                                <button class="btn-action btn-action-profile" onclick="openCompletionLink('${c.id}')" title="Send a secure link so this client completes their own details, KYC and documents" id="btn-completion-${c.id}">
+                                <button class="btn-action btn-action-profile" data-cust-id="${escapeHtml(c.id)}" data-cust-action="completion" title="Send a secure link so this client completes their own details, KYC and documents" id="btn-completion-${escapeHtml(c.id)}">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                     <span>Completion Link</span>
                                 </button>
@@ -493,7 +493,7 @@
                                             <td style="padding: 6px 10px; text-align: right; font-weight: 600;">₹${Number(l.principal_amount || 0).toLocaleString('en-IN')}</td>
                                             <td style="padding: 6px 10px; text-align: right;">₹${Number((Number(l.principal_balance) || 0) + (Number(l.interest_balance) || 0) + (Number(l.fee_balance) || 0)).toLocaleString('en-IN')}</td>
                                             <td style="padding: 6px 10px;"><span class="badge ${l.status === 'ACTIVE' ? 'badge-success' : (l.status === 'CLOSED' ? 'badge-success' : 'badge-warning')}">${escapeHtml(l.status)}</span></td>
-                                            <td style="padding: 6px 10px;"><button class="btn-secondary" style="font-size: 11px; padding: 3px 10px;" onclick="openLoanDetails('${l.id}')">View Details</button></td>
+                                            <td style="padding: 6px 10px;"><button class="btn-secondary" style="font-size: 11px; padding: 3px 10px;" data-loan-id="${escapeHtml(l.id)}" data-loan-action="view">View Details</button></td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -555,7 +555,7 @@
                             <div style="font-size: 11px; text-transform: uppercase; font-weight: 600; color: var(--color-text-muted);">Registered Phone</div>
                             <div style="font-size: 17px; font-weight: 700; color: #047857; letter-spacing: 0.5px;">${escapeHtml(cust.phone)}</div>
                         </div>
-                        <button class="btn-action" onclick="copyToClipboard('${escapeHtml(cust.phone)}', 'Phone number copied!')" style="font-size: 11px; padding: 4px 8px;">
+                        <button class="btn-action" data-copy-value="${escapeHtml(cust.phone)}" data-copy-message="Phone number copied!" style="font-size: 11px; padding: 4px 8px;">
                             Copy
                         </button>
                     </div>
@@ -576,7 +576,7 @@
                         This customer has not listed a telephone contact number yet. You can reach out via their verified email address or update their profile record.
                     </div>
                     <div style="margin-top: 10px;">
-                        <button class="btn-action btn-action-message w-100" onclick="closeModal('callCustomerModal'); openSendMessageModal('${cust.id}');" style="justify-content: center; padding: 8px;">
+                        <button class="btn-action btn-action-message w-100" data-cust-id="${escapeHtml(cust.id)}" data-cust-action="email" style="justify-content: center; padding: 8px;">
                             Send Email Instead
                         </button>
                     </div>
@@ -1099,6 +1099,32 @@ Gahonsh Finance Support Team</textarea>
                 showToast(err.message, 'error');
             }
         }
+
+        // Delegated handlers: ids, phone numbers and file names from the API
+        // never enter inline handler attributes.
+        document.addEventListener('change', (e) => {
+            const sel = e.target.closest && e.target.closest('[data-cust-action="status"]');
+            if (sel) changeStatus(sel.dataset.custId, sel.value);
+        });
+
+        document.addEventListener('click', (e) => {
+            const copy = e.target.closest && e.target.closest('[data-copy-value]');
+            if (copy) { copyToClipboard(copy.dataset.copyValue, copy.dataset.copyMessage); return; }
+
+            const loan = e.target.closest && e.target.closest('[data-loan-id]');
+            if (loan) { window.openLoanDetails(loan.dataset.loanId); return; }
+
+            const btn = e.target.closest && e.target.closest('[data-cust-id]');
+            if (!btn) return;
+            const id = btn.dataset.custId;
+            switch (btn.dataset.custAction) {
+                case 'profile': viewCustomerProfile(id); break;
+                case 'call': initiateCall(id); break;
+                case 'message': openSendMessageModal(id); break;
+                case 'completion': openCompletionLink(id); break;
+                case 'email': closeModal('callCustomerModal'); openSendMessageModal(id); break;
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             load();

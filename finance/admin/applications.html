@@ -93,13 +93,13 @@
 
                 rows.innerHTML = d.map(a => `
                     <tr>
-                        <td title="${a.id}">${escapeHtml(a.id.slice(0, 8))}...</td>
-                        <td>₹${a.requested_amount}</td>
+                        <td title="${escapeHtml(a.id)}">${escapeHtml(a.id.slice(0, 8))}...</td>
+                        <td>₹${Number(a.requested_amount) || 0}</td>
                         <td><span class="badge ${getStatusBadge(a.status)}">${escapeHtml(a.status)}</span></td>
                         <td>
-                            ${['DRAFT', 'SUBMITTED', 'APPLICATION_SUBMITTED'].includes(a.status) ? `<button class="btn-secondary" onclick="changeStatus('${a.id}', 'UNDER_REVIEW')">Review</button>` : ''}
-                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button onclick="changeStatus('${a.id}', 'APPROVED')">Approve</button>` : ''}
-                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button class="btn-secondary" style="color: var(--color-danger); border-color: var(--color-danger);" onclick="changeStatus('${a.id}', 'REJECTED')">Reject</button>` : ''}
+                            ${['DRAFT', 'SUBMITTED', 'APPLICATION_SUBMITTED'].includes(a.status) ? `<button class="btn-secondary" data-app-id="${escapeHtml(a.id)}" data-app-action="UNDER_REVIEW">Review</button>` : ''}
+                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button data-app-id="${escapeHtml(a.id)}" data-app-action="APPROVED">Approve</button>` : ''}
+                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button class="btn-secondary" style="color: var(--color-danger); border-color: var(--color-danger);" data-app-id="${escapeHtml(a.id)}" data-app-action="REJECTED">Reject</button>` : ''}
                         </td>
                     </tr>
                 `).join('');
@@ -132,6 +132,14 @@
                 showToast(err.message, 'error');
             }
         }
+
+        // Delegated so an application id from the API never enters an inline
+        // handler attribute (HTML entities decode before the JS parser, so
+        // escaping alone cannot make an inline handler safe).
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('[data-app-id]');
+            if (btn) changeStatus(btn.dataset.appId, btn.dataset.appAction);
+        });
 
         document.addEventListener('DOMContentLoaded', load);
     </script>
