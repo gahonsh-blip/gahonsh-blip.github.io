@@ -1,0 +1,39 @@
+# Cloudflare security headers for the Gahonsh Finance public site.
+#
+# The Worker (`run_worker_first: ["/api/*"]`) answers only `/api/*`; every other
+# path is served by the static assets layer, which processes this file. Rules
+# are additive across matching blocks, so no header name is repeated between the
+# `/*` block and the `/site/*` block — that keeps the merge order unambiguous.
+#
+# The public site (`/site/*`) has been refactored so every page ships NO inline
+# JavaScript (footer year and the auth/client page logic are external modules)
+# and no inline event handlers, so it can carry a strict `script-src 'self'`
+# policy. `style-src` keeps `'unsafe-inline'` because the pages use inline
+# `style="..."` attributes; that is a far weaker risk than inline script.
+#
+# Inter is self-hosted (`/shared/fonts.css` + `apps/shared/fonts/*.woff2`), so
+# no Google Fonts origin appears in any directive.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(self), payment=(), usb=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+/site/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'none'; upgrade-insecure-requests
+
+# The bare-origin redirect document. It loads one same-origin script and no
+# external resources, so it can carry the tightest policy. The portal shells
+# (admin/customer/agent/mobile) are deliberately NOT given a CSP here: they use
+# inline scripts and handlers, and a strict policy would break them; they are
+# staff/authenticated surfaces, not the public marketing site.
+/
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; manifest-src 'self'; upgrade-insecure-requests
+
+/index.html
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; manifest-src 'self'; upgrade-insecure-requests
+

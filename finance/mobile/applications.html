@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>My Applications | Gahonsh Finance</title>
+<meta name="description" content="Sign in to the Gahonsh Finance borrower portal to track your loan applications and start a new one.">
+<link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+<link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/finance/shared/fonts.css">
+<link rel="stylesheet" href="/finance/shared/tokens.css">
+<style>
+  /* Page-specific: a two-up row for the amount/tenure pair on wide screens. */
+  .gf-row { display: grid; gap: var(--gf-space-4); }
+  @media (min-width: 560px) { .gf-row { grid-template-columns: 1fr 1fr; } }
+</style>
+<script src="/finance/shared/session.js"></script>
+</head>
+<body class="gf">
+<a class="gf-skip" href="#main">Skip to main content</a>
+
+<div class="gf-shell">
+  <header class="gf-topbar">
+    <a class="gf-brand" href="/finance/site/" aria-label="Gahonsh Finance Borrower portal home">
+      <img class="gf-brand__logo" src="/finance/site/brand/logo.svg" alt="" width="38" height="38">
+      <span>
+        <span class="gf-brand__name" data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+        <span class="gf-brand__sub">Borrower portal</span>
+      </span>
+    </a>
+    <button type="button" id="themeToggle" class="gf-btn" style="margin-left:auto;min-height:36px;padding:var(--gf-space-2) var(--gf-space-3);font-size:var(--gf-text-sm)" aria-label="Switch colour theme">Theme</button>
+  </header>
+
+  <main class="gf-main" id="main">
+    <div class="gf-page-head">
+      <h1>My Applications</h1>
+      <p>Sign in to track your loan applications and start a new one.</p>
+    </div>
+
+    <!-- Sign-in -->
+    <section class="gf-card" id="signInCard" aria-labelledby="signInHeading">
+      <div class="gf-card__head"><h2 id="signInHeading">Sign in</h2></div>
+      <form id="signInForm" novalidate>
+        <div class="gf-field">
+          <label class="gf-label" for="email">Email address</label>
+          <input class="gf-input" id="email" name="email" type="email" placeholder="name@example.com"
+                 autocomplete="username" required aria-describedby="signInError">
+        </div>
+        <div class="gf-field">
+          <label class="gf-label" for="password">Password</label>
+          <input class="gf-input" id="password" name="password" type="password" placeholder="Your password"
+                 autocomplete="current-password" required aria-describedby="signInError">
+        </div>
+        <p class="gf-error" id="signInError" role="alert" hidden></p>
+        <button type="submit" class="gf-btn gf-btn--primary gf-btn--block" id="signInBtn">Sign in</button>
+      </form>
+    </section>
+
+    <!-- Signed-in area -->
+    <div id="appArea" hidden>
+      <section class="gf-card" aria-labelledby="newAppHeading">
+        <div class="gf-card__head">
+          <h2 id="newAppHeading">New application</h2>
+          <button type="button" class="gf-btn" id="signOutBtn" style="min-height:36px;padding:var(--gf-space-2) var(--gf-space-3);font-size:var(--gf-text-sm)">Sign out</button>
+        </div>
+        <form id="form" novalidate>
+          <div class="gf-field">
+            <label class="gf-label" for="product">Loan product</label>
+            <select class="gf-select" id="product" name="product" required aria-describedby="createError"></select>
+            <span class="gf-hint" id="productHint">Loading products&hellip;</span>
+          </div>
+          <div class="gf-row">
+            <div class="gf-field">
+              <label class="gf-label" for="amount">Amount</label>
+              <input class="gf-input" id="amount" name="amount" type="number" min="1" value="1000"
+                     inputmode="numeric" required aria-describedby="createError">
+            </div>
+            <div class="gf-field">
+              <label class="gf-label" for="tenure">Tenure (days)</label>
+              <input class="gf-input" id="tenure" name="tenure" type="number" min="1" value="30"
+                     inputmode="numeric" required aria-describedby="createError">
+            </div>
+          </div>
+          <div class="gf-field">
+            <label class="gf-label" for="purpose">Purpose</label>
+            <input class="gf-input" id="purpose" name="purpose" type="text" placeholder="e.g. Home repair"
+                   aria-describedby="createError">
+          </div>
+          <p class="gf-error" id="createError" role="alert" hidden></p>
+          <button type="submit" class="gf-btn gf-btn--primary gf-btn--block" id="createBtn">Create draft application</button>
+        </form>
+      </section>
+
+      <section class="gf-card" aria-labelledby="listHeading">
+        <div class="gf-card__head"><h2 id="listHeading">Your applications</h2></div>
+        <p class="gf-alert" id="message" role="status" hidden></p>
+        <div id="listState" class="gf-loading" hidden>
+          <span class="gf-spinner" aria-hidden="true"></span><span>Loading applications&hellip;</span>
+        </div>
+        <div class="gf-table-wrap">
+          <table class="gf-table">
+            <caption class="gf-sr-only">Your loan applications and their current status</caption>
+            <thead>
+              <tr><th scope="col">Application</th><th scope="col">Amount</th><th scope="col">Status</th><th scope="col">Action</th></tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="gf-empty" id="emptyState" hidden>No applications yet. Create your first draft above.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="gf-footer">
+    Gahonsh Finance &mdash; borrower portal. Development build, not for public lending.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var token = '';
+
+  // ---- Theme (light / dark / system) ------------------------------------
+  var root = document.documentElement;
+  var saved = localStorage.getItem('gf-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    if (!current) current = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('gf-theme', next);
+  });
+
+  // ---- Helpers -----------------------------------------------------------
+  function $(id) { return document.getElementById(id); }
+  function text(el, msg) { el.textContent = msg; el.hidden = !msg; }
+  function busy(btn, on, label) {
+    btn.disabled = on;
+    btn.setAttribute('aria-busy', on ? 'true' : 'false');
+    if (label) btn.textContent = label;
+  }
+  function alertBox(el, kind, msg) {
+    el.className = 'gf-alert' + (kind ? ' gf-alert--' + kind : '');
+    text(el, msg);
+  }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  async function postJson(url, body, auth) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (auth) headers.Authorization = 'Bearer ' + token;
+    var res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) });
+    var data = await res.json().catch(function () { return {}; });
+    return { ok: res.ok, status: res.status, data: data };
+  }
+
+  // ---- Sign in -----------------------------------------------------------
+  $('signInForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('signInError');
+    text(err, '');
+    var emailOk = !!$('email').value.trim();
+    var passOk = !!$('password').value;
+    $('email').setAttribute('aria-invalid', emailOk ? 'false' : 'true');
+    $('password').setAttribute('aria-invalid', passOk ? 'false' : 'true');
+    if (!emailOk || !passOk) { text(err, 'Enter your email and password.'); return; }
+
+    busy($('signInBtn'), true, 'Signing in\u2026');
+    try {
+      var r = await postJson('/api/auth/login', { email: $('email').value.trim(), password: $('password').value });
+      if (!r.ok) { text(err, r.data.detail || r.data.error || 'Sign in failed. Check your details and try again.'); return; }
+      // A second factor is required: verify the e-mailed code before continuing.
+      if (r.data.otp_required) {
+        var code = window.prompt('Enter the 6-digit sign-in code we e-mailed you:');
+        if (!code) { return; }
+        var vr = await postJson('/api/auth/login/verify', { challenge_token: r.data.challenge_token, code: code });
+        if (!vr.ok) { text(err, vr.data.error || 'Verification failed. Please try again.'); return; }
+        r = { ok: true, data: vr.data };
+      }
+      token = r.data.access_token || r.data.token || '';
+      if (!token) { text(err, 'Unexpected response from the server. Please try again.'); return; }
+      // Persist so a refresh restores the session instead of silently dropping
+      // it; the page re-verifies the token against the server on every load.
+      if (window.GFPortal) window.GFPortal.saveToken(token);
+
+      if (!(await showApp())) {
+        token = '';
+        text(err, 'Signed in, but products could not be loaded. Please try again.');
+        return;
+      }
+    } catch (ex) {
+      text(err, 'Network error. Check your connection and try again.');
+    } finally {
+      busy($('signInBtn'), false, 'Sign in');
+    }
+  });
+
+  $('signOutBtn').addEventListener('click', function () {
+    token = '';
+    if (window.GFPortal) window.GFPortal.clear();
+    $('appArea').hidden = true;
+    $('signInCard').hidden = false;
+    $('rows').innerHTML = '';
+    text($('message'), '');
+    $('email').value = '';
+    $('password').value = '';
+  });
+
+  /**
+   * Loads the product picker and reveals the application area. Returns false
+   * when the products call fails, so the caller can keep the sign-in card up
+   * rather than showing an empty workspace.
+   */
+  async function showApp() {
+    var p = await fetch('/api/me/loan-products', { headers: { Authorization: 'Bearer ' + token } });
+    var products = await p.json().catch(function () { return []; });
+    if (!p.ok || !Array.isArray(products)) return false;
+    $('product').innerHTML = products.map(function (x) {
+      return '<option value="' + esc(x.id) + '">' + esc(x.name) +
+        ' (' + esc(x.minimum_amount) + '\u2013' + esc(x.maximum_amount) + ')</option>';
+    }).join('');
+    text($('productHint'), products.length ? '' : 'No products are available right now.');
+    $('signInCard').hidden = true;
+    $('appArea').hidden = false;
+    $('password').value = '';
+    await load();
+    return true;
+  }
+
+  /**
+   * Restores a previously signed-in session and only reveals the workspace
+   * when the stored token is a live session on the server. An anonymous
+   * visitor, a forged token or an expired one stays on the sign-in card.
+   */
+  async function restoreSession() {
+    if (!window.GFPortal) return;
+    var session = await window.GFPortal.verify();
+    if (!session) return;
+    token = session.token;
+    await showApp();
+  }
+
+  restoreSession();
+
+  // ---- List --------------------------------------------------------------
+  async function load() {
+    var state = $('listState');
+    state.hidden = false;
+    $('emptyState').hidden = true;
+    try {
+      var res = await fetch('/api/me/applications', { headers: { Authorization: 'Bearer ' + token } });
+      var data = await res.json().catch(function () { return []; });
+      if (!res.ok || !Array.isArray(data)) {
+        alertBox($('message'), 'danger', 'Could not load your applications. Please refresh to try again.');
+        return;
+      }
+      $('rows').innerHTML = data.map(function (a) {
+        var action = a.status === 'DRAFT'
+          ? '<button type="button" class="gf-btn gf-btn--secondary" style="min-height:36px;padding:var(--gf-space-2) var(--gf-space-3);font-size:var(--gf-text-sm)" data-submit="' + esc(a.id) + '">Submit</button>'
+          : '<span class="gf-badge">' + esc(a.status) + '</span>';
+        return '<tr><td>' + esc(String(a.id).slice(0, 8)) + '</td><td>' + esc(a.requested_amount) +
+          '</td><td>' + esc(a.status) + '</td><td>' + action + '</td></tr>';
+      }).join('');
+      $('emptyState').hidden = data.length > 0;
+    } catch (ex) {
+      alertBox($('message'), 'danger', 'Network error while loading applications. Please refresh to try again.');
+    } finally {
+      state.hidden = true;
+    }
+  }
+
+  // ---- Create ------------------------------------------------------------
+  $('form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('createError');
+    text(err, '');
+    var amount = Number($('amount').value);
+    var tenure = Number($('tenure').value);
+    $('amount').setAttribute('aria-invalid', amount > 0 ? 'false' : 'true');
+    $('tenure').setAttribute('aria-invalid', tenure > 0 ? 'false' : 'true');
+    if (!(amount > 0) || !(tenure > 0)) { text(err, 'Enter a valid amount and tenure.'); return; }
+
+    busy($('createBtn'), true, 'Creating\u2026');
+    try {
+      var r = await postJson('/api/applications', {
+        loan_product_id: $('product').value,
+        requested_amount: amount,
+        requested_tenure_days: tenure,
+        purpose: $('purpose').value
+      }, true);
+      if (!r.ok) {
+        text(err, r.data.detail || r.data.error || 'Could not create the application. Please check the details.');
+        return;
+      }
+      alertBox($('message'), 'success', 'Draft application created.');
+      await load();
+    } catch (ex) {
+      text(err, 'Network error while creating the application. Please try again.');
+    } finally {
+      busy($('createBtn'), false, 'Create draft application');
+    }
+  });
+
+  // ---- Submit (delegated so re-rendered rows keep working) ---------------
+  $('rows').addEventListener('click', async function (e) {
+    var btn = e.target.closest('[data-submit]');
+    if (!btn) return;
+    busy(btn, true, 'Submitting\u2026');
+    try {
+      var res = await fetch('/api/applications/' + encodeURIComponent(btn.getAttribute('data-submit')) + '/submit', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token }
+      });
+      var data = await res.json().catch(function () { return {}; });
+      alertBox($('message'), res.ok ? 'success' : 'danger',
+        res.ok ? 'Application submitted for review.' : (data.detail || data.error || 'Could not submit the application.'));
+      await load();
+    } catch (ex) {
+      alertBox($('message'), 'danger', 'Network error while submitting. Please try again.');
+    }
+  });
+})();
+</script>
+<script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

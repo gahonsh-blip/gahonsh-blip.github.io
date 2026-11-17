@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create your account - Gahonsh Finance</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Create your Gahonsh Finance account to apply for a loan and track your application online.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gahonsh Finance">
+<meta property="og:title" content="Create your account — Gahonsh Finance">
+<meta property="og:description" content="Create your Gahonsh Finance account to apply for a loan and track your application online.">
+<meta property="og:image" content="/finance/site/brand/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://gahonsh-finance.gahonsh.workers.dev/site/signup.html">
+<link rel="icon" href="/finance/site/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+<link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/finance/shared/fonts.css">
+<link rel="stylesheet" href="/finance/site/css/site.css">
+<style>
+  .auth-main { padding: 40px 0 72px; }
+  .auth-shell { max-width: 460px; margin: 0 auto; }
+  .auth-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--sh-1); padding: 28px; }
+  .auth-card h1 { font-size: 1.4rem; margin: 0 0 6px; }
+  .auth-card p.sub { margin: 0 0 20px; color: var(--c-muted); font-size: 0.9375rem; }
+  .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .auth-field label { font-size: 0.9375rem; font-weight: 600; color: var(--c-ink-soft); }
+  .auth-field .req { color: var(--c-danger); margin-left: 2px; }
+  .auth-field .hint { font-size: 0.875rem; color: var(--c-muted); margin-top: 2px; }
+  .auth-field .err { font-size: 0.75rem; color: var(--c-danger); margin-top: 2px; }
+  .auth-alt { margin-top: 18px; font-size: 0.9375rem; color: var(--c-muted); text-align: center; }
+  .auth-alt a { color: var(--brand-primary); font-weight: 600; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img class="brand-mark" src="/finance/site/brand/logo.svg" alt="" width="34" height="34">
+      <span>
+        <span class="brand-name" data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+        <span class="brand-tag" data-gf="text" data-gf-field="tagline">Loans made straightforward</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <select class="site-locale-select" data-gf-lang aria-label="Choose language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+      </select>
+      <a class="btn btn-outline btn-sm" href="/finance/site/">Back to site</a>
+    </div>
+  </div>
+</header>
+
+<main class="auth-main" id="main">
+  <div class="wrap auth-shell">
+    <div class="auth-card">
+      <h1>Create your account</h1>
+      <p class="sub">Set up a sign-in so you can track your applications, loans and repayments. This does not start a loan application.</p>
+
+      <div class="alert alert--error" id="signupError" hidden role="alert"></div>
+      <div class="alert alert--success" id="signupSuccess" hidden role="status"></div>
+
+      <form id="signupForm" novalidate>
+        <div class="auth-field">
+          <label for="fullName">Full name <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="fullName" type="text" autocomplete="name" required>
+          <div class="err" id="fullNameErr" hidden></div>
+        </div>
+        <div class="auth-field">
+          <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="email" type="email" autocomplete="email" required>
+          <div class="err" id="emailErr" hidden></div>
+        </div>
+        <div class="auth-field">
+          <label for="phone">Mobile number <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="phone" type="tel" inputmode="numeric" autocomplete="tel" required>
+          <div class="hint">A 10-digit Indian mobile number.</div>
+          <div class="err" id="phoneErr" hidden></div>
+        </div>
+        <div class="auth-field">
+          <label for="password">Password <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="password" type="password" autocomplete="new-password" minlength="8" required>
+          <div class="hint">At least 8 characters.</div>
+          <div class="err" id="passwordErr" hidden></div>
+        </div>
+        <div class="auth-field">
+          <label for="password2">Confirm password <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="password2" type="password" autocomplete="new-password" required>
+          <div class="err" id="password2Err" hidden></div>
+        </div>
+        <button class="btn btn-primary btn-block" id="signupButton" type="submit">Create account</button>
+      </form>
+
+      <p class="auth-alt">Already have an account? <a href="/finance/site/signin.html">Sign in</a></p>
+      <p class="auth-notice">
+        Development build. This is a demonstration environment and is not a licensed bank or
+        public lending service. No real credit decision, disbursement or repayment takes place,
+        and all figures shown are illustrative examples.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/finance/site/js/platform-config.js"></script>
+<script type="module" src="/finance/site/js/site-i18n.js"></script>
+<script type="module" src="/finance/site/js/signup-page.js"></script>
+</body>
+</html>

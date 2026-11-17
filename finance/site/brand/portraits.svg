@@ -1,0 +1,642 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!--
+    Gahonsh Finance — original portrait illustration set (photo-style).
+
+    Drawn from scratch for this site as flat-to-realistic studio headshots, not
+    photographs of any real person. This keeps the page free of any third-party
+    likeness or image licence while still reading as a real, professional,
+    human team rather than an anonymous placeholder.
+
+    Referenced as `<use href="/finance/site/brand/portraits.svg#gf-p-1">` inside a
+    `.portrait` frame. Variants differ in skin tone, hair style, attire and
+    accessories so the team grid does not look cloned. Every figure wears
+    business attire with a collar and lapel, sits on a soft studio backdrop and
+    shares one key light (top-left) so the grid reads as one consistent set.
+  -->
+  <!-- =============================================== gf-p-1 — Ananya Deshpande -->
+  <symbol id="gf-p-1" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-1-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F3F6FC"/><stop offset="1" stop-color="#DCE6F7"/>
+      </linearGradient>
+      <radialGradient id="gf-p-1-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-1-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#EFC49B"/><stop offset="0.55" stop-color="#D79A6A"/><stop offset="1" stop-color="#B97A4C"/>
+      </linearGradient>
+      <linearGradient id="gf-p-1-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1E3A8A"/><stop offset="1" stop-color="#16295E"/>
+      </linearGradient>
+      <linearGradient id="gf-p-1-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F4F7FB"/>
+      </linearGradient>
+      <radialGradient id="gf-p-1-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-1-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-1-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-1-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#16295E" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#1E3A8A" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#1E3A8A" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-1-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#F4F7FB"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#F4F7FB"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#047857" opacity=".9"/>
+    
+    <path d="M40 84c4 10 11 16 20 16s16-6 20-16l-6-4c-3.4 8-8.6 12-14 12s-10.6-4-14-12z" fill="#047857" opacity=".28"/>
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#B97A4C"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#D79A6A"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#D79A6A"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#B97A4C" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#B97A4C" opacity=".6"/>
+    
+    <circle cx="38.5" cy="63" r="1.9" fill="#D4A017"/>
+    <circle cx="81.5" cy="63" r="1.9" fill="#D4A017"/>
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-1-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-1-face)"/>
+    
+    <path d="M34.5 62c-5-26 12-40 25.5-40S85.5 36 80.5 62c-1.6 12-4 22-6.5 30 8-6 11.5-19 11-32-1-24-12-34-25-34S35.5 36 34.5 60c-.5 13 3 26 11 32-2.5-8-5-18-6.5-30z" fill="#241A14"/>
+    <path d="M37 54c-3.6-21.5 10.6-32.5 23-32.5S83.6 32.5 80 54c-2-8.6-6-13.6-10.6-16-6.6 5.4-18.8 5.4-25.4 0-4.6 2.4-8.6 7.4-10.6 16z" fill="#241A14"/>
+    <path d="M40 43c3-7.6 10.6-12.6 20-12.6 7.4 0 13.4 2.6 17 7-3.4-2.4-8.6-3.8-15-3.8-9.4 0-16.4 3-22 9.4z" fill="#4A3524" opacity=".55"/>
+    <path d="M35 60c-2 12 0 26 6 36-6-3-9.5-11-10-20-.4-7 1.4-12.6 4-16z" fill="#241A14"/>
+    <path d="M85 60c2 12 0 26-6 36 6-3 9.5-11 10-20 .4-7-1.4-12.6-4-16z" fill="#241A14"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#241A14" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#B97A4C" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#B97A4C" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#B97A4C" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#A85A52" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-2 — Rohit Menon -->
+  <symbol id="gf-p-2" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-2-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EEF1F6"/><stop offset="1" stop-color="#CFD8E6"/>
+      </linearGradient>
+      <radialGradient id="gf-p-2-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-2-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#E3B183"/><stop offset="0.55" stop-color="#C98C5A"/><stop offset="1" stop-color="#A66C3C"/>
+      </linearGradient>
+      <linearGradient id="gf-p-2-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#334155"/><stop offset="1" stop-color="#243044"/>
+      </linearGradient>
+      <linearGradient id="gf-p-2-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#EEF2F7"/>
+      </linearGradient>
+      <radialGradient id="gf-p-2-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-2-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-2-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-2-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#243044" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#334155" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#334155" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-2-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#EEF2F7"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#EEF2F7"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#94A3B8" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#A66C3C"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#C98C5A"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#C98C5A"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#A66C3C" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#A66C3C" opacity=".6"/>
+    
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-2-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-2-face)"/>
+    
+    <path d="M38.5 51c0-15.5 9.5-24.5 21.5-24.5S81.5 35.5 81.5 51c-3.2-8.6-10.4-13.4-21.5-13.4S41.7 42.4 38.5 51z" fill="#1C1712"/>
+    <path d="M41 47c2.6-7.6 9.4-11.8 19-11.8 7.2 0 13 2.4 16.4 6.8-3.4-2.2-8.2-3.4-14.2-3.4-9.2 0-16.2 2.8-21.2 8.4z" fill="#3A2C20" opacity=".55"/>
+    
+    <path d="M46 66c1.6 7 7 11.5 14 11.5S72.4 73 74 66c-2.4 3.6-7.4 5.4-14 5.4S48.4 69.6 46 66z" fill="#1C1712" opacity=".55"/>
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#1C1712" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#A66C3C" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <g fill="none" stroke="#26303D" stroke-width="1.8">
+      <rect x="43.5" y="49.5" width="14.5" height="10.5" rx="4"/>
+      <rect x="62" y="49.5" width="14.5" height="10.5" rx="4"/>
+      <path d="M58 53.5h4M43.5 52.5l-5 1.2M76.5 52.5l5 1.2" stroke-linecap="round"/>
+    </g>
+    <rect x="45" y="51" width="11.5" height="7.5" rx="3" fill="#BFD3EA" opacity=".35"/>
+    <path d="M60 57v6.5" stroke="#A66C3C" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#A66C3C" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#8C4A3A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-3 — Priya Nair -->
+  <symbol id="gf-p-3" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-3-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EAF4F1"/><stop offset="1" stop-color="#C9E4DB"/>
+      </linearGradient>
+      <radialGradient id="gf-p-3-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-3-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#C98A50"/><stop offset="0.55" stop-color="#A9662F"/><stop offset="1" stop-color="#8A4F22"/>
+      </linearGradient>
+      <linearGradient id="gf-p-3-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0F766E"/><stop offset="1" stop-color="#0A544E"/>
+      </linearGradient>
+      <linearGradient id="gf-p-3-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F2FBF8"/>
+      </linearGradient>
+      <radialGradient id="gf-p-3-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-3-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-3-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-3-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#0A544E" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#0F766E" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#0F766E" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-3-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#F2FBF8"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#F2FBF8"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#D4A017" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#8A4F22"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#A9662F"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#A9662F"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#8A4F22" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#8A4F22" opacity=".6"/>
+    
+    <circle cx="38.5" cy="63" r="1.9" fill="#D4A017"/>
+    <circle cx="81.5" cy="63" r="1.9" fill="#D4A017"/>
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-3-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-3-face)"/>
+    
+    <path d="M36.5 55c-3.4-21 10.4-31.5 24-31.5S87 34 83.6 55c-2.2-9-6.4-14-11.4-16.4-7 5.4-20 5.4-27 0-5 2.4-9 7.4-11.2 16.4z" fill="#20160F"/>
+    <path d="M40 44c3-8 11-13 20-13s17 5 20 13c-3.4-5.4-10-8.4-20-8.4S43.4 38.6 40 44z" fill="#3E2A1C" opacity=".5"/>
+    <path d="M84 58c4 4 6 11 4 17 5-4 7-13 4-20-1.6-2.8-4.8-4-8-3z" fill="#20160F"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#20160F" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#8A4F22" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#8A4F22" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#8A4F22" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#8C3B30" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-4 — Imran Qureshi -->
+  <symbol id="gf-p-4" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-4-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F1EFFA"/><stop offset="1" stop-color="#D8D3EE"/>
+      </linearGradient>
+      <radialGradient id="gf-p-4-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-4-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#FAD6B4"/><stop offset="0.55" stop-color="#EFBE93"/><stop offset="1" stop-color="#CF9C6E"/>
+      </linearGradient>
+      <linearGradient id="gf-p-4-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3F3D56"/><stop offset="1" stop-color="#2E2C42"/>
+      </linearGradient>
+      <linearGradient id="gf-p-4-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#FFFFFF"/>
+      </linearGradient>
+      <radialGradient id="gf-p-4-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-4-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-4-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-4-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#2E2C42" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#3F3D56" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#3F3D56" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-4-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#FFFFFF"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#FFFFFF"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#7C7A99" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#CF9C6E"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#EFBE93"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#EFBE93"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#CF9C6E" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#CF9C6E" opacity=".6"/>
+    
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-4-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-4-face)"/>
+    
+    <path d="M38.5 51c0-15.5 9.5-24.5 21.5-24.5S81.5 35.5 81.5 51c-3.2-8.6-10.4-13.4-21.5-13.4S41.7 42.4 38.5 51z" fill="#3A2A1C"/>
+    <path d="M41 47c2.6-7.6 9.4-11.8 19-11.8 7.2 0 13 2.4 16.4 6.8-3.4-2.2-8.2-3.4-14.2-3.4-9.2 0-16.2 2.8-21.2 8.4z" fill="#5C4530" opacity=".55"/>
+    
+    <path d="M44.5 63c1 10 7.4 17 15.5 17s14.5-7 15.5-17c-2.6 5-8.4 8-15.5 8s-12.9-3-15.5-8z" fill="#3A2A1C"/>
+    <path d="M50 74c3 3.4 6.4 4.6 10 4.6S67 78 70 74c-2.8 2-6.4 3-10 3s-7.2-1-10-3z" fill="#5C4530" opacity=".5"/>
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#3A2A1C" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#CF9C6E" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#CF9C6E" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#CF9C6E" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#8C4A3A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-5 — Kavya Reddy -->
+  <symbol id="gf-p-5" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-5-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FBF0E7"/><stop offset="1" stop-color="#F2D9C3"/>
+      </linearGradient>
+      <radialGradient id="gf-p-5-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-5-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#E3B183"/><stop offset="0.55" stop-color="#C68A55"/><stop offset="1" stop-color="#A66C3C"/>
+      </linearGradient>
+      <linearGradient id="gf-p-5-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#B45309"/><stop offset="1" stop-color="#8A3F06"/>
+      </linearGradient>
+      <linearGradient id="gf-p-5-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#FFF7ED"/>
+      </linearGradient>
+      <radialGradient id="gf-p-5-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-5-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-5-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-5-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#8A3F06" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#B45309" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#B45309" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-5-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#FFF7ED"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#FFF7ED"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#D97706" opacity=".9"/>
+    
+    <path d="M40 84c4 10 11 16 20 16s16-6 20-16l-6-4c-3.4 8-8.6 12-14 12s-10.6-4-14-12z" fill="#D97706" opacity=".28"/>
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#A66C3C"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#C68A55"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#C68A55"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#A66C3C" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#A66C3C" opacity=".6"/>
+    
+    <circle cx="38.5" cy="63" r="1.9" fill="#D4A017"/>
+    <circle cx="81.5" cy="63" r="1.9" fill="#D4A017"/>
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-5-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-5-face)"/>
+    
+    <path d="M34.5 62c-5-26 12-40 25.5-40S85.5 36 80.5 62c-1.6 12-4 22-6.5 30 8-6 11.5-19 11-32-1-24-12-34-25-34S35.5 36 34.5 60c-.5 13 3 26 11 32-2.5-8-5-18-6.5-30z" fill="#26180F"/>
+    <path d="M37 54c-3.6-21.5 10.6-32.5 23-32.5S83.6 32.5 80 54c-2-8.6-6-13.6-10.6-16-6.6 5.4-18.8 5.4-25.4 0-4.6 2.4-8.6 7.4-10.6 16z" fill="#26180F"/>
+    <path d="M40 43c3-7.6 10.6-12.6 20-12.6 7.4 0 13.4 2.6 17 7-3.4-2.4-8.6-3.8-15-3.8-9.4 0-16.4 3-22 9.4z" fill="#4A3220" opacity=".55"/>
+    <path d="M35 60c-2 12 0 26 6 36-6-3-9.5-11-10-20-.4-7 1.4-12.6 4-16z" fill="#26180F"/>
+    <path d="M85 60c2 12 0 26-6 36 6-3 9.5-11 10-20 .4-7-1.4-12.6-4-16z" fill="#26180F"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#26180F" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#A66C3C" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#A66C3C" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#A66C3C" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#9C4A3C" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-6 — Arjun Bhatt -->
+  <symbol id="gf-p-6" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-6-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EDF1F7"/><stop offset="1" stop-color="#CDD6E4"/>
+      </linearGradient>
+      <radialGradient id="gf-p-6-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-6-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#B07A45"/><stop offset="0.55" stop-color="#8D5524"/><stop offset="1" stop-color="#6E411A"/>
+      </linearGradient>
+      <linearGradient id="gf-p-6-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0F172A"/><stop offset="1" stop-color="#0A101E"/>
+      </linearGradient>
+      <linearGradient id="gf-p-6-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F1F5F9"/>
+      </linearGradient>
+      <radialGradient id="gf-p-6-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-6-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-6-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-6-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#0A101E" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#0F172A" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#0F172A" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-6-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#F1F5F9"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#F1F5F9"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#B45309" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#6E411A"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#8D5524"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#8D5524"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#6E411A" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#6E411A" opacity=".6"/>
+    
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-6-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-6-face)"/>
+    
+    <path d="M38.5 51c0-15.5 9.5-24.5 21.5-24.5S81.5 35.5 81.5 51c-3.2-8.6-10.4-13.4-21.5-13.4S41.7 42.4 38.5 51z" fill="#14100C"/>
+    <path d="M41 47c2.6-7.6 9.4-11.8 19-11.8 7.2 0 13 2.4 16.4 6.8-3.4-2.2-8.2-3.4-14.2-3.4-9.2 0-16.2 2.8-21.2 8.4z" fill="#2E241A" opacity=".55"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#14100C" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#6E411A" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#6E411A" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#6E411A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#7E3A2C" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-7 — Meera Iyer -->
+  <symbol id="gf-p-7" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-7-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F2F5FB"/><stop offset="1" stop-color="#D7E0F0"/>
+      </linearGradient>
+      <radialGradient id="gf-p-7-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-7-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#D69B63"/><stop offset="0.55" stop-color="#B87A45"/><stop offset="1" stop-color="#96602F"/>
+      </linearGradient>
+      <linearGradient id="gf-p-7-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3730A3"/><stop offset="1" stop-color="#272173"/>
+      </linearGradient>
+      <linearGradient id="gf-p-7-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F5F7FF"/>
+      </linearGradient>
+      <radialGradient id="gf-p-7-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-7-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-7-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-7-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#272173" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#3730A3" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#3730A3" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-7-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#F5F7FF"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#F5F7FF"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#C7D2FE" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#96602F"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#B87A45"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#B87A45"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#96602F" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#96602F" opacity=".6"/>
+    
+    <circle cx="38.5" cy="63" r="1.9" fill="#D4A017"/>
+    <circle cx="81.5" cy="63" r="1.9" fill="#D4A017"/>
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-7-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-7-face)"/>
+    
+    <circle cx="60" cy="24.5" r="9.5" fill="#1A120B"/>
+    <circle cx="60" cy="24.5" r="9.5" fill="#38271A" opacity=".35"/>
+    <path d="M37.5 54c-3.6-21.5 10.6-32.5 22.5-32.5S83.6 32.5 80 54c-2-8.6-6-13.6-10.6-16-6.6 5.4-18.8 5.4-25.4 0-4.6 2.4-8.6 7.4-10.6 16z" fill="#1A120B"/>
+    <path d="M41 44c2.8-7.6 10.2-12.6 19-12.6 7 0 13 2.6 16.6 7-3.4-2.4-8.4-3.8-14.6-3.8-9 0-15.6 3-21 9.4z" fill="#38271A" opacity=".5"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#1A120B" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#96602F" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <path d="M60 57v6.5" stroke="#96602F" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#96602F" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#94413A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+  <!-- =============================================== gf-p-8 — Daniel Fernandes -->
+  <symbol id="gf-p-8" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="gf-p-8-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EEF2F8"/><stop offset="1" stop-color="#D0DAE8"/>
+      </linearGradient>
+      <radialGradient id="gf-p-8-spot" cx="0.5" cy="0.34" r="0.62">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gf-p-8-skin" x1="0.3" y1="0.1" x2="0.75" y2="1">
+        <stop offset="0" stop-color="#F3CBA4"/><stop offset="0.55" stop-color="#E0AC80"/><stop offset="1" stop-color="#BE8A5C"/>
+      </linearGradient>
+      <linearGradient id="gf-p-8-jacket" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0E7490"/><stop offset="1" stop-color="#0A586E"/>
+      </linearGradient>
+      <linearGradient id="gf-p-8-shirt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#FFFFFF"/>
+      </linearGradient>
+      <radialGradient id="gf-p-8-face" cx="0.38" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+        <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- studio backdrop with vignette + key light -->
+    <rect width="120" height="120" fill="url(#gf-p-8-bg)"/>
+    <rect width="120" height="120" fill="url(#gf-p-8-spot)"/>
+    <rect width="120" height="120" fill="#0F172A" opacity=".06"/>
+
+    <!-- shoulders / jacket -->
+    <path d="M8 120c0-27 22-42 52-42s52 15 52 42z" fill="url(#gf-p-8-jacket)"/>
+    <path d="M60 78c9 0 17 2 24 6l-8 36H44l-8-36c7-4 15-6 24-6z" fill="#0A586E" opacity=".55"/>
+    <path d="M60 96l-16-15 6-3 10 12z" fill="#0E7490" opacity=".8"/>
+    <path d="M60 96l16-15-6-3-10 12z" fill="#0E7490" opacity=".8"/>
+    <path d="M47 79l13 17 13-17-7-3H54z" fill="url(#gf-p-8-shirt)"/>
+    <path d="M54 79l6 5 6-5-3-2h-6z" fill="#FFFFFF"/>
+    <path d="M47 79l7 6-4 7zM73 79l-7 6 4 7z" fill="#FFFFFF"/>
+    <path d="M60 98l-6-13 6-4 6 4z" fill="#67E8F9" opacity=".9"/>
+    
+    <path d="M53 71h14v12a7 7 0 0 1-14 0z" fill="#BE8A5C"/>
+    <path d="M53 71h14v5a7 7 0 0 1-14 0z" fill="#000" opacity=".16"/>
+
+    <ellipse cx="39" cy="56" rx="3.8" ry="6" fill="#E0AC80"/>
+    <ellipse cx="81" cy="56" rx="3.8" ry="6" fill="#E0AC80"/>
+    <ellipse cx="39" cy="56" rx="1.6" ry="3" fill="#BE8A5C" opacity=".6"/>
+    <ellipse cx="81" cy="56" rx="1.6" ry="3" fill="#BE8A5C" opacity=".6"/>
+    
+
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-8-skin)"/>
+    <ellipse cx="60" cy="54" rx="21" ry="24" fill="url(#gf-p-8-face)"/>
+    
+    <path d="M38.5 51c0-15.5 9.5-24.5 21.5-24.5S81.5 35.5 81.5 51c-3.2-8.6-10.4-13.4-21.5-13.4S41.7 42.4 38.5 51z" fill="#2A2018"/>
+    <path d="M41 47c2.6-7.6 9.4-11.8 19-11.8 7.2 0 13 2.4 16.4 6.8-3.4-2.2-8.2-3.4-14.2-3.4-9.2 0-16.2 2.8-21.2 8.4z" fill="#4E3C2A" opacity=".55"/>
+    
+    <path d="M49.5 48.5c2-1.4 4.6-1.6 6.5-.6M64 47.9c1.9-1 4.5-.8 6.5.6" stroke="#2A2018" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <ellipse cx="53" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="67" cy="54" rx="3.4" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="53" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="67" cy="54" r="2.1" fill="#3B2A1E"/>
+    <circle cx="53" cy="54" r="1" fill="#120C08"/>
+    <circle cx="67" cy="54" r="1" fill="#120C08"/>
+    <circle cx="53.8" cy="53.2" r="0.6" fill="#fff"/>
+    <circle cx="67.8" cy="53.2" r="0.6" fill="#fff"/>
+    <path d="M49.6 52.2c2-1.6 5-1.6 6.8 0M63.6 52.2c1.8-1.6 4.8-1.6 6.8 0" stroke="#BE8A5C" stroke-width="1" fill="none" opacity=".6"/>
+    
+    <g fill="none" stroke="#26303D" stroke-width="1.8">
+      <rect x="43.5" y="49.5" width="14.5" height="10.5" rx="4"/>
+      <rect x="62" y="49.5" width="14.5" height="10.5" rx="4"/>
+      <path d="M58 53.5h4M43.5 52.5l-5 1.2M76.5 52.5l5 1.2" stroke-linecap="round"/>
+    </g>
+    <rect x="45" y="51" width="11.5" height="7.5" rx="3" fill="#BFD3EA" opacity=".35"/>
+    <path d="M60 57v6.5" stroke="#BE8A5C" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M57.4 64.6c1.6 1 3.6 1 5.2 0" stroke="#BE8A5C" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".7"/>
+    <path d="M54.5 69.4c3.4 2.4 7.6 2.4 11 0" stroke="#8C4A3A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M56.5 69.6c2.2 1 4.8 1 7 0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" fill="none" opacity=".5"/>
+    <ellipse cx="48" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+    <ellipse cx="72" cy="60" rx="4.5" ry="3" fill="#fff" opacity=".07"/>
+  </symbol>
+</svg>

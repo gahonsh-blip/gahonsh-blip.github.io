@@ -1,0 +1,28 @@
+# Gahonsh Finance — public site
+#
+# The customer-facing content pages (home, products, rates, help, legal, ...)
+# are meant to be discoverable, so crawlers are allowed on the public site. The
+# transactional surfaces are disallowed: sign-in, sign-up, password reset and
+# client completion are marked `noindex,nofollow` in the page itself, and the
+# staff / borrower portals must never be indexed.
+#
+# The machine-readable sitemap is /sitemap.xml; the human-readable page index
+# lives at /site/sitemap.html.
+#
+# NOTE: the `Sitemap:` line carries an absolute URL, which robots.txt requires.
+# Update it (and the <loc> entries in apps/sitemap.xml) when a custom public
+# domain is attached — the Worker hostname below is the current deployment.
+
+User-agent: *
+Allow: /site/
+Disallow: /admin/
+Disallow: /customer/
+Disallow: /agent/
+Disallow: /mobile/
+Disallow: /api/
+Disallow: /site/signin.html
+Disallow: /site/signup.html
+Disallow: /site/reset-password.html
+Disallow: /site/client.html
+
+Sitemap: https://gahonsh-finance.gahonsh.workers.dev/sitemap.xml

@@ -1,0 +1,699 @@
+/* ==========================================================================
+   Gahonsh Finance — Shared International Design System
+   --------------------------------------------------------------------------
+   The single source of truth for the brand's visual language: colour, type,
+   spacing, radius, elevation and motion, plus the small set of primitives the
+   lightweight portals are built from.
+
+   This file is intentionally framework-free and dependency-free so it can be
+   loaded by the plain-HTML portals (`/mobile`, `/customer`, `/agent`) as well
+   as referenced by the richer `/site` and `/admin` themes. Pages consume it
+   via `<link rel="stylesheet" href="/finance/shared/tokens.css">` and then layer
+   their own page-specific rules on top.
+
+   Tokens are exposed under the `--gf-*` namespace so they never collide with
+   the legacy `--color-*` (admin) or `--brand-*` / `--c-*` (public site)
+   vocabularies while those two themes are migrated over.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Brand -------------------------------------------------------- */
+  --gf-navy-900: #0F1F4B;
+  --gf-navy-800: #172E6E;
+  --gf-navy-700: #1E3A8A; /* Trustworthy Blue — primary */
+  --gf-navy-600: #1D4ED8;
+  --gf-navy-500: #3B82F6;
+
+  --gf-green-800: #065F46;
+  --gf-green-700: #047857; /* Financial Green — secondary */
+  --gf-green-600: #059669;
+  --gf-green-500: #10B981;
+
+  --gf-gold-700: #B45309; /* Accent — caution, never decorative */
+  --gf-gold-600: #D97706;
+
+  /* ---- Neutrals (slate) --------------------------------------------- */
+  --gf-slate-50: #F8FAFC;
+  --gf-slate-100: #F1F5F9;
+  --gf-slate-200: #E2E8F0;
+  --gf-slate-300: #CBD5E1;
+  --gf-slate-400: #94A3B8;
+  --gf-slate-500: #64748B;
+  --gf-slate-600: #475569;
+  --gf-slate-700: #334155;
+  --gf-slate-800: #1E293B;
+  --gf-slate-900: #0F172A;
+
+  /* ---- Semantic — surfaces ------------------------------------------ */
+  --gf-bg: var(--gf-slate-50);
+  --gf-bg-alt: var(--gf-slate-100);
+  --gf-surface: #FFFFFF;
+  --gf-surface-sunken: var(--gf-slate-50);
+  --gf-border: var(--gf-slate-200);
+  --gf-border-strong: var(--gf-slate-300);
+
+  /* ---- Semantic — text ---------------------------------------------- */
+  --gf-ink: var(--gf-slate-900);
+  --gf-ink-soft: var(--gf-slate-700);
+  --gf-muted: var(--gf-slate-500);
+  --gf-on-brand: #FFFFFF;
+
+  /* ---- Semantic — actions ------------------------------------------- */
+  --gf-primary: var(--gf-navy-700);
+  --gf-primary-hover: var(--gf-navy-600);
+  --gf-primary-active: var(--gf-navy-800);
+  --gf-secondary: var(--gf-green-700);
+  --gf-secondary-hover: var(--gf-green-600);
+  --gf-focus: var(--gf-navy-700);
+
+  /* ---- Semantic — status -------------------------------------------- */
+  --gf-danger: #DC2626;
+  --gf-danger-bg: #FEF2F2;
+  --gf-danger-border: #FECACA;
+  --gf-success: var(--gf-green-700);
+  --gf-success-bg: #ECFDF5;
+  --gf-success-border: #A7F3D0;
+  --gf-warning: var(--gf-gold-700);
+  --gf-warning-bg: #FFFBEB;
+  --gf-warning-border: #FDE68A;
+  --gf-info: var(--gf-navy-700);
+  --gf-info-bg: #EFF6FF;
+  --gf-info-border: #BFDBFE;
+
+  /* ---- Typography ---------------------------------------------------- */
+  --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, 'Noto Sans', sans-serif;
+  --gf-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --gf-text-xs: 12px;
+  --gf-text-sm: 13px;
+  --gf-text-base: 15px;
+  --gf-text-lg: 17px;
+  --gf-text-xl: 20px;
+  --gf-text-2xl: 25px;
+  --gf-text-3xl: 32px;
+
+  --gf-leading-tight: 1.25;
+  --gf-leading-normal: 1.55;
+  --gf-leading-relaxed: 1.7;
+
+  --gf-weight-normal: 400;
+  --gf-weight-medium: 500;
+  --gf-weight-semibold: 600;
+  --gf-weight-bold: 700;
+
+  /* ---- Spacing (4px base) -------------------------------------------- */
+  --gf-space-1: 4px;
+  --gf-space-2: 8px;
+  --gf-space-3: 12px;
+  --gf-space-4: 16px;
+  --gf-space-5: 24px;
+  --gf-space-6: 32px;
+  --gf-space-7: 48px;
+
+  /* ---- Radius -------------------------------------------------------- */
+  --gf-radius-sm: 6px;
+  --gf-radius: 10px;
+  --gf-radius-lg: 14px;
+  --gf-radius-pill: 999px;
+
+  /* ---- Elevation ----------------------------------------------------- */
+  --gf-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --gf-shadow-2: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --gf-shadow-3: 0 18px 40px -12px rgba(15, 23, 42, 0.18);
+  --gf-ring: 0 0 0 3px rgba(30, 58, 138, 0.28);
+
+  /* ---- Motion -------------------------------------------------------- */
+  --gf-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --gf-duration-fast: 120ms;
+  --gf-duration: 200ms;
+
+  /* ---- Layout -------------------------------------------------------- */
+  --gf-maxw: 720px;
+  --gf-tap: 44px; /* minimum touch target */
+}
+
+/* ---- Dark theme ------------------------------------------------------ */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --gf-bg: #0B1220;
+  --gf-bg-alt: #0F172A;
+  --gf-surface: #16203A;
+  --gf-surface-sunken: #111A2E;
+  --gf-border: #26314D;
+  --gf-border-strong: #384566;
+
+  --gf-ink: #F8FAFC;
+  --gf-ink-soft: #CBD5E1;
+  --gf-muted: #94A3B8;
+
+  --gf-primary: var(--gf-navy-500);
+  --gf-primary-hover: #60A5FA;
+  --gf-primary-active: var(--gf-navy-600);
+  --gf-secondary: var(--gf-green-500);
+  --gf-secondary-hover: #34D399;
+  --gf-focus: var(--gf-navy-500);
+
+  --gf-danger-bg: #3B1114;
+  --gf-danger-border: #7F1D1D;
+  --gf-success-bg: #052E23;
+  --gf-success-border: #065F46;
+  --gf-warning-bg: #3A2A08;
+  --gf-warning-border: #78350F;
+  --gf-info-bg: #14244A;
+  --gf-info-border: #1E3A8A;
+
+  --gf-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --gf-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --gf-shadow-3: 0 18px 40px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* Honour the OS preference when the page has not chosen a theme itself. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --gf-bg: #0B1220;
+    --gf-bg-alt: #0F172A;
+    --gf-surface: #16203A;
+    --gf-surface-sunken: #111A2E;
+    --gf-border: #26314D;
+    --gf-border-strong: #384566;
+    --gf-ink: #F8FAFC;
+    --gf-ink-soft: #CBD5E1;
+    --gf-muted: #94A3B8;
+    --gf-primary: var(--gf-navy-500);
+    --gf-primary-hover: #60A5FA;
+    --gf-focus: var(--gf-navy-500);
+    --gf-danger-bg: #3B1114;
+    --gf-danger-border: #7F1D1D;
+    --gf-success-bg: #052E23;
+    --gf-success-border: #065F46;
+    --gf-warning-bg: #3A2A08;
+    --gf-warning-border: #78350F;
+    --gf-info-bg: #14244A;
+    --gf-info-border: #1E3A8A;
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* The portals toggle content through the HTML `hidden` attribute. Component
+   rules below set `display` (e.g. `.gf-error`, `.gf-loading`), which would
+   otherwise override the user-agent `[hidden] { display: none }` rule and
+   paint hidden cards, errors and loaders. Re-assert it. */
+[hidden] {
+  display: none !important;
+}
+
+body.gf {
+  margin: 0;
+  font-family: var(--gf-font);
+  font-size: var(--gf-text-base);
+  line-height: var(--gf-leading-normal);
+  color: var(--gf-ink);
+  background: var(--gf-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.gf h1,
+body.gf h2,
+body.gf h3 {
+  margin: 0 0 var(--gf-space-2);
+  line-height: var(--gf-leading-tight);
+  letter-spacing: -0.01em;
+}
+
+body.gf h1 { font-size: var(--gf-text-2xl); font-weight: var(--gf-weight-bold); }
+body.gf h2 { font-size: var(--gf-text-xl); font-weight: var(--gf-weight-semibold); }
+body.gf h3 { font-size: var(--gf-text-lg); font-weight: var(--gf-weight-semibold); }
+
+body.gf p { margin: 0 0 var(--gf-space-3); }
+
+body.gf a { color: var(--gf-primary); }
+
+/* Visible focus for keyboard users on every interactive control. */
+body.gf :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--gf-ring);
+  border-radius: var(--gf-radius-sm);
+}
+
+.gf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.gf-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: var(--gf-space-2) var(--gf-space-4);
+  background: var(--gf-surface);
+  border-radius: var(--gf-radius-sm);
+  box-shadow: var(--gf-shadow-2);
+}
+.gf-skip:focus { left: var(--gf-space-4); top: var(--gf-space-4); }
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+
+.gf-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--gf-space-3);
+  padding: var(--gf-space-3) var(--gf-space-4);
+  background: var(--gf-surface);
+  border-bottom: 1px solid var(--gf-border);
+}
+
+.gf-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--gf-space-3);
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.gf-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--gf-radius);
+  background: var(--gf-primary);
+  color: var(--gf-on-brand);
+  font-weight: var(--gf-weight-bold);
+  font-size: var(--gf-text-sm);
+  letter-spacing: 0.02em;
+}
+
+.gf-brand__name {
+  display: block;
+  font-size: var(--gf-text-base);
+  font-weight: var(--gf-weight-semibold);
+  line-height: 1.2;
+}
+
+.gf-brand__sub {
+  display: block;
+  font-size: var(--gf-text-xs);
+  color: var(--gf-muted);
+}
+
+.gf-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--gf-maxw);
+  margin: 0 auto;
+  padding: var(--gf-space-5) var(--gf-space-4) var(--gf-space-7);
+}
+
+.gf-main--wide { max-width: 1100px; }
+
+.gf-footer {
+  padding: var(--gf-space-4);
+  text-align: center;
+  font-size: var(--gf-text-xs);
+  color: var(--gf-muted);
+  border-top: 1px solid var(--gf-border);
+}
+
+.gf-page-head { margin-bottom: var(--gf-space-5); }
+.gf-page-head p { color: var(--gf-muted); margin: 0; }
+
+/* ==========================================================================
+   Card
+   ========================================================================== */
+
+.gf-card {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: var(--gf-radius-lg);
+  box-shadow: var(--gf-shadow-1);
+  padding: var(--gf-space-5);
+  margin-bottom: var(--gf-space-4);
+}
+
+.gf-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gf-space-3);
+  margin-bottom: var(--gf-space-4);
+}
+
+.gf-card__head h2 { margin: 0; }
+
+/* ==========================================================================
+   Form
+   ========================================================================== */
+
+.gf-field { margin-bottom: var(--gf-space-4); }
+
+.gf-label {
+  display: block;
+  margin-bottom: var(--gf-space-2);
+  font-size: var(--gf-text-sm);
+  font-weight: var(--gf-weight-medium);
+  color: var(--gf-ink-soft);
+}
+
+.gf-hint {
+  display: block;
+  margin-top: var(--gf-space-1);
+  font-size: var(--gf-text-xs);
+  color: var(--gf-muted);
+}
+
+.gf-input,
+.gf-select {
+  width: 100%;
+  min-height: var(--gf-tap);
+  padding: var(--gf-space-3) var(--gf-space-4);
+  font: inherit;
+  font-size: var(--gf-text-base);
+  color: var(--gf-ink);
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border-strong);
+  border-radius: var(--gf-radius);
+  transition: border-color var(--gf-duration) var(--gf-ease),
+    box-shadow var(--gf-duration) var(--gf-ease);
+}
+
+.gf-input::placeholder { color: var(--gf-muted); }
+
+.gf-input:hover,
+.gf-select:hover { border-color: var(--gf-slate-400); }
+
+.gf-input:focus,
+.gf-select:focus {
+  outline: none;
+  border-color: var(--gf-primary);
+  box-shadow: var(--gf-ring);
+}
+
+.gf-input[aria-invalid='true'] {
+  border-color: var(--gf-danger);
+  background: var(--gf-danger-bg);
+}
+
+.gf-error {
+  display: block;
+  margin-top: var(--gf-space-1);
+  font-size: var(--gf-text-xs);
+  color: var(--gf-danger);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.gf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gf-space-2);
+  min-height: var(--gf-tap);
+  padding: var(--gf-space-3) var(--gf-space-5);
+  font: inherit;
+  font-size: var(--gf-text-base);
+  font-weight: var(--gf-weight-semibold);
+  line-height: 1;
+  color: var(--gf-ink);
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border-strong);
+  border-radius: var(--gf-radius);
+  cursor: pointer;
+  transition: background-color var(--gf-duration) var(--gf-ease),
+    border-color var(--gf-duration) var(--gf-ease),
+    transform var(--gf-duration-fast) var(--gf-ease);
+}
+
+.gf-btn:hover { background: var(--gf-bg-alt); }
+.gf-btn:active { transform: translateY(1px); }
+
+.gf-btn--primary {
+  color: var(--gf-on-brand);
+  background: var(--gf-primary);
+  border-color: var(--gf-primary);
+}
+.gf-btn--primary:hover { background: var(--gf-primary-hover); border-color: var(--gf-primary-hover); }
+
+.gf-btn--secondary {
+  color: var(--gf-on-brand);
+  background: var(--gf-secondary);
+  border-color: var(--gf-secondary);
+}
+.gf-btn--secondary:hover { background: var(--gf-secondary-hover); border-color: var(--gf-secondary-hover); }
+
+.gf-btn--danger {
+  color: var(--gf-danger);
+  background: var(--gf-danger-bg);
+  border-color: var(--gf-danger-border);
+}
+
+.gf-btn--block { width: 100%; }
+
+.gf-btn[disabled],
+.gf-btn[aria-busy='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================================================
+   Badge
+   ========================================================================== */
+
+.gf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gf-space-1);
+  padding: 2px var(--gf-space-3);
+  font-size: var(--gf-text-xs);
+  font-weight: var(--gf-weight-semibold);
+  border-radius: var(--gf-radius-pill);
+  border: 1px solid var(--gf-border);
+  background: var(--gf-bg-alt);
+  color: var(--gf-ink-soft);
+  white-space: nowrap;
+}
+
+.gf-badge--success { color: var(--gf-success); background: var(--gf-success-bg); border-color: var(--gf-success-border); }
+.gf-badge--warning { color: var(--gf-warning); background: var(--gf-warning-bg); border-color: var(--gf-warning-border); }
+.gf-badge--danger  { color: var(--gf-danger);  background: var(--gf-danger-bg);  border-color: var(--gf-danger-border); }
+.gf-badge--info    { color: var(--gf-info);    background: var(--gf-info-bg);    border-color: var(--gf-info-border); }
+
+/* ==========================================================================
+   Alert
+   ========================================================================== */
+
+.gf-alert {
+  padding: var(--gf-space-3) var(--gf-space-4);
+  border-radius: var(--gf-radius);
+  border: 1px solid var(--gf-border);
+  background: var(--gf-bg-alt);
+  font-size: var(--gf-text-sm);
+  margin-bottom: var(--gf-space-4);
+}
+
+.gf-alert--success { color: var(--gf-success); background: var(--gf-success-bg); border-color: var(--gf-success-border); }
+.gf-alert--warning { color: var(--gf-warning); background: var(--gf-warning-bg); border-color: var(--gf-warning-border); }
+.gf-alert--danger  { color: var(--gf-danger);  background: var(--gf-danger-bg);  border-color: var(--gf-danger-border); }
+.gf-alert--info    { color: var(--gf-info);    background: var(--gf-info-bg);    border-color: var(--gf-info-border); }
+
+/* ==========================================================================
+   Table
+   ========================================================================== */
+
+.gf-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--gf-text-sm);
+}
+
+.gf-table th,
+.gf-table td {
+  padding: var(--gf-space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--gf-border);
+}
+
+.gf-table th {
+  font-size: var(--gf-text-xs);
+  font-weight: var(--gf-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gf-muted);
+}
+
+.gf-table tbody tr:hover { background: var(--gf-bg-alt); }
+
+/* ==========================================================================
+   States
+   ========================================================================== */
+
+.gf-empty {
+  padding: var(--gf-space-6) var(--gf-space-4);
+  text-align: center;
+  color: var(--gf-muted);
+  font-size: var(--gf-text-sm);
+}
+
+.gf-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gf-space-3);
+  padding: var(--gf-space-6) var(--gf-space-4);
+  color: var(--gf-muted);
+  font-size: var(--gf-text-sm);
+}
+
+.gf-spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 2px solid var(--gf-border-strong);
+  border-top-color: var(--gf-primary);
+  border-radius: 50%;
+  animation: gf-spin 0.7s linear infinite;
+}
+
+@keyframes gf-spin { to { transform: rotate(360deg); } }
+
+/* ==========================================================================
+   Icons & brand mark
+   --------------------------------------------------------------------------
+   Icons come from `/shared/icons.svg` and inherit `currentColor`; this
+   rule only sets their box. Decorative icons are marked aria-hidden by the
+   page, functional icon-only controls must carry an aria-label.
+   ========================================================================== */
+
+.gf-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.gf-icon--sm { width: 16px; height: 16px; }
+.gf-icon--lg { width: 28px; height: 28px; }
+
+/* The real brand logo as an image, sized to sit where the text monogram did. */
+.gf-brand__logo {
+  display: block;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--gf-radius);
+}
+
+/* ==========================================================================
+   Trust strip
+   --------------------------------------------------------------------------
+   The regulatory/security assurance row used near the top of the public site.
+   Four concise, scannable signals rather than a wall of legal text.
+   ========================================================================== */
+
+.gf-trust {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--gf-space-3);
+  margin: 0 0 var(--gf-space-5);
+}
+
+.gf-trust__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gf-space-3);
+  padding: var(--gf-space-3) var(--gf-space-4);
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: var(--gf-radius);
+  box-shadow: var(--gf-shadow-1);
+}
+
+.gf-trust__item .gf-icon {
+  color: var(--gf-secondary);
+  margin-top: 1px;
+}
+
+.gf-trust__title {
+  display: block;
+  font-size: var(--gf-text-sm);
+  font-weight: var(--gf-weight-semibold);
+  color: var(--gf-ink);
+}
+
+.gf-trust__text {
+  display: block;
+  font-size: var(--gf-text-xs);
+  color: var(--gf-muted);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .gf-main { padding: var(--gf-space-4) var(--gf-space-3) var(--gf-space-6); }
+  .gf-card { padding: var(--gf-space-4); border-radius: var(--gf-radius); }
+  .gf-page-head h1 { font-size: var(--gf-text-xl); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

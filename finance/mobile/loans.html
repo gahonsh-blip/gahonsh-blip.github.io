@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>My Loans | Gahonsh Finance</title>
+<meta name="description" content="Sign in to the Gahonsh Finance borrower portal to view your active loans, outstanding balances and repayment status.">
+<link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+<link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/finance/shared/fonts.css">
+<link rel="stylesheet" href="/finance/shared/tokens.css">
+<script src="/finance/shared/session.js"></script>
+</head>
+<body class="gf">
+<a class="gf-skip" href="#main">Skip to main content</a>
+
+<div class="gf-shell">
+  <header class="gf-topbar">
+    <a class="gf-brand" href="/finance/site/" aria-label="Gahonsh Finance Borrower portal home">
+      <img class="gf-brand__logo" src="/finance/site/brand/logo.svg" alt="" width="38" height="38">
+      <span>
+        <span class="gf-brand__name" data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+        <span class="gf-brand__sub">Borrower portal</span>
+      </span>
+    </a>
+    <button type="button" id="themeToggle" class="gf-btn" style="margin-left:auto;min-height:36px;padding:var(--gf-space-2) var(--gf-space-3);font-size:var(--gf-text-sm)" aria-label="Switch colour theme">Theme</button>
+  </header>
+
+  <main class="gf-main" id="main">
+    <div class="gf-page-head">
+      <h1>My Loans</h1>
+      <p>Sign in to see your active loans, balances and repayment status.</p>
+    </div>
+
+    <section class="gf-card" id="signInCard" aria-labelledby="signInHeading">
+      <div class="gf-card__head"><h2 id="signInHeading">Sign in</h2></div>
+      <form id="signInForm" novalidate>
+        <div class="gf-field">
+          <label class="gf-label" for="email">Email address</label>
+          <input class="gf-input" id="email" name="email" type="email" placeholder="name@example.com"
+                 autocomplete="username" required aria-describedby="signInError">
+        </div>
+        <div class="gf-field">
+          <label class="gf-label" for="password">Password</label>
+          <input class="gf-input" id="password" name="password" type="password" placeholder="Your password"
+                 autocomplete="current-password" required aria-describedby="signInError">
+        </div>
+        <p class="gf-error" id="signInError" role="alert" hidden></p>
+        <button type="submit" class="gf-btn gf-btn--primary gf-btn--block" id="signInBtn">Sign in</button>
+      </form>
+    </section>
+
+    <section class="gf-card" id="listCard" hidden aria-labelledby="listHeading">
+      <div class="gf-card__head">
+        <h2 id="listHeading">Your loans</h2>
+        <button type="button" class="gf-btn" id="signOutBtn" style="min-height:36px;padding:var(--gf-space-2) var(--gf-space-3);font-size:var(--gf-text-sm)">Sign out</button>
+      </div>
+      <p class="gf-alert" id="message" role="status" hidden></p>
+      <div id="listState" class="gf-loading" hidden>
+        <span class="gf-spinner" aria-hidden="true"></span><span>Loading loans&hellip;</span>
+      </div>
+      <div class="gf-table-wrap">
+        <table class="gf-table">
+          <caption class="gf-sr-only">Your loans, principal, tenure and status</caption>
+          <thead>
+            <tr><th scope="col">Loan</th><th scope="col">Principal</th><th scope="col">Tenure</th><th scope="col">Status</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="gf-empty" id="emptyState" hidden>You have no loans yet.</p>
+    </section>
+  </main>
+
+  <footer class="gf-footer">
+    Gahonsh Finance &mdash; borrower portal. Development build, not for public lending.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var token = '';
+
+  var root = document.documentElement;
+  var saved = localStorage.getItem('gf-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    if (!current) current = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('gf-theme', next);
+  });
+
+  function $(id) { return document.getElementById(id); }
+  function text(el, msg) { el.textContent = msg; el.hidden = !msg; }
+  function busy(btn, on, label) {
+    btn.disabled = on;
+    btn.setAttribute('aria-busy', on ? 'true' : 'false');
+    if (label) btn.textContent = label;
+  }
+  function alertBox(el, kind, msg) {
+    el.className = 'gf-alert' + (kind ? ' gf-alert--' + kind : '');
+    text(el, msg);
+  }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  $('signInForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('signInError');
+    text(err, '');
+    var emailOk = !!$('email').value.trim();
+    var passOk = !!$('password').value;
+    $('email').setAttribute('aria-invalid', emailOk ? 'false' : 'true');
+    $('password').setAttribute('aria-invalid', passOk ? 'false' : 'true');
+    if (!emailOk || !passOk) { text(err, 'Enter your email and password.'); return; }
+
+    busy($('signInBtn'), true, 'Signing in\u2026');
+    try {
+      var res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('email').value.trim(), password: $('password').value })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) { text(err, data.detail || data.error || 'Sign in failed. Check your details and try again.'); return; }
+      // A second factor is required: verify the e-mailed code before continuing.
+      if (data.otp_required) {
+        var otpCode = window.prompt('Enter the 6-digit sign-in code we e-mailed you:');
+        if (!otpCode) { return; }
+        var vres = await fetch('/api/auth/login/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ challenge_token: data.challenge_token, code: otpCode })
+        });
+        var vdata = await vres.json().catch(function () { return {}; });
+        if (!vres.ok) { text(err, vdata.error || 'Verification failed. Please try again.'); return; }
+        data = vdata;
+      }
+      token = data.access_token || data.token || '';
+      if (!token) { text(err, 'Unexpected response from the server. Please try again.'); return; }
+      // Persist so a refresh restores the session instead of silently dropping
+      // it; the page re-verifies the token against the server on every load.
+      if (window.GFPortal) window.GFPortal.saveToken(token);
+      $('signInCard').hidden = true;
+      $('listCard').hidden = false;
+      $('password').value = '';
+      await load();
+    } catch (ex) {
+      text(err, 'Network error. Check your connection and try again.');
+    } finally {
+      busy($('signInBtn'), false, 'Sign in');
+    }
+  });
+
+  $('signOutBtn').addEventListener('click', function () {
+    token = '';
+    if (window.GFPortal) window.GFPortal.clear();
+    $('listCard').hidden = true;
+    $('signInCard').hidden = false;
+    $('rows').innerHTML = '';
+    text($('message'), '');
+    $('email').value = '';
+    $('password').value = '';
+  });
+
+  /**
+   * Restores a previously signed-in session and only reveals the loan list
+   * when the stored token is a live session on the server. An anonymous
+   * visitor, a forged token or an expired one stays on the sign-in card.
+   */
+  async function restoreSession() {
+    if (!window.GFPortal) return;
+    var session = await window.GFPortal.verify();
+    if (!session) return;
+    token = session.token;
+    $('signInCard').hidden = true;
+    $('listCard').hidden = false;
+    await load();
+  }
+
+  restoreSession();
+
+  async function load() {
+    var state = $('listState');
+    state.hidden = false;
+    $('emptyState').hidden = true;
+    try {
+      var res = await fetch('/api/me/loans', { headers: { Authorization: 'Bearer ' + token } });
+      var data = await res.json().catch(function () { return []; });
+      if (!res.ok || !Array.isArray(data)) {
+        alertBox($('message'), 'danger', 'Could not load your loans. Please refresh to try again.');
+        return;
+      }
+      $('rows').innerHTML = data.map(function (l) {
+        return '<tr><td>' + esc(l.loan_number) + '</td><td>' + esc(l.principal_amount) +
+          '</td><td>' + esc(l.tenure_days) + ' days</td><td>' + esc(l.status) + '</td></tr>';
+      }).join('');
+      $('emptyState').hidden = data.length > 0;
+    } catch (ex) {
+      alertBox($('message'), 'danger', 'Network error while loading loans. Please refresh to try again.');
+    } finally {
+      state.hidden = true;
+    }
+  }
+})();
+</script>
+<script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

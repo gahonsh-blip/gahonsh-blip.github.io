@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Audit Logs - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Audit Logs</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <div class="flex gap-2 mb-4">
+                    <input id="filterText" placeholder="Filter by action, setting or user" style="max-width:320px;">
+                    <button onclick="render()">Filter</button>
+                    <button class="btn-secondary" onclick="load()">Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>When</th><th>User</th><th>Action</th><th>Setting</th><th>Old</th><th>New</th><th>Metadata</th></tr></thead>
+                        <tbody id="auditRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+        let LOGS = [];
+
+        async function load() {
+            renderState('auditRows', 'loading', 'Loading audit log\u2026');
+            try {
+                const rows = await apiFetch('/api/audit');
+                LOGS = Array.isArray(rows) ? rows : (rows.items || []);
+                render();
+            } catch (err) { renderState('auditRows', 'error', err.message); }
+        }
+
+        function render() {
+            const needle = el('filterText').value.toLowerCase();
+            const filtered = needle
+                ? LOGS.filter((l) => [l.action, l.setting, l.user_id].some((v) => String(v || '').toLowerCase().includes(needle)))
+                : LOGS;
+            if (filtered.length === 0) { renderState('auditRows', 'empty', 'No audit entries match.'); return; }
+            el('auditRows').innerHTML = filtered.map((l) => `<tr>
+                <td>${formatDate(l.created_at)}</td>
+                <td>${escapeHtml(l.user_id || '-')}</td>
+                <td><strong>${escapeHtml(l.action)}</strong></td>
+                <td>${escapeHtml(l.setting || '-')}</td>
+                <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(l.old_value || '')}</td>
+                <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(l.new_value || '')}</td>
+                <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(l.metadata || '')}</td>
+            </tr>`).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', load);
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

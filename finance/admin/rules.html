@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Rules &amp; Automation - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Rules &amp; Automation</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="notice">
+                Rules are evaluated when their event fires. Automation is processed in the background, so
+                a messaging outage never blocks a financial transaction.
+            </div>
+
+            <div class="flex gap-2 mb-4" style="flex-wrap:wrap;">
+                <button onclick="openRuleEditor()">New rule</button>
+                <button class="btn-secondary" onclick="runAutomation()">Run automation queue</button>
+                <button class="btn-secondary" onclick="loadAll()">Refresh</button>
+            </div>
+
+            <div class="card">
+                <h2>Rules</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Priority</th><th>Name</th><th>Event</th><th>Conditions</th><th>Actions</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="rulesRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Automation runs</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Started</th><th>Event</th><th>Rule</th><th>Matched</th><th>Status</th><th>Executed</th><th>Error</th></tr></thead>
+                        <tbody id="runsRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Failures (dead-letter queue)</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Event</th><th>Type</th><th>Attempts</th><th>Last error</th><th>Actions</th></tr></thead>
+                        <tbody id="failuresRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+        let META = { events: [], operators: [], actionTypes: [] };
+
+        async function loadAll() {
+            await Promise.all([loadMeta(), loadRules(), loadRuns(), loadFailures()]);
+        }
+
+        async function loadMeta() {
+            try { META = await apiFetch('/api/rules/meta'); } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function loadRules() {
+            renderState('rulesRows', 'loading', 'Loading rules\u2026');
+            try {
+                const result = await apiFetch('/api/rules');
+                const items = result.items || [];
+                if (items.length === 0) { renderState('rulesRows', 'empty', 'No rules configured yet. Create one to automate notifications, tasks and status changes.'); return; }
+                el('rulesRows').innerHTML = items.map((r) => {
+                    const conditions = safeParse(r.conditions_json, []);
+                    const actions = safeParse(r.actions_json, []);
+                    return `<tr>
+                        <td>${r.priority}</td>
+                        <td><strong>${escapeHtml(r.name)}</strong><div class="text-muted" style="font-size:11px;">v${r.version}</div></td>
+                        <td><code>${escapeHtml(r.event)}</code></td>
+                        <td style="font-size:12px;">${conditions.map((c) => `${escapeHtml(c.field)} ${escapeHtml(c.operator)} ${escapeHtml(String(c.value ?? ''))}`).join('<br>') || '\u2014'}</td>
+                        <td style="font-size:12px;">${actions.map((a) => escapeHtml(a.type)).join('<br>')}</td>
+                        <td>${r.is_active ? '<span class="badge badge-success">ACTIVE</span>' : '<span class="badge badge-warning">INACTIVE</span>'}</td>
+                        <td>
+                            <button class="btn-secondary" onclick="openRuleEditor('${r.id}')">Edit</button>
+                            <button class="btn-secondary" onclick="toggleRule('${r.id}', ${r.is_active ? 0 : 1})">${r.is_active ? 'Disable' : 'Enable'}</button>
+                            <button class="btn-secondary" onclick="deleteRule('${r.id}')">Delete</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (err) { renderState('rulesRows', 'error', err.message); }
+        }
+
+        function safeParse(json, fallback) {
+            try { const v = JSON.parse(json); return Array.isArray(v) ? v : fallback; } catch { return fallback; }
+        }
+
+        async function loadRuns() {
+            renderState('runsRows', 'loading', 'Loading runs\u2026');
+            try {
+                const result = await apiFetch('/api/automation/runs?limit=25');
+                const items = result.items || [];
+                if (items.length === 0) { renderState('runsRows', 'empty', 'No automation runs recorded yet.'); return; }
+                el('runsRows').innerHTML = items.map((r) => `<tr>
+                    <td>${formatDate(r.started_at)}</td>
+                    <td><code>${escapeHtml(r.event_type || r.event_id || '')}</code></td>
+                    <td>${escapeHtml(r.rule_name || r.rule_id || '')}</td>
+                    <td>${r.matched ? 'Yes' : 'No'}</td>
+                    <td>${statusBadge(r.status)}</td>
+                    <td>${r.actions_executed || 0} ok / ${r.actions_failed || 0} failed</td>
+                    <td style="font-size:12px;color:var(--color-danger);">${escapeHtml(r.error || '')}</td>
+                </tr>`).join('');
+            } catch (err) { renderState('runsRows', 'error', err.message); }
+        }
+
+        async function loadFailures() {
+            renderState('failuresRows', 'loading', 'Loading failures\u2026');
+            try {
+                const result = await apiFetch('/api/automation/failures');
+                const items = result.events || [];
+                if (items.length === 0) { renderState('failuresRows', 'empty', 'No failed automation events. '); return; }
+                el('failuresRows').innerHTML = items.map((e) => `<tr>
+                    <td><code>${escapeHtml(e.id)}</code></td>
+                    <td>${escapeHtml(e.event_type)}</td>
+                    <td>${e.attempts || 0}</td>
+                    <td style="font-size:12px;color:var(--color-danger);">${escapeHtml(e.last_error || '')}</td>
+                    <td><button class="btn-secondary" onclick="retryEvent('${e.id}')">Retry</button></td>
+                </tr>`).join('');
+            } catch (err) { renderState('failuresRows', 'error', err.message); }
+        }
+
+        async function retryEvent(id) {
+            try {
+                await apiFetch(`/api/automation/events/${id}/retry`, { method: 'POST', body: {} });
+                showToast('Event requeued', 'success');
+                loadAll();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function runAutomation() {
+            try {
+                const result = await apiFetch('/api/automation/run', { method: 'POST', body: { limit: 50 } });
+                showToast(`Processed ${result.events.processed} events (${result.events.completed} completed, ${result.events.deadLettered} dead-lettered)`, 'success');
+                loadAll();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        // ----------------------------------------------------------------
+        // Rule editor
+        // ----------------------------------------------------------------
+        function eventOptions(selected) {
+            return META.events.map((e) => `<option value="${e}" ${e === selected ? 'selected' : ''}>${e}</option>`).join('');
+        }
+        function operatorOptions(selected) {
+            return META.operators.map((o) => `<option value="${o}" ${o === selected ? 'selected' : ''}>${o}</option>`).join('');
+        }
+        function actionTypeOptions(selected) {
+            return META.actionTypes.map((a) => `<option value="${a}" ${a === selected ? 'selected' : ''}>${a}</option>`).join('');
+        }
+
+        function conditionRow(c = { field: '', operator: 'equals', value: '' }) {
+            return `<div class="flex gap-2 items-center condition-row" style="margin-bottom:8px;">
+                <input class="condition-field" placeholder="field (e.g. loan_amount)" value="${escapeHtml(c.field || '')}" style="flex:1;">
+                <select class="condition-operator" style="max-width:190px;">${operatorOptions(c.operator)}</select>
+                <input class="condition-value" placeholder="value" value="${escapeHtml(String(c.value ?? ''))}" style="flex:1;">
+                <button class="btn-secondary" onclick="this.parentElement.remove()" aria-label="Remove condition">&times;</button>
+            </div>`;
+        }
+
+        function actionRow(a = { type: 'CREATE_NOTIFICATION', params: {} }) {
+            return `<div class="flex gap-2 items-center action-row" style="margin-bottom:8px;">
+                <select class="action-type" style="max-width:210px;">${actionTypeOptions(a.type)}</select>
+                <input class="action-params" placeholder='params JSON, e.g. {"template":"loan_created_hi","to":"+91..."}' value="${escapeHtml(a.params ? JSON.stringify(a.params) : '')}" style="flex:1;">
+                <button class="btn-secondary" onclick="this.parentElement.remove()" aria-label="Remove action">&times;</button>
+            </div>`;
+        }
+
+        async function openRuleEditor(id) {
+            let rule = { name: '', event: META.events[0] || 'CUSTOMER_CREATED', conditions: [], actions: [], priority: 100, condition_logic: 'AND', cooldownSeconds: 0, maxExecutionsPerDay: 0 };
+            if (id) {
+                try {
+                    const result = await apiFetch(`/api/rules/${id}`);
+                    rule = Object.assign({}, result.rule, {
+                        conditions: safeParse(result.rule.conditions_json, []),
+                        actions: safeParse(result.rule.actions_json, []),
+                        condition_logic: result.rule.condition_logic || 'AND',
+                        cooldownSeconds: result.rule.cooldown_seconds || 0,
+                        maxExecutionsPerDay: result.rule.max_executions_per_day || 0
+                    });
+                } catch (err) { showToast(err.message, 'error'); return; }
+            }
+
+            const html = `
+                <div class="form-group"><label>Name</label><input id="ruleName" value="${escapeHtml(rule.name)}"></div>
+                <div class="form-group"><label>Description</label><input id="ruleDesc" value="${escapeHtml(rule.description || '')}"></div>
+                <div class="grid-2">
+                    <div class="form-group"><label>WHEN (event)</label><select id="ruleEvent">${eventOptions(rule.event)}</select></div>
+                    <div class="form-group"><label>Priority (lower runs first)</label><input id="rulePriority" type="number" value="${rule.priority}"></div>
+                </div>
+                <h4 class="mt-4">IF (conditions)</h4>
+                <div id="conditionList">${(rule.conditions.length ? rule.conditions : [{}]).map(conditionRow).join('')}</div>
+                <div class="flex gap-2 items-center">
+                    <button class="btn-secondary" onclick="addCondition()">Add condition</button>
+                    <label style="margin:0;">Match</label>
+                    <select id="ruleLogic" style="max-width:100px;">
+                        <option value="AND" ${rule.condition_logic === 'AND' ? 'selected' : ''}>ALL (AND)</option>
+                        <option value="OR" ${rule.condition_logic === 'OR' ? 'selected' : ''}>ANY (OR)</option>
+                    </select>
+                </div>
+                <h4 class="mt-4">THEN (actions)</h4>
+                <div id="actionList">${(rule.actions.length ? rule.actions : [{ type: 'CREATE_NOTIFICATION', params: {} }]).map(actionRow).join('')}</div>
+                <button class="btn-secondary" onclick="addAction()">Add action</button>
+                <div class="grid-2 mt-4">
+                    <div class="form-group"><label>Cooldown (seconds)</label><input id="ruleCooldown" type="number" value="${rule.cooldownSeconds}"></div>
+                    <div class="form-group"><label>Max executions per day (0 = unlimited)</label><input id="ruleMax" type="number" value="${rule.maxExecutionsPerDay}"></div>
+                </div>
+                <div class="flex gap-2 mt-4" style="justify-content:flex-end;">
+                    <button class="btn-secondary" onclick="closeRuleEditor()">Cancel</button>
+                    <button onclick="saveRule(${id ? `'${id}'` : 'null'})">Save rule</button>
+                </div>`;
+
+            window.__ruleModal = openModal(id ? 'Edit rule' : 'New rule', html);
+        }
+
+        function closeRuleEditor() { if (window.__ruleModal) { window.__ruleModal.close(); window.__ruleModal = null; } }
+        function addCondition() { el('conditionList').insertAdjacentHTML('beforeend', conditionRow()); }
+        function addAction() { el('actionList').insertAdjacentHTML('beforeend', actionRow()); }
+
+        function collectRule() {
+            const conditions = [...document.querySelectorAll('.condition-row')].map((row) => {
+                const value = row.querySelector('.condition-value').value;
+                const numeric = value !== '' && !isNaN(Number(value)) ? Number(value) : value;
+                return { field: row.querySelector('.condition-field').value, operator: row.querySelector('.condition-operator').value, value: numeric };
+            }).filter((c) => c.field);
+
+            const actions = [...document.querySelectorAll('.action-row')].map((row) => {
+                const raw = row.querySelector('.action-params').value.trim();
+                let params = {};
+                if (raw) {
+                    try { params = JSON.parse(raw); } catch { throw new Error('Action params must be valid JSON'); }
+                }
+                return { type: row.querySelector('.action-type').value, params };
+            });
+
+            return {
+                name: el('ruleName').value,
+                description: el('ruleDesc').value,
+                event: el('ruleEvent').value,
+                priority: Number(el('rulePriority').value),
+                condition_logic: el('ruleLogic').value,
+                conditions,
+                actions,
+                cooldownSeconds: Number(el('ruleCooldown').value),
+                maxExecutionsPerDay: Number(el('ruleMax').value)
+            };
+        }
+
+        async function saveRule(id) {
+            try {
+                const body = collectRule();
+                if (id) await apiFetch(`/api/rules/${id}`, { method: 'PUT', body });
+                else await apiFetch('/api/rules', { method: 'POST', body });
+                showToast('Rule saved', 'success');
+                closeRuleEditor();
+                loadAll();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function toggleRule(id, enable) {
+            const verb = enable ? 'Enable' : 'Disable';
+            if (!(await confirmAction(`${verb} rule`, `${verb} this rule? Automation will ${enable ? 'start' : 'stop'} evaluating it.`, verb))) return;
+            try {
+                await apiFetch(`/api/rules/${id}/toggle`, { method: 'POST', body: { enabled: !!enable } });
+                showToast(`Rule ${enable ? 'enabled' : 'disabled'}`, 'success');
+                loadRules();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteRule(id) {
+            if (!(await confirmAction('Delete rule', 'Delete this rule? Its version history is retained for audit, but it will stop evaluating.', 'Delete'))) return;
+            try {
+                await apiFetch(`/api/rules/${id}`, { method: 'DELETE' });
+                showToast('Rule deleted', 'success');
+                loadAll();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAll);
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

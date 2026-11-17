@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Gahonsh Finance — shared icon sprite.
+
+  A single, framework-free symbol sheet for every portal. Icons are drawn on a
+  24x24 grid with a 2px stroke and inherit `currentColor`, so a page controls
+  size and colour with CSS (`width`/`height`/`color`). Reference an icon with:
+
+    <svg class="gf-icon" aria-hidden="true"><use href="/finance/shared/icons.svg#gf-shield-check"></use></svg>
+
+  Functional (icon-only) controls must carry an aria-label; purely decorative
+  icons are hidden from assistive tech with aria-hidden="true".
+-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-shield-check" viewBox="0 0 24 24">
+    <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>
+    <path d="M9 12l2 2 4-4"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-lock" viewBox="0 0 24 24">
+    <rect x="4" y="10" width="16" height="10" rx="2"/>
+    <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-percent" viewBox="0 0 24 24">
+    <path d="M19 5L5 19"/>
+    <circle cx="7.5" cy="7.5" r="2.5"/>
+    <circle cx="16.5" cy="16.5" r="2.5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-rupee" viewBox="0 0 24 24">
+    <path d="M7 4h10M7 8h10M15 4c0 3-2 4.5-5 4.5H7l7 11.5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-calculator" viewBox="0 0 24 24">
+    <rect x="5" y="3" width="14" height="18" rx="2"/>
+    <path d="M8 7h8"/>
+    <path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 7v5l3 2"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-users" viewBox="0 0 24 24">
+    <path d="M16 20v-1.5A3.5 3.5 0 0 0 12.5 15h-5A3.5 3.5 0 0 0 4 18.5V20"/>
+    <circle cx="10" cy="8" r="3.5"/>
+    <path d="M20 20v-1.5a3.5 3.5 0 0 0-2.6-3.4M15.5 4.6a3.5 3.5 0 0 1 0 6.8"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20a8 8 0 0 1 16 0"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-phone" viewBox="0 0 24 24">
+    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-mail" viewBox="0 0 24 24">
+    <rect x="3" y="5" width="18" height="14" rx="2"/>
+    <path d="M3 7l9 6 9-6"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-map-pin" viewBox="0 0 24 24">
+    <path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/>
+    <circle cx="12" cy="10" r="2.5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-file-text" viewBox="0 0 24 24">
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+    <path d="M14 3v5h5M9 13h6M9 17h6"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-check-circle" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M8.5 12.5l2.5 2.5 4.5-5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-alert-triangle" viewBox="0 0 24 24">
+    <path d="M10.3 4.3 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/>
+    <path d="M12 9v4M12 17h.01"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-arrow-right" viewBox="0 0 24 24">
+    <path d="M5 12h14M13 6l6 6-6 6"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-arrow-up-right" viewBox="0 0 24 24">
+    <path d="M7 17L17 7M8 7h9v9"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-wallet" viewBox="0 0 24 24">
+    <path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H5a2 2 0 0 0-2 2z"/>
+    <rect x="3" y="8" width="18" height="11" rx="2"/>
+    <path d="M16 13.5h.01"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-chart" viewBox="0 0 24 24">
+    <path d="M4 20V10M10 20V4M16 20v-7M22 20H3"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-calendar" viewBox="0 0 24 24">
+    <rect x="3" y="5" width="18" height="16" rx="2"/>
+    <path d="M3 9h18M8 3v4M16 3v4"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="7"/>
+    <path d="M20 20l-3.5-3.5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-bank" viewBox="0 0 24 24">
+    <path d="M3 10l9-6 9 6"/>
+    <path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-badge-check" viewBox="0 0 24 24">
+    <path d="M12 2.5l2.3 2 3-.4 1.2 2.8 2.8 1.2-.4 3 2 2.3-2 2.3.4 3-2.8 1.2-1.2 2.8-3-.4-2.3 2-2.3-2-3 .4-1.2-2.8L2.6 18l.4-3-2-2.3 2-2.3-.4-3 2.8-1.2L6.6 4l3 .4z"/>
+    <path d="M8.5 12.5l2.3 2.3 4.7-5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-building" viewBox="0 0 24 24">
+    <rect x="5" y="3" width="14" height="18" rx="2"/>
+    <path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01M10 21v-3h4v3"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-chevron-down" viewBox="0 0 24 24">
+    <path d="M6 9l6 6 6-6"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-plus" viewBox="0 0 24 24">
+    <path d="M12 5v14M5 12h14"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-edit" viewBox="0 0 24 24">
+    <path d="M12 20h9"/>
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-download" viewBox="0 0 24 24">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <path d="M7 10l5 5 5-5M12 15V3"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-logout" viewBox="0 0 24 24">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <path d="M16 17l5-5-5-5M21 12H9"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-moon" viewBox="0 0 24 24">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-credit-card" viewBox="0 0 24 24">
+    <rect x="2" y="5" width="20" height="14" rx="2"/>
+    <path d="M2 10h20M6 15h4"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-leaf" viewBox="0 0 24 24">
+    <path d="M4 20c0-8 5-13 16-14 0 9-5 14-13 14H4z"/>
+    <path d="M4 20c4-4 8-6 12-7"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-car" viewBox="0 0 24 24">
+    <path d="M5 16l1.5-4.5A2 2 0 0 1 8.4 10h7.2a2 2 0 0 1 1.9 1.5L19 16"/>
+    <path d="M3 16h18v3h-2M5 19H3v-3"/>
+    <circle cx="7.5" cy="19" r="1.5"/>
+    <circle cx="16.5" cy="19" r="1.5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-graduation-cap" viewBox="0 0 24 24">
+    <path d="M22 9L12 5 2 9l10 4 10-4z"/>
+    <path d="M6 11v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-briefcase" viewBox="0 0 24 24">
+    <rect x="3" y="7" width="18" height="13" rx="2"/>
+    <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-help-circle" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 1-1 1.7M12 17h.01"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-eye" viewBox="0 0 24 24">
+    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="gf-star" viewBox="0 0 24 24">
+    <path d="M12 3l2.6 5.5 6 .8-4.4 4.2 1.1 6L12 16.8 6.7 19.5l1.1-6L3.4 9.3l6-.8z"/>
+  </symbol>
+</svg>

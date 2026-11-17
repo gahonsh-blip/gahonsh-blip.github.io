@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Loan Applications - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="index.html" data-i18n="dashboard">Dashboard / Settings</a>
+                <a href="customers.html" data-i18n="customers">Customers</a>
+                <a href="loan-products.html">Loan Products</a>
+                <a href="applications.html" class="active">Applications</a>
+                <a href="loans.html" data-i18n="loans">Loans</a>
+            </nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()" data-i18n="sign_out">Sign Out</button>
+            </div>
+            <div class="mt-4">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect" onchange="setTheme(this.value)">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Loan Applications</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Requested (₹)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'APPROVED': return 'badge-success';
+                case 'REJECTED': return 'badge-danger';
+                default: return 'badge-warning';
+            }
+        }
+
+        async function load() {
+            try {
+                const r = await fetch('/api/applications', { headers: headers() });
+                const d = await r.json();
+
+                if (!r.ok) throw new Error(apiErrorMessage(d, 'Failed to load applications'));
+
+                const rows = document.getElementById('rows');
+                if (d.length === 0) {
+                    rows.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted);">No applications found</td></tr>';
+                    return;
+                }
+
+                rows.innerHTML = d.map(a => `
+                    <tr>
+                        <td title="${a.id}">${escapeHtml(a.id.slice(0, 8))}...</td>
+                        <td>₹${a.requested_amount}</td>
+                        <td><span class="badge ${getStatusBadge(a.status)}">${escapeHtml(a.status)}</span></td>
+                        <td>
+                            ${['DRAFT', 'SUBMITTED', 'APPLICATION_SUBMITTED'].includes(a.status) ? `<button class="btn-secondary" onclick="changeStatus('${a.id}', 'UNDER_REVIEW')">Review</button>` : ''}
+                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button onclick="changeStatus('${a.id}', 'APPROVED')">Approve</button>` : ''}
+                            ${['SUBMITTED', 'APPLICATION_SUBMITTED', 'UNDER_REVIEW'].includes(a.status) ? `<button class="btn-secondary" style="color: var(--color-danger); border-color: var(--color-danger);" onclick="changeStatus('${a.id}', 'REJECTED')">Reject</button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function changeStatus(id, status) {
+            try {
+                let rejection_reason = null;
+                if (status === 'REJECTED') {
+                    rejection_reason = prompt('Reason for rejection:');
+                    if (!rejection_reason) return;
+                }
+
+                const r = await fetch(`/api/applications/${id}/status`, {
+                    method: 'PUT',
+                    headers: headers(),
+                    body: JSON.stringify({ status, rejection_reason })
+                });
+
+                if (!r.ok) {
+                    const errData = await r.json().catch(() => ({}));
+                    throw new Error(apiErrorMessage(errData, 'Failed to update application'));
+                }
+                showToast(`Application marked as ${status}`, 'success');
+                load();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', load);
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Complete your details - Gahonsh Finance</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Complete your Gahonsh Finance details using the secure link you were sent.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gahonsh Finance">
+<meta property="og:title" content="Complete your details — Gahonsh Finance">
+<meta property="og:description" content="Complete your Gahonsh Finance details using the secure link you were sent.">
+<meta property="og:image" content="/finance/site/brand/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/finance/site/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+<link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/finance/shared/fonts.css">
+<link rel="stylesheet" href="/finance/site/css/site.css">
+<style>
+  /* Page-specific layout; the shared public-site design tokens do the rest. */
+  .cc-main { padding: 32px 0 72px; }
+  .cc-shell { max-width: 900px; }
+  .cc-head { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; }
+  .cc-ref { font-family: monospace; font-size: 0.9375rem; color: var(--c-muted); }
+  .cc-progress { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+  .cc-progress .progress-track { flex: 1; }
+  .cc-progress-label { font-size: 0.9375rem; font-weight: 600; color: var(--c-ink-soft); white-space: nowrap; }
+  .cc-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--sh-1); padding: 24px; margin-bottom: 20px; }
+  .cc-card > h2 { font-size: 1.15rem; margin-bottom: 4px; }
+  .cc-card > p.sub { margin: 0 0 18px; color: var(--c-muted); font-size: 0.9375rem; }
+  .cc-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .cc-field label { font-size: 0.9375rem; font-weight: 600; color: var(--c-ink-soft); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cc-locked { background: var(--c-bg-alt); border: 1px solid var(--c-border); border-radius: var(--r-sm); padding: 10px 12px; font-size: 0.9375rem; color: var(--c-ink-soft); display: flex; gap: 10px; align-items: flex-start; }
+  .cc-locked svg { flex-shrink: 0; margin-top: 2px; color: var(--c-muted); }
+  .cc-tag { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: var(--r-pill); }
+  .cc-tag-locked { background: var(--c-bg-alt); color: var(--c-muted); border: 1px solid var(--c-border-strong); }
+  .cc-tag-pending { background: var(--c-warning-bg); color: var(--c-warning); border: 1px solid var(--c-warning-border); }
+  .cc-tag-done { background: var(--c-success-bg); color: var(--c-success); border: 1px solid var(--c-success-border); }
+  .cc-tag-invalid { background: var(--c-danger-bg); color: var(--c-danger); border: 1px solid var(--c-danger-border); }
+  .cc-doc { border: 1px solid var(--c-border); border-radius: var(--r-md); padding: 16px; margin-bottom: 14px; }
+  .cc-doc-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .cc-doc-title { font-weight: 600; }
+  .cc-upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .cc-upload-row input[type=file] { font-size: 0.9375rem; }
+  .cc-up-track { height: 6px; background: var(--c-border); border-radius: var(--r-pill); overflow: hidden; margin-top: 10px; }
+  .cc-up-fill { height: 100%; width: 0; background: var(--brand-primary); transition: width .2s linear; }
+  .cc-camera { width: 100%; max-width: 320px; border-radius: var(--r-md); background: var(--c-bg-alt); border: 1px solid var(--c-border); }
+  .cc-checklist { list-style: none; margin: 0; padding: 0; }
+  .cc-checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--c-border); font-size: 0.9375rem; }
+  .cc-checklist li:last-child { border-bottom: 0; }
+  .cc-checklist .cc-ok { color: var(--c-success); font-weight: 700; }
+  .cc-checklist .cc-no { color: var(--c-warning); font-weight: 700; }
+  .cc-review dl { margin: 0; }
+  .cc-review .review-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; padding: 9px 0; border-bottom: 1px solid var(--c-border); }
+  .cc-review .review-row:last-child { border-bottom: 0; }
+  .cc-sticky-actions { position: sticky; bottom: 0; background: linear-gradient(to top, var(--c-bg) 70%, transparent); padding: 16px 0; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  .cc-spinner-row { display: flex; align-items: center; gap: 10px; color: var(--c-muted); font-size: 0.9375rem; }
+  .cc-consent { display: flex; gap: 10px; align-items: flex-start; }
+  .cc-consent input[type=checkbox] { margin-top: 3px; flex-shrink: 0; width: 18px; height: 18px; }
+  .cc-consent label { font-weight: 400; color: var(--c-ink-soft); font-size: 0.9375rem; line-height: 1.5; }
+  .cc-rule { border: 0; border-top: 1px solid var(--c-border); margin: 22px 0; }
+  .cc-h3 { font-size: 1rem; margin: 0 0 12px; }
+  .cc-center { text-align: center; padding: 48px 20px; }
+  .cc-center .cc-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  @media (max-width: 560px) {
+    .cc-card { padding: 18px; }
+    .cc-review .review-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img class="brand-mark" src="/finance/site/brand/logo.svg" alt="" width="34" height="34">
+      <span>
+        <span class="brand-name" data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+        <span class="brand-tag" data-gf="text" data-gf-field="tagline">Loans made straightforward</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <select class="site-locale-select" data-gf-lang aria-label="Choose language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+      </select>
+      <a class="btn btn-outline btn-sm" href="/finance/site/">Back to site</a>
+    </div>
+  </div>
+</header>
+
+<main class="cc-main" id="main">
+  <!-- A persistent, screen-reader-only level-one heading. The visible headings
+       live inside the view panels (loading/error/code/wizard), so without this
+       the page has no `h1` in its initial state. -->
+  <h1 class="sr-only">Complete your details</h1>
+  <div class="wrap cc-shell">
+
+    <!-- Loading -->
+    <div id="viewLoading" class="cc-card cc-center" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p style="margin-top:12px;color:var(--c-muted);">Opening your secure link…</p>
+    </div>
+
+    <!-- Invalid / expired / revoked / error -->
+    <div id="viewError" class="cc-card cc-center" hidden>
+      <div class="cc-icon" aria-hidden="true">🔒</div>
+      <h2 id="errorTitle" style="font-size:1.35rem;">We could not open this link</h2>
+      <p id="errorMessage" style="color:var(--c-ink-soft);max-width:44em;margin:0 auto 8px;"></p>
+      <p class="cc-ref" id="errorRef"></p>
+    </div>
+
+    <!-- Verification code -->
+    <div id="viewSecret" class="cc-card" hidden>
+      <h2 style="font-size:1.3rem;">Verification code required</h2>
+      <p class="sub">For your security, this link needs the verification code that Gahonsh Finance sent you separately.</p>
+      <div class="cc-field">
+        <label for="secretInput">Verification code</label>
+        <input class="input" id="secretInput" autocomplete="one-time-code" inputmode="text">
+      </div>
+      <div class="alert alert--error" id="secretError" hidden role="alert"></div>
+      <button class="btn btn-primary" id="secretSubmit" type="button">Continue</button>
+    </div>
+
+    <!-- Main wizard -->
+    <div id="viewMain" hidden>
+      <div class="cc-head">
+        <div>
+          <h2 style="font-size:1.5rem;margin-bottom:2px;">Complete your details</h2>
+          <p style="margin:0;color:var(--c-muted);font-size:0.9375rem;">
+            Hello <strong id="clientName">there</strong> — please complete the items marked
+            <span class="cc-tag cc-tag-pending">Action required</span>.
+          </p>
+        </div>
+        <div style="text-align:right;">
+          <div class="cc-ref" id="refLabel"></div>
+          <div class="cc-ref" id="expiryLabel"></div>
+        </div>
+      </div>
+
+      <div class="cc-progress">
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="cc-progress-label" id="progressLabel">0% complete</div>
+      </div>
+
+      <div id="banner" hidden></div>
+
+      <!-- 1. Information -->
+      <section class="cc-card" aria-labelledby="h-info">
+        <h2 id="h-info">1. Your information</h2>
+        <p class="sub">
+          Details already on your file are shown greyed out and cannot be changed here.
+          Anything marked <span class="cc-tag cc-tag-pending">Action required</span> needs your input.
+        </p>
+        <div id="sections"></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="saveFieldsBtn" type="button">Save my information</button>
+          <span class="cc-spinner-row" id="saveStatus" hidden>
+            <span class="spinner spinner--dark" aria-hidden="true"></span> Saving…
+          </span>
+        </div>
+      </section>
+
+      <!-- 2. KYC -->
+      <section class="cc-card" aria-labelledby="h-kyc">
+        <h2 id="h-kyc">2. Identity verification (KYC)</h2>
+        <p class="sub" id="kycSub">Verify your identity with your 12-digit Aadhaar number and a selfie.</p>
+
+        <div id="kycDone" class="alert alert--success" hidden>
+          <span class="alert-title">Identity verified</span>
+          <p id="kycDoneDetail"></p>
+        </div>
+
+        <div id="kycForm">
+          <div class="cc-field">
+            <label for="kycAadhaar">Aadhaar number</label>
+            <input class="input" id="kycAadhaar" inputmode="numeric" maxlength="14" placeholder="XXXX XXXX XXXX">
+            <div class="hint">Your number is stored masked; the raw value is never kept.</div>
+          </div>
+          <div class="cc-field">
+            <label for="kycSelfieFile">Selfie</label>
+            <div class="cc-upload-row">
+              <button class="btn btn-outline btn-sm" id="cameraStart" type="button">Start camera</button>
+              <button class="btn btn-outline btn-sm" id="cameraCapture" type="button" hidden>Capture photo</button>
+              <input type="file" id="kycSelfieFile" accept="image/*" capture="user" aria-label="Upload a selfie photo">
+            </div>
+            <video class="cc-camera" id="kycVideo" playsinline hidden aria-label="Camera preview"></video>
+            <img class="cc-camera" id="kycPreview" alt="Captured selfie preview" hidden>
+            <div class="hint" id="selfieHint">Take a clear photo of your face, or upload one from your device.</div>
+          </div>
+          <div class="cc-field">
+            <div class="cc-consent">
+              <input type="checkbox" id="kycConsent">
+              <label for="kycConsent">
+                I consent to Gahonsh Finance verifying my identity against the identity
+                details I have provided, and I understand the result is recorded against
+                my application.
+              </label>
+            </div>
+            <div class="hint" id="kycConsentHint">
+              Your number is stored masked and a one-way hash only; the raw value is never kept.
+            </div>
+          </div>
+          <div class="alert alert--error" id="kycError" hidden role="alert"></div>
+          <button class="btn btn-primary" id="kycSubmit" type="button">Verify my identity</button>
+        </div>
+
+        <hr class="cc-rule">
+
+        <div id="panDone" class="alert alert--success" hidden>
+          <span class="alert-title">PAN verified</span>
+          <p id="panDoneDetail"></p>
+        </div>
+
+        <div id="panForm">
+          <h3 class="cc-h3">PAN verification</h3>
+          <div class="cc-field">
+            <label for="panNumber">PAN</label>
+            <input class="input" id="panNumber" maxlength="10" placeholder="ABCDE1234F" autocapitalize="characters">
+          </div>
+          <div class="cc-field">
+            <label for="panName">Name as printed on the PAN card</label>
+            <input class="input" id="panName" autocomplete="name">
+          </div>
+          <div class="cc-field">
+            <div class="cc-consent">
+              <input type="checkbox" id="panConsent">
+              <label for="panConsent">
+                I consent to Gahonsh Finance verifying my PAN against the details I have provided.
+              </label>
+            </div>
+            <div class="hint">Your PAN is stored masked and a one-way hash only; the raw value is never kept.</div>
+          </div>
+          <div class="alert alert--error" id="panError" hidden role="alert"></div>
+          <button class="btn btn-primary" id="panSubmit" type="button">Verify my PAN</button>
+        </div>
+      </section>
+
+      <!-- 3. Documents -->
+      <section class="cc-card" aria-labelledby="h-otp">
+        <h2 id="h-otp">3. Mobile verification</h2>
+        <p class="sub">We will send a 6-digit code to your mobile number to confirm it is yours.</p>
+
+        <div id="otpDone" class="alert alert--success" hidden>
+          <strong>Mobile number verified</strong>
+          <p id="otpDoneDetail"></p>
+        </div>
+
+        <div id="otpForm">
+          <div class="cc-field">
+            <label for="otpPhone">Mobile number <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="otpPhone" type="tel" inputmode="numeric" maxlength="14" autocomplete="tel" placeholder="10-digit mobile number">
+            <div class="hint" id="otpPhoneHint">The number we should reach you on.</div>
+          </div>
+          <div class="cc-field" id="otpCodeWrap" hidden>
+            <label for="otpCode">Verification code <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="otpCode" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6-digit code">
+            <div class="hint" id="otpCodeHint"></div>
+          </div>
+          <div class="alert alert--error" id="otpError" hidden role="alert"></div>
+          <div class="cc-sticky-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-outline" id="otpSend" type="button">Send code</button>
+            <button class="btn btn-primary" id="otpVerify" type="button" hidden>Confirm code</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="cc-card" aria-labelledby="h-docs">
+        <h2 id="h-docs">4. Documents</h2>
+        <p class="sub">Upload a JPEG, PNG or PDF up to 5 MB for each item.</p>
+        <div id="documentList"></div>
+      </section>
+
+      <!-- 5. Review -->
+      <section class="cc-card cc-review" aria-labelledby="h-review">
+        <h2 id="h-review">5. Review</h2>
+        <p class="sub">Check everything below before you submit.</p>
+        <div id="reviewBody"></div>
+      </section>
+
+      <!-- 6. Submit -->
+      <section class="cc-card" aria-labelledby="h-submit">
+        <h2 id="h-submit">6. Submit</h2>
+        <p class="sub">When everything above is complete, submit your file for review.</p>
+        <ul class="cc-checklist" id="checklist"></ul>
+        <div class="alert alert--error" id="submitError" hidden role="alert"></div>
+        <div class="cc-sticky-actions">
+          <button class="btn btn-primary btn-lg" id="submitBtn" type="button" disabled>Submit my file</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Submitted / review status -->
+    <div id="viewSubmitted" class="cc-card cc-center" hidden>
+      <div class="cc-icon" aria-hidden="true" id="submittedIcon">✅</div>
+      <h2 style="font-size:1.5rem;" id="submittedTitle">Thank you — your file is submitted</h2>
+      <p style="color:var(--c-ink-soft);max-width:46em;margin:0 auto 12px;" id="submittedMessage">
+        Gahonsh Finance has received your information, KYC and documents. A member of our team
+        will review your file and contact you if anything further is needed.
+      </p>
+      <p class="cc-ref" id="submittedRef"></p>
+      <p class="cc-ref" id="submittedAt"></p>
+      <div id="reviewStatusBox" class="alert" hidden></div>
+
+      <div id="accountSetup" class="cc-card" style="text-align:left;margin-top:20px;" hidden>
+        <h2 style="font-size:1.05rem;">Track your application</h2>
+        <p class="sub">Set a password so you can sign in later and follow the status of your application. We never send passwords by message.</p>
+        <div class="cc-field">
+          <label for="accountEmail">Email (your sign-in name)</label>
+          <input class="input" id="accountEmail" type="email" readonly>
+        </div>
+        <div class="cc-field">
+          <label for="accountPassword">Choose a password <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="accountPassword" type="password" autocomplete="new-password" minlength="8">
+          <div class="hint">At least 8 characters.</div>
+        </div>
+        <div class="cc-field">
+          <label for="accountPassword2">Confirm password <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="accountPassword2" type="password" autocomplete="new-password">
+        </div>
+        <div class="alert alert--error" id="accountError" hidden role="alert"></div>
+        <div class="alert alert--success" id="accountSuccess" hidden role="status"></div>
+        <button class="btn btn-primary" id="accountSetupBtn" type="button">Set my password</button>
+      </div>
+
+      <p id="accountSignin" hidden style="margin-top:16px;">
+        <a class="btn btn-outline" href="/finance/site/signin.html">Sign in to track your application</a>
+      </p>
+    </div>
+
+    <p class="auth-notice" style="max-width:56em;margin-left:auto;margin-right:auto;">
+      Development build. This is a demonstration environment and is not a licensed bank or
+      public lending service. No real credit decision, disbursement or repayment takes place,
+      and all figures shown are illustrative examples.
+    </p>
+  </div>
+</main>
+
+<script type="module" src="/finance/site/js/platform-config.js"></script>
+<script type="module" src="/finance/site/js/site-i18n.js"></script>
+<script type="module" src="/finance/site/js/client-page.js"></script>
+</body>
+</html>

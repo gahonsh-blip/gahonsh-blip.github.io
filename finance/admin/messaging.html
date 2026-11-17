@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Messaging - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Messaging</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div id="providerBanner"></div>
+
+            <div class="card">
+                <h2>Send a message</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="sendChannel">Channel</label>
+                        <select id="sendChannel">
+                            <option value="WHATSAPP">WhatsApp</option>
+                            <option value="SMS">SMS</option>
+                            <option value="EMAIL">Email</option>
+                            <option value="IN_APP">In-app</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sendTo">Recipient</label>
+                        <input id="sendTo" placeholder="+91 90000 00000 or email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sendTemplate">Template (optional)</label>
+                    <select id="sendTemplate"><option value="">\u2014 ad-hoc message \u2014</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="sendMessage">Message body (used when no template is selected)</label>
+                    <textarea id="sendMessage" rows="3" style="width:100%;"></textarea>
+                </div>
+                <div class="form-group hidden" id="variablesGroup">
+                    <label>Template variables <span class="text-muted">(JSON)</span></label>
+                    <input id="sendVariables" placeholder='{"customer_name":"Ramesh","loan_amount":"50000"}'>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <button onclick="sendMessage(true)">Send now</button>
+                    <button class="btn-secondary" onclick="sendMessage(false)">Queue only</button>
+                </div>
+                <div id="sendState"></div>
+            </div>
+
+            <div class="card">
+                <h2>Templates <button class="btn-secondary" style="float:right;" onclick="openTemplateEditor()">New template</button></h2>
+                <p class="text-muted">Available variables: <span id="variableList"></span></p>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Code</th><th>Channel</th><th>Language</th><th>Subject</th><th>Body</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="templateRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Delivery logs</h2>
+                <div class="flex gap-2 mb-4">
+                    <select id="logStatus" style="max-width:190px;">
+                        <option value="">All statuses</option>
+                        <option value="QUEUED">Queued</option>
+                        <option value="SENT">Sent</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="FAILED">Failed</option>
+                    </select>
+                    <select id="logChannel" style="max-width:190px;">
+                        <option value="">All channels</option>
+                        <option value="WHATSAPP">WhatsApp</option>
+                        <option value="SMS">SMS</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="IN_APP">In-app</option>
+                    </select>
+                    <button onclick="loadLogs()">Filter</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Created</th><th>Channel</th><th>Recipient</th><th>Status</th><th>Attempts</th><th>Provider</th><th>Error</th><th>Actions</th></tr></thead>
+                        <tbody id="logRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+        let META = { channels: [], variables: [], providers: [] };
+        let TEMPLATES = [];
+
+        async function loadAll() {
+            await Promise.all([loadMeta(), loadTemplates(), loadLogs()]);
+        }
+
+        async function loadMeta() {
+            try {
+                META = await apiFetch('/api/messaging/meta');
+                el('variableList').textContent = (META.variables || []).map((v) => `{{${v}}}`).join(', ');
+                renderProviderBanner();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        function renderProviderBanner() {
+            const anyMock = (META.providers || []).some((p) => p.isMock && p.channel !== 'IN_APP');
+            const rows = (META.providers || []).map((p) =>
+                `<span class="badge ${p.isMock ? 'badge-warning' : 'badge-success'}">${escapeHtml(p.channel)}: ${escapeHtml(p.provider)}</span>`
+            ).join(' ');
+            el('providerBanner').innerHTML = `<div class="card">
+                <strong>Active providers</strong>
+                <div class="mt-4">${rows}</div>
+                ${anyMock ? '<p class="text-muted" style="margin-top:8px;">Some channels use the deterministic mock provider (no vendor credentials configured). Messages are recorded but not delivered to a real recipient. Configure provider environment variables for production delivery.</p>' : ''}
+            </div>`;
+        }
+
+        // ----------------------------------------------------------------
+        // Send
+        // ----------------------------------------------------------------
+        function renderTemplateSelect() {
+            el('sendTemplate').innerHTML = '<option value="">\u2014 ad-hoc message \u2014</option>' +
+                TEMPLATES.filter((t) => t.is_active).map((t) => `<option value="${escapeHtml(t.code)}">${escapeHtml(t.code)} (${escapeHtml(t.channel)})</option>`).join('');
+        }
+
+        async function sendMessage(dispatch) {
+            const channel = el('sendChannel').value;
+            const template = el('sendTemplate').value;
+            const body = { channel, to: el('sendTo').value || null, dispatch };
+            if (template) {
+                body.template = template;
+                const raw = el('sendVariables').value.trim();
+                if (raw) {
+                    try { body.variables = JSON.parse(raw); } catch { showToast('Variables must be valid JSON', 'error'); return; }
+                }
+            } else {
+                body.message = el('sendMessage').value;
+                if (!body.message.trim()) { showToast('Enter a message or select a template', 'error'); return; }
+            }
+
+            renderState('sendState', 'loading', 'Sending\u2026');
+            try {
+                const result = await apiFetch('/api/messaging/send', { method: 'POST', body });
+                const detail = result.dispatch ? ` (sent ${result.dispatch.sent}, failed ${result.dispatch.failed})` : ' (queued)';
+                renderState('sendState', 'empty', `Message ${result.id}${detail}.`);
+                showToast('Message processed', 'success');
+                loadLogs();
+            } catch (err) { renderState('sendState', 'error', err.message); }
+        }
+
+        // ----------------------------------------------------------------
+        // Templates
+        // ----------------------------------------------------------------
+        async function loadTemplates() {
+            renderState('templateRows', 'loading', 'Loading templates\u2026');
+            try {
+                const result = await apiFetch('/api/messaging/templates');
+                TEMPLATES = result.items || [];
+                renderTemplateSelect();
+                if (TEMPLATES.length === 0) { renderState('templateRows', 'empty', 'No templates yet. Create one to reuse message content across automations.'); return; }
+                el('templateRows').innerHTML = TEMPLATES.map((t) => `<tr>
+                    <td><code>${escapeHtml(t.code)}</code></td>
+                    <td>${escapeHtml(t.channel)}</td>
+                    <td>${escapeHtml(t.language)}</td>
+                    <td>${escapeHtml(t.subject || '\u2014')}</td>
+                    <td style="max-width:320px;font-size:12px;">${escapeHtml(t.body)}</td>
+                    <td>${t.is_active ? '<span class="badge badge-success">ACTIVE</span>' : '<span class="badge badge-warning">DISABLED</span>'}</td>
+                    <td><button class="btn-secondary" onclick="deleteTemplate('${t.id}')">Disable</button></td>
+                </tr>`).join('');
+            } catch (err) { renderState('templateRows', 'error', err.message); }
+        }
+
+        function openTemplateEditor() {
+            const html = `
+                <div class="grid-2">
+                    <div class="form-group"><label>Code (lowercase, digits, underscore)</label><input id="tplCode" placeholder="loan_created_hi"></div>
+                    <div class="form-group"><label>Channel</label><select id="tplChannel">
+                        <option value="WHATSAPP">WhatsApp</option><option value="SMS">SMS</option><option value="EMAIL">Email</option><option value="IN_APP">In-app</option>
+                    </select></div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Language</label><input id="tplLanguage" value="en"></div>
+                    <div class="form-group"><label>Subject (email only)</label><input id="tplSubject"></div>
+                </div>
+                <div class="form-group"><label>Body</label><textarea id="tplBody" rows="6" style="width:100%;" placeholder="नमस्ते {{customer_name}}, Loan Amount: \u20B9{{loan_amount}}"></textarea></div>
+                <p class="text-muted">Known variables: ${(META.variables || []).map((v) => `{{${v}}}`).join(', ')}</p>
+                <div class="flex gap-2 mt-4" style="justify-content:flex-end;">
+                    <button class="btn-secondary" onclick="closeTemplateEditor()">Cancel</button>
+                    <button onclick="saveTemplate()">Save template</button>
+                </div>`;
+            window.__tplModal = openModal('New template', html);
+        }
+        function closeTemplateEditor() { if (window.__tplModal) { window.__tplModal.close(); window.__tplModal = null; } }
+
+        async function saveTemplate() {
+            try {
+                await apiFetch('/api/messaging/templates', {
+                    method: 'POST',
+                    body: {
+                        code: el('tplCode').value,
+                        channel: el('tplChannel').value,
+                        language: el('tplLanguage').value || 'en',
+                        subject: el('tplSubject').value || null,
+                        body: el('tplBody').value
+                    }
+                });
+                showToast('Template saved', 'success');
+                closeTemplateEditor();
+                loadTemplates();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteTemplate(id) {
+            if (!(await confirmAction('Disable template', 'Disable this template? Rules referencing it will fail until it is re-enabled.', 'Disable'))) return;
+            try {
+                await apiFetch(`/api/messaging/templates/${id}`, { method: 'DELETE' });
+                showToast('Template disabled', 'success');
+                loadTemplates();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        // ----------------------------------------------------------------
+        // Logs
+        // ----------------------------------------------------------------
+        async function loadLogs() {
+            renderState('logRows', 'loading', 'Loading delivery logs\u2026');
+            try {
+                const params = new URLSearchParams();
+                if (el('logStatus').value) params.set('status', el('logStatus').value);
+                if (el('logChannel').value) params.set('channel', el('logChannel').value);
+                const result = await apiFetch(`/api/messaging/logs${params.toString() ? '?' + params : ''}`);
+                const items = result.items || [];
+                if (items.length === 0) { renderState('logRows', 'empty', 'No messages match the filter.'); return; }
+                el('logRows').innerHTML = items.map((m) => `<tr>
+                    <td>${formatDate(m.created_at)}</td>
+                    <td>${escapeHtml(m.channel)}</td>
+                    <td>${escapeHtml(m.recipient_address || '-')}</td>
+                    <td>${statusBadge(m.status)}</td>
+                    <td>${m.attempts || 0}</td>
+                    <td>${escapeHtml(m.provider || '-')}</td>
+                    <td style="font-size:12px;color:var(--color-danger);max-width:200px;">${escapeHtml(m.last_error || '')}</td>
+                    <td>${m.status === 'FAILED' ? `<button class="btn-secondary" onclick="retryMessage('${m.id}')">Retry</button>` : ''}
+                        <button class="btn-secondary" onclick="viewMessage('${m.id}')">View</button></td>
+                </tr>`).join('');
+            } catch (err) { renderState('logRows', 'error', err.message); }
+        }
+
+        async function retryMessage(id) {
+            if (!(await confirmAction('Retry message', 'Requeue this failed message for another delivery attempt?', 'Retry'))) return;
+            try {
+                await apiFetch(`/api/messaging/logs/${id}/retry`, { method: 'POST', body: {} });
+                showToast('Message requeued', 'success');
+                loadLogs();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function viewMessage(id) {
+            try {
+                const result = await apiFetch(`/api/messaging/logs/${id}`);
+                const m = result.message;
+                const deliveries = (result.deliveries || []).map((d) => `<tr><td>${formatDate(d.attempted_at || d.created_at)}</td><td>${statusBadge(d.status)}</td><td>${escapeHtml(d.provider || '')}</td><td>${escapeHtml(d.error || '')}</td></tr>`).join('');
+                openModal(`Message ${m.id}`, `
+                    <div class="grid-2">
+                        <div><strong>Channel</strong><br>${escapeHtml(m.channel)}</div>
+                        <div><strong>Status</strong><br>${statusBadge(m.status)}</div>
+                        <div><strong>Recipient</strong><br>${escapeHtml(m.recipient_address || '-')}</div>
+                        <div><strong>Attempts</strong><br>${m.attempts || 0}</div>
+                    </div>
+                    <h4 class="mt-4">Rendered body</h4>
+                    <pre style="white-space:pre-wrap;background:var(--color-bg);padding:12px;border-radius:8px;">${escapeHtml(m.rendered_body || m.body || '')}</pre>
+                    <h4 class="mt-4">Delivery attempts</h4>
+                    <div class="table-responsive"><table><thead><tr><th>When</th><th>Status</th><th>Provider</th><th>Error</th></tr></thead><tbody>${deliveries || '<tr><td colspan="4" class="text-muted">No attempts recorded</td></tr>'}</tbody></table></div>
+                `);
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tplSelect = el('sendTemplate');
+            if (tplSelect) tplSelect.addEventListener('change', () => {
+                el('variablesGroup').classList.toggle('hidden', !tplSelect.value);
+            });
+            loadAll();
+        });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

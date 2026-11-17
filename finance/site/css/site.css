@@ -1,0 +1,1769 @@
+/* ==========================================================================
+   Gahonsh Finance — Public Customer Site
+   Self-contained design system for the public marketing / loan-application
+   experience. Deliberately isolated from apps/admin/css/style.css so the
+   dense portal theme and this spacious public theme can evolve independently.
+   Brand tokens mirror docs/DESIGN_SYSTEM.md.
+   ========================================================================== */
+
+/* The public theme is light-only. tokens.css ships a `prefers-color-scheme:
+   dark` block that sets `color-scheme: dark` on `:root:not([data-theme])`; the
+   page stays white but the native controls (the language/region selects, the
+   calculator inputs) flip to dark chrome. Match that specificity so the opt-out
+   wins regardless of stylesheet order. */
+:root:not([data-theme]) { color-scheme: light; }
+
+:root {
+  /* Brand */
+  --brand-primary: #1E3A8A;
+  --brand-primary-600: #1D4ED8;
+  --brand-primary-700: #172E6E;
+  --brand-accent: #047857;
+  --brand-accent-600: #059669;
+  --brand-gold: #B45309;
+
+  /* Surfaces */
+  --c-bg: #F8FAFC;
+  --c-bg-alt: #F1F5F9;
+  --c-surface: #FFFFFF;
+  --c-ink: #0F172A;
+  --c-ink-soft: #334155;
+  /* Slate-600. Slate-500 (#64748B) fell just short of 4.5:1 on the tinted
+     panels (#EFF6FF / #F1F5F9) that carry muted text; this clears it
+     everywhere while staying clearly secondary to --c-ink. */
+  --c-muted: #475569;
+  --c-border: #E2E8F0;
+  --c-border-strong: #CBD5E1;
+
+  /* Status */
+  --c-danger: #DC2626;
+  --c-danger-bg: #FEF2F2;
+  --c-danger-border: #FECACA;
+  --c-success: #047857;
+  --c-success-bg: #ECFDF5;
+  --c-success-border: #A7F3D0;
+  --c-warning: #B45309;
+  --c-warning-bg: #FFFBEB;
+  --c-warning-border: #FDE68A;
+  --c-info-bg: #EFF6FF;
+  --c-info-border: #BFDBFE;
+
+  /* Type */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+
+  /* Scale */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+
+  --sh-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --sh-2: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --sh-3: 0 18px 40px -12px rgba(15, 23, 42, 0.18);
+  --sh-focus: 0 0 0 3px rgba(30, 58, 138, 0.28);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout. Background bands (`.hero`, `.section--alt`, the header and the
+     footer) stay full-bleed, but the content column inside them — header,
+     page body and footer alike — is capped at `--shell` and centred, so the
+     whole page reads as one aligned column instead of stretched edges. At
+     1560px it sits in the 1170-1570px band every international fintech site
+     uses (Stripe 1266, Wise 1440, Monzo 1440-1568, Tailwind 2xl 1536): wide
+     enough that a 1920px monitor keeps a full-bleed feel, narrow enough that a
+     paragraph, form field or product card never stretches. `--gutter` is the
+     single knob for the side padding; individual prose elements still carry
+     their own `ch`/`em` measure so a line never exceeds the WCAG 80-character
+     guidance. */
+  --gutter: 28px;
+  --shell: 1560px;
+  --header-h: 72px;
+}
+
+/* --------------------------------------------------------------- reset -- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Root scale. A 16px root on a 1440-1920px desktop renders every rem-sized
+     control a touch small; 106.25% makes 1rem = 17px, so the whole rem scale
+     (body copy, labels, cards, buttons, the step markers) lifts together while
+     the px-based shell/gutters stay put. One knob, no scattered font-size
+     edits. */
+  font-size: 106.25%;
+  /* No page may ever scroll sideways. `clip` (unlike `hidden`) does not create
+     a scroll container, so the sticky header keeps working. Individual
+     components that need to scroll own it themselves (.table-wrap, .stepper). */
+  overflow-x: clip;
+}
+
+/* Form controls do not inherit `font` by default, so a bare `<button>` or
+   `<option>` falls back to the browser's ~13.33px UA default. That made the
+   application stepper and the language `<select>` render visibly smaller than
+   the text around them. Force every control to inherit the page font. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+option { font-size: 1rem; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  overflow-x: clip;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  margin: 0 0 0.5em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--c-ink);
+  font-weight: 700;
+}
+
+h1 { font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem); }
+h2 { font-size: clamp(1.875rem, 1.35rem + 1.6vw, 2.5rem); }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.125rem; }
+
+p { margin: 0 0 1rem; }
+
+a { color: var(--brand-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img, svg { max-width: 100%; }
+
+/* Several components set `display: flex/inline-flex`, which would otherwise
+   defeat the `hidden` attribute. Keep `hidden` authoritative everywhere. */
+[hidden] { display: none !important; }
+
+/* Keyboard-only focus ring: visible, high contrast, never on mouse click. */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — becomes visible on keyboard focus. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 200;
+  background: var(--brand-primary);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  transition: top 0.15s var(--ease);
+}
+.skip-link:focus { top: 12px; text-decoration: none; }
+
+.site-locale-select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font: inherit;
+}
+
+/* One aligned column for the whole page. The cap is wide enough that a 1920px
+   monitor keeps a full-bleed feel while every inner component (hero copy, form
+   field, product card, footer column) stays at a comfortable reading width. */
+.wrap {
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+@media (min-width: 1200px) {
+  .wrap { padding: 0 40px; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 18px; }
+}
+
+/* Grid/flex items default to `min-width: auto`, so any wide descendant (the
+   4-step stepper, a number input, the range slider) forces its track wider
+   than the viewport. Let these containers shrink so inner elements own their
+   own scrolling. */
+.hero-inner > *,
+.apply-grid > *,
+.help-grid > *,
+.apply-card,
+.stepper,
+.range-row,
+.side-panel,
+.main-content { min-width: 0; }
+
+/* -------------------------------------------------------------- header -- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.header-inner {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+/* Keep the brand readable but let it give up space before the actions do, so
+   the header row can never push the page wider than the viewport. */
+.header-inner .brand { min-width: 0; }
+.header-inner .brand > span { min-width: 0; }
+.brand-name, .brand-tag { overflow-wrap: anywhere; }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 800;
+  font-size: 1.1875rem;
+  color: var(--c-ink);
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+}
+.brand:hover { text-decoration: none; }
+
+.brand-mark {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #2563EB 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  box-shadow: var(--sh-1);
+  flex-shrink: 0;
+  /* The mark is the real logo image; keep it crisp in any lockup. */
+  object-fit: contain;
+}
+
+.brand-name { display: block; line-height: 1.15; }
+.brand-tag {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--c-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.main-nav ul {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav a {
+  display: block;
+  padding: 9px 14px;
+  border-radius: var(--r-sm);
+  color: var(--c-ink-soft);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.main-nav a:hover {
+  background: var(--c-bg-alt);
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+/* The current page must be visually distinct, not only announced. */
+.main-nav a[aria-current] {
+  color: var(--brand-primary);
+  background: var(--c-bg-alt);
+  font-weight: 600;
+}
+
+/* Apply / Sign in entry points repeated inside the mobile menu. They are hidden
+   on the desktop row (where the header already carries both buttons) and shown
+   only once the nav collapses, so a phone visitor never loses the way in. */
+.nav-mobile-action { display: none; }
+
+.header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+/* The two header CTAs are primary touch targets; keep them at the 44px
+   guideline even though the compact button size is shorter. */
+.header-actions .btn { min-height: 44px; }
+
+.nav-toggle {
+  display: none;
+  width: 44px; height: 44px;
+  padding: 0;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  cursor: pointer;
+  color: var(--c-ink);
+}
+.nav-toggle:hover { background: var(--c-bg-alt); }
+.nav-toggle svg { pointer-events: none; }
+
+/* ------------------------------------------------------------- buttons -- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease),
+    transform 0.08s var(--ease), box-shadow 0.15s var(--ease);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { text-decoration: none; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--brand-primary);
+  color: #fff;
+  box-shadow: var(--sh-1);
+}
+.btn-primary:hover:not(:disabled) { background: var(--brand-primary-600); }
+
+.btn-accent { background: var(--brand-accent); color: #fff; }
+.btn-accent:hover:not(:disabled) { background: var(--brand-accent-600); }
+
+.btn-ghost { background: transparent; color: var(--c-ink); }
+.btn-ghost:hover:not(:disabled) { background: var(--c-bg-alt); }
+
+.btn-outline {
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border-color: var(--c-border-strong);
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.btn-lg { padding: 17px 34px; font-size: 1.0625rem; }
+.btn-sm { padding: 9px 15px; font-size: 1rem; }
+.btn-block { width: 100%; }
+
+/* Inline spinner shown during async work. */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+.spinner--dark { border-color: rgba(15, 23, 42, 0.25); border-top-color: var(--c-ink); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------------- hero -- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 420px at 12% -10%, #E0E9FF 0%, transparent 60%),
+    radial-gradient(760px 380px at 92% 8%, #D9F5EA 0%, transparent 62%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--c-bg) 100%);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 48px;
+  align-items: start;
+  /* Vertical rhythm only: the shorthand would reset `.wrap`'s horizontal
+     gutter to 0 and push the hero content against the screen edge. */
+  padding-top: 84px;
+  padding-bottom: 96px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--c-info-bg);
+  border: 1px solid var(--c-info-border);
+  color: var(--brand-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+.eyebrow-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--c-success);
+  flex-shrink: 0;
+}
+
+.hero-lede {
+  font-size: 1.3125rem;
+  line-height: 1.65;
+  color: var(--c-ink-soft);
+  max-width: 46ch;
+  margin-bottom: 28px;
+}
+
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding-top: 28px;
+  border-top: 1px solid var(--c-border);
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--brand-primary);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.stat-label { font-size: 1rem; color: var(--c-muted); margin-top: 2px; }
+
+/* Trust strip ------------------------------------------------------------ */
+/* The assurance row under the hero CTA. Defined here in the public sheet with
+   the site's own tokens so the visible layout never depends on a second
+   stylesheet arriving: a missing shared file must not flatten it into raw
+   inline text. */
+.gf-trust {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 32px 0 0;
+}
+.gf-trust__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+}
+.gf-trust__item .gf-icon { color: var(--brand-accent); margin-top: 1px; }
+.gf-trust__title { display: block; font-size: 1rem; font-weight: 600; color: var(--c-ink); }
+.gf-trust__text { display: block; font-size: 1rem; color: var(--c-muted); line-height: 1.5; }
+
+/* Shared sprite icon box. */
+.gf-icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@media (max-width: 560px) {
+  .gf-trust { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------- applications section -- */
+.section { padding: 96px 0; }
+.section--alt { background: var(--c-surface); border-top: 1px solid var(--c-border); border-bottom: 1px solid var(--c-border); }
+
+.section-head { max-width: 46em; margin-bottom: 56px; }
+.section-head p { color: var(--c-ink-soft); font-size: 1.125rem; margin: 0; }
+.section-head--center { margin-left: auto; margin-right: auto; text-align: center; }
+
+/* --------------------------------------------------- application card -- */
+.apply-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.apply-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-3);
+  overflow: hidden;
+}
+
+/* Shown in place of the application card when the operator turns the
+   `public_site` feature flag off. The card carries `data-gf-public-site` and is
+   hidden by `platform-config.js`; this notice is revealed in its place. */
+.apply-closed {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  padding: 40px 32px;
+  text-align: center;
+}
+.apply-closed h2 { font-size: 1.5rem; margin: 0 0 10px; }
+.apply-closed p { margin: 0 auto; color: var(--c-muted); font-size: 1rem; max-width: 40ch; }
+.apply-closed a { color: var(--brand-primary); font-weight: 600; }
+
+.apply-card-head {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--c-border);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+}
+.apply-card-head h2 { font-size: 1.5rem; margin-bottom: 4px; }
+.apply-card-head p { margin: 0; color: var(--c-muted); font-size: 1rem; }
+
+/* Stepper -------------------------------------------------------------- */
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 24px 32px;
+  background: #FBFDFF;
+  border-bottom: 1px solid var(--c-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.stepper::-webkit-scrollbar { display: none; }
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 132px;
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--font);
+  text-align: left;
+  cursor: default;
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 2px;
+  min-width: 14px;
+  margin: 0 10px;
+  border-radius: 2px;
+  background: var(--c-border);
+  transition: background 0.25s var(--ease);
+}
+.step.is-done:not(:last-child)::after { background: var(--brand-accent); }
+
+.step-marker {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--c-surface);
+  border: 2px solid var(--c-border-strong);
+  color: var(--c-muted);
+  transition: all 0.2s var(--ease);
+}
+.step-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-muted);
+  white-space: nowrap;
+  transition: color 0.2s var(--ease);
+}
+
+.step.is-active .step-marker {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.14);
+}
+.step.is-active .step-label { color: var(--brand-primary); }
+
+.step.is-done .step-marker {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #fff;
+}
+.step.is-done .step-label { color: var(--c-ink-soft); }
+
+/* Revisited steps become clickable via JS (aria-disabled toggled off). */
+.step.is-clickable { cursor: pointer; }
+.step.is-clickable:hover .step-label { color: var(--brand-primary); }
+
+/* Progress bar (mobile summary) */
+.progress-track {
+  height: 4px;
+  background: var(--c-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 25%;
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-primary-600));
+  border-radius: 2px;
+  transition: width 0.35s var(--ease);
+}
+
+.apply-card-body { padding: 32px; }
+
+.step-panel[hidden] { display: none; }
+
+.panel-head { margin-bottom: 22px; }
+.panel-head h3 { font-size: 1.25rem; margin-bottom: 4px; }
+.panel-head p { margin: 0; color: var(--c-muted); font-size: 1rem; }
+
+/* ---------------------------------------------------------------- form -- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.field-full { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; min-width: 0; }
+
+.field label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-ink-soft);
+  margin-bottom: 6px;
+  display: block;
+}
+.field .req { color: var(--c-danger); margin-left: 2px; }
+.field .hint { font-size: 0.9375rem; color: var(--c-muted); margin-top: 5px; }
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font);
+  font-size: 1rem;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  min-width: 0;
+}
+.input::placeholder, .textarea::placeholder { color: #94A3B8; }
+
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: var(--sh-focus);
+}
+
+.input[aria-invalid='true'],
+.select[aria-invalid='true'] {
+  border-color: var(--c-danger);
+  background: var(--c-danger-bg);
+}
+.input[aria-invalid='true']:focus,
+.select[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--c-danger);
+  margin-top: 5px;
+}
+.field-error[hidden] { display: none; }
+.field-error svg { flex-shrink: 0; margin-top: 2px; }
+
+.textarea { resize: vertical; min-height: 84px; }
+
+/* Currency input with static prefix. */
+.input-prefix { position: relative; display: flex; align-items: center; }
+.input-prefix .prefix {
+  position: absolute;
+  left: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-muted);
+  pointer-events: none;
+}
+.input-prefix .input { padding-left: 40px; }
+
+/* Selectable chips (employment status, purpose, amount presets). */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  color: var(--c-ink-soft);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+}
+.chip:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+.chip[aria-pressed='true'] {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #fff;
+  font-weight: 600;
+}
+.chip[aria-pressed='true']:hover { background: var(--brand-primary-600); color: #fff; }
+
+/* Radio/checkbox rows */
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 15px 17px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  background: var(--c-surface);
+}
+.choice:hover { border-color: var(--brand-primary); }
+.choice input { margin: 3px 0 0; flex-shrink: 0; accent-color: var(--brand-primary); width: 16px; height: 16px; }
+.choice-text { font-size: 1rem; color: var(--c-ink-soft); }
+.choice-title { font-weight: 600; color: var(--c-ink); display: block; }
+.choice:has(input:checked) { border-color: var(--brand-primary); background: var(--c-info-bg); }
+.choice:has(input:focus-visible) { box-shadow: var(--sh-focus); }
+
+/* Slider for loan amount */
+.range-row { display: flex; align-items: center; gap: 14px; }
+.range {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--c-border);
+  outline: none;
+  padding: 0;
+  border: 0;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  border: 3px solid #fff;
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+}
+.range::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  border: 3px solid #fff;
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+}
+.range:focus-visible { box-shadow: var(--sh-focus); }
+
+/* EMI estimate preview */
+.estimate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 15px 18px;
+  border-radius: var(--r-md);
+  background: var(--c-info-bg);
+  border: 1px solid var(--c-info-border);
+}
+.estimate-label { font-size: 1rem; color: var(--c-ink-soft); font-weight: 500; }
+.estimate-value { font-size: 1.375rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em; }
+.estimate-note { font-size: 0.9375rem; color: var(--c-muted); margin: 0; }
+
+/* ------------------------------------------------------------ review -- */
+.review-block {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.review-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--c-bg-alt);
+  border-bottom: 1px solid var(--c-border);
+}
+.review-block-head h4 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-muted); }
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--brand-primary);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-btn:hover { background: var(--c-info-bg); text-decoration: underline; }
+
+.review-list { margin: 0; padding: 4px 18px 14px; }
+.review-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.2fr);
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.review-row:last-child { border-bottom: 0; }
+.review-row dt { font-size: 1rem; color: var(--c-muted); margin: 0; }
+.review-row dd { margin: 0; font-size: 1rem; font-weight: 600; color: var(--c-ink); word-break: break-word; }
+
+/* ------------------------------------------------------------ alerts -- */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid;
+  font-size: 1rem;
+  margin-bottom: 18px;
+}
+.alert[hidden] { display: none; }
+.alert svg { flex-shrink: 0; margin-top: 1px; }
+.alert-title { font-weight: 700; display: block; margin-bottom: 2px; }
+.alert p { margin: 0; }
+.alert--error { background: var(--c-danger-bg); border-color: var(--c-danger-border); color: #991B1B; }
+.alert--success { background: var(--c-success-bg); border-color: var(--c-success-border); color: #065F46; }
+.alert--warning { background: var(--c-warning-bg); border-color: var(--c-warning-border); color: #92400E; }
+.alert--info { background: var(--c-info-bg); border-color: var(--c-info-border); color: #1E40AF; }
+
+/* ------------------------------------------------------ form actions -- */
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--c-border);
+  flex-wrap: wrap;
+}
+.form-actions-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap; }
+
+.step-counter { font-size: 1rem; color: var(--c-muted); font-weight: 500; }
+
+/* ---------------------------------------------------------- success -- */
+.success-panel { text-align: center; padding: 12px 0 4px; }
+.success-icon {
+  width: 66px; height: 66px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--c-success-bg);
+  border: 2px solid var(--c-success-border);
+  display: grid;
+  place-items: center;
+  color: var(--c-success);
+  animation: pop 0.4s var(--ease);
+}
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.success-panel h3 { font-size: 1.5rem; }
+.success-panel > p { color: var(--c-ink-soft); max-width: 32em; margin: 0 auto 22px; }
+
+.ref-box {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 26px;
+  border-radius: var(--r-md);
+  background: var(--c-bg-alt);
+  border: 1px dashed var(--c-border-strong);
+  margin-bottom: 24px;
+}
+.ref-label { font-size: 0.9375rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-muted); font-weight: 600; }
+.ref-value { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.0625rem; font-weight: 700; color: var(--brand-primary); }
+
+.next-steps {
+  text-align: left;
+  max-width: 30em;
+  margin: 0 auto 24px;
+  padding: 18px 20px 18px 40px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  color: var(--c-ink-soft);
+  font-size: 1rem;
+}
+.next-steps li { margin-bottom: 7px; }
+.next-steps li:last-child { margin-bottom: 0; }
+
+/* ------------------------------------------------------ side panel -- */
+.side-panel { display: flex; flex-direction: column; gap: 18px; position: sticky; top: calc(var(--header-h) + 20px); }
+
+.side-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--sh-1);
+}
+.side-card h3 { font-size: 1.25rem; margin-bottom: 14px; }
+
+.trust-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 15px; }
+.trust-item { display: flex; gap: 12px; align-items: flex-start; }
+.trust-icon svg { width: 20px; height: 20px; }
+.trust-icon {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--c-info-bg);
+  color: var(--brand-primary);
+  display: grid;
+  place-items: center;
+}
+.trust-item strong { display: block; font-size: 1rem; }
+.trust-item span { font-size: 1rem; color: var(--c-muted); line-height: 1.5; }
+
+/* --------------------------------------------------- loan categories -- */
+/* Explicit column counts, not `auto-fit`. An auto-fit track count is a
+   function of the container width alone, so a six-card catalogue landed as
+   four columns with a two-card orphan row. Explicit counts keep every card the
+   same width and every row full: three across for the six-product grids, four
+   for the four-card trust row, two for the four-card link lists. */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.cat-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cat-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  box-shadow: var(--sh-1);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  text-align: left;
+  font-family: var(--font);
+  cursor: pointer;
+  color: inherit;
+}
+.cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sh-3);
+  border-color: var(--c-border-strong);
+  text-decoration: none;
+}
+.cat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  background: var(--c-info-bg);
+  color: var(--brand-primary);
+}
+.cat-card h3 { font-size: 1.5rem; margin-bottom: 8px; }
+.cat-card p { font-size: 1rem; color: var(--c-muted); margin-bottom: 16px; flex: 1; }
+.cat-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--c-border);
+  font-size: 1rem;
+}
+.cat-rate { font-weight: 700; color: var(--brand-accent); }
+.cat-range { color: var(--c-muted); }
+
+/* ------------------------------------------------------ help / contact -- */
+.help-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.contact-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.contact-item { display: flex; gap: 13px; align-items: flex-start; }
+.contact-icon svg { width: 21px; height: 21px; }
+.contact-icon {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--c-info-bg);
+  color: var(--brand-primary);
+  display: grid;
+  place-items: center;
+}
+.contact-item strong { display: block; font-size: 1.0625rem; }
+.contact-item a, .contact-item span { font-size: 1rem; color: var(--c-muted); }
+.contact-item a:hover { color: var(--brand-primary); }
+
+/* FAQ accordion */
+.faq { display: flex; flex-direction: column; gap: 10px; }
+.faq-item {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  overflow: hidden;
+}
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 18px;
+  background: none;
+  border: 0;
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--c-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.faq-q:hover { background: var(--c-bg-alt); }
+.faq-q svg { flex-shrink: 0; transition: transform 0.2s var(--ease); color: var(--c-muted); }
+.faq-q[aria-expanded='true'] svg { transform: rotate(180deg); }
+.faq-a { padding: 0 18px 18px; font-size: 1rem; color: var(--c-ink-soft); }
+.faq-a[hidden] { display: none; }
+
+/* ------------------------------------------------------------- footer -- */
+.site-footer {
+  background: #0B1B3A;
+  color: #C7D2E5;
+  padding: 54px 0 26px;
+  margin-top: auto;
+}
+.footer-grid {
+  display: grid;
+  /* Brand column, then the five link columns: Products, Company, Resources,
+     Support, Legal. */
+  grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr));
+  gap: 28px;
+  padding-bottom: 34px;
+  border-bottom: 1px solid rgba(199, 210, 229, 0.16);
+}
+/* Long unbroken strings (the support e-mail address) must wrap inside the
+   column instead of widening the grid track and the page. */
+.footer-grid > * { min-width: 0; }
+.site-footer .brand { color: #fff; }
+.site-footer .brand-tag { color: #93A6C4; }
+.footer-about { font-size: 1rem; color: #93A6C4; max-width: 30em; margin: 14px 0 0; }
+.footer-col h2 {
+  color: #fff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+.footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.footer-col a, .footer-col span { color: #C7D2E5; font-size: 1rem; }
+.footer-col a {
+  display: inline-block;
+  padding: 3px 0;
+  min-height: 24px;
+  overflow-wrap: anywhere;
+}
+.footer-col a:hover { color: #fff; }
+
+.footer-bottom a {
+  display: inline-block;
+  padding: 3px 0;
+  min-height: 24px;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 22px;
+  font-size: 1rem;
+  color: #93A6C4;
+}
+.footer-legal { display: flex; gap: 18px; flex-wrap: wrap; }
+.footer-legal a { color: #93A6C4; }
+.footer-legal a:hover { color: #fff; }
+
+.dev-notice {
+  margin-top: 18px;
+  padding: 11px 15px;
+  border-radius: var(--r-sm);
+  background: rgba(180, 83, 9, 0.16);
+  border: 1px solid rgba(253, 230, 138, 0.3);
+  color: #FCD34D;
+  font-size: 1rem;
+  max-width: 72ch;
+}
+
+/* The same compliance note on the light auth / client cards, where the footer
+   notice does not reach because those pages carry no footer. */
+.auth-notice {
+  margin: 18px 0 0;
+  padding: 11px 15px;
+  border-radius: var(--r-sm);
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------- responsive -- */
+/* The full desktop row (brand + six nav links + Sign In + Apply Now) is about
+   1318px wide at max-content once the type scale was lifted, and the header
+   carries 56px gutters on each side, so the menu button must take over before
+   the viewport gets that narrow. Collapsing at 1120px left a 1121-1133px band
+   where the row overflowed and the "Apply Now" button was clipped off the right
+   edge (the page clips stray overflow, so no scrollbar warned the visitor).
+   1140px covers the widest row with a small margin. */
+@media (max-width: 1140px) {
+  .hero-inner { gap: 28px; padding-top: 46px; padding-bottom: 54px; }
+  .apply-grid { grid-template-columns: 1fr; gap: 24px; }
+  .side-panel { position: static; }
+  .help-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cat-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
+
+  .main-nav {
+    position: absolute;
+    top: var(--header-h);
+    left: 0;
+    right: 0;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+    box-shadow: var(--sh-2);
+    padding: 10px 20px 18px;
+    display: none;
+  }
+  .main-nav.is-open { display: block; }
+  .main-nav ul { flex-direction: column; align-items: stretch; gap: 2px; }
+  .main-nav a { padding: 12px 14px; font-size: 1rem; }
+  /* The header row hides these below 420px; repeat them in the menu so the
+     primary actions are never unreachable on a phone. */
+  .nav-mobile-action { display: block; margin-top: 6px; }
+  .site-header { position: relative; }
+  .header-actions .btn-outline { display: none; }
+}
+
+/* Browser zoom narrows the CSS viewport even on a landscape desktop. Keep the
+   application form beside its introduction until the layout is genuinely
+   tablet-sized; otherwise a modest zoom turns the landing page into a tall
+   single column. */
+@media (max-width: 960px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+
+/* The demo badge duplicates the always-present footer compliance note and is
+   ~130px wide. With the badge shown the full desktop row needs about 1423px
+   (brand + nav + two CTAs + badge + the 56px gutters), so below that width the
+   badge yields rather than clipping the "Apply Now" button. */
+@media (max-width: 1439px) {
+  [data-gf-mode-badge] { display: none !important; }
+}
+
+@media (max-width: 720px) {
+  .section { padding: 56px 0; }
+  .hero-inner { padding-top: 40px; padding-bottom: 48px; }
+  .form-grid { grid-template-columns: 1fr; gap: 16px; }
+  .apply-card-head, .stepper, .apply-card-body { padding-left: 20px; padding-right: 20px; }
+  .hero-stats { grid-template-columns: 1fr; gap: 14px; }
+  .review-row { grid-template-columns: 1fr; gap: 2px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 26px; }
+  .cat-grid, .cat-grid--2, .cat-grid--4 { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column-reverse; align-items: stretch; }
+  .form-actions .btn { width: 100%; }
+  .form-actions-right { margin-left: 0; flex-direction: column-reverse; width: 100%; }
+  .step-counter { text-align: center; }
+}
+
+@media (max-width: 420px) {
+  .wrap { padding-left: 15px; padding-right: 15px; }
+  .hero-cta .btn { width: 100%; }
+  .stepper { padding-left: 16px; padding-right: 16px; }
+  .step { min-width: 112px; min-height: 44px; align-items: center; }
+  .step-label { font-size: 0.9375rem; }
+
+  /* The brand tagline and the header CTA do not fit alongside the menu button
+     at this width; both actions are repeated in the nav menu (see
+     .nav-mobile-action), so nothing is lost. */
+  .brand-tag { display: none; }
+  .header-actions .btn { display: none; }
+  .brand-name { font-size: 1rem; }
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cat-card:hover { transform: none; }
+}
+
+/* Print: the confirmation is the only thing worth printing. */
+@media print {
+  .site-header, .site-footer, .side-panel, .hero, .section--alt,
+  .form-actions, .stepper, .no-print { display: none !important; }
+  .apply-card { box-shadow: none; border: 1px solid #ccc; }
+}
+
+/* ==========================================================================
+   Content pages — About, Recovery & Collections, Rates & Fees, Contact,
+   Legal, Error. Same chrome as the landing page, but the body is a readable
+   document rather than the application wizard.
+   ========================================================================== */
+
+/* Compact hero used at the top of every content page. */
+.page-hero {
+  background:
+    radial-gradient(760px 320px at 8% -20%, #E0E9FF 0%, transparent 60%),
+    radial-gradient(620px 300px at 96% 0%, #D9F5EA 0%, transparent 62%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--c-bg) 100%);
+  border-bottom: 1px solid var(--c-border);
+  padding: 52px 0 44px;
+}
+.page-hero__inner { max-width: 52em; }
+.page-hero h1 { margin-bottom: 14px; }
+.page-hero p {
+  font-size: 1.0625rem;
+  color: var(--c-ink-soft);
+  margin: 0;
+  max-width: 44em;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  font-size: 1rem;
+  color: var(--c-muted);
+}
+.breadcrumb li { display: flex; align-items: center; gap: 8px; }
+.breadcrumb li + li::before { content: '/'; color: var(--c-border-strong); }
+.breadcrumb a { color: var(--c-muted); }
+.breadcrumb a:hover { color: var(--brand-primary); }
+.breadcrumb [aria-current='page'] { color: var(--c-ink-soft); font-weight: 600; }
+
+/* Two-column document layout: prose on the left, sticky facts on the right.
+   The prose is capped at a comfortable measure and the gutter kept tight, so a
+   wide viewport does not open a hole between the text and the sidebar. */
+.doc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 330px);
+  gap: 40px;
+  align-items: start;
+}
+.doc-grid > * { min-width: 0; }
+
+.prose { max-width: 52em; }
+/* Long unbroken strings — email addresses, URLs — must wrap instead of
+   overflowing the viewport. Without this, a support address is clipped at the
+   screen edge on a 320px phone and the tail is unreadable. */
+.prose, .desk-item, .side-card, .legal-links { overflow-wrap: anywhere; }
+.prose > * + * { margin-top: 1rem; }
+.prose h2 {
+  font-size: 1.625rem;
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--c-border);
+}
+.prose h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.prose h3 { font-size: 1.25rem; margin-top: 1.9rem; }
+.prose p, .prose li { color: var(--c-ink-soft); }
+/* A link inside body prose must be distinguishable without colour alone
+   (WCAG 1.4.1): underline it in the flowing text, and keep the hover state
+   from removing the cue. Standalone links (buttons, nav, cards) stay clean. */
+.prose a, .callout p a, .desk-item a { text-decoration: underline; text-underline-offset: 2px; }
+.prose a:hover, .callout p a:hover, .desk-item a:hover { text-decoration-thickness: 2px; }
+.prose ul, .prose ol { padding-left: 1.35em; }
+.prose li { margin-bottom: 0.5rem; }
+.prose li:last-child { margin-bottom: 0; }
+.prose strong { color: var(--c-ink); }
+.prose a { font-weight: 600; }
+
+/* Muted body copy. Used on the landing page and every content page, but was
+   never defined in this stylesheet — the class fell through to inherited
+   colour. Defined here so small-print and captions actually read as secondary. */
+.text-muted { color: var(--c-muted); max-width: 68ch; }
+
+/* Callout — used for the fair-practice commitments and legal notices. */
+.callout {
+  border: 1px solid var(--c-border);
+  border-left: 4px solid var(--brand-primary);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  padding: 18px 20px;
+  box-shadow: var(--sh-1);
+}
+.callout--accent { border-left-color: var(--brand-accent); }
+.callout--warn {
+  border-left-color: var(--c-warning);
+  background: var(--c-warning-bg);
+  border-color: var(--c-warning-border);
+}
+.callout h3 { font-size: 1.125rem; margin-bottom: 8px; }
+.callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+.callout ul { padding-left: 1.25em; }
+
+/* ------------------------------------------------------ team / people -- */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+  gap: 22px;
+}
+
+.person-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--sh-1);
+  text-align: center;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.person-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sh-3);
+  border-color: var(--c-border-strong);
+}
+
+/* Portrait frame. The artwork is an original inline SVG illustration, so it
+   scales cleanly and carries no third-party likeness or licence. */
+.portrait {
+  width: 124px;
+  height: 124px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--c-surface);
+  box-shadow: 0 0 0 1px var(--c-border), var(--sh-2);
+  background: var(--c-bg-alt);
+  flex-shrink: 0;
+}
+.portrait svg { display: block; width: 100%; height: 100%; }
+
+.person-card h3 { font-size: 1.25rem; margin-bottom: 3px; }
+.person-role {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--brand-primary);
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+.person-bio { font-size: 1rem; color: var(--c-muted); margin: 0; flex: 1; }
+.person-meta {
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--c-border);
+  font-size: 1rem;
+  color: var(--c-muted);
+}
+.person-meta strong { display: block; color: var(--c-ink-soft); font-weight: 600; }
+
+/* Desk directory rows — name, remit, contact. */
+.desk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.desk-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 15px 17px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+}
+.desk-item .trust-icon { background: var(--c-success-bg); color: var(--brand-accent); }
+.desk-item strong { display: block; font-size: 1rem; }
+.desk-item span { font-size: 1rem; color: var(--c-muted); }
+
+/* --------------------------------------------------------- step list -- */
+.step-list { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.step-list li {
+  position: relative;
+  padding: 0 0 22px 46px;
+  counter-increment: step;
+}
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--c-info-bg);
+  color: var(--brand-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.step-list li::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 32px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--c-border);
+}
+.step-list li:last-child { padding-bottom: 0; }
+.step-list li:last-child::after { display: none; }
+.step-list strong { display: block; color: var(--c-ink); }
+.step-list span { font-size: 1rem; color: var(--c-muted); }
+
+/* --------------------------------------------------------- data table -- */
+.table-wrap { overflow-x: auto; border: 1px solid var(--c-border); border-radius: var(--r-md); background: var(--c-surface); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 1rem; min-width: 520px; }
+.data-table caption { text-align: left; padding: 14px 16px 0; font-weight: 600; color: var(--c-ink); }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--c-border); vertical-align: top; }
+.data-table th { background: var(--c-bg-alt); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--c-ink-soft); }
+.data-table td { color: var(--c-ink-soft); }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table td strong { color: var(--c-ink); }
+
+/* -------------------------------------------------------- stat strip -- */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+.stat-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 20px;
+  box-shadow: var(--sh-1);
+}
+.stat-card .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em; }
+.stat-card .stat-label { font-size: 1rem; color: var(--c-muted); margin-top: 4px; }
+
+/* --------------------------------------------------------- legal nav -- */
+.legal-links { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.legal-links a {
+  display: inline-block;
+  padding: 7px 13px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-pill);
+  font-size: 1rem;
+  color: var(--c-ink-soft);
+  background: var(--c-surface);
+}
+.legal-links a:hover { border-color: var(--brand-primary); color: var(--brand-primary); text-decoration: none; }
+
+/* -------------------------------------------------------- error page -- */
+.error-main { padding: 80px 0 96px; text-align: center; }
+.error-code {
+  font-size: clamp(4rem, 3rem + 8vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--brand-primary);
+  margin-bottom: 8px;
+}
+.error-main h1 { font-size: 1.6rem; }
+.error-main p { color: var(--c-muted); max-width: 34em; margin: 0 auto 24px; }
+.error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.error-popular-head { font-size: 1.25rem; margin: 46px 0 18px; }
+.error-main .cat-grid { text-align: left; max-width: 64em; margin: 0 auto; }
+.error-main .cat-card h3 { font-size: 1rem; margin: 0 0 6px; }
+.error-main .cat-card p { max-width: none; margin: 0; font-size: 1rem; }
+
+/* --------------------------------------------------- responsive (doc) -- */
+@media (max-width: 1024px) {
+  .doc-grid { grid-template-columns: 1fr; gap: 32px; }
+  .page-hero { padding: 42px 0 36px; }
+}
+
+@media (max-width: 720px) {
+  .page-hero { padding: 34px 0 30px; }
+  .team-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .person-card { padding: 20px; }
+  .prose h2 { margin-top: 1.9rem; }
+}
+/* ==========================================================================
+   International additions — how-it-works, responsible lending, glossary,
+   insights, locations, press, partners, cookie & AML policies, plus the
+   language/region switcher and the expanded footer.
+   ========================================================================== */
+
+/* --------------------------------------------------- language / region -- */
+.util-bar {
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  font-size: 1rem;
+}
+.util-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  flex-wrap: wrap;
+}
+.util-bar__note { color: var(--c-muted); }
+.util-bar__controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.lang-switch, .region-switch { display: inline-flex; align-items: center; gap: 7px; }
+.lang-switch label, .region-switch label { color: var(--c-muted); }
+.lang-switch select, .region-switch select {
+  font: inherit;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  min-height: 44px;
+}
+.lang-switch select:focus-visible, .region-switch select:focus-visible { box-shadow: var(--sh-focus); }
+
+/* --------------------------------------------------------- step cards -- */
+.flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+.flow-card {
+  position: relative;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 26px 24px 24px;
+  box-shadow: var(--sh-1);
+}
+.flow-card__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+.flow-card h3 { font-size: 1.25rem; margin-bottom: 6px; }
+.flow-card p { font-size: 1rem; color: var(--c-muted); margin: 0; }
+
+/* ------------------------------------------------------ definition list -- */
+.glossary { margin: 0; }
+.glossary dt { font-weight: 700; color: var(--c-ink); margin-top: 20px; }
+.glossary dt:first-of-type { margin-top: 0; }
+.glossary dd { margin: 6px 0 0; color: var(--c-ink-soft); }
+
+/* ---------------------------------------------------------- insight --- */
+.insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+.insight-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.insight-card:hover { transform: translateY(-3px); box-shadow: var(--sh-3); }
+.insight-card__art { display: block; width: 100%; height: 172px; }
+.insight-card__body { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
+.insight-card__tag {
+  align-self: flex-start;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+  background: var(--c-success-bg);
+  border: 1px solid var(--c-success-border);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  margin-bottom: 12px;
+}
+.insight-card h3 { font-size: 1.25rem; margin-bottom: 8px; }
+.insight-card p { font-size: 1rem; color: var(--c-muted); margin: 0 0 16px; flex: 1; }
+.insight-card .insight-card__meta { font-size: 0.9375rem; color: var(--c-muted); margin: 0; }
+
+/* ------------------------------------------------------------ offices -- */
+.office-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.office-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--sh-1);
+}
+.office-card h3 { font-size: 1.25rem; margin-bottom: 4px; }
+.office-card .office-region {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-primary);
+  margin-bottom: 12px;
+}
+.office-card address { font-style: normal; font-size: 1rem; color: var(--c-ink-soft); line-height: 1.5; }
+.office-card .office-meta { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--c-border); font-size: 1rem; color: var(--c-muted); }
+
+/* ---------------------------------------------------------- press kit -- */
+.press-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.press-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+  box-shadow: var(--sh-1);
+}
+.press-item__date { flex-shrink: 0; width: 104px; font-size: 1rem; font-weight: 600; color: var(--c-muted); }
+.press-item h3 { font-size: 1.1875rem; margin-bottom: 4px; }
+.press-item p { font-size: 1rem; color: var(--c-muted); margin: 0; }
+
+/* ----------------------------------------------------------- partners -- */
+.logo-wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; }
+.logo-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 132px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 22px;
+  text-align: center;
+  box-shadow: var(--sh-1);
+}
+.logo-tile svg { color: var(--brand-primary); }
+.logo-tile strong { font-size: 1rem; color: var(--c-ink); }
+.logo-tile span { font-size: 1rem; color: var(--c-muted); }
+
+/* --------------------------------------------------- footer additions -- */
+/* Every select in the footer, whether it sits in a `.footer-col` or in the
+   brand column's `.footer-regions` group. The global `color: inherit` reset
+   would otherwise hand the brand-column selects the footer's light text
+   (#C7D2E5) on a white control background - a 1.32:1 contrast failure. */
+.site-footer select {
+  font: inherit;
+  font-size: 1rem;
+  color: var(--c-ink);
+  background: #fff;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  min-height: 38px;
+  width: 100%;
+  max-width: 190px;
+}
+.footer-regions { display: flex; flex-direction: column; gap: 9px; }
+.footer-note { font-size: 0.9375rem; color: #93A6C4; margin: 12px 0 0; max-width: 34em; }
+
+@media (max-width: 720px) {
+  .press-item { flex-direction: column; gap: 6px; }
+  .press-item__date { width: auto; }
+  .util-bar__inner { justify-content: center; }
+}
+
+/* ------------------------------------------------------ page figures -- */
+.page-figure {
+  margin: 0 0 40px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+}
+.page-figure img { display: block; width: 100%; height: auto; }
+.page-figure figcaption {
+  padding: 16px 20px;
+  font-size: 1rem;
+  color: var(--c-muted);
+  border-top: 1px solid var(--c-border);
+  background: var(--c-bg-alt);
+}
+
+/* Six footer columns fit comfortably only on a wide viewport. Between the
+   desktop breakpoint and the 1024px switch to two columns, fold the grid to
+   three so the region selectors keep a usable width. */
+@media (min-width: 1025px) and (max-width: 1199px) {
+  .footer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

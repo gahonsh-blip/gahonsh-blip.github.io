@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Gahonsh Finance - Admin Dashboard</title>
+    <meta name="description" content="Financial loan management and administration platform">
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar" hidden>
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="active" data-i18n="dashboard">Dashboard / Settings</a>
+                <a href="customers.html" data-i18n="customers">Customers</a>
+                <a href="loan-products.html">Loan Products</a>
+                <a href="applications.html">Applications</a>
+                <a href="loans.html" data-i18n="loans">Loans</a>
+            </nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()" data-i18n="sign_out">Sign Out</button>
+            </div>
+            <div class="mt-4">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect" onchange="setTheme(this.value)">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="notice">
+                <strong>DEVELOPMENT / NOT FOR PUBLIC LENDING</strong><br>
+                Not an RBI-licensed bank or public lending service.
+            </div>
+
+            <div class="top-bar" id="topBar" hidden>
+                <h1>Admin Overview & Dashboard</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <!-- Login Section -->
+            <section class="card" id="loginPanel">
+                <h2>Admin Sign In</h2>
+                <form id="loginForm" autocomplete="on">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="admin@yourbank.example" autocomplete="username" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" id="loginButton">Sign in</button>
+                    <p style="margin-top:.75rem;font-size:.9rem;">
+                        <a href="/finance/admin/reset-password.html">Forgot your password?</a>
+                    </p>
+                </form>
+                <form id="otpForm" hidden autocomplete="off">
+                    <p class="sub" id="otpIntro">For your security, we e-mailed you a 6-digit sign-in code.</p>
+                    <div class="form-group">
+                        <label for="otpCode">Verification code</label>
+                        <input id="otpCode" name="otpCode" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6-digit code" required>
+                        <div class="hint" id="otpHint"></div>
+                    </div>
+                    <button type="submit" id="otpButton">Verify &amp; sign in</button>
+                    <p style="margin-top:.75rem;font-size:.9rem;">
+                        <button type="button" id="otpResend" class="btn-secondary">Resend code</button>
+                        <button type="button" id="otpBack" class="btn-secondary">Back</button>
+                    </p>
+                </form>
+            </section>
+
+            <!-- Settings & Dashboard Section -->
+            <section id="settingsPanel" hidden>
+                <!-- Summary Card: Total Active Loan Amounts & User Growth D3 Line Chart -->
+                <div class="summary-card" id="adminSummaryCard">
+                    <div class="summary-card-header">
+                        <div class="summary-card-title">
+                            <h2>Portfolio & User Growth Overview</h2>
+                            <p>Real-time active lending exposure and registered platform user trajectory</p>
+                        </div>
+                        <div class="summary-card-actions">
+                            <!-- Live Update Toggle Switch -->
+                            <div class="live-update-wrapper" id="liveUpdateWrapper">
+                                <label class="live-update-label" for="liveUpdateToggle" id="liveUpdateLabel">
+                                    <span class="live-pulse-dot" id="livePulseDot" aria-hidden="true"></span>
+                                    <span class="live-title-text">Live Update</span>
+                                    <span class="live-status-badge" id="liveStatusBadge">Off</span>
+                                </label>
+                                <label class="toggle-switch" id="liveToggleSwitch" title="Toggle live auto-refresh every 60 seconds">
+                                    <input type="checkbox" id="liveUpdateToggle" onchange="toggleLiveUpdate(this.checked)" aria-label="Toggle Live Update re-fetching every 60 seconds">
+                                    <span class="toggle-slider" id="liveToggleSlider">
+                                        <span class="toggle-knob" id="liveToggleKnob"></span>
+                                    </span>
+                                </label>
+                            </div>
+                            <!-- Period Filters -->
+                            <div class="summary-filter-pills" id="growthPeriodFilters">
+                                <button class="filter-pill active" data-period="all" onclick="setGrowthPeriod('all')">All Time</button>
+                                <button class="filter-pill" data-period="6m" onclick="setGrowthPeriod('6m')">Last 6 Months</button>
+                                <button class="filter-pill" data-period="3m" onclick="setGrowthPeriod('3m')">Last 3 Months</button>
+                            </div>
+                            <!-- Export to CSV Button -->
+                            <button class="btn-export-csv" id="exportMetricsCsvBtn" onclick="exportMetricsToCSV()" title="Export metrics for selected period as CSV">
+                                <svg class="export-icon" id="exportCsvIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span id="exportCsvText">Export to CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="summary-metrics-grid">
+                        <!-- Total Active Loans Metric Box -->
+                        <div class="metric-stat-box" id="activeLoansBox">
+                            <div class="metric-label-row">
+                                <span class="metric-eyebrow">Total Active Loan Volume</span>
+                                <span class="metric-tag metric-tag-success" id="activeLoansTag">Active Portfolio</span>
+                            </div>
+                            <div class="metric-value-row" id="activeLoansValueRow">
+                                <div class="metric-value" id="totalActiveLoansAmount">₹0</div>
+                                <div class="trend-indicator trend-neutral" id="activeLoansTrendIndicator" title="Trend compared to previous period">
+                                    <svg class="trend-arrow" id="activeLoansTrendArrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    <span class="trend-percentage" id="activeLoansTrendPct">0.0%</span>
+                                </div>
+                            </div>
+                            <div class="metric-subtext">
+                                <span id="activeLoansCountDesc">0 active loans</span>
+                                <span>•</span>
+                                <span id="avgActiveLoanDesc">Avg ₹0 / loan</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Users & Growth Metric Box -->
+                        <div class="metric-stat-box" id="usersGrowthBox">
+                            <div class="metric-label-row">
+                                <span class="metric-eyebrow">Total Registered Users</span>
+                                <span class="metric-tag metric-tag-primary" id="growthRateTag">+0% Growth</span>
+                            </div>
+                            <div class="metric-value-row" id="usersGrowthValueRow">
+                                <div class="metric-value" id="totalUsersCount">0 Users</div>
+                                <div class="trend-indicator trend-neutral" id="usersGrowthTrendIndicator" title="Trend compared to previous period">
+                                    <svg class="trend-arrow" id="usersGrowthTrendArrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    <span class="trend-percentage" id="usersGrowthTrendPct">0.0%</span>
+                                </div>
+                            </div>
+                            <div class="metric-subtext">
+                                <span id="verifiedCustomersDesc">0 verified customers</span>
+                                <span>•</span>
+                                <span id="userGrowthStatusDesc">Consistent month-over-month trend</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard filters: date range + client/loan search + granularity -->
+                    <div class="dashboard-filters" id="dashboardFilters">
+                        <div class="filter-group">
+                            <label for="metricsFrom">From</label>
+                            <input type="date" id="metricsFrom" aria-label="Filter from date">
+                        </div>
+                        <div class="filter-group">
+                            <label for="metricsTo">To</label>
+                            <input type="date" id="metricsTo" aria-label="Filter to date">
+                        </div>
+                        <div class="filter-group filter-group-grow">
+                            <label for="metricsSearch">Search client or loan</label>
+                            <input type="search" id="metricsSearch" placeholder="Client name, e-mail, phone or loan number" aria-label="Search client or loan">
+                        </div>
+                        <div class="filter-group">
+                            <label for="metricsGranularity">Group by</label>
+                            <select id="metricsGranularity">
+                                <option value="month">Month</option>
+                                <option value="day">Day</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button type="button" onclick="applyMetricsFilters()">Apply</button>
+                            <button type="button" class="btn-secondary" onclick="resetMetricsFilters()">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- D3 Charts Grid: Loan Volume, User Growth & Client Portfolio -->
+                    <div class="summary-charts-grid">
+                        <!-- Chart 1: Active Loan Volume Trends (Emerald / Teal Palette) -->
+                        <div class="chart-section" id="loanVolumeChartSection">
+                            <div class="chart-section-header">
+                                <span class="chart-section-title">Active Loan Volume Trends</span>
+                                <div class="chart-header-actions">
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-dot legend-dot-emerald"></span>
+                                            <span>Active Portfolio (₹)</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-download-chart" id="downloadLoanChartBtn" onclick="downloadChartImage('loanVolumeChartContainer', 'Active Loan Volume Trends', 'active-loan-volume')" title="Download Chart Image">
+                                        <svg class="download-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        <span>Download Chart Image</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d3-chart-wrapper">
+                                <div id="loanVolumeChartContainer" class="d3-chart-container"></div>
+                                <div id="loanChartTooltip" class="chart-tooltip"></div>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: User Growth Trajectory (Royal Blue / Indigo Palette) -->
+                        <div class="chart-section" id="userGrowthChartSection">
+                            <div class="chart-section-header">
+                                <span class="chart-section-title">User Growth Trajectory</span>
+                                <div class="chart-header-actions">
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-dot legend-dot-blue"></span>
+                                            <span>Cumulative Registered Users</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-download-chart" id="downloadUserGrowthChartBtn" onclick="downloadChartImage('userGrowthChartContainer', 'User Growth Trajectory', 'user-growth-trajectory')" title="Download Chart Image">
+                                        <svg class="download-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        <span>Download Chart Image</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d3-chart-wrapper">
+                                <div id="userGrowthChartContainer" class="d3-chart-container"></div>
+                                <div id="chartTooltip" class="chart-tooltip"></div>
+                            </div>
+                        </div>
+
+                        <!-- Chart 3: Client Portfolio (bar chart, searchable) -->
+                        <div class="chart-section" id="clientChartSection">
+                            <div class="chart-section-header">
+                                <span class="chart-section-title">Active Portfolio by Client</span>
+                                <div class="chart-header-actions">
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-dot legend-dot-emerald"></span>
+                                            <span>Active amount (₹)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d3-chart-wrapper">
+                                <div id="clientChartContainer" class="d3-chart-container"></div>
+                                <div id="clientChartTooltip" class="chart-tooltip"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Platform Settings</h2>
+                    <p class="mb-4">The entire website is managed from these three settings.</p>
+                    <div class="grid-2" id="settings"></div>
+                    <div class="mt-4">
+                        <button onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Feature Flags</h2>
+                    <p class="mb-4">Toggle platform features.</p>
+                    <div class="grid-2" id="flags"></div>
+                    <div class="mt-4">
+                        <button onclick="saveFlags()">Save Feature Flags</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script>
+        let token = localStorage.getItem('token') || '';
+        let userRole = localStorage.getItem('userRole') || '';
+        let metricsData = null;
+        let currentPeriod = 'all';
+        let chartResizeObserver = null;
+        let liveUpdateInterval = null;
+        let isLiveUpdateEnabled = false;
+
+        const settingsElement = document.getElementById('settings');
+        const flagsElement = document.getElementById('flags');
+        const loginPanel = document.getElementById('loginPanel');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const sidebar = document.getElementById('sidebar');
+        const topBar = document.getElementById('topBar');
+        const identity = document.getElementById('identity');
+
+        const headers = () => ({
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        });
+
+        /**
+         * Loads D3 on demand. The charts only render once a staff session is
+         * verified, so the 91 KB library is fetched after sign-in rather than in
+         * `<head>` - where it blocked first paint and was reported as unused
+         * JavaScript on the sign-in page. The same-origin vendored copy is tried
+         * first; the pinned, integrity-checked CDN build is the last-resort
+         * fallback. Loaded once and cached on `window.d3`.
+         */
+        function loadScript(src, integrity) {
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = true;
+                if (integrity) {
+                    s.integrity = integrity;
+                    s.crossOrigin = 'anonymous';
+                }
+                s.onload = resolve;
+                s.onerror = () => reject(new Error(`Failed to load ${src}`));
+                document.head.appendChild(s);
+            });
+        }
+
+        async function ensureD3() {
+            if (window.d3) return true;
+            try {
+                await loadScript('/finance/vendor/d3/d3.min.js');
+                return true;
+            } catch (err) {
+                try {
+                    await loadScript(
+                        'https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js',
+                        'sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i'
+                    );
+                    return true;
+                } catch (cdnErr) {
+                    console.error('D3 could not be loaded; charts are unavailable.', cdnErr);
+                    return false;
+                }
+            }
+        }
+
+        async function init() {
+            if (token) {
+                // Verify the session against the server before showing the
+                // dashboard. A token that merely *exists* is not trusted: a
+                // forged, expired or wrong-role token must not open the admin
+                // shell. A valid session for a non-staff role is forwarded to
+                // the portal that role owns.
+                const session = window.GFPortal ? await window.GFPortal.verify() : null;
+                if (!session) {
+                    logout();
+                } else if (window.GFPortal.roles('admin').indexOf(session.user.role) === -1) {
+                    window.location.replace(window.GFPortal.home(session.user.role));
+                    return;
+                } else {
+                    userRole = session.user.role;
+                    window.GFPortal.saveRole(userRole);
+                    await ensureD3();
+                    showApp();
+                    await load();
+                }
+            }
+
+            // Listen for theme changes to automatically update chart styling
+            window.addEventListener('themechange', () => {
+                if (settingsPanel && !settingsPanel.classList.contains('hidden')) {
+                    renderAllCharts();
+                }
+            });
+        }
+
+        function showApp() {
+            loginPanel.classList.add('hidden');
+            loginPanel.hidden = true;
+            settingsPanel.classList.remove('hidden');
+            settingsPanel.hidden = false;
+            sidebar.hidden = false;
+            topBar.hidden = false;
+            identity.textContent = `Signed in as ${userRole}`;
+            initChartResizeObserver();
+
+            // Restore Live Update state if enabled
+            if (localStorage.getItem('adminLiveUpdate') === 'true') {
+                toggleLiveUpdate(true, true);
+            }
+        }
+
+        function logout() {
+            token = '';
+            userRole = '';
+            metricsData = null;
+            toggleLiveUpdate(false, true);
+            if (chartResizeObserver) {
+                chartResizeObserver.disconnect();
+                chartResizeObserver = null;
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            loginPanel.classList.remove('hidden');
+            loginPanel.hidden = false;
+            settingsPanel.classList.add('hidden');
+            settingsPanel.hidden = true;
+            sidebar.hidden = true;
+            topBar.hidden = true;
+        }
+
+        function toggleLiveUpdate(enabled, isInitial = false) {
+            isLiveUpdateEnabled = !!enabled;
+            const toggleInput = document.getElementById('liveUpdateToggle');
+            const wrapper = document.getElementById('liveUpdateWrapper');
+            const badge = document.getElementById('liveStatusBadge');
+
+            if (toggleInput && toggleInput.checked !== isLiveUpdateEnabled) {
+                toggleInput.checked = isLiveUpdateEnabled;
+            }
+
+            if (wrapper) {
+                wrapper.classList.toggle('active', isLiveUpdateEnabled);
+            }
+
+            if (badge) {
+                badge.textContent = isLiveUpdateEnabled ? '60s' : 'Off';
+                badge.title = isLiveUpdateEnabled ? 'Auto-refresh active every 60 seconds' : 'Live update disabled';
+            }
+
+            if (liveUpdateInterval) {
+                clearInterval(liveUpdateInterval);
+                liveUpdateInterval = null;
+            }
+
+            if (isLiveUpdateEnabled) {
+                localStorage.setItem('adminLiveUpdate', 'true');
+                // Trigger background re-fetch every 60 seconds (60000ms)
+                liveUpdateInterval = setInterval(() => {
+                    reFetchMetricsInBackground();
+                }, 60000);
+
+                if (!isInitial) {
+                    showToast('Live Update enabled: auto-refreshing metrics every 60s', 'info');
+                }
+            } else {
+                localStorage.setItem('adminLiveUpdate', 'false');
+                if (!isInitial) {
+                    showToast('Live Update disabled', 'info');
+                }
+            }
+        }
+
+        async function reFetchMetricsInBackground() {
+            if (!token) {
+                toggleLiveUpdate(false, true);
+                return;
+            }
+
+            const pulseDot = document.getElementById('livePulseDot');
+            const badge = document.getElementById('liveStatusBadge');
+
+            if (pulseDot) {
+                pulseDot.classList.add('refreshing');
+            }
+
+            try {
+                const r = await fetch('/api/admin/metrics', { headers: headers() });
+                if (!r.ok) {
+                    if (r.status === 401 || r.status === 403) {
+                        toggleLiveUpdate(false, true);
+                    }
+                    return;
+                }
+
+                const freshData = await r.json();
+                metricsData = freshData;
+                updateSummaryMetricsUI();
+                renderAllCharts();
+
+                if (badge && isLiveUpdateEnabled) {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    badge.textContent = 'Updated';
+                    badge.title = `Last auto-refetched at ${timeStr}`;
+                    setTimeout(() => {
+                        if (isLiveUpdateEnabled && badge) {
+                            badge.textContent = '60s';
+                        }
+                    }, 2500);
+                }
+            } catch (err) {
+                console.warn('Background metrics re-fetch encountered an error:', err);
+            } finally {
+                if (pulseDot) {
+                    pulseDot.classList.remove('refreshing');
+                }
+            }
+        }
+
+        // Remove any existing toasts so retries never stack repeated errors.
+        function clearToasts() {
+            const container = document.querySelector('.toast-container');
+            if (container) container.innerHTML = '';
+        }
+
+        async function login(ev) {
+            if (ev) ev.preventDefault();
+            clearToasts();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                showToast('Email and password are required', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('loginButton');
+            btn.disabled = true;
+            btn.textContent = 'Signing in…';
+            try {
+                const r = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const d = await r.json();
+                if (!r.ok) {
+                    showToast(d.detail || 'Login failed', 'error');
+                    return;
+                }
+
+                // A second factor is required: the password was accepted, but no
+                // session exists yet. Show the code form and wait for it.
+                if (d.otp_required) {
+                    challengeToken = d.challenge_token;
+                    if (d.masked_email) {
+                        document.getElementById('otpIntro').textContent =
+                            'For your security, we e-mailed a 6-digit code to ' + d.masked_email + '.';
+                    }
+                    if (d.dev_code) {
+                        document.getElementById('otpHint').textContent = 'Development code: ' + d.dev_code;
+                    }
+                    document.getElementById('loginForm').hidden = true;
+                    document.getElementById('otpForm').hidden = false;
+                    document.getElementById('otpCode').focus();
+                    return;
+                }
+
+                await finishLogin(d);
+            } catch (err) {
+                console.error('Login network error:', err);
+                showToast('Network error during login. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign in';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', login);
+
+        // ---- Two-factor sign-in (e-mail OTP) ----
+        let challengeToken = null;
+
+        async function finishLogin(d) {
+            // Make sure the successful response actually carries a usable token
+            // and user before exposing the app.
+            token = d.access_token || d.token;
+            userRole = d.user && d.user.role;
+            if (!token || !userRole) {
+                showToast('Unexpected response from server. Please try again.', 'error');
+                return;
+            }
+            localStorage.setItem('token', token);
+            localStorage.setItem('userRole', userRole);
+            challengeToken = null;
+            document.getElementById('otpForm').hidden = true;
+            document.getElementById('loginForm').hidden = false;
+
+            // Only staff roles may open the admin shell. A borrower who signs in
+            // on this form is forwarded to the portal their role owns instead of
+            // being shown a dashboard whose API calls would all be refused.
+            if (window.GFPortal && window.GFPortal.roles('admin').indexOf(userRole) === -1) {
+                window.location.replace(window.GFPortal.home(userRole));
+                return;
+            }
+
+            // Charts need D3, which is loaded lazily (see `ensureD3`) so it
+            // stays out of the sign-in page's critical path. Load it before the
+            // dashboard renders.
+            await ensureD3();
+
+            showApp();
+
+            // The credentials were accepted (HTTP 200 + token). A failure to
+            // fetch the dashboard data afterwards is NOT a login failure and must
+            // never be reported as one.
+            try {
+                await load();
+                showToast('Successfully signed in', 'success');
+            } catch (loadErr) {
+                console.error('Post-login dashboard load failed:', loadErr);
+                showToast('Signed in, but unable to load the dashboard. You can retry shortly.', 'warning');
+            }
+        }
+
+        async function verifyOtp(ev) {
+            if (ev) ev.preventDefault();
+            clearToasts();
+            const code = document.getElementById('otpCode').value.trim();
+            if (!code || !challengeToken) {
+                showToast('Enter the 6-digit code', 'error');
+                return;
+            }
+            const btn = document.getElementById('otpButton');
+            btn.disabled = true;
+            btn.textContent = 'Verifying…';
+            try {
+                const r = await fetch('/api/auth/login/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ challenge_token: challengeToken, code })
+                });
+                const d = await r.json();
+                if (!r.ok) {
+                    showToast(d.error || 'Verification failed', 'error');
+                    return;
+                }
+                await finishLogin(d);
+            } catch (err) {
+                console.error('Verification network error:', err);
+                showToast('Network error during verification. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify & sign in';
+            }
+        }
+
+        async function resendOtp() {
+            clearToasts();
+            if (!challengeToken) return;
+            try {
+                const r = await fetch('/api/auth/login/resend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ challenge_token: challengeToken })
+                });
+                const d = await r.json();
+                if (!r.ok) {
+                    showToast(d.error || 'Could not resend the code', 'error');
+                    return;
+                }
+                if (d.dev_code) {
+                    document.getElementById('otpHint').textContent = 'Development code: ' + d.dev_code;
+                }
+                showToast('A new code was sent', 'success');
+            } catch (err) {
+                console.error('Resend network error:', err);
+                showToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        function backToLogin() {
+            challengeToken = null;
+            document.getElementById('otpCode').value = '';
+            document.getElementById('otpForm').hidden = true;
+            document.getElementById('loginForm').hidden = false;
+        }
+
+        document.getElementById('otpForm').addEventListener('submit', verifyOtp);
+        document.getElementById('otpResend').addEventListener('click', resendOtp);
+        document.getElementById('otpBack').addEventListener('click', backToLogin);
+
+        // ---- Filters: shared with both the dashboard and the CSV export ----
+        const metricsFilters = { from: '', to: '', q: '', granularity: 'month' };
+
+        function readFilterInputs() {
+            metricsFilters.from = (document.getElementById('metricsFrom') || {}).value || '';
+            metricsFilters.to = (document.getElementById('metricsTo') || {}).value || '';
+            metricsFilters.q = (document.getElementById('metricsSearch') || {}).value || '';
+            metricsFilters.granularity = (document.getElementById('metricsGranularity') || {}).value || 'month';
+        }
+
+        function metricsQueryString() {
+            const params = new URLSearchParams();
+            if (metricsFilters.from) params.set('from', metricsFilters.from);
+            if (metricsFilters.to) params.set('to', metricsFilters.to);
+            if (metricsFilters.q) params.set('q', metricsFilters.q);
+            if (metricsFilters.granularity) params.set('granularity', metricsFilters.granularity);
+            const s = params.toString();
+            return s ? `?${s}` : '';
+        }
+
+        function applyMetricsFilters() {
+            readFilterInputs();
+            loadMetrics();
+        }
+
+        function resetMetricsFilters() {
+            const from = document.getElementById('metricsFrom');
+            const to = document.getElementById('metricsTo');
+            const search = document.getElementById('metricsSearch');
+            const gran = document.getElementById('metricsGranularity');
+            if (from) from.value = '';
+            if (to) to.value = '';
+            if (search) search.value = '';
+            if (gran) gran.value = 'month';
+            readFilterInputs();
+            loadMetrics();
+        }
+
+        async function load() {
+            try {
+                // Load admin summary metrics and charts (with current filters).
+                await loadMetrics();
+
+                let r = await fetch('/api/settings', { headers: headers() });
+                if (!r.ok) throw new Error('Failed to load settings');
+                let settings = await r.json();
+                settingsElement.innerHTML = settings.map(s => {
+                    const value = typeof s.value === 'object' && s.value !== null
+                        ? JSON.stringify(s.value, null, 2)
+                        : String(s.value ?? '');
+                    const isJson = typeof s.value === 'object' && s.value !== null;
+                    const field = isJson
+                        ? `<textarea data-key="${escapeHtml(s.key)}" data-type="json" rows="6" style="width:100%;font-family:var(--font-family);font-size:12px;">${escapeHtml(value)}</textarea>`
+                        : (String(s.key).endsWith('_note')
+                            ? `<textarea data-key="${escapeHtml(s.key)}" data-type="string" rows="3" style="width:100%;">${escapeHtml(value)}</textarea>`
+                            : `<input data-key="${escapeHtml(s.key)}" data-type="string" value="${escapeHtml(value)}">`);
+                    return `
+                    <div class="form-group">
+                        <label>${escapeHtml(s.label || s.key.replace(/_/g, ' '))}</label>
+                        ${field}
+                        <small class="text-muted" style="font-size: 12px; color: var(--color-text-muted)">${escapeHtml(s.description || '')}</small>
+                    </div>`;
+                }).join('');
+
+                r = await fetch('/api/feature-flags', { headers: headers() });
+                if (!r.ok) throw new Error('Failed to load flags');
+                let flags = await r.json();
+                flagsElement.innerHTML = flags.map(f => `
+                    <div class="form-group flex items-center gap-2">
+                        <input type="checkbox" data-flag="${escapeHtml(f.key)}" ${f.enabled ? 'checked' : ''} style="width: auto; cursor: pointer;">
+                        <div>
+                            <label style="margin: 0;">${escapeHtml(f.key.replace(/_/g, ' '))}</label>
+                            <small class="text-muted" style="font-size: 12px; color: var(--color-text-muted)">${escapeHtml(f.description || '')}</small>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function loadMetrics() {
+            try {
+                const r = await fetch(`/api/admin/metrics${metricsQueryString()}`, { headers: headers() });
+                if (!r.ok) return;
+                metricsData = await r.json();
+                updateSummaryMetricsUI();
+                renderAllCharts();
+            } catch (err) {
+                console.error('Error fetching admin metrics:', err);
+            }
+        }
+
+        function updateSummaryMetricsUI() {
+            if (!metricsData) return;
+
+            const currency = metricsData.currency || 'INR';
+            const formatter = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: currency,
+                maximumFractionDigits: 0
+            });
+
+            // Total Active Loans
+            const activeAmt = Number(metricsData.total_active_loan_amount || 0);
+            const activeLoansEl = document.getElementById('totalActiveLoansAmount');
+            if (activeLoansEl) {
+                activeLoansEl.textContent = formatter.format(activeAmt);
+            }
+
+            const count = metricsData.active_loans_count || 0;
+            const countEl = document.getElementById('activeLoansCountDesc');
+            if (countEl) {
+                countEl.textContent = `${count} active loan${count === 1 ? '' : 's'}`;
+            }
+
+            const avgLoan = count > 0 ? Math.round(activeAmt / count) : 0;
+            const avgEl = document.getElementById('avgActiveLoanDesc');
+            if (avgEl) {
+                avgEl.textContent = `Avg ${formatter.format(avgLoan)} / loan`;
+            }
+
+            // Total Registered Users
+            const totalUsers = metricsData.total_users_count || 0;
+            const usersEl = document.getElementById('totalUsersCount');
+            if (usersEl) {
+                usersEl.textContent = `${totalUsers} Users`;
+            }
+
+            const growthRate = metricsData.growth_rate_percent || 0;
+            const growthTag = document.getElementById('growthRateTag');
+            if (growthTag) {
+                growthTag.textContent = growthRate >= 0 ? `+${growthRate}% Growth` : `${growthRate}%`;
+            }
+
+            const custCount = metricsData.total_customers_count || 0;
+            const custEl = document.getElementById('verifiedCustomersDesc');
+            if (custEl) {
+                custEl.textContent = `${custCount} verified customer${custCount === 1 ? '' : 's'}`;
+            }
+
+            updateTrendIndicators();
+        }
+
+        function setGrowthPeriod(period) {
+            currentPeriod = period;
+            document.querySelectorAll('#growthPeriodFilters .filter-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
+            renderAllCharts();
+            updateTrendIndicators();
+        }
+
+        function updateTrendIndicators() {
+            if (!metricsData) return;
+
+            const loanList = getFilteredLoanData();
+            const growthList = getFilteredGrowthData();
+
+            // 1. Calculate Active Loan Volume percentage change compared to previous period
+            let loanPct = 0;
+            let loanPrevLabel = '';
+            if (loanList && loanList.length >= 2) {
+                const latest = loanList[loanList.length - 1];
+                const prev = loanList[loanList.length - 2];
+                const latestVal = Number(latest.total_volume !== undefined ? latest.total_volume : (latest.disbursed_amount || 0));
+                const prevVal = Number(prev.total_volume !== undefined ? prev.total_volume : (prev.disbursed_amount || 0));
+                loanPrevLabel = prev.label || prev.period || '';
+                if (prevVal > 0) {
+                    loanPct = ((latestVal - prevVal) / prevVal) * 100;
+                } else if (latestVal > 0) {
+                    loanPct = 100;
+                }
+            } else if (loanList && loanList.length === 1 && metricsData.loan_growth && metricsData.loan_growth.length >= 2) {
+                const allLoans = metricsData.loan_growth;
+                const latest = allLoans[allLoans.length - 1];
+                const prev = allLoans[allLoans.length - 2];
+                const latestVal = Number(latest.total_volume !== undefined ? latest.total_volume : (latest.disbursed_amount || 0));
+                const prevVal = Number(prev.total_volume !== undefined ? prev.total_volume : (prev.disbursed_amount || 0));
+                loanPrevLabel = prev.label || prev.period || '';
+                if (prevVal > 0) {
+                    loanPct = ((latestVal - prevVal) / prevVal) * 100;
+                }
+            }
+
+            renderTrendBadge(
+                'activeLoansTrendIndicator',
+                'activeLoansTrendArrow',
+                'activeLoansTrendPct',
+                loanPct,
+                loanPrevLabel ? `vs ${loanPrevLabel}` : 'vs previous period'
+            );
+
+            // 2. Calculate User Growth percentage change compared to previous period
+            let userPct = 0;
+            let userPrevLabel = '';
+            if (growthList && growthList.length >= 2) {
+                const latest = growthList[growthList.length - 1];
+                const prev = growthList[growthList.length - 2];
+                const latestVal = Number(latest.total_users || 0);
+                const prevVal = Number(prev.total_users || 0);
+                userPrevLabel = prev.label || prev.period || '';
+                if (prevVal > 0) {
+                    userPct = ((latestVal - prevVal) / prevVal) * 100;
+                } else if (latestVal > 0) {
+                    userPct = 100;
+                }
+            } else if (growthList && growthList.length === 1 && metricsData.user_growth && metricsData.user_growth.length >= 2) {
+                const allUsers = metricsData.user_growth;
+                const latest = allUsers[allUsers.length - 1];
+                const prev = allUsers[allUsers.length - 2];
+                const latestVal = Number(latest.total_users || 0);
+                const prevVal = Number(prev.total_users || 0);
+                userPrevLabel = prev.label || prev.period || '';
+                if (prevVal > 0) {
+                    userPct = ((latestVal - prevVal) / prevVal) * 100;
+                }
+            } else if (metricsData.growth_rate_percent !== undefined) {
+                userPct = Number(metricsData.growth_rate_percent);
+            }
+
+            renderTrendBadge(
+                'usersGrowthTrendIndicator',
+                'usersGrowthTrendArrow',
+                'usersGrowthTrendPct',
+                userPct,
+                userPrevLabel ? `vs ${userPrevLabel}` : 'vs previous period'
+            );
+        }
+
+        function renderTrendBadge(containerId, arrowId, textId, pct, comparisonDesc) {
+            const container = document.getElementById(containerId);
+            const arrow = document.getElementById(arrowId);
+            const text = document.getElementById(textId);
+            if (!container || !arrow || !text) return;
+
+            container.classList.remove('trend-positive', 'trend-negative', 'trend-neutral');
+
+            const rounded = Math.round(pct * 10) / 10;
+            const absVal = Math.abs(rounded).toFixed(1);
+
+            if (rounded > 0) {
+                container.classList.add('trend-positive');
+                container.title = `+${absVal}% ${comparisonDesc}`;
+                text.textContent = `+${absVal}%`;
+                arrow.setAttribute('aria-label', 'Trending up');
+                arrow.innerHTML = '<line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>';
+            } else if (rounded < 0) {
+                container.classList.add('trend-negative');
+                container.title = `-${absVal}% ${comparisonDesc}`;
+                text.textContent = `-${absVal}%`;
+                arrow.setAttribute('aria-label', 'Trending down');
+                arrow.innerHTML = '<line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline>';
+            } else {
+                container.classList.add('trend-neutral');
+                container.title = `0.0% ${comparisonDesc}`;
+                text.textContent = '0.0%';
+                arrow.setAttribute('aria-label', 'No change');
+                arrow.innerHTML = '<line x1="5" y1="12" x2="19" y2="12"></line>';
+            }
+        }
+
+        function renderAllCharts() {
+            // D3 is fetched lazily; only render once it is present. A failed
+            // load logs from `ensureD3` and leaves the charts empty rather than
+            // throwing on every render pass.
+            if (!window.d3) return;
+            renderLoanVolumeChart();
+            renderUserGrowthChart();
+            renderClientChart();
+        }
+
+        function getFilteredGrowthData() {
+            if (!metricsData || !metricsData.user_growth) return [];
+            let list = [...metricsData.user_growth];
+            if (currentPeriod === '3m') {
+                list = list.slice(-3);
+            } else if (currentPeriod === '6m') {
+                list = list.slice(-6);
+            }
+            return list;
+        }
+
+        function getFilteredLoanData() {
+            if (!metricsData || !metricsData.loan_growth) return [];
+            let list = [...metricsData.loan_growth];
+            if (currentPeriod === '3m') {
+                list = list.slice(-3);
+            } else if (currentPeriod === '6m') {
+                list = list.slice(-6);
+            }
+            return list;
+        }
+
+        function exportMetricsToCSV() {
+            if (!metricsData) {
+                showToast('No metric data available to export', 'warning');
+                return;
+            }
+
+            const loanList = getFilteredLoanData();
+            const growthList = getFilteredGrowthData();
+
+            if ((!loanList || loanList.length === 0) && (!growthList || growthList.length === 0)) {
+                showToast('No data available for the selected period', 'warning');
+                return;
+            }
+
+            const periodNames = {
+                'all': 'All Time',
+                '6m': 'Last 6 Months',
+                '3m': 'Last 3 Months'
+            };
+            const currentPeriodLabel = periodNames[currentPeriod] || currentPeriod;
+            const currency = metricsData.currency || 'INR';
+
+            // Index datasets by period
+            const loanMap = new Map();
+            loanList.forEach(item => {
+                if (item && item.period) loanMap.set(item.period, item);
+            });
+
+            const userMap = new Map();
+            growthList.forEach(item => {
+                if (item && item.period) userMap.set(item.period, item);
+            });
+
+            // Preserve chronological order of unique periods
+            const periods = [];
+            loanList.forEach(item => {
+                if (item && item.period && !periods.includes(item.period)) {
+                    periods.push(item.period);
+                }
+            });
+            growthList.forEach(item => {
+                if (item && item.period && !periods.includes(item.period)) {
+                    periods.push(item.period);
+                }
+            });
+
+            // CSV column headers
+            const headers = [
+                'Period Code',
+                'Month Label',
+                'Date',
+                `Active Loan Volume (${currency})`,
+                'Active Loans Count',
+                `New Disbursed Amount (${currency})`,
+                'New Loans Disbursed',
+                'Total Registered Users',
+                'New Registered Users'
+            ];
+
+            const escapeCsv = (val) => {
+                if (val === null || val === undefined) return '';
+                const str = String(val);
+                if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            const csvLines = [];
+            csvLines.push(headers.map(escapeCsv).join(','));
+
+            for (const p of periods) {
+                const l = loanMap.get(p) || {};
+                const u = userMap.get(p) || {};
+
+                const row = [
+                    escapeCsv(p),
+                    escapeCsv(l.label || u.label || p),
+                    escapeCsv(l.date || u.date || ''),
+                    escapeCsv(l.total_volume !== undefined ? l.total_volume : ''),
+                    escapeCsv(l.active_loans_count !== undefined ? l.active_loans_count : ''),
+                    escapeCsv(l.disbursed_amount !== undefined ? l.disbursed_amount : ''),
+                    escapeCsv(l.new_loans_count !== undefined ? l.new_loans_count : ''),
+                    escapeCsv(u.total_users !== undefined ? u.total_users : ''),
+                    escapeCsv(u.new_users !== undefined ? u.new_users : '')
+                ];
+                csvLines.push(row.join(','));
+            }
+
+            // UTF-8 BOM ensures Excel and Sheets decode UTF-8 correctly
+            const csvContent = '\uFEFF' + csvLines.join('\r\n');
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const filename = `admin-metrics-${currentPeriod}-${todayStr}.csv`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+
+            showToast(`Exported ${currentPeriodLabel} metrics (${filename})`, 'success');
+        }
+
+        function downloadChartImage(containerId, chartTitle, filenamePrefix) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                showToast('Chart container not found', 'error');
+                return;
+            }
+
+            const svgElement = container.querySelector('svg');
+            if (!svgElement) {
+                showToast('No chart available to export', 'warning');
+                return;
+            }
+
+            try {
+                const bbox = svgElement.getBoundingClientRect();
+                const svgWidth = Math.max(parseFloat(svgElement.getAttribute('width')) || bbox.width || 560, 320);
+                const svgHeight = Math.max(parseFloat(svgElement.getAttribute('height')) || bbox.height || 240, 200);
+
+                // Clone the SVG so live chart is untouched
+                const clonedSvg = svgElement.cloneNode(true);
+                clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+                clonedSvg.setAttribute('width', svgWidth);
+                clonedSvg.setAttribute('height', svgHeight);
+                if (!clonedSvg.getAttribute('viewBox')) {
+                    clonedSvg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+                }
+
+                // Remove transparent or hover tracking elements
+                clonedSvg.querySelectorAll('line').forEach(l => {
+                    if (l.style.opacity === '0' || l.getAttribute('opacity') === '0') {
+                        l.remove();
+                    }
+                });
+
+                // Standardize font family for clean rendering across all image viewers
+                const fontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+                clonedSvg.querySelectorAll('text').forEach(t => {
+                    t.setAttribute('font-family', fontStack);
+                });
+
+                // Theme color detection
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                               (localStorage.getItem('theme') === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+                const cardBorder = isDark ? '#374151' : '#E5E7EB';
+                const textColor = isDark ? '#F9FAFB' : '#111827';
+                const subtextColor = isDark ? '#9CA3AF' : '#6B7280';
+
+                // High-resolution canvas (2x scale for retina crispness)
+                const scale = 2;
+                const padX = 24;
+                const padTop = 24;
+                const headerHeight = chartTitle ? 44 : 8;
+                const padBottom = 20;
+
+                const totalWidth = svgWidth + padX * 2;
+                const totalHeight = svgHeight + padTop + headerHeight + padBottom;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = totalWidth * scale;
+                canvas.height = totalHeight * scale;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    showToast('Canvas rendering unavailable', 'error');
+                    return;
+                }
+
+                ctx.scale(scale, scale);
+
+                // Draw background
+                ctx.fillStyle = cardBg;
+                ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+                // Optional subtle border around card snapshot
+                ctx.strokeStyle = cardBorder;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(0.5, 0.5, totalWidth - 1, totalHeight - 1);
+
+                // Header title and metadata on snapshot
+                if (chartTitle) {
+                    ctx.fillStyle = textColor;
+                    ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                    ctx.fillText(chartTitle, padX, padTop + 14);
+
+                    const periodNames = {
+                        'all': 'All Time',
+                        '6m': 'Last 6 Months',
+                        '3m': 'Last 3 Months'
+                    };
+                    const periodLabel = periodNames[currentPeriod] || currentPeriod;
+                    const todayStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+                    ctx.fillStyle = subtextColor;
+                    ctx.font = '500 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                    ctx.fillText(`${periodLabel} • Generated ${todayStr} • Gahonsh Finance`, padX, padTop + 32);
+                }
+
+                // Serialize SVG to XML string
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(clonedSvg);
+
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const URLObj = window.URL || window.webkitURL || window;
+                const blobUrl = URLObj.createObjectURL(svgBlob);
+
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        const chartY = padTop + headerHeight;
+                        ctx.drawImage(img, padX, chartY, svgWidth, svgHeight);
+                        URLObj.revokeObjectURL(blobUrl);
+
+                        const periodStr = currentPeriod || 'all';
+                        const dateStr = new Date().toISOString().slice(0, 10);
+                        const filename = `${filenamePrefix}-${periodStr}-${dateStr}.png`;
+
+                        if (canvas.toBlob) {
+                            canvas.toBlob(function(pngBlob) {
+                                if (!pngBlob) {
+                                    const dataUrl = canvas.toDataURL('image/png');
+                                    triggerPngDownload(dataUrl, filename);
+                                    return;
+                                }
+                                const pngUrl = URLObj.createObjectURL(pngBlob);
+                                triggerPngDownload(pngUrl, filename, () => URLObj.revokeObjectURL(pngUrl));
+                            }, 'image/png');
+                        } else {
+                            const dataUrl = canvas.toDataURL('image/png');
+                            triggerPngDownload(dataUrl, filename);
+                        }
+                    } catch (drawErr) {
+                        console.error('Error drawing SVG onto canvas:', drawErr);
+                        URLObj.revokeObjectURL(blobUrl);
+                        showToast('Failed to snapshot chart', 'error');
+                    }
+                };
+
+                img.onerror = function(err) {
+                    console.error('Error loading SVG as image:', err);
+                    URLObj.revokeObjectURL(blobUrl);
+                    showToast('Failed to snapshot chart image', 'error');
+                };
+
+                img.src = blobUrl;
+            } catch (err) {
+                console.error('Download chart error:', err);
+                showToast('Failed to export chart image', 'error');
+            }
+        }
+
+        function triggerPngDownload(url, filename, cleanup) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (cleanup) {
+                setTimeout(cleanup, 1200);
+            }
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function formatCompactCurrency(val) {
+            const sym = (metricsData && metricsData.currency === 'USD') ? '$' : '₹';
+            if (val >= 10000000) return `${sym}${(val / 10000000).toFixed(1)}Cr`;
+            if (val >= 100000) return `${sym}${(val / 100000).toFixed(val % 100000 === 0 ? 0 : 1)}L`;
+            if (val >= 1000) return `${sym}${Math.round(val / 1000)}k`;
+            return `${sym}${val}`;
+        }
+
+        function renderLoanVolumeChart() {
+            const container = document.getElementById('loanVolumeChartContainer');
+            const tooltip = document.getElementById('loanChartTooltip');
+            if (!container || typeof d3 === 'undefined') return;
+
+            d3.select(container).selectAll('*').remove();
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                tooltip.removeAttribute('style');
+            }
+
+            const data = getFilteredLoanData();
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:13px;">No loan portfolio records available for this period.</div>';
+                return;
+            }
+
+            const rect = container.getBoundingClientRect();
+            const width = Math.max(rect.width || container.clientWidth || 360, 280);
+            const height = Math.max(rect.height || container.clientHeight || 240, 200);
+
+            const margin = { top: 20, right: 28, bottom: 35, left: 56 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            if (innerWidth <= 0 || innerHeight <= 0) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           (localStorage.getItem('theme') === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+            // Emerald / Mint financial palette for active loans
+            const primaryColor = isDark ? '#10B981' : '#059669';
+            const borderColor = isDark ? '#374151' : '#E5E7EB';
+            const textMuted = isDark ? '#9CA3AF' : '#6B7280';
+            const surfaceColor = isDark ? '#1F2937' : '#FFFFFF';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .style('overflow', 'visible');
+
+            const defs = svg.append('defs');
+            const gradient = defs.append('linearGradient')
+                .attr('id', 'loanGradientFill')
+                .attr('x1', '0')
+                .attr('y1', '0')
+                .attr('x2', '0')
+                .attr('y2', '1');
+
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', primaryColor)
+                .attr('stop-opacity', isDark ? 0.38 : 0.22);
+
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', primaryColor)
+                .attr('stop-opacity', 0.0);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const xScale = d3.scalePoint()
+                .domain(data.map(d => d.label))
+                .range([0, innerWidth])
+                .padding(0.15);
+
+            const maxY = d3.max(data, d => d.total_volume) || 10000;
+            const yScale = d3.scaleLinear()
+                .domain([0, Math.ceil(maxY * 1.18)])
+                .nice()
+                .range([innerHeight, 0]);
+
+            // Subtle Horizontal Gridlines
+            g.append('g')
+                .attr('class', 'chart-grid')
+                .call(d3.axisLeft(yScale)
+                    .ticks(4)
+                    .tickSize(-innerWidth)
+                    .tickFormat('')
+                )
+                .call(gAxis => gAxis.select('.domain').remove())
+                .call(gAxis => gAxis.selectAll('.tick line')
+                    .attr('stroke', borderColor)
+                    .attr('stroke-dasharray', '3,3')
+                    .attr('stroke-opacity', 0.8)
+                );
+
+            // X Axis
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale).tickSize(0).tickPadding(10))
+                .call(gAxis => gAxis.select('.domain').attr('stroke', borderColor))
+                .call(gAxis => gAxis.selectAll('.tick text')
+                    .attr('fill', textMuted)
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'var(--font-family)')
+                );
+
+            // Y Axis with compact currency format
+            g.append('g')
+                .call(d3.axisLeft(yScale).ticks(4).tickFormat(formatCompactCurrency).tickSize(0).tickPadding(8))
+                .call(gAxis => gAxis.select('.domain').remove())
+                .call(gAxis => gAxis.selectAll('.tick text')
+                    .attr('fill', textMuted)
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'var(--font-family)')
+                );
+
+            // Area
+            const area = d3.area()
+                .x(d => xScale(d.label))
+                .y0(innerHeight)
+                .y1(d => yScale(d.total_volume))
+                .curve(d3.curveMonotoneX);
+
+            g.append('path')
+                .datum(data)
+                .attr('fill', 'url(#loanGradientFill)')
+                .attr('d', area);
+
+            // Line
+            const line = d3.line()
+                .x(d => xScale(d.label))
+                .y(d => yScale(d.total_volume))
+                .curve(d3.curveMonotoneX);
+
+            g.append('path')
+                .datum(data)
+                .attr('fill', 'none')
+                .attr('stroke', primaryColor)
+                .attr('stroke-width', 2.5)
+                .attr('stroke-linecap', 'round')
+                .attr('stroke-linejoin', 'round')
+                .attr('d', line);
+
+            // Hover crosshair vertical line
+            const hoverLine = g.append('line')
+                .attr('y1', 0)
+                .attr('y2', innerHeight)
+                .attr('stroke', isDark ? '#34D399' : '#6EE7B7')
+                .attr('stroke-width', 1.5)
+                .attr('stroke-dasharray', '4,4')
+                .style('opacity', 0)
+                .style('pointer-events', 'none');
+
+            // Data Points
+            const circles = g.selectAll('.chart-point')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'chart-point')
+                .attr('cx', d => xScale(d.label))
+                .attr('cy', d => yScale(d.total_volume))
+                .attr('r', 4.5)
+                .attr('fill', surfaceColor)
+                .attr('stroke', primaryColor)
+                .attr('stroke-width', 2.2)
+                .style('cursor', 'pointer');
+
+            const currency = (metricsData && metricsData.currency) || 'INR';
+            const fullFormatter = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: currency,
+                maximumFractionDigits: 0
+            });
+
+            // Overlay for smooth tracking
+            g.append('rect')
+                .attr('width', innerWidth)
+                .attr('height', innerHeight)
+                .attr('fill', 'transparent')
+                .style('cursor', 'crosshair')
+                .on('mousemove', function(event) {
+                    const [mouseX] = d3.pointer(event);
+                    let closest = data[0];
+                    let minDistance = Infinity;
+
+                    data.forEach(d => {
+                        const px = xScale(d.label);
+                        const dist = Math.abs(mouseX - px);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closest = d;
+                        }
+                    });
+
+                    const cx = xScale(closest.label);
+                    const cy = yScale(closest.total_volume);
+
+                    hoverLine
+                        .attr('x1', cx)
+                        .attr('x2', cx)
+                        .style('opacity', 1);
+
+                    circles
+                        .attr('r', d => d === closest ? 7 : 4.5)
+                        .attr('fill', d => d === closest ? primaryColor : surfaceColor);
+
+                    if (tooltip) {
+                        const tooltipX = margin.left + cx;
+                        const tooltipY = margin.top + cy - 12;
+
+                        tooltip.innerHTML = `
+                            <div class="chart-tooltip-period">${escapeHtml(closest.label)}</div>
+                            <div class="chart-tooltip-stat stat-emerald">
+                                <span>Active Volume:</span>
+                                <strong>${fullFormatter.format(closest.total_volume)}</strong>
+                            </div>
+                            <div class="chart-tooltip-stat">
+                                <span>Disbursed:</span>
+                                <span>+${fullFormatter.format(closest.disbursed_amount)} (${closest.new_loans_count} loan${closest.new_loans_count === 1 ? '' : 's'})</span>
+                            </div>
+                        `;
+                        tooltip.style.left = `${tooltipX}px`;
+                        tooltip.style.top = `${tooltipY}px`;
+                        tooltip.classList.add('visible');
+                    }
+                })
+                .on('mouseleave', function() {
+                    hoverLine.style('opacity', 0);
+                    circles
+                        .attr('r', 4.5)
+                        .attr('fill', surfaceColor);
+                    if (tooltip) {
+                        tooltip.classList.remove('visible');
+                    }
+                });
+        }
+
+        function renderUserGrowthChart() {
+            const container = document.getElementById('userGrowthChartContainer');
+            const tooltip = document.getElementById('chartTooltip');
+            if (!container || typeof d3 === 'undefined') return;
+
+            // Clear previous SVG / elements
+            d3.select(container).selectAll('*').remove();
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                tooltip.removeAttribute('style');
+            }
+
+            const data = getFilteredGrowthData();
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:13px;">No user registration records available for this period.</div>';
+                return;
+            }
+
+            const rect = container.getBoundingClientRect();
+            const width = Math.max(rect.width || container.clientWidth || 360, 280);
+            const height = Math.max(rect.height || container.clientHeight || 240, 200);
+
+            const margin = { top: 20, right: 28, bottom: 35, left: 42 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            if (innerWidth <= 0 || innerHeight <= 0) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           (localStorage.getItem('theme') === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+            const primaryColor = isDark ? '#3B82F6' : '#1E3A8A';
+            const borderColor = isDark ? '#374151' : '#E5E7EB';
+            const textMuted = isDark ? '#9CA3AF' : '#6B7280';
+            const surfaceColor = isDark ? '#1F2937' : '#FFFFFF';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .style('overflow', 'visible');
+
+            const defs = svg.append('defs');
+            const gradient = defs.append('linearGradient')
+                .attr('id', 'growthGradientFill')
+                .attr('x1', '0')
+                .attr('y1', '0')
+                .attr('x2', '0')
+                .attr('y2', '1');
+
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', primaryColor)
+                .attr('stop-opacity', isDark ? 0.35 : 0.18);
+
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', primaryColor)
+                .attr('stop-opacity', 0.0);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const xScale = d3.scalePoint()
+                .domain(data.map(d => d.label))
+                .range([0, innerWidth])
+                .padding(0.15);
+
+            const maxY = d3.max(data, d => d.total_users) || 10;
+            const yScale = d3.scaleLinear()
+                .domain([0, Math.ceil(maxY * 1.2)])
+                .nice()
+                .range([innerHeight, 0]);
+
+            // Subtle Horizontal Gridlines
+            g.append('g')
+                .attr('class', 'chart-grid')
+                .call(d3.axisLeft(yScale)
+                    .ticks(4)
+                    .tickSize(-innerWidth)
+                    .tickFormat('')
+                )
+                .call(gAxis => gAxis.select('.domain').remove())
+                .call(gAxis => gAxis.selectAll('.tick line')
+                    .attr('stroke', borderColor)
+                    .attr('stroke-dasharray', '3,3')
+                    .attr('stroke-opacity', 0.8)
+                );
+
+            // X Axis
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale).tickSize(0).tickPadding(10))
+                .call(gAxis => gAxis.select('.domain').attr('stroke', borderColor))
+                .call(gAxis => gAxis.selectAll('.tick text')
+                    .attr('fill', textMuted)
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'var(--font-family)')
+                );
+
+            // Y Axis
+            g.append('g')
+                .call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format('d')).tickSize(0).tickPadding(8))
+                .call(gAxis => gAxis.select('.domain').remove())
+                .call(gAxis => gAxis.selectAll('.tick text')
+                    .attr('fill', textMuted)
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'var(--font-family)')
+                );
+
+            // Area
+            const area = d3.area()
+                .x(d => xScale(d.label))
+                .y0(innerHeight)
+                .y1(d => yScale(d.total_users))
+                .curve(d3.curveMonotoneX);
+
+            g.append('path')
+                .datum(data)
+                .attr('fill', 'url(#growthGradientFill)')
+                .attr('d', area);
+
+            // Line
+            const line = d3.line()
+                .x(d => xScale(d.label))
+                .y(d => yScale(d.total_users))
+                .curve(d3.curveMonotoneX);
+
+            g.append('path')
+                .datum(data)
+                .attr('fill', 'none')
+                .attr('stroke', primaryColor)
+                .attr('stroke-width', 2.5)
+                .attr('stroke-linecap', 'round')
+                .attr('stroke-linejoin', 'round')
+                .attr('d', line);
+
+            // Hover crosshair vertical line
+            const hoverLine = g.append('line')
+                .attr('y1', 0)
+                .attr('y2', innerHeight)
+                .attr('stroke', isDark ? '#60A5FA' : '#93C5FD')
+                .attr('stroke-width', 1.5)
+                .attr('stroke-dasharray', '4,4')
+                .style('opacity', 0)
+                .style('pointer-events', 'none');
+
+            // Data Points
+            const circles = g.selectAll('.chart-point')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'chart-point')
+                .attr('cx', d => xScale(d.label))
+                .attr('cy', d => yScale(d.total_users))
+                .attr('r', 4.5)
+                .attr('fill', surfaceColor)
+                .attr('stroke', primaryColor)
+                .attr('stroke-width', 2.2)
+                .style('cursor', 'pointer');
+
+            // Overlay for smooth tracking
+            g.append('rect')
+                .attr('width', innerWidth)
+                .attr('height', innerHeight)
+                .attr('fill', 'transparent')
+                .style('cursor', 'crosshair')
+                .on('mousemove', function(event) {
+                    const [mouseX] = d3.pointer(event);
+                    let closest = data[0];
+                    let minDistance = Infinity;
+
+                    data.forEach(d => {
+                        const px = xScale(d.label);
+                        const dist = Math.abs(mouseX - px);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closest = d;
+                        }
+                    });
+
+                    const cx = xScale(closest.label);
+                    const cy = yScale(closest.total_users);
+
+                    hoverLine
+                        .attr('x1', cx)
+                        .attr('x2', cx)
+                        .style('opacity', 1);
+
+                    circles
+                        .attr('r', d => d === closest ? 7 : 4.5)
+                        .attr('fill', d => d === closest ? primaryColor : surfaceColor);
+
+                    if (tooltip) {
+                        const tooltipX = margin.left + cx;
+                        const tooltipY = margin.top + cy - 12;
+
+                        tooltip.innerHTML = `
+                            <div class="chart-tooltip-period">${escapeHtml(closest.label)}</div>
+                            <div class="chart-tooltip-stat">
+                                <span>Total Users:</span>
+                                <strong>${closest.total_users}</strong>
+                            </div>
+                            <div class="chart-tooltip-stat">
+                                <span>New in period:</span>
+                                <strong>+${closest.new_users}</strong>
+                            </div>
+                        `;
+                        tooltip.style.left = `${tooltipX}px`;
+                        tooltip.style.top = `${tooltipY}px`;
+                        tooltip.classList.add('visible');
+                    }
+                })
+                .on('mouseleave', function() {
+                    hoverLine.style('opacity', 0);
+                    circles
+                        .attr('r', 4.5)
+                        .attr('fill', surfaceColor);
+                    if (tooltip) {
+                        tooltip.classList.remove('visible');
+                    }
+                });
+        }
+
+        /**
+         * Horizontal bar chart of active portfolio by client. Read-only and
+         * driven entirely by `/api/admin/metrics` (filtered by the same date
+         * range and client search as the line charts), so it respects the
+         * dashboard filters without a second request.
+         */
+        function renderClientChart() {
+            const container = document.getElementById('clientChartContainer');
+            const tooltip = document.getElementById('clientChartTooltip');
+            if (!container || typeof d3 === 'undefined') return;
+
+            d3.select(container).selectAll('*').remove();
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                tooltip.removeAttribute('style');
+            }
+
+            const data = (metricsData && Array.isArray(metricsData.clients) ? metricsData.clients : [])
+                .filter((c) => Number(c.active_amount) > 0 || Number(c.loans_count) > 0)
+                .slice(0, 12);
+
+            if (data.length === 0) {
+                container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:13px;">No client portfolio records match the current filters.</div>';
+                return;
+            }
+
+            const rect = container.getBoundingClientRect();
+            const width = Math.max(rect.width || container.clientWidth || 360, 280);
+            const height = Math.max(rect.height || container.clientHeight || 240, 200);
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           (localStorage.getItem('theme') === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            const primaryColor = isDark ? '#10B981' : '#059669';
+            const borderColor = isDark ? '#374151' : '#E5E7EB';
+            const textMuted = isDark ? '#9CA3AF' : '#6B7280';
+
+            const margin = { top: 12, right: 24, bottom: 28, left: 150 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+            if (innerWidth <= 0 || innerHeight <= 0) return;
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`);
+
+            const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(data, (d) => Number(d.active_amount)) || 1])
+                .nice()
+                .range([0, innerWidth]);
+
+            const yScale = d3.scaleBand()
+                .domain(data.map((d) => d.name || d.code || d.id))
+                .range([0, innerHeight])
+                .padding(0.28);
+
+            const currency = (metricsData && metricsData.currency) || 'INR';
+            const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 });
+
+            // Vertical gridlines
+            g.append('g')
+                .call(d3.axisBottom(xScale).ticks(4).tickSize(innerHeight).tickFormat(''))
+                .call((ax) => ax.select('.domain').remove())
+                .call((ax) => ax.selectAll('.tick line').attr('stroke', borderColor).attr('stroke-dasharray', '3,3').attr('stroke-opacity', 0.7));
+
+            // Y axis labels (client names)
+            g.append('g')
+                .call(d3.axisLeft(yScale).tickSize(0).tickPadding(8))
+                .call((ax) => ax.select('.domain').remove())
+                .call((ax) => ax.selectAll('.tick text')
+                    .attr('fill', textMuted)
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'var(--font-family)'));
+
+            // X axis
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale).ticks(4).tickFormat(formatCompactCurrency).tickSize(0).tickPadding(6))
+                .call((ax) => ax.select('.domain').attr('stroke', borderColor))
+                .call((ax) => ax.selectAll('.tick text').attr('fill', textMuted).attr('font-size', '11px'));
+
+            g.selectAll('.client-bar')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('class', 'client-bar')
+                .attr('x', 0)
+                .attr('y', (d) => yScale(d.name || d.code || d.id))
+                .attr('height', yScale.bandwidth())
+                .attr('rx', 4)
+                .attr('fill', primaryColor)
+                .attr('opacity', 0.9)
+                .style('cursor', 'pointer')
+                .on('mousemove', function (event, d) {
+                    d3.select(this).attr('opacity', 1);
+                    if (!tooltip) return;
+                    tooltip.innerHTML = `
+                        <div class="chart-tooltip-period">${escapeHtml(d.name || d.code || '')}</div>
+                        <div class="chart-tooltip-stat stat-emerald">
+                            <span>Active amount:</span>
+                            <strong>${formatter.format(Number(d.active_amount) || 0)}</strong>
+                        </div>
+                        <div class="chart-tooltip-stat">
+                            <span>Active / total loans:</span>
+                            <span>${d.active_loans_count} / ${d.loans_count}</span>
+                        </div>
+                        <div class="chart-tooltip-stat">
+                            <span>Outstanding:</span>
+                            <span>${formatter.format(Number(d.outstanding) || 0)}</span>
+                        </div>`;
+                    tooltip.style.left = `${margin.left + event.offsetX + 12}px`;
+                    tooltip.style.top = `${margin.top + event.offsetY + 12}px`;
+                    tooltip.classList.add('visible');
+                })
+                .on('mouseleave', function () {
+                    d3.select(this).attr('opacity', 0.9);
+                    if (tooltip) tooltip.classList.remove('visible');
+                })
+                .transition()
+                .duration(500)
+                .attr('width', (d) => Math.max(xScale(Number(d.active_amount) || 0), 1));
+        }
+
+        function initChartResizeObserver() {
+            const userContainer = document.getElementById('userGrowthChartContainer');
+            const loanContainer = document.getElementById('loanVolumeChartContainer');
+            const clientContainer = document.getElementById('clientChartContainer');
+            if (typeof ResizeObserver === 'undefined') return;
+
+            if (chartResizeObserver) {
+                chartResizeObserver.disconnect();
+            }
+
+            let resizeTimer = null;
+            chartResizeObserver = new ResizeObserver(() => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    renderAllCharts();
+                }, 60);
+            });
+
+            if (userContainer) chartResizeObserver.observe(userContainer);
+            if (loanContainer) chartResizeObserver.observe(loanContainer);
+            if (clientContainer) chartResizeObserver.observe(clientContainer);
+        }
+
+        async function saveSettings() {
+            const fields = document.querySelectorAll('#settings [data-key]');
+            let successCount = 0;
+            let failed = 0;
+            for (const field of fields) {
+                let value = field.value;
+                if (field.dataset.type === 'json') {
+                    try {
+                        value = JSON.parse(value);
+                    } catch (err) {
+                        showToast(`"${field.dataset.key}" is not valid JSON: ${err.message}`, 'error');
+                        failed++;
+                        continue;
+                    }
+                }
+                const r = await fetch(`/api/settings/${field.dataset.key}`, {
+                    method: 'PUT',
+                    headers: headers(),
+                    body: JSON.stringify({ value })
+                });
+                if (r.ok) successCount++;
+                else {
+                    failed++;
+                    const payload = await r.json().catch(() => ({}));
+                    showToast(payload.error || `Failed to save ${field.dataset.key}`, 'error');
+                }
+            }
+            if (failed === 0 && successCount === fields.length) {
+                showToast('Settings saved successfully', 'success');
+            } else {
+                showToast('Some settings failed to save', 'warning');
+            }
+            await load();
+        }
+
+        async function saveFlags() {
+            const inputs = document.querySelectorAll('#flags input');
+            let successCount = 0;
+            for (const input of inputs) {
+                const r = await fetch(`/api/feature-flags/${input.dataset.flag}`, {
+                    method: 'PUT',
+                    headers: headers(),
+                    body: JSON.stringify({ enabled: input.checked })
+                });
+                if(r.ok) successCount++;
+            }
+            if (successCount === inputs.length) {
+                showToast('Feature flags saved successfully', 'success');
+            } else {
+                showToast('Some flags failed to save', 'warning');
+            }
+            await load();
+        }
+
+        init();
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

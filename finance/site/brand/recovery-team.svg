@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="gf-rt-title gf-rt-desc">
+  <title id="gf-rt-title">The Gahonsh Finance recovery and collections desk at work</title>
+  <desc id="gf-rt-desc">An original illustration of a professional, well-run recovery desk: trained officers at their workstations, a supervisor reviewing a written case file, and the conduct rules posted on the wall behind them.</desc>
+
+  <!--
+    Original in-house artwork. Flat corporate illustration — no photograph and no
+    third-party likeness. It shows the recovery desk as a calm, organised,
+    accountable operation: named officers, logged calls, a supervisor, and the
+    written conduct rules on the wall. The intent is professional credibility,
+    not intimidation.
+  -->
+
+  <defs>
+    <linearGradient id="gf-rt-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EEF3FC"/>
+      <stop offset="1" stop-color="#D7E2F5"/>
+    </linearGradient>
+    <linearGradient id="gf-rt-floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#C3CFE0"/>
+    </linearGradient>
+    <linearGradient id="gf-rt-desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1F5F9"/>
+      <stop offset="1" stop-color="#CBD5E1"/>
+    </linearGradient>
+    <linearGradient id="gf-rt-screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="gf-rt-light" cx="0.5" cy="0.14" r="0.85">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gf-rt-jacket" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#16295E"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="360" rx="18" fill="url(#gf-rt-bg)"/>
+  <rect width="640" height="360" rx="18" fill="url(#gf-rt-light)"/>
+
+  <!-- floor -->
+  <rect x="0" y="300" width="640" height="60" fill="url(#gf-rt-floor)"/>
+  <rect x="0" y="300" width="640" height="3" fill="#94A3B8" opacity=".4"/>
+
+  <!-- back wall: framed code-of-conduct board -->
+  <rect x="42" y="40" width="196" height="132" rx="10" fill="#FFFFFF" opacity=".95"/>
+  <rect x="42" y="40" width="196" height="132" rx="10" fill="none" stroke="#CBD5E1" stroke-width="2"/>
+  <rect x="60" y="58" width="120" height="10" rx="5" fill="#1E3A8A" opacity=".8"/>
+  <g fill="#94A3B8">
+    <circle cx="66" cy="86" r="4"/><rect x="78" y="82" width="120" height="7" rx="3.5"/>
+    <circle cx="66" cy="106" r="4"/><rect x="78" y="102" width="98" height="7" rx="3.5"/>
+    <circle cx="66" cy="126" r="4"/><rect x="78" y="122" width="132" height="7" rx="3.5"/>
+    <circle cx="66" cy="146" r="4"/><rect x="78" y="142" width="86" height="7" rx="3.5"/>
+  </g>
+  <path d="M212 92l6 6 11-13" fill="none" stroke="#047857" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- back wall: wall clock (calling hours) -->
+  <circle cx="470" cy="82" r="30" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+  <circle cx="470" cy="82" r="24" fill="none" stroke="#E2E8F0" stroke-width="2"/>
+  <path d="M470 82V64M470 82l14 8" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <circle cx="470" cy="82" r="2.6" fill="#1E3A8A"/>
+
+  <!-- wall nameplate for the recovery and collections desk -->
+  <rect x="524" y="120" width="88" height="26" rx="6" fill="#0F172A" opacity=".85"/>
+  <rect x="534" y="129" width="60" height="8" rx="4" fill="#93C5FD" opacity=".9"/>
+
+  <!-- ================ workstation: left officer ================ -->
+  <g>
+    <rect x="58" y="238" width="150" height="14" rx="6" fill="url(#gf-rt-desk)"/>
+    <rect x="58" y="252" width="150" height="8" rx="4" fill="#94A3B8" opacity=".5"/>
+    <!-- monitor with a logged-call list -->
+    <rect x="96" y="196" width="78" height="52" rx="7" fill="#0F172A"/>
+    <rect x="101" y="201" width="68" height="42" rx="4" fill="url(#gf-rt-screen)"/>
+    <rect x="107" y="207" width="40" height="5" rx="2.5" fill="#ffffff" opacity=".9"/>
+    <rect x="107" y="217" width="56" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="107" y="226" width="48" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="107" y="235" width="30" height="4" rx="2" fill="#FDE68A"/>
+    <!-- seated officer -->
+    <circle cx="80" cy="188" r="17" fill="#D79A6A"/>
+    <path d="M66 184c-1-12 6-18 14-18s15 6 14 18c-2-4-5-6-9-7-3 3-8 3-11 0-4 1-6 3-8 7z" fill="#241A14"/>
+    <path d="M50 268c0-19 13-29 30-29s30 10 30 29z" fill="url(#gf-rt-jacket)"/>
+    <path d="M74 240l6 8 6-8-3-1h-6z" fill="#F4F7FB"/>
+  </g>
+
+  <!-- ================ workstation: centre officer ================ -->
+  <g>
+    <rect x="244" y="238" width="150" height="14" rx="6" fill="url(#gf-rt-desk)"/>
+    <rect x="244" y="252" width="150" height="8" rx="4" fill="#94A3B8" opacity=".5"/>
+    <rect x="282" y="194" width="80" height="54" rx="7" fill="#0F172A"/>
+    <rect x="287" y="199" width="70" height="44" rx="4" fill="url(#gf-rt-screen)"/>
+    <rect x="293" y="205" width="44" height="5" rx="2.5" fill="#ffffff" opacity=".9"/>
+    <rect x="293" y="216" width="58" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="293" y="225" width="50" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="293" y="234" width="34" height="4" rx="2" fill="#FDE68A"/>
+    <circle cx="268" cy="186" r="17" fill="#A9662F"/>
+    <path d="M254 183c-1-12 6-18 14-18s15 6 14 18c-2-4-5-6-9-7-3 3-8 3-11 0-4 1-6 3-8 7z" fill="#20160F"/>
+    <path d="M238 268c0-19 13-29 30-29s30 10 30 29z" fill="#0F766E"/>
+    <path d="M262 240l6 8 6-8-3-1h-6z" fill="#F2FBF8"/>
+  </g>
+
+  <!-- ================ workstation: right officer ================ -->
+  <g>
+    <rect x="430" y="238" width="150" height="14" rx="6" fill="url(#gf-rt-desk)"/>
+    <rect x="430" y="252" width="150" height="8" rx="4" fill="#94A3B8" opacity=".5"/>
+    <rect x="468" y="196" width="78" height="52" rx="7" fill="#0F172A"/>
+    <rect x="473" y="201" width="68" height="42" rx="4" fill="url(#gf-rt-screen)"/>
+    <rect x="479" y="207" width="42" height="5" rx="2.5" fill="#ffffff" opacity=".9"/>
+    <rect x="479" y="217" width="54" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="479" y="226" width="46" height="4" rx="2" fill="#ffffff" opacity=".55"/>
+    <rect x="479" y="235" width="28" height="4" rx="2" fill="#FDE68A"/>
+    <circle cx="452" cy="188" r="17" fill="#EFC49B"/>
+    <path d="M438 184c-1-12 6-18 14-18s15 6 14 18c-2-4-5-6-9-7-3 3-8 3-11 0-4 1-6 3-8 7z" fill="#4A2F1B"/>
+    <path d="M422 268c0-19 13-29 30-29s30 10 30 29z" fill="#1E3A8A"/>
+    <path d="M446 240l6 8 6-8-3-1h-6z" fill="#F4F7FB"/>
+  </g>
+
+  <!-- ================ supervisor standing, reviewing a case file ================ -->
+  <g>
+    <circle cx="612" cy="150" r="16" fill="#D79A6A"/>
+    <path d="M598 146c-1-11 6-17 14-17s15 6 14 17c-2-4-5-6-9-7-3 3-8 3-11 0-4 1-6 3-8 7z" fill="#241A14"/>
+    <path d="M586 224c0-17 12-26 26-26s26 9 26 26z" fill="#16295E"/>
+    <path d="M606 200l6 7 6-7-3-1h-6z" fill="#F4F7FB"/>
+    <!-- clipboard / case file -->
+    <rect x="596" y="196" width="34" height="44" rx="4" fill="#FFFFFF" transform="rotate(-8 613 218)"/>
+    <rect x="601" y="205" width="22" height="4" rx="2" fill="#1E3A8A" opacity=".55" transform="rotate(-8 613 218)"/>
+    <rect x="601" y="214" width="24" height="4" rx="2" fill="#94A3B8" transform="rotate(-8 613 218)"/>
+    <rect x="601" y="223" width="18" height="4" rx="2" fill="#94A3B8" transform="rotate(-8 613 218)"/>
+    <circle cx="613" cy="199" r="4" fill="#1E3A8A"/>
+  </g>
+
+  <!-- a shared case file on the centre desk, a mug, a pen cup -->
+  <rect x="252" y="230" width="52" height="8" rx="3" fill="#FFFFFF"/>
+  <rect x="257" y="232" width="28" height="3" rx="1.5" fill="#94A3B8"/>
+  <rect x="360" y="222" width="16" height="16" rx="3" fill="#FFFFFF"/>
+  <path d="M376 226c6 0 6 9 0 9" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <rect x="72" y="228" width="12" height="10" rx="2" fill="#FFFFFF"/>
+  <path d="M84 231c5 0 5 7 0 7" fill="none" stroke="#FFFFFF" stroke-width="2.6"/>
+
+  <!-- subtle desk namecards: named, accountable officers -->
+  <rect x="120" y="228" width="30" height="9" rx="2" fill="#FFFFFF" opacity=".95"/>
+  <rect x="124" y="231" width="22" height="3" rx="1.5" fill="#1E3A8A" opacity=".5"/>
+  <rect x="306" y="228" width="30" height="9" rx="2" fill="#FFFFFF" opacity=".95"/>
+  <rect x="310" y="231" width="22" height="3" rx="1.5" fill="#1E3A8A" opacity=".5"/>
+  <rect x="492" y="228" width="30" height="9" rx="2" fill="#FFFFFF" opacity=".95"/>
+  <rect x="496" y="231" width="22" height="3" rx="1.5" fill="#1E3A8A" opacity=".5"/>
+</svg>

@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Agent Portal - Gahonsh Finance</title>
+    <meta name="description" content="Sign in to the Gahonsh Finance agent portal to manage your assigned customers, applications and collection tasks.">
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="../admin/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance Agent portal home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span><span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+                    <small>Agent portal</small>
+                </span>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="active"><svg class="sidebar-icon" aria-hidden="true"><use href="/finance/shared/icons.svg#gf-users"></use></svg><span>Assigned Customers</span></a>
+                <a href="#"><svg class="sidebar-icon" aria-hidden="true"><use href="/finance/shared/icons.svg#gf-file-text"></use></svg><span>Applications</span></a>
+                <a href="#"><svg class="sidebar-icon" aria-hidden="true"><use href="/finance/shared/icons.svg#gf-check-circle"></use></svg><span>Tasks</span></a>
+            </nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="notice">
+                <strong>DEVELOPMENT / NOT FOR PUBLIC LENDING</strong><br>
+                Agent portal UI foundation (Placeholder).
+            </div>
+
+            <div class="top-bar">
+                <h1>Assigned Customers</h1>
+                <div class="badge" id="agentIdentityBadge">Agent Area</div>
+            </div>
+
+            <!-- Agent Sign In Card when unauthenticated -->
+            <div class="card mb-4" id="agentLoginPanel" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 15px;">Agent Portal Sign In</h2>
+                        <p style="margin: 0; font-size: 13px; color: var(--color-text-muted);">Sign in with your field agent credentials to access assigned customer tools.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input id="agentEmail" type="email" placeholder="Agent email" style="width: 200px; padding: 6px 10px; font-size: 13px;">
+                        <input id="agentPassword" type="password" placeholder="Password" style="width: 140px; padding: 6px 10px; font-size: 13px;" autocomplete="current-password">
+                        <button onclick="agentLogin()" style="padding: 6px 14px; font-size: 13px;">Sign In</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="agentDataCard" hidden>
+                <div class="flex items-center gap-2 mb-4">
+                    <input id="search" placeholder="Search assigned customers..." style="max-width: 300px;">
+                    <button onclick="load()" id="btn-agent-filter">Filter</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th style="min-width: 270px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentRows">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--color-text-muted);">Loading customers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modals for Agent Workflow -->
+    <div id="agentProfileModal" class="modal-overlay" onclick="handleBackdropClick(event, 'agentProfileModal')" role="dialog" aria-modal="true" aria-labelledby="agentProfileTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="agentProfileTitle">Customer Profile</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('agentProfileModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="agentProfileBody"></div>
+            <div class="modal-footer">
+                <button class="btn-action btn-action-call" id="agentModalCallBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>Call</span>
+                </button>
+                <button class="btn-action btn-action-message" id="agentModalMessageBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Send Message</span>
+                </button>
+                <button class="btn-secondary" onclick="closeModal('agentProfileModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="agentCallModal" class="modal-overlay" onclick="handleBackdropClick(event, 'agentCallModal')" role="dialog" aria-modal="true" aria-labelledby="agentCallTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="agentCallTitle">Initiate Call</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('agentCallModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="agentCallBody"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('agentCallModal')">Close</button>
+                <button class="btn-action btn-action-call" id="agentDialBtn" onclick="executeAgentDial()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>Launch Dialer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="agentMsgModal" class="modal-overlay" onclick="handleBackdropClick(event, 'agentMsgModal')" role="dialog" aria-modal="true" aria-labelledby="agentMsgTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="agentMsgTitle">Send Message</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('agentMsgModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="agentMsgBody"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('agentMsgModal')">Cancel</button>
+                <button class="btn-action btn-action-message" onclick="dispatchAgentMsg()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    <span>Send Message</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../admin/js/components.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        const headers = () => ({
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        });
+
+        let agentCustomers = [];
+        let curCustomer = null;
+
+        async function agentLogin() {
+            const email = (document.getElementById('agentEmail')?.value || '').trim();
+            const password = document.getElementById('agentPassword')?.value || '';
+            if (!email || !password) {
+                showToast('Agent email and password are required', 'error');
+                return;
+            }
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.detail || 'Login failed', 'error');
+                    return;
+                }
+                // A second factor is required: the password was accepted but no
+                // session exists yet. Ask for the e-mailed code and verify.
+                if (data.otp_required) {
+                    const code = window.prompt('Enter the 6-digit sign-in code we e-mailed you:');
+                    if (!code) return;
+                    const vr = await fetch('/api/auth/login/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ challenge_token: data.challenge_token, code })
+                    });
+                    const vd = await vr.json();
+                    if (!vr.ok) {
+                        showToast(vd.error || 'Verification failed', 'error');
+                        return;
+                    }
+                    token = vd.access_token || vd.token;
+                    if (!token || !vd.user) {
+                        showToast('Unexpected response from server. Please try again.', 'error');
+                        return;
+                    }
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userRole', vd.user.role);
+                    showAgentApp(vd.user);
+                    showToast(`Signed in as ${vd.user.fullName}`, 'success');
+                    try { await load(); } catch (loadErr) { console.error('Post-login customers load failed:', loadErr); }
+                    return;
+                }
+                token = data.access_token || data.token;
+                if (!token || !data.user) {
+                    showToast('Unexpected response from server. Please try again.', 'error');
+                    return;
+                }
+                localStorage.setItem('token', token);
+                localStorage.setItem('userRole', data.user.role);
+                showAgentApp(data.user);
+                showToast(`Signed in as ${data.user.fullName}`, 'success');
+
+                // Credentials were accepted (HTTP 200 + token). A subsequent
+                // customers-load failure is NOT a login failure.
+                try {
+                    await load();
+                } catch (loadErr) {
+                    console.error('Post-login customers load failed:', loadErr);
+                }
+            } catch (err) {
+                showToast('Network error during login', 'error');
+            }
+        }
+
+        /** Reveals the agent workspace and hides the sign-in card. */
+        function showAgentApp(user) {
+            const panel = document.getElementById('agentLoginPanel');
+            if (panel) panel.style.display = 'none';
+            const dataCard = document.getElementById('agentDataCard');
+            if (dataCard) dataCard.hidden = false;
+            const badge = document.getElementById('agentIdentityBadge');
+            if (badge && user) {
+                // `/api/auth/login` returns both `fullName` and `full_name`, but
+                // `/api/auth/me` (used on refresh) returns only `full_name`. Read
+                // both so the badge shows the agent's name, not their role.
+                const name = user.fullName || user.full_name;
+                badge.textContent = name ? `Agent: ${name}` : 'Agent';
+            }
+        }
+
+        /**
+         * Gates the workspace on a server-verified session.
+         *
+         * The agent portal owns its sign-in form, so an anonymous visitor (or
+         * one holding a forged/expired token) sees that form rather than being
+         * bounced away. A *valid* session for a non-agent role is forwarded to
+         * the portal that role owns, so a customer cannot sit on the agent
+         * shell. Nothing is loaded until the token is verified.
+         */
+        async function initAgentPortal() {
+            const panel = document.getElementById('agentLoginPanel');
+            if (!window.GFPortal) {
+                if (panel) panel.style.display = 'block';
+                return;
+            }
+            const session = await window.GFPortal.verify();
+            if (!session) {
+                window.GFPortal.clear();
+                if (panel) panel.style.display = 'block';
+                return;
+            }
+            if (window.GFPortal.roles('agent').indexOf(session.user.role) === -1) {
+                window.location.replace(window.GFPortal.home(session.user.role));
+                return;
+            }
+            token = session.token;
+            showAgentApp(session.user);
+            try {
+                await load();
+            } catch (loadErr) {
+                console.error('Post-login customers load failed:', loadErr);
+            }
+        }
+
+        async function load() {
+            const rows = document.getElementById('agentRows');
+            try {
+                const search = (document.getElementById('search')?.value || '').toLowerCase();
+                const res = await fetch('/api/customers', { headers: headers() });
+                if (!res.ok) throw new Error('Could not fetch customers');
+                const data = await res.json();
+                agentCustomers = Array.isArray(data) ? data : [];
+
+                const filtered = agentCustomers.filter(c => 
+                    !search || 
+                    c.full_name.toLowerCase().includes(search) || 
+                    c.email.toLowerCase().includes(search) || 
+                    (c.phone && c.phone.includes(search))
+                );
+
+                if (filtered.length === 0) {
+                    rows.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 24px;">No assigned customers match criteria</td></tr>';
+                    return;
+                }
+
+                rows.innerHTML = filtered.map(c => `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(c.full_name)}</div>
+                            <div style="font-size: 11px; color: var(--color-text-muted); font-family: monospace;">${escapeHtml(c.id)}</div>
+                        </td>
+                        <td>
+                            <div><a href="mailto:${escapeHtml(c.email)}" style="color: var(--color-primary); text-decoration: none;">${escapeHtml(c.email)}</a></div>
+                            <div style="font-size: 12px; color: var(--color-text-muted);">${escapeHtml(c.phone || '-')}</div>
+                        </td>
+                        <td>${escapeHtml(c.address || 'Assigned Territory')}</td>
+                        <td><span class="badge ${c.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${escapeHtml(c.status)}</span></td>
+                        <td class="actions-cell">
+                            <div class="action-btn-group">
+                                <button class="btn-action btn-action-profile" onclick="viewAgentProfile('${c.id}')" title="View Profile" id="btn-agent-prof-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <span>View Profile</span>
+                                </button>
+                                <button class="btn-action btn-action-call" onclick="initiateAgentCall('${c.id}')" title="Call" id="btn-agent-call-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                    <span>Call</span>
+                                </button>
+                                <button class="btn-action btn-action-message" onclick="openAgentMsg('${c.id}')" title="Send Message" id="btn-agent-msg-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                    <span>Send Message</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                rows.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 24px;">Please sign in to view assigned customers</td></tr>';
+            }
+        }
+
+        function viewAgentProfile(id) {
+            const cust = agentCustomers.find(c => c.id === id);
+            if (!cust) return;
+            curCustomer = cust;
+
+            const body = document.getElementById('agentProfileBody');
+            const initials = cust.full_name ? cust.full_name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : 'C';
+
+            body.innerHTML = `
+                <div class="profile-hero">
+                    <div class="profile-avatar">${escapeHtml(initials)}</div>
+                    <div class="profile-info">
+                        <h3>${escapeHtml(cust.full_name)}</h3>
+                        <div><span class="badge ${cust.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${escapeHtml(cust.status)}</span></div>
+                    </div>
+                </div>
+                <div class="profile-meta-grid">
+                    <div class="meta-field">
+                        <div class="meta-label">Email</div>
+                        <div class="meta-value">${escapeHtml(cust.email)}</div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">Phone</div>
+                        <div class="meta-value">${escapeHtml(cust.phone || 'Not available')}</div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">Location / Address</div>
+                        <div class="meta-value">${escapeHtml(cust.address || '-')}</div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">Customer ID</div>
+                        <div class="meta-value"><code>${escapeHtml(cust.id)}</code></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('agentModalCallBtn').onclick = () => {
+                closeModal('agentProfileModal');
+                initiateAgentCall(cust.id);
+            };
+            document.getElementById('agentModalMessageBtn').onclick = () => {
+                closeModal('agentProfileModal');
+                openAgentMsg(cust.id);
+            };
+
+            openModal('agentProfileModal');
+        }
+
+        function initiateAgentCall(id) {
+            const cust = agentCustomers.find(c => c.id === id);
+            if (!cust) return;
+            curCustomer = cust;
+
+            const body = document.getElementById('agentCallBody');
+            const hasPhone = Boolean(cust.phone && cust.phone.trim() !== '' && cust.phone !== '-');
+
+            body.innerHTML = `
+                <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${escapeHtml(cust.full_name)}</div>
+                <div style="color: var(--color-text-muted); font-size: 13px; margin-bottom: 14px;">${escapeHtml(cust.email)}</div>
+                ${hasPhone ? `
+                    <div style="background: var(--color-bg); padding: 14px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 14px;">
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600;">Phone Number</div>
+                        <div style="font-size: 17px; font-weight: 700; color: #047857;">${escapeHtml(cust.phone)}</div>
+                    </div>
+                ` : `
+                    <div class="notice">No phone number on file for this customer.</div>
+                `}
+            `;
+
+            document.getElementById('agentDialBtn').style.display = hasPhone ? 'inline-flex' : 'none';
+            openModal('agentCallModal');
+        }
+
+        function executeAgentDial() {
+            if (!curCustomer || !curCustomer.phone) return;
+            window.location.href = 'tel:' + curCustomer.phone.replace(/[^0-9+]/g, '');
+            showToast('Dialing ' + curCustomer.phone, 'info');
+        }
+
+        function openAgentMsg(id) {
+            const cust = agentCustomers.find(c => c.id === id);
+            if (!cust) return;
+            curCustomer = cust;
+
+            const body = document.getElementById('agentMsgBody');
+            body.innerHTML = `
+                <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">${escapeHtml(cust.full_name)}</div>
+                <div style="color: var(--color-text-muted); font-size: 12px; margin-bottom: 12px;">${escapeHtml(cust.email)}</div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 4px;">Message</label>
+                    <textarea id="agentMsgInput" style="width: 100%; min-height: 90px; padding: 8px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main);">Hello ${escapeHtml(cust.full_name)}, this is your Gahonsh Finance loan agent reaching out regarding your account.</textarea>
+                </div>
+            `;
+            openModal('agentMsgModal');
+        }
+
+        function dispatchAgentMsg() {
+            if (!curCustomer) return;
+            const text = document.getElementById('agentMsgInput')?.value || '';
+            const mailto = `mailto:${encodeURIComponent(curCustomer.email)}?subject=Gahonsh Finance Agent Notice&body=${encodeURIComponent(text)}`;
+            window.location.href = mailto;
+            showToast('Message client opened', 'success');
+            closeModal('agentMsgModal');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.add('active');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('active');
+        }
+
+        function handleBackdropClick(e, id) {
+            if (e.target && e.target.id === id) closeModal(id);
+        }
+
+        function logout() {
+            if (window.GFPortal) {
+                window.GFPortal.signOut('agent');
+                return;
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.replace('/finance/site/signin.html');
+        }
+
+        document.addEventListener('DOMContentLoaded', initAgentPortal);
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>System Settings - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>System Settings</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="notice">
+                The entire website is managed from three settings and three feature flags.
+                Changes take effect across the public site, the borrower portal and the admin
+                dashboard on the next page load, without a source-code change.
+            </div>
+
+            <div class="card">
+                <h2>Platform settings</h2>
+                <p class="text-muted mb-4">Exactly three settings drive branding, runtime posture and the
+                    compliance disclaimer. Unknown keys are refused.</p>
+                <div id="settingsGrid" class="grid-2"></div>
+                <div class="mt-4">
+                    <button onclick="saveSettings()">Save settings</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Feature flags</h2>
+                <p class="text-muted mb-4">Exactly three switches for the public site, notifications and client intake.</p>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Flag</th><th>Description</th><th>State</th><th>Actions</th></tr></thead>
+                        <tbody id="flagRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+
+        async function loadSettings() {
+            renderState('settingsGrid', 'loading', 'Loading settings\u2026');
+            try {
+                const rows = await apiFetch('/api/settings');
+                const items = Array.isArray(rows) ? rows : (rows.items || []);
+                if (items.length === 0) { renderState('settingsGrid', 'empty', 'No settings defined yet.'); return; }
+                el('settingsGrid').innerHTML = items.map((s) => {
+                    const isJson = typeof s.value === 'object' && s.value !== null;
+                    const value = isJson ? JSON.stringify(s.value, null, 2) : String(s.value ?? '');
+                    const field = isJson
+                        ? `<textarea data-key="${escapeHtml(s.key)}" data-type="json" rows="7" style="width:100%;font-family:var(--font-family);font-size:12px;">${escapeHtml(value)}</textarea>`
+                        : `<textarea data-key="${escapeHtml(s.key)}" data-type="string" rows="3" style="width:100%;">${escapeHtml(value)}</textarea>`;
+                    return `<div class="form-group" style="grid-column:1/-1;">
+                        <label>${escapeHtml(s.label || s.key)}</label>
+                        ${field}
+                        <small class="text-muted" style="font-size:12px;">${escapeHtml(s.description || '')} &middot; updated ${escapeHtml(formatDate(s.updated_at))}</small>
+                    </div>`;
+                }).join('');
+            } catch (err) { renderState('settingsGrid', 'error', err.message); }
+        }
+
+        async function loadFlags() {
+            renderState('flagRows', 'loading', 'Loading flags\u2026');
+            try {
+                const rows = await apiFetch('/api/feature-flags');
+                const items = Array.isArray(rows) ? rows : (rows.items || []);
+                if (items.length === 0) { renderState('flagRows', 'empty', 'No feature flags defined yet.'); return; }
+                el('flagRows').innerHTML = items.map((f) => `<tr>
+                    <td><code>${escapeHtml(f.key)}</code></td>
+                    <td class="text-muted">${escapeHtml(f.description || '')}</td>
+                    <td>${f.enabled ? '<span class="badge badge-success">ON</span>' : '<span class="badge badge-warning">OFF</span>'}</td>
+                    <td><button class="btn-secondary" onclick="toggleFlag('${escapeHtml(f.key)}', ${f.enabled ? 'false' : 'true'})">${f.enabled ? 'Disable' : 'Enable'}</button></td>
+                </tr>`).join('');
+            } catch (err) { renderState('flagRows', 'error', err.message); }
+        }
+
+        async function saveSettings() {
+            const fields = document.querySelectorAll('#settingsGrid [data-key]');
+            let failed = 0;
+            for (const field of fields) {
+                let value = field.value;
+                if (field.dataset.type === 'json') {
+                    try { value = JSON.parse(value); }
+                    catch (err) { showToast(`"${field.dataset.key}" is not valid JSON: ${err.message}`, 'error'); failed++; continue; }
+                }
+                try {
+                    await apiFetch(`/api/settings/${field.dataset.key}`, { method: 'PUT', body: { value } });
+                } catch (err) { showToast(`${field.dataset.key}: ${err.message}`, 'error'); failed++; }
+            }
+            if (failed === 0) showToast('Settings saved', 'success');
+            loadSettings();
+        }
+
+        async function toggleFlag(key, enabled) {
+            if (!(await confirmAction('Change feature flag', `${enabled ? 'Enable' : 'Disable'} "${key}"?`, 'Apply'))) return;
+            try {
+                await apiFetch('/api/feature-flags/toggle', { method: 'POST', body: { key, enabled } });
+                showToast('Flag updated', 'success');
+                loadFlags();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { loadSettings(); loadFlags(); });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

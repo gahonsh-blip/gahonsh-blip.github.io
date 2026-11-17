@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer Sign In - Gahonsh Finance</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Sign in to your Gahonsh Finance account to track your loan application and repayments.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gahonsh Finance">
+<meta property="og:title" content="Customer Sign In — Gahonsh Finance">
+<meta property="og:description" content="Sign in to your Gahonsh Finance account to track your loan application and repayments.">
+<meta property="og:image" content="/finance/site/brand/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://gahonsh-finance.gahonsh.workers.dev/site/signin.html">
+<link rel="icon" href="/finance/site/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+<link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/finance/shared/fonts.css">
+<link rel="stylesheet" href="/finance/site/css/site.css">
+<style>
+  .auth-main { padding: 40px 0 72px; }
+  .auth-shell { max-width: 460px; margin: 0 auto; }
+  .auth-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--sh-1); padding: 28px; }
+  .auth-card h1 { font-size: 1.4rem; margin: 0 0 6px; }
+  .auth-card p.sub { margin: 0 0 20px; color: var(--c-muted); font-size: 0.9375rem; }
+  .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .auth-field label { font-size: 0.9375rem; font-weight: 600; color: var(--c-ink-soft); }
+  .auth-alt { margin-top: 18px; font-size: 0.9375rem; color: var(--c-muted); text-align: center; }
+  .auth-alt a { color: var(--brand-primary); font-weight: 600; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img class="brand-mark" src="/finance/site/brand/logo.svg" alt="" width="34" height="34">
+      <span>
+        <span class="brand-name" data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+        <span class="brand-tag" data-gf="text" data-gf-field="tagline">Loans made straightforward</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <select class="site-locale-select" data-gf-lang aria-label="Choose language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+      </select>
+      <a class="btn btn-outline btn-sm" href="/finance/site/">Back to site</a>
+    </div>
+  </div>
+</header>
+
+<main class="auth-main" id="main">
+  <div class="wrap auth-shell">
+    <div class="auth-card">
+      <h1>Sign in to your account</h1>
+      <p class="sub">Track your applications, loans and repayments.</p>
+
+      <div class="alert alert--error" id="authError" hidden role="alert"></div>
+      <div class="alert alert--success" id="authNotice" hidden role="status"></div>
+
+      <form id="signinForm" novalidate>
+        <div class="auth-field">
+          <label for="email">Email</label>
+          <input class="input" id="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="password">Password</label>
+          <input class="input" id="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary btn-block" id="signinButton" type="submit">Sign in</button>
+      </form>
+
+      <form id="otpForm" hidden novalidate>
+        <p class="sub">Enter the 6-digit code we emailed to <strong id="otpTarget"></strong>.</p>
+        <div class="auth-field">
+          <label for="otpCode">Verification code</label>
+          <input class="input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+          <div class="hint" id="devCodeHint"></div>
+        </div>
+        <button class="btn btn-primary btn-block" id="otpButton" type="submit">Verify and sign in</button>
+      </form>
+
+      <p class="auth-alt">New here? <a href="/finance/site/signup.html">Create an account</a></p>
+      <p class="auth-alt"><a href="/finance/site/reset-password.html">Forgot your password?</a></p>
+      <p class="auth-notice">
+        Development build. This is a demonstration environment and is not a licensed bank or
+        public lending service. No real credit decision, disbursement or repayment takes place,
+        and all figures shown are illustrative examples.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/finance/site/js/platform-config.js"></script>
+<script type="module" src="/finance/site/js/site-i18n.js"></script>
+<script type="module" src="/finance/site/js/signin-page.js"></script>
+</body>
+</html>

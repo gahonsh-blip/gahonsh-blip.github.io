@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Data Import - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Data Import</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="notice">
+                Upload an Excel or CSV file. Gahonsh reads the workbook, works out what it contains
+                (customers, loans or repayments), understands every column from its heading and its
+                values, then imports the records. There is nothing to map by hand.
+            </div>
+
+            <div class="card">
+                <h2>Upload Excel / CSV</h2>
+                <p class="text-muted">
+                    Any normal register works: Customers, Loans, Loan Register, Repayments, or a
+                    combined customer + loan sheet. Hindi and English headings are both understood,
+                    and columns may be in any order.
+                </p>
+                <div class="form-group">
+                    <label for="fileInput">File (CSV or XLSX, max 10 MB)</label>
+                    <input id="fileInput" type="file" accept=".csv,.xlsx">
+                </div>
+                <div class="flex gap-2 items-center mt-4" style="flex-wrap:wrap;">
+                    <button id="importBtn" onclick="startImport()">Upload &amp; import</button>
+                    <span class="text-muted" style="font-size:13px;">The file is read, validated and imported automatically.</span>
+                </div>
+                <div id="uploadState"></div>
+            </div>
+
+            <div class="card hidden" id="progressCard">
+                <h2>Working on your file</h2>
+                <div id="progressSteps" class="function-list"></div>
+                <div id="progressState"></div>
+            </div>
+
+            <div class="card hidden" id="resultCard">
+                <h2>Import result</h2>
+                <div id="resultSummary"></div>
+                <div class="mt-4">
+                    <h3 style="font-size:15px;">How your columns were understood</h3>
+                    <p class="text-muted" style="font-size:13px;">
+                        This is what the importer decided. Columns not listed had no matching Gahonsh
+                        field; their original values are kept in the import record.
+                    </p>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Column</th><th>Imported as</th><th>Confidence</th></tr></thead>
+                            <tbody id="mappingRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4" style="flex-wrap:wrap;">
+                    <a id="resultCustomers" class="btn-secondary hidden" style="text-decoration:none;display:inline-block;padding:10px 16px;border-radius:8px;" href="customers.html">View Customers</a>
+                    <a id="resultLoans" class="btn-secondary hidden" style="text-decoration:none;display:inline-block;padding:10px 16px;border-radius:8px;" href="loans.html">View Loans</a>
+                    <a id="resultDashboard" class="btn-secondary hidden" style="text-decoration:none;display:inline-block;padding:10px 16px;border-radius:8px;" href="index.html">View Dashboard</a>
+                    <button onclick="downloadErrors()" id="downloadErrorsBtn">Download rows that could not be imported (CSV)</button>
+                    <button class="btn-secondary" onclick="resetImport()">Import another file</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Import history</h2>
+                <div class="flex gap-2 mb-4">
+                    <select id="historyStatus" style="max-width:220px;">
+                        <option value="">All statuses</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="PARTIAL">Partial</option>
+                        <option value="FAILED">Failed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                    <button onclick="loadHistory()">Filter</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Reference</th><th>File</th><th>Type</th><th>Status</th><th>Rows</th><th>Created</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="historyRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        let activeResult = null;
+
+        const el = (id) => document.getElementById(id);
+
+        const TYPE_LABEL = {
+            CUSTOMERS: 'Customers', LOANS: 'Loans', REPAYMENTS: 'Repayments',
+            AGENTS: 'Agents', BRANCHES: 'Branches'
+        };
+
+        // A div cannot live inside a <tbody>; render table-safe placeholder rows.
+        function renderTableState(tbodyId, kind, message, cols) {
+            const color = kind === 'error' ? 'var(--color-danger)' : 'var(--color-text-muted)';
+            el(tbodyId).innerHTML =
+                '<tr><td colspan="' + cols + '" style="text-align:center;padding:32px 16px;color:' + color + ';">' + escapeHtml(message) + '</td></tr>';
+        }
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const name = file.name.toLowerCase();
+                    if (name.endsWith('.xlsx')) {
+                        const bytes = new Uint8Array(reader.result);
+                        let binary = '';
+                        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                        resolve({ contentBase64: btoa(binary) });
+                    } else {
+                        resolve({ content: reader.result });
+                    }
+                };
+                reader.onerror = () => reject(new Error('Could not read the file'));
+                if (file.name.toLowerCase().endsWith('.xlsx')) reader.readAsArrayBuffer(file);
+                else reader.readAsText(file);
+            });
+        }
+
+        const IMPORT_STEPS = [
+            { key: 'read', label: 'Reading the workbook' },
+            { key: 'understand', label: 'Understanding the columns' },
+            { key: 'validate', label: 'Validating the rows' },
+            { key: 'import', label: 'Saving to the database' }
+        ];
+
+        function setStep(activeKey) {
+            const activeIndex = IMPORT_STEPS.findIndex((s) => s.key === activeKey);
+            el('progressSteps').innerHTML = IMPORT_STEPS.map((s, i) => {
+                const done = i < activeIndex;
+                const active = i === activeIndex;
+                const mark = done ? '&#10003;' : '&#8226;';
+                const color = done ? 'var(--color-secondary)' : 'var(--color-text-muted)';
+                const weight = active ? '600' : '400';
+                const textColor = active ? 'var(--color-text-main)' : 'var(--color-text-muted)';
+                return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;">'
+                    + '<span style="width:20px;text-align:center;color:' + color + ';">' + mark + '</span>'
+                    + '<span style="color:' + textColor + ';font-weight:' + weight + ';">' + escapeHtml(s.label) + '</span>'
+                    + '</div>';
+            }).join('');
+        }
+
+        // ----------------------------------------------------------------
+        // Upload -> automatic understanding -> automatic import -> result
+        // ----------------------------------------------------------------
+        async function startImport() {
+            const file = el('fileInput').files[0];
+            if (!file) { showToast('Choose a file first', 'error'); return; }
+            if (file.size > 10 * 1024 * 1024) { showToast('File is larger than 10 MB', 'error'); return; }
+
+            el('resultCard').classList.add('hidden');
+            el('progressCard').classList.remove('hidden');
+            el('importBtn').disabled = true;
+            renderState('progressState', 'loading', 'Working on your file. This can take a moment for large files.');
+            setStep('read');
+
+            try {
+                const payload = await readFile(file);
+                setStep('understand');
+                const result = await apiFetch('/api/imports/auto', {
+                    method: 'POST',
+                    body: Object.assign({ fileName: file.name }, payload)
+                });
+                setStep('import');
+                renderResult(result);
+            } catch (err) {
+                renderState('progressState', 'error', err.message);
+            } finally {
+                el('importBtn').disabled = false;
+            }
+        }
+
+        function statCard(label, value, color) {
+            return '<div class="card" style="padding:12px 16px;min-width:120px;margin:0;">'
+                + '<div class="text-muted" style="font-size:12px;">' + escapeHtml(label) + '</div>'
+                + '<div style="font-size:20px;font-weight:600;color:' + (color || 'var(--color-text-main)') + ';">' + value + '</div>'
+                + '</div>';
+        }
+
+        function renderResult(result) {
+            const i = result.import;
+            activeResult = result;
+            const typeLabel = TYPE_LABEL[i.entity_type] || i.entity_type;
+            const failed = (result.failures || []).length;
+            const tone = i.status === 'FAILED' ? 'var(--color-danger)'
+                : i.status === 'PARTIAL' ? 'var(--color-warning)' : 'var(--color-secondary)';
+
+            const counts = result.counts || {};
+            // The narrative must never contradict the stat cards above it.
+            // The authoritative numbers are the outcome fields the backend
+            // derives from the final staged-row statuses (created/updated are
+            // rows that were actually written, skipped are rows deliberately not
+            // imported, failed are rows that errored). `counts` is a secondary,
+            // optional-annotation source only: a backend version that still
+            // echoes old validation counts (e.g. a mixed asset/worker deploy)
+            // must not be able to make the sentence claim "N imported".
+            const imported = (result.created || 0) + (result.updated || 0);
+            // `skipped` and "could not import" can be reported slightly
+            // differently by backend versions (totals rows pre-skipped at
+            // validation vs duplicates skipped at commit); take the more
+            // complete figure so a trailer-total row is never recast as one of
+            // the "imported" rows the narrative claims.
+            const skipped = Math.max(result.skipped || 0, counts.skipped || 0, i.skipped_rows || 0);
+            const couldNotImport = Math.max(failed || 0, counts.error || 0, i.error_rows || 0);
+            const total = i.total_rows || counts.total || (imported + skipped + couldNotImport);
+            const droppedNote = (counts.warning && counts.warning <= imported)
+                ? ' (' + counts.warning + ' with an optional value dropped)' : '';
+            el('resultSummary').innerHTML =
+                '<div class="flex gap-2" style="flex-wrap:wrap;margin-bottom:12px;">'
+                + statCard('Result', escapeHtml(i.status), tone)
+                + statCard(escapeHtml(typeLabel) + ' created', result.created)
+                + statCard('Updated', result.updated)
+                + statCard('Skipped (already existed)', result.skipped)
+                + statCard('Could not import', failed, failed ? 'var(--color-danger)' : undefined)
+                + '</div>'
+                + '<p class="text-muted">Understood this file as a <strong>' + escapeHtml(typeLabel) + '</strong> register. '
+                + 'Of ' + total + ' row(s), <strong>' + imported + ' imported</strong>'
+                  + droppedNote
+                  + (skipped ? ', ' + skipped + ' skipped' : '')
+                  + (couldNotImport ? ', ' + couldNotImport + ' could not be imported' : '')
+                  + '.'
+                + ' Reference <code>' + escapeHtml(i.reference || i.id) + '</code>.</p>'
+                + (failed ? '<p class="text-muted">The rows that could not be imported are in the download below; they were never written to the database.</p>' : '')
+                + renderPreserved(result.preservedHeaders);
+
+            renderMapping(result.mapping, result.assignments, result.detection);
+
+            el('resultCustomers').classList.toggle('hidden', i.entity_type !== 'CUSTOMERS');
+            el('resultLoans').classList.toggle('hidden', i.entity_type !== 'LOANS');
+            el('resultDashboard').classList.toggle('hidden', i.entity_type !== 'REPAYMENTS');
+            el('downloadErrorsBtn').classList.toggle('hidden', failed === 0);
+
+            el('progressCard').classList.add('hidden');
+            el('resultCard').classList.remove('hidden');
+            el('resultCard').scrollIntoView({ behavior: 'smooth' });
+            showToast('Imported: ' + result.created + ' created, ' + result.updated + ' updated, '
+                + result.skipped + ' skipped' + (failed ? ', ' + failed + ' failed' : ''), failed ? 'warning' : 'success');
+            loadHistory();
+        }
+
+        function fieldLabel(field) {
+            if (!field) return 'Not imported';
+            return field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+
+        function renderPreserved(headers) {
+            if (!headers || !headers.length) return '';
+            return '<p class="text-muted" style="margin-top:8px;">These source columns have no Gahonsh field, so their '
+                + 'values were preserved exactly as they appear in the file: '
+                + headers.map(escapeHtml).join(', ') + '.</p>';
+        }
+
+        function renderMapping(mapping, assignments, detection) {
+            const byHeader = {};
+            (assignments || []).forEach((a) => { byHeader[a.header] = a; });
+            const valueTypes = (detection && detection.valueTypes) || {};
+            const headers = Object.keys(mapping || {});
+            if (headers.length === 0) {
+                renderTableState('mappingRows', 'empty', 'No columns were mapped.', 3);
+                return;
+            }
+            el('mappingRows').innerHTML = headers.map((h) => {
+                const field = mapping[h];
+                const a = byHeader[h];
+                const conf = a ? Math.round(a.confidence * 100) + '%' : '\u2014';
+                const reason = a && a.reasons && a.reasons.length ? ' title="' + escapeHtml(a.reasons.join(', ')) + '"' : '';
+                return '<tr>'
+                    + '<td><strong>' + escapeHtml(h) + '</strong><br><span class="text-muted" style="font-size:12px;">' + escapeHtml(valueTypes[h] || '') + '</span></td>'
+                    + '<td' + reason + '>' + escapeHtml(fieldLabel(field)) + '</td>'
+                    + '<td class="text-muted">' + conf + '</td>'
+                    + '</tr>';
+            }).join('');
+        }
+
+        function downloadErrors() {
+            if (!activeResult) return;
+            const id = activeResult.import.id;
+            fetch('/api/imports/' + id + '/errors.csv', { headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') } })
+                .then((r) => { if (!r.ok) throw new Error('Could not download the report'); return r.text(); })
+                .then((csv) => {
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'import-' + (activeResult.import.reference || id) + '-errors.csv';
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                })
+                .catch((err) => showToast(err.message, 'error'));
+        }
+
+        function resetImport() {
+            activeResult = null;
+            el('fileInput').value = '';
+            el('progressCard').classList.add('hidden');
+            el('resultCard').classList.add('hidden');
+            el('mappingRows').innerHTML = '';
+            renderState('uploadState', 'empty', 'Ready for the next file.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ----------------------------------------------------------------
+        // History
+        // ----------------------------------------------------------------
+        async function loadHistory() {
+            renderTableState('historyRows', 'empty', 'Loading import history\u2026', 7);
+            try {
+                const status = el('historyStatus').value;
+                const query = status ? '?status=' + encodeURIComponent(status) : '';
+                const result = await apiFetch('/api/imports' + query, { method: 'GET' });
+                const items = result.items || [];
+                if (items.length === 0) {
+                    renderTableState('historyRows', 'empty', 'No imports yet.', 7);
+                    return;
+                }
+                el('historyRows').innerHTML = items.map((i) =>
+                    '<tr>'
+                    + '<td><code>' + escapeHtml(i.reference) + '</code></td>'
+                    + '<td>' + escapeHtml(i.file_name) + '</td>'
+                    + '<td>' + escapeHtml(TYPE_LABEL[i.entity_type] || i.entity_type) + '</td>'
+                    + '<td>' + statusBadge(i.status) + '</td>'
+                    + '<td>' + i.total_rows + ' total / ' + i.imported_rows + ' imported / ' + i.skipped_rows + ' skipped / ' + i.error_rows + ' errors</td>'
+                    + '<td>' + formatDate(i.created_at) + '</td>'
+                    + '<td><button class="btn-secondary" onclick="viewHistory(\'' + i.id + '\')">Details</button></td>'
+                    + '</tr>').join('');
+            } catch (err) {
+                renderTableState('historyRows', 'error', err.message, 7);
+            }
+        }
+
+        function rowMessages(r) {
+            if (!r.messages_json) return '';
+            try {
+                return (JSON.parse(r.messages_json) || []).map((m) => m.message).join('; ');
+            } catch {
+                return '';
+            }
+        }
+
+        async function viewHistory(id) {
+            try {
+                const result = await apiFetch('/api/imports/' + id, { method: 'GET' });
+                const i = result.import;
+                const rows = await apiFetch('/api/imports/' + id + '/rows?limit=50', { method: 'GET' });
+                const list = (rows.items || []).map((r) =>
+                    '<tr><td>' + (r.row_number != null ? r.row_number : '') + '</td><td>' + statusBadge(r.status) + '</td>'
+                    + '<td style="font-size:12px;">' + escapeHtml(rowMessages(r)) + '</td></tr>').join('');
+                openModal('Import ' + i.reference,
+                    '<div class="grid-2">'
+                    + '<div><strong>File</strong><br>' + escapeHtml(i.file_name) + '</div>'
+                    + '<div><strong>Type</strong><br>' + escapeHtml(TYPE_LABEL[i.entity_type] || i.entity_type) + '</div>'
+                    + '<div><strong>Status</strong><br>' + statusBadge(i.status) + '</div>'
+                    + '<div><strong>Rows</strong><br>' + i.total_rows + ' total, ' + i.imported_rows + ' imported</div>'
+                    + '<div><strong>Created</strong><br>' + formatDate(i.created_at) + '</div>'
+                    + '</div>'
+                    + '<h4 class="mt-4">Rows</h4>'
+                    + '<div class="table-responsive"><table><thead><tr><th>#</th><th>Status</th><th>Detail</th></tr></thead><tbody>' + list + '</tbody></table></div>');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+        });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

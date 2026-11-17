@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="gf-rd-title gf-rd-desc">
+  <title id="gf-rd-title">A Gahonsh Finance support officer talking with a borrower</title>
+  <desc id="gf-rd-desc">An original illustration of a calm, respectful conversation between a support officer and a borrower across a desk, with a shared repayment plan on screen.</desc>
+
+  <!--
+    Original in-house artwork. Flat corporate illustration, no photograph and no
+    third-party likeness. It shows the tone the recovery page describes: two
+    people, at a desk, working out a plan together — not a confrontation.
+  -->
+
+  <defs>
+    <linearGradient id="gf-rd-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EEF3FC"/>
+      <stop offset="1" stop-color="#DCE6F7"/>
+    </linearGradient>
+    <linearGradient id="gf-rd-desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1F5F9"/>
+      <stop offset="1" stop-color="#CBD5E1"/>
+    </linearGradient>
+    <linearGradient id="gf-rd-screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="gf-rd-light" cx="0.5" cy="0.2" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="640" height="360" rx="18" fill="url(#gf-rd-bg)"/>
+  <rect width="640" height="360" rx="18" fill="url(#gf-rd-light)"/>
+
+  <!-- back wall: soft calendar / notice board, keeps the scene calm -->
+  <rect x="58" y="46" width="120" height="88" rx="10" fill="#FFFFFF" opacity=".85"/>
+  <rect x="74" y="62" width="88" height="8" rx="4" fill="#1E3A8A" opacity=".55"/>
+  <rect x="74" y="80" width="64" height="7" rx="3.5" fill="#94A3B8"/>
+  <rect x="74" y="96" width="76" height="7" rx="3.5" fill="#94A3B8"/>
+  <rect x="74" y="112" width="52" height="7" rx="3.5" fill="#94A3B8"/>
+
+  <!-- desk -->
+  <rect x="30" y="272" width="580" height="20" rx="8" fill="url(#gf-rd-desk)"/>
+  <rect x="30" y="290" width="580" height="8" rx="4" fill="#94A3B8" opacity=".55"/>
+
+  <!-- monitor with the agreed plan -->
+  <rect x="250" y="150" width="150" height="104" rx="10" fill="#0F172A"/>
+  <rect x="258" y="158" width="134" height="88" rx="6" fill="url(#gf-rd-screen)"/>
+  <rect x="270" y="172" width="72" height="9" rx="4.5" fill="#ffffff" opacity=".92"/>
+  <rect x="270" y="190" width="110" height="7" rx="3.5" fill="#ffffff" opacity=".55"/>
+  <rect x="270" y="206" width="96" height="7" rx="3.5" fill="#ffffff" opacity=".55"/>
+  <rect x="270" y="222" width="60" height="7" rx="3.5" fill="#FDE68A"/>
+  <rect x="300" y="254" width="50" height="18" rx="4" fill="#334155"/>
+  <rect x="286" y="270" width="78" height="8" rx="4" fill="#475569"/>
+
+  <!-- officer (left): navy blazer, seated, hand gesturing to the plan -->
+  <g>
+    <circle cx="150" cy="196" r="30" fill="#D79A6A"/>
+    <path d="M124 190c-2-20 10-30 26-30s28 10 26 30c-3-7-9-11-16-12-6 5-15 5-20 0-7 1-13 5-16 12z" fill="#241A14"/>
+    <ellipse cx="150" cy="200" rx="3" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="162" cy="200" rx="3" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="150" cy="200" r="1.9" fill="#3B2A1E"/>
+    <circle cx="162" cy="200" r="1.9" fill="#3B2A1E"/>
+    <path d="M141 194c2-1.4 4.4-1.4 6 0M156 194c1.6-1.4 4-1.4 6 0" stroke="#241A14" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M156 207c2.6 2 5.4 2 8 0" stroke="#A85A52" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M104 300c0-30 22-46 46-46s46 16 46 46z" fill="#1E3A8A"/>
+    <path d="M150 254c7 0 13 2 18 5l-6 41h-24l-6-41c5-3 11-5 18-5z" fill="#16295E"/>
+    <path d="M140 254l10 13 10-13-5-2h-10z" fill="#F4F7FB"/>
+    <path d="M150 267l-5-10 5-3 5 3z" fill="#047857"/>
+    <!-- gesturing forearm toward the screen -->
+    <path d="M196 262c18-6 40-8 58-4l-2 12c-16-3-36-1-52 4z" fill="#1E3A8A"/>
+    <circle cx="256" cy="266" r="9" fill="#D79A6A"/>
+  </g>
+
+  <!-- borrower (right): teal top, attentive, hand on a document -->
+  <g>
+    <circle cx="470" cy="198" r="29" fill="#A9662F"/>
+    <path d="M444 194c-2-19 10-29 26-29s28 10 26 29c-3-7-9-11-16-12-6 5-15 5-20 0-7 1-13 5-16 12z" fill="#20160F"/>
+    <circle cx="444" cy="206" r="6" fill="#20160F"/>
+    <circle cx="496" cy="206" r="6" fill="#20160F"/>
+    <ellipse cx="462" cy="202" rx="3" ry="2.6" fill="#F7F9FC"/>
+    <ellipse cx="478" cy="202" rx="3" ry="2.6" fill="#F7F9FC"/>
+    <circle cx="462" cy="202" r="1.9" fill="#2B2118"/>
+    <circle cx="478" cy="202" r="1.9" fill="#2B2118"/>
+    <path d="M454 196c2-1.4 4.4-1.4 6 0M472 196c1.6-1.4 4-1.4 6 0" stroke="#20160F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M464 209c2.6 2 5.4 2 8 0" stroke="#8C3B30" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M424 300c0-29 21-45 46-45s46 16 46 45z" fill="#0F766E"/>
+    <path d="M470 255c7 0 13 2 18 5l-6 40h-24l-6-40c5-3 11-5 18-5z" fill="#0A544E"/>
+    <path d="M460 255l10 13 10-13-5-2h-10z" fill="#F2FBF8"/>
+    <!-- forearm resting on the document -->
+    <path d="M424 266c-16-4-34-3-48 3l5 11c12-5 28-6 41-3z" fill="#0F766E"/>
+    <circle cx="374" cy="274" r="9" fill="#A9662F"/>
+  </g>
+
+  <!-- a document between them, being reviewed together -->
+  <rect x="336" y="268" width="96" height="12" rx="4" fill="#FFFFFF"/>
+  <rect x="344" y="271" width="46" height="3" rx="1.5" fill="#94A3B8"/>
+  <rect x="344" y="276" width="66" height="3" rx="1.5" fill="#CBD5E1"/>
+
+  <!-- two mugs, a small human touch -->
+  <rect x="214" y="252" width="20" height="22" rx="4" fill="#FFFFFF"/>
+  <path d="M234 258c8 0 8 12 0 12" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <rect x="512" y="256" width="20" height="20" rx="4" fill="#FFFFFF"/>
+  <path d="M532 262c8 0 8 11 0 11" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+
+  <!-- speech bubbles: the two-way conversation -->
+  <g>
+    <rect x="196" y="70" width="118" height="46" rx="12" fill="#FFFFFF"/>
+    <path d="M228 116l10 14 6-14z" fill="#FFFFFF"/>
+    <rect x="212" y="84" width="86" height="7" rx="3.5" fill="#1E3A8A" opacity=".6"/>
+    <rect x="212" y="98" width="60" height="7" rx="3.5" fill="#94A3B8"/>
+  </g>
+  <g>
+    <rect x="372" y="46" width="130" height="46" rx="12" fill="#047857"/>
+    <path d="M462 92l-10 14-6-14z" fill="#047857"/>
+    <rect x="388" y="60" width="98" height="7" rx="3.5" fill="#ffffff" opacity=".85"/>
+    <rect x="388" y="74" width="70" height="7" rx="3.5" fill="#ffffff" opacity=".6"/>
+  </g>
+
+  <!-- plant, softens the frame -->
+  <rect x="576" y="238" width="26" height="34" rx="5" fill="#B45309"/>
+  <path d="M589 238c-16-4-22-20-14-32 12 2 20 14 14 32z" fill="#047857"/>
+  <path d="M589 238c14-6 20-22 10-34-12 4-18 18-10 34z" fill="#059669"/>
+</svg>

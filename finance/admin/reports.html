@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reports - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Reports</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <h2>Portfolio overview</h2>
+                <div class="flex gap-2 mb-4">
+                    <button class="btn-secondary" onclick="exportCsv('/api/reports/overview/export', 'portfolio-overview.csv')">Export CSV</button>
+                </div>
+                <div id="overviewGrid" class="grid-2"></div>
+            </div>
+
+            <div class="card">
+                <h2>Branch performance <button class="btn-secondary" style="float:right;" onclick="exportCsv('/api/reports/branches/export','branch-performance.csv')">Export CSV</button></h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Branch</th><th>Code</th><th>City</th><th>Customers</th><th>Loans</th><th>Disbursed</th><th>Active principal</th></tr></thead>
+                        <tbody id="branchRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Agent performance <button class="btn-secondary" style="float:right;" onclick="exportCsv('/api/reports/agents/export','agent-performance.csv')">Export CSV</button></h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Agent</th><th>Code</th><th>Branch</th><th>Assigned customers</th><th>Portfolio loans</th><th>Disbursed</th><th>Collected</th></tr></thead>
+                        <tbody id="agentRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+
+        async function loadOverview() {
+            renderState('overviewGrid', 'loading', 'Loading portfolio\u2026');
+            try {
+                const d = await apiFetch('/api/reports/overview');
+                const metric = (label, value) => `<div class="card" style="margin:0;padding:14px 16px;">
+                    <div class="text-muted" style="font-size:12px;">${label}</div>
+                    <div style="font-size:20px;font-weight:600;">${value}</div></div>`;
+                el('overviewGrid').innerHTML =
+                    metric('Total disbursed', formatMoney(d.totalDisbursed)) +
+                    metric('Total loans', d.totalLoans) +
+                    metric('Total collected', formatMoney(d.totalRepayments)) +
+                    metric('Principal outstanding', formatMoney(d.principalOutstanding)) +
+                    metric('Interest outstanding', formatMoney(d.interestOutstanding)) +
+                    metric('Fee outstanding', formatMoney(d.feeOutstanding)) +
+                    metric('Total outstanding', formatMoney(d.totalOutstanding)) +
+                    metric('Customers', d.customerCount) +
+                    metric('Branches', d.branchCount) +
+                    metric('Overdue loans', d.overdueLoansCount) +
+                    metric('Overdue amount', formatMoney(d.totalOverdueAmount)) +
+                    metric('Recovery rate', d.recoveryRate + '%');
+            } catch (err) { renderState('overviewGrid', 'error', err.message); }
+        }
+
+        async function loadBranches() {
+            renderState('branchRows', 'loading', 'Loading branches\u2026');
+            try {
+                const rows = await apiFetch('/api/reports/branches');
+                const items = Array.isArray(rows) ? rows : (rows.items || []);
+                if (items.length === 0) { renderState('branchRows', 'empty', 'No branch data.'); return; }
+                el('branchRows').innerHTML = items.map((b) => `<tr>
+                    <td>${escapeHtml(b.name)}</td><td>${escapeHtml(b.code)}</td><td>${escapeHtml(b.city || '')}</td>
+                    <td>${b.customer_count}</td><td>${b.loan_count}</td>
+                    <td>${formatMoney(b.disbursed_volume)}</td><td>${formatMoney(b.active_principal_balance)}</td>
+                </tr>`).join('');
+            } catch (err) { renderState('branchRows', 'error', err.message); }
+        }
+
+        async function loadAgents() {
+            renderState('agentRows', 'loading', 'Loading agents\u2026');
+            try {
+                const rows = await apiFetch('/api/reports/agents');
+                const items = Array.isArray(rows) ? rows : (rows.items || []);
+                if (items.length === 0) { renderState('agentRows', 'empty', 'No agent data.'); return; }
+                el('agentRows').innerHTML = items.map((a) => `<tr>
+                    <td>${escapeHtml(a.agent_name)}</td><td>${escapeHtml(a.agent_code)}</td><td>${escapeHtml(a.branch_name || '')}</td>
+                    <td>${a.assigned_customers}</td><td>${a.portfolio_loans}</td>
+                    <td>${formatMoney(a.total_disbursed)}</td><td>${formatMoney(a.total_collected)}</td>
+                </tr>`).join('');
+            } catch (err) { renderState('agentRows', 'error', err.message); }
+        }
+
+        async function exportCsv(path, filename) {
+            try {
+                const response = await fetch(path, { headers: headers() });
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    throw new Error(payload.error || `Export failed (${response.status})`);
+                }
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { loadOverview(); loadBranches(); loadAgents(); });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

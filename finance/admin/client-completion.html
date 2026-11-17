@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Client Completion Links - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .cc-panel { border: 1px solid var(--color-border); border-radius: 8px; padding: 16px; margin-bottom: 16px; background: var(--color-surface); }
+        .cc-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .cc-stat { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; padding: 12px; }
+        .cc-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--color-text-muted); font-weight: 600; }
+        .cc-stat-value { font-size: 16px; font-weight: 700; color: var(--color-text-main); margin-top: 4px; word-break: break-word; }
+        .cc-link-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .cc-token-box { font-family: monospace; font-size: 12px; background: var(--color-bg); border: 1px dashed var(--color-border); border-radius: 6px; padding: 10px; word-break: break-all; width: 100%; }
+        .cc-progress-track { height: 8px; background: var(--color-border); border-radius: 999px; overflow: hidden; margin-top: 6px; }
+        .cc-progress-fill { height: 100%; background: var(--color-secondary); transition: width .3s ease; }
+        .cc-share-message { width: 100%; min-height: 130px; font-size: 13px; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); color: var(--color-text-main); font-family: inherit; }
+        .cc-banner { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+        .cc-banner-warn { background: var(--color-warning-bg, #FEF3C7); color: #92400E; border: 1px solid #FDE68A; }
+        .cc-banner-info { background: var(--color-info-bg, #EFF6FF); color: #1E3A8A; border: 1px solid #BFDBFE; }
+    </style>
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+            <div class="mt-4">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect" onchange="setTheme(this.value)">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Client Completion Links</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <h2>1. Choose the client</h2>
+                <p class="text-muted" style="font-size:13px;margin-top:-4px;">
+                    Select the client whose details you want the customer to complete. Only clients in
+                    your organisation are listed.
+                </p>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="customerSearch">Find client</label>
+                        <input id="customerSearch" placeholder="Search name, email or phone" oninput="renderCustomerOptions()">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerSelect">Client <span class="required-mark">*</span></label>
+                        <select id="customerSelect" onchange="onCustomerSelected()">
+                            <option value="">Select a client…</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="customerContext"></div>
+            </div>
+
+            <div class="card" id="issueCard" hidden>
+                <h2>2. Enter what you already know</h2>
+                <div class="cc-banner cc-banner-info">
+                    Anything you enter here is saved on the client record and shown to the customer as
+                    <strong>read-only</strong>. The customer can only complete the fields you leave blank.
+                </div>
+                <form id="prefillForm" onsubmit="generateLink(event)">
+                    <div id="prefillFields" class="grid-2"></div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="applicationId">Attach to application (optional)</label>
+                            <select id="applicationId">
+                                <option value="">No application (identity &amp; contact only)</option>
+                            </select>
+                            <div class="text-muted" style="font-size:12px;">Employment and income fields are only requested when an application is attached.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ttlHours">Link valid for (hours)</label>
+                            <input id="ttlHours" type="number" min="1" max="720" value="72">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="secret">Optional verification code</label>
+                        <input id="secret" placeholder="Leave blank for no code">
+                        <div class="text-muted" style="font-size:12px;">
+                            When set, the customer must enter this code to open the link. Share it separately from the link.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="generateBtn">Generate secure link</button>
+                </form>
+            </div>
+
+            <div class="card" id="linkCard" hidden>
+                <h2>3. Share the link</h2>
+                <div class="cc-banner cc-banner-warn">
+                    Send this link only to the client it was created for. Anyone with the link can
+                    complete this client's information until it expires or you revoke it.
+                </div>
+                <div class="form-group">
+                    <label>Completion link</label>
+                    <div class="cc-token-box" id="generatedUrl">-</div>
+                </div>
+                <div class="cc-link-row">
+                    <button class="btn-primary" onclick="copyLink()">Copy link</button>
+                    <button class="btn-secondary" onclick="copyMessage()">Copy message</button>
+                    <button class="btn-secondary" onclick="openWhatsApp()">Share on WhatsApp</button>
+                    <button class="btn-secondary" onclick="openSms()">Send by SMS</button>
+                    <button class="btn-secondary" onclick="openEmail()">Send by email</button>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="shareMessage">Message to send</label>
+                    <textarea id="shareMessage" class="cc-share-message" readonly></textarea>
+                </div>
+                <div class="text-muted" style="font-size:12px;">
+                    Gahonsh Finance does not send this message for you: copy it, or use one of the
+                    share buttons, so you stay in control of delivery.
+                </div>
+            </div>
+
+            <div class="card" id="bulkCard">
+                <h2>Send to all clients (one click)</h2>
+                <div class="cc-banner cc-banner-info">
+                    Issues every active client their <strong>own</strong> secure completion link and sends
+                    the message to them, each with their own link, in one action. A client who has already
+                    been messaged, or whose file is already submitted, is skipped and listed — a repeat
+                    press never re-opens a finished file or churns a live link. Tick
+                    <strong>Re-send to everyone</strong> to deliberately issue and send a fresh link again.
+                    Clients without a number/email for the chosen channel are skipped and listed.
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="bulkChannel">Channel <span class="required-mark">*</span></label>
+                        <select id="bulkChannel">
+                            <option value="SMS">SMS</option>
+                            <option value="WHATSAPP">WhatsApp</option>
+                            <option value="EMAIL">Email</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkTtlHours">Link valid for (hours)</label>
+                        <input id="bulkTtlHours" type="number" min="1" max="720" value="72">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bulkSecret">Optional verification code (sent separately)</label>
+                    <input id="bulkSecret" placeholder="Leave blank for no code">
+                </div>
+                <div class="form-group">
+                    <label for="bulkTemplate">Template (optional)</label>
+                    <select id="bulkTemplate"><option value="">— built-in message —</option></select>
+                    <div class="text-muted" style="font-size:12px;">
+                        The client's name and their own link are always filled in from the server.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Recipients</label>
+                    <div class="text-muted" style="font-size:13px;" id="bulkAudience">Loading clients…</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn-primary" id="bulkSendBtn" onclick="sendToAllClients()">Send to all clients</button>
+                    <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+                        <input type="checkbox" id="bulkDeliverNow"> Deliver now (wait for results)
+                    </label>
+                    <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+                        <input type="checkbox" id="bulkResend"> Re-send to everyone (issue a fresh link even if already sent)
+                    </label>
+                </div>
+                <div id="bulkResult" class="mt-4"></div>
+            </div>
+
+            <div class="card" id="statusCard" hidden>
+                <h2>4. Completion status</h2>
+                <div id="statusBody"></div>
+            </div>
+
+            <div class="card" id="linksCard" hidden>
+                <h2>5. Issued links</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Expires</th>
+                                <th>Opens</th>
+                                <th>Submitted</th>
+                                <th style="min-width:200px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linkRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" id="eventsCard" hidden>
+                <h2>6. Client activity</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>When</th><th>Action</th><th>Detail</th></tr></thead>
+                        <tbody id="eventRows"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card" id="reviewCard" hidden>
+                <h2>7. KYC review</h2>
+                <div id="reviewBody"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+
+        // Fields the admin may pre-fill. Keys match the API exactly.
+        const PREFILL_FIELDS = [
+            { key: 'fullName', label: 'Full name', type: 'text', maxlength: 120 },
+            { key: 'nationalId', label: 'Government ID number', type: 'text', maxlength: 60 },
+            { key: 'phone', label: 'Mobile number', type: 'tel', maxlength: 20 },
+            { key: 'address', label: 'Residential address', type: 'textarea', maxlength: 300 },
+            { key: 'employmentStatus', label: 'Employment status', type: 'select',
+              options: ['SALARIED', 'SELF_EMPLOYED', 'BUSINESS_OWNER', 'FARMER', 'STUDENT', 'RETIRED', 'UNEMPLOYED'] },
+            { key: 'employerName', label: 'Employer / business name', type: 'text', maxlength: 150 },
+            { key: 'monthlyIncome', label: 'Monthly income', type: 'number' },
+        ];
+        const EMPLOYMENT_KEYS = ['employmentStatus', 'employerName', 'monthlyIncome'];
+
+        let customers = [];
+        let activeCustomerId = '';
+        let generated = null;
+
+        async function loadCustomers() {
+            renderState('customerContext', 'loading', 'Loading clients…');
+            try {
+                const data = await apiFetch('/api/customers');
+                customers = Array.isArray(data) ? data : (data.items || []);
+                renderCustomerOptions();
+                if (customers.length === 0) {
+                    renderState('customerContext', 'empty', 'No clients found in this organisation.');
+                } else {
+                    el('customerContext').innerHTML = '';
+                }
+                renderBulkAudience();
+                loadBulkTemplates();
+                // Arriving from the Customers page with ?customer=<id>.
+                const requested = new URLSearchParams(window.location.search).get('customer');
+                if (requested && customers.some((c) => c.id === requested)) {
+                    el('customerSelect').value = requested;
+                    onCustomerSelected();
+                }
+            } catch (err) {
+                renderState('customerContext', 'error', err.message);
+            }
+        }
+
+        /** How many clients the bulk action will actually reach on the chosen channel. */
+        function renderBulkAudience() {
+            const channel = el('bulkChannel').value;
+            const active = customers.filter((c) => String(c.status || 'ACTIVE').toUpperCase() === 'ACTIVE');
+            const reachable = active.filter((c) => (channel === 'EMAIL'
+                ? String(c.email || '').trim() !== ''
+                : String(c.phone || '').replace(/\D/g, '') !== ''));
+            const skipped = active.length - reachable.length;
+            el('bulkAudience').textContent =
+                `${reachable.length} of ${active.length} active clients have a ${channel === 'EMAIL' ? 'email address' : 'mobile number'}` +
+                (skipped > 0 ? ` — ${skipped} will be skipped and listed` : '');
+        }
+
+        async function loadBulkTemplates() {
+            try {
+                const data = await apiFetch('/api/messaging/templates');
+                const items = (data && data.items) || [];
+                const channel = el('bulkChannel').value;
+                el('bulkTemplate').innerHTML = '<option value="">— built-in message —</option>' +
+                    items.filter((t) => t.is_active && t.channel === channel)
+                        .map((t) => `<option value="${escapeHtml(t.code)}">${escapeHtml(t.code)}</option>`).join('');
+            } catch {
+                // A missing template list must not block the bulk action; the
+                // built-in message is always available.
+            }
+        }
+
+        function bulkStatusBadge(status) {
+            const map = { SENT: 'badge-success', ISSUED: 'badge-info', QUEUED: 'badge-warning', FAILED: 'badge-danger', SUPPRESSED: 'badge-warning', SKIPPED: 'badge-warning', COMPLETED: 'badge-info' };
+            return `<span class="badge ${map[status] || ''}">${escapeHtml(status)}</span>`;
+        }
+
+        async function sendToAllClients() {
+            const channel = el('bulkChannel').value;
+            const active = customers.filter((c) => String(c.status || 'ACTIVE').toUpperCase() === 'ACTIVE');
+            const resend = el('bulkResend').checked;
+            const ok = await confirmAction(
+                'Send to all clients',
+                `Issue each of ${active.length} active clients their own completion link and send it by ${channel}? ` +
+                (resend
+                    ? 'Re-send is on: every client already messaged will get a fresh link (their current link is replaced). '
+                    : 'A client already messaged keeps their current link and is skipped, so a repeat press is safe. ') +
+                'A client whose file is already submitted is skipped.',
+                resend ? 'Re-send to all' : 'Send to all'
+            );
+            if (!ok) return;
+
+            const btn = el('bulkSendBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+            renderState('bulkResult', 'loading', 'Issuing links and queueing messages…');
+            try {
+                const body = {
+                    channel,
+                    ttlHours: Number(el('bulkTtlHours').value) || undefined,
+                    secret: el('bulkSecret').value.trim() || undefined,
+                    templateCode: el('bulkTemplate').value || undefined,
+                    deliverNow: el('bulkDeliverNow').checked,
+                    resend,
+                    // An SMS/WhatsApp/email body needs an absolute URL; without a
+                    // base each client's link would be the root-relative
+                    // `/client.html#token=…`, which is not clickable outside the
+                    // browser. Mirrors the single-link path's `absoluteUrl`.
+                    baseUrl: window.location.origin,
+                };
+                const result = await apiFetch('/api/admin/completion-links/send-to-all', { method: 'POST', body });
+                renderBulkResult(result);
+                showToast(
+                    `Issued ${result.issued + result.sent + result.queued}, sent ${result.sent + result.queued}, ` +
+                    `already submitted ${result.completed || 0}, skipped ${result.skipped}`,
+                    result.failed > 0 ? 'warning' : 'success'
+                );
+                if (activeCustomerId) await loadStatus(activeCustomerId);
+            } catch (err) {
+                renderState('bulkResult', 'error', err.message);
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send to all clients';
+            }
+        }
+
+        function renderBulkResult(result) {
+            const results = result.results || [];
+            el('bulkResult').innerHTML = `
+                <div class="cc-status-grid">
+                    <div class="cc-stat"><div class="cc-stat-label">Clients scanned</div><div class="cc-stat-value">${result.scanned}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Sent</div><div class="cc-stat-value">${result.sent}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Queued</div><div class="cc-stat-value">${result.queued}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Issued only</div><div class="cc-stat-value">${result.issued || 0}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Already submitted</div><div class="cc-stat-value">${result.completed || 0}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Skipped</div><div class="cc-stat-value">${result.skipped}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Failed</div><div class="cc-stat-value">${result.failed}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Suppressed</div><div class="cc-stat-value">${result.suppressed}</div></div>
+                </div>
+                ${results.length ? `
+                <div class="table-responsive mt-4"><table>
+                    <thead><tr><th>Client</th><th>Contact</th><th>Link</th><th>Status</th><th>Note</th></tr></thead>
+                    <tbody>
+                    ${results.map((r) => `<tr>
+                        <td>${escapeHtml(r.customerName || r.customerId)}</td>
+                        <td>${escapeHtml(r.maskedPhone || r.maskedEmail || '-')}</td>
+                        <td>${!r.linkId ? '<span class="text-muted">—</span>' : (r.reusedLink ? '<span class="badge badge-info">resent</span>' : '<span class="badge">new</span>')}</td>
+                        <td>${bulkStatusBadge(r.status)}</td>
+                        <td class="text-muted" style="font-size:12px;">${escapeHtml(r.reason || '-')}</td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table></div>` : ''}`;
+        }
+
+        function renderCustomerOptions() {
+            const term = (el('customerSearch').value || '').trim().toLowerCase();
+            const select = el('customerSelect');
+            const previous = select.value;
+            const matches = customers.filter((c) => {
+                if (!term) return true;
+                return [c.full_name, c.email, c.phone].some((v) => String(v || '').toLowerCase().includes(term));
+            });
+            select.innerHTML = '<option value="">Select a client…</option>' + matches.map((c) => {
+                const label = `${c.full_name || c.id} · ${c.email || ''}`.trim();
+                return `<option value="${escapeHtml(c.id)}">${escapeHtml(label)}</option>`;
+            }).join('');
+            if (matches.some((c) => c.id === previous)) select.value = previous;
+        }
+
+        function renderPrefillFields(hasApplication) {
+            el('prefillFields').innerHTML = PREFILL_FIELDS
+                .filter((f) => hasApplication || !EMPLOYMENT_KEYS.includes(f.key))
+                .map((f) => {
+                    const id = `prefill-${f.key}`;
+                    const attrs = `${f.maxlength ? ` maxlength="${f.maxlength}"` : ''}${f.type === 'number' ? ' step="0.01" min="0"' : ''}`;
+                    const control = f.type === 'select'
+                        ? `<select id="${id}"><option value="">Not provided</option>${f.options.map((o) => `<option value="${o}">${o}</option>`).join('')}</select>`
+                        : f.type === 'textarea'
+                            ? `<textarea id="${id}" rows="2"${attrs}></textarea>`
+                            : `<input id="${id}" type="${f.type}"${attrs}>`;
+                    return `<div class="form-group">
+                        <label for="${id}">${escapeHtml(f.label)}</label>
+                        ${control}
+                        <div class="field-error" id="err-${f.key}" hidden></div>
+                    </div>`;
+                }).join('');
+        }
+
+        function onCustomerSelected() {
+            activeCustomerId = el('customerSelect').value;
+            generated = null;
+            el('linkCard').hidden = true;
+
+            if (!activeCustomerId) {
+                el('issueCard').hidden = true;
+                el('statusCard').hidden = true;
+                el('linksCard').hidden = true;
+                el('eventsCard').hidden = true;
+                return;
+            }
+            const customer = customers.find((c) => c.id === activeCustomerId) || {};
+            el('customerContext').innerHTML = `
+                <div class="cc-panel">
+                    <div class="cc-status-grid">
+                        <div class="cc-stat"><div class="cc-stat-label">Client</div><div class="cc-stat-value">${escapeHtml(customer.full_name || '-')}</div></div>
+                        <div class="cc-stat"><div class="cc-stat-label">Email</div><div class="cc-stat-value">${escapeHtml(customer.email || '-')}</div></div>
+                        <div class="cc-stat"><div class="cc-stat-label">Phone</div><div class="cc-stat-value">${escapeHtml(customer.phone || 'Not provided')}</div></div>
+                        <div class="cc-stat"><div class="cc-stat-label">Status</div><div class="cc-stat-value">${escapeHtml(customer.status || '-')}</div></div>
+                    </div>
+                </div>`;
+
+            // Pre-fill the form from the values already on the record. The
+            // application list determines whether employment fields apply, so
+            // wait for it before drawing the inputs.
+            void loadApplications(customer.id).then((hasApp) => {
+                if (el('customerSelect').value !== customer.id) return;
+                renderPrefillFields(hasApp);
+                el('prefill-fullName').value = customer.full_name || '';
+                el('prefill-phone').value = customer.phone || '';
+                el('prefill-address').value = customer.address || '';
+                el('prefill-nationalId').value = customer.national_id || '';
+            });
+
+            el('issueCard').hidden = false;
+            loadStatus(customer.id);
+        }
+
+        async function loadApplications(customerId) {
+            const select = el('applicationId');
+            select.innerHTML = '<option value="">No application (identity &amp; contact only)</option>';
+            try {
+                const apps = await apiFetch('/api/applications');
+                const own = (Array.isArray(apps) ? apps : []).filter((a) => a.customer_id === customerId);
+                select.innerHTML += own.map((a) =>
+                    `<option value="${escapeHtml(a.id)}">${escapeHtml(a.reference_number || a.id)} · ${escapeHtml(a.status)}</option>`
+                ).join('');
+                return own.length > 0;
+            } catch {
+                return false;
+            }
+        }
+
+        async function loadStatus(customerId) {
+            el('statusCard').hidden = false;
+            el('linksCard').hidden = false;
+            el('eventsCard').hidden = false;
+            renderState('statusBody', 'loading', 'Loading completion status…');
+            try {
+                const overview = await apiFetch(`/api/admin/customers/${encodeURIComponent(customerId)}/completion`);
+                renderStatus(overview);
+                renderLinks(overview.links || []);
+                await loadReview(overview);
+                await loadEvents(overview);
+            } catch (err) {
+                renderState('statusBody', 'error', err.message);
+            }
+        }
+
+        /**
+         * Shows the review state for the client's most recent submitted link and
+         * lets a reviewer approve, reject or request a correction.
+         */
+        async function loadReview(overview) {
+            const submitted = (overview.links || []).find((l) => l.completedAt || l.status === 'COMPLETED');
+            if (!submitted) {
+                el('reviewCard').hidden = true;
+                return;
+            }
+            el('reviewCard').hidden = false;
+            renderState('reviewBody', 'loading', 'Loading review…');
+            try {
+                const review = await apiFetch(`/api/admin/kyc/reviews/${encodeURIComponent(submitted.id)}`);
+                renderReviewPanel(submitted.id, review);
+            } catch (err) {
+                renderState('reviewBody', 'error', err.message);
+            }
+        }
+
+        function renderReviewPanel(linkId, review) {
+            const mobile = (review.overview && review.overview.mobile) || {};
+            const kyc = (review.overview && review.overview.kyc) || {};
+            const events = review.events || [];
+            const decided = review.reviewStatus === 'APPROVED' || review.reviewStatus === 'REJECTED';
+            el('reviewBody').innerHTML = `
+                <div class="cc-status-grid">
+                    <div class="cc-stat"><div class="cc-stat-label">Review state</div>
+                        <div class="cc-stat-value">${escapeHtml(review.reviewStatus || 'NOT_SUBMITTED')}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Aadhaar KYC</div>
+                        <div class="cc-stat-value">${escapeHtml(kyc.status || 'NOT_STARTED')}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Mobile</div>
+                        <div class="cc-stat-value">${mobile.verified ? 'VERIFIED' : 'NOT_VERIFIED'}</div>
+                        <div class="text-muted" style="font-size:12px;">${mobile.maskedPhone ? escapeHtml(mobile.maskedPhone) : '-'}</div></div>
+                    <div class="cc-stat"><div class="cc-stat-label">Reviewed</div>
+                        <div class="cc-stat-value">${review.reviewedAt ? formatDate(review.reviewedAt) : 'Not yet'}</div></div>
+                </div>
+                ${review.reviewNote ? `<div class="cc-banner cc-banner-info mt-4"><strong>Latest note</strong><br>${escapeHtml(review.reviewNote)}</div>` : ''}
+                ${decided ? '' : `
+                    <div class="mt-4">
+                        <label for="reviewNote" style="font-weight:600;font-size:13px;">Note (required to reject or request a correction)</label>
+                        <textarea id="reviewNote" class="cc-share-message" style="min-height:80px;" placeholder="Explain what is needed"></textarea>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                            <button class="btn-primary" onclick="decideReview('${escapeHtml(linkId)}', 'APPROVE')">Approve</button>
+                            <button class="btn-secondary" onclick="decideReview('${escapeHtml(linkId)}', 'REQUEST_CORRECTION')">Request correction</button>
+                            <button class="btn-secondary" onclick="decideReview('${escapeHtml(linkId)}', 'REJECT')">Reject</button>
+                        </div>
+                    </div>`}
+                <div class="mt-4">
+                    <h4 style="margin:0 0 8px;font-size:13px;">Review history</h4>
+                    ${events.length ? `<div class="table-responsive"><table><thead><tr><th>When</th><th>Decision</th><th>Note</th><th>By</th></tr></thead><tbody>
+                        ${events.map((e) => `<tr><td>${formatDate(e.createdAt)}</td><td>${escapeHtml(e.decision)}</td><td>${escapeHtml(e.note || '-')}</td><td>${escapeHtml(e.actorRole || '-')}</td></tr>`).join('')}
+                    </tbody></table></div>` : '<div class="text-muted">No decisions recorded yet.</div>'}
+                </div>`;
+        }
+
+        async function decideReview(linkId, decision) {
+            const note = (el('reviewNote') || {}).value || '';
+            try {
+                await apiFetch(`/api/admin/kyc/reviews/${encodeURIComponent(linkId)}/decision`, {
+                    method: 'POST',
+                    body: { decision, note },
+                });
+                showToast('Review recorded.', 'success');
+                await loadStatus(activeCustomerId);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function renderStatus(overview) {
+            const kyc = overview.kyc || {};
+            const progress = overview.progress;
+            const percent = progress ? progress.percent : 0;
+            const documents = overview.documents || [];
+            const blocking = overview.blocking || [];
+
+            el('statusBody').innerHTML = `
+                <div class="cc-status-grid">
+                    <div class="cc-stat"><div class="cc-stat-label">Information</div>
+                        <div class="cc-stat-value">${progress ? `${progress.completedFields}/${progress.totalFields} fields` : 'No link issued'}</div>
+                        <div class="cc-progress-track"><div class="cc-progress-fill" style="width:${percent}%"></div></div>
+                    </div>
+                    <div class="cc-stat"><div class="cc-stat-label">KYC</div>
+                        <div class="cc-stat-value">${escapeHtml(kyc.status || 'NOT_STARTED')}</div>
+                        <div class="text-muted" style="font-size:12px;">${kyc.maskedId ? escapeHtml(kyc.maskedId) : 'Not submitted'}</div>
+                    </div>
+                    <div class="cc-stat"><div class="cc-stat-label">Documents</div>
+                        <div class="cc-stat-value">${documents.length}</div>
+                        <div class="text-muted" style="font-size:12px;">${progress ? `${progress.documentsProvided}/${progress.documentsRequired} required` : '-'}</div>
+                    </div>
+                    <div class="cc-stat"><div class="cc-stat-label">Submitted</div>
+                        <div class="cc-stat-value">${overview.submittedAt ? formatDate(overview.submittedAt) : 'Not yet'}</div>
+                    </div>
+                </div>
+                ${documents.length ? `
+                    <div class="mt-4">
+                        <h4 style="margin:0 0 8px;font-size:13px;">Uploaded documents</h4>
+                        <div class="table-responsive"><table><thead><tr><th>Type</th><th>File</th><th>Size</th><th>Uploaded</th><th>Actions</th></tr></thead><tbody>
+                        ${documents.map((d) => `<tr>
+                            <td>${escapeHtml(d.documentType)}</td>
+                            <td>${escapeHtml(d.fileName)}</td>
+                            <td>${d.fileSize ? Math.round(d.fileSize / 1024) + ' KB' : '-'}</td>
+                            <td>${formatDate(d.uploadedAt)}</td>
+                            <td><button class="btn-secondary" onclick="downloadDocument('${escapeHtml(d.id)}', '${escapeHtml(d.fileName)}')">Download</button></td>
+                        </tr>`).join('')}
+                        </tbody></table></div>
+                    </div>` : ''}
+                ${blocking.length ? `<div class="cc-banner cc-banner-warn mt-4"><strong>Still outstanding with the client</strong><br>${blocking.map(escapeHtml).join('<br>')}</div>` : ''}
+                ${(overview.warnings || []).length ? `<div class="cc-banner cc-banner-info mt-4"><strong>Needs correction by Gahonsh Finance</strong><br>${overview.warnings.map(escapeHtml).join('<br>')}</div>` : ''}
+            `;
+        }
+
+        function renderLinks(links) {
+            if (links.length === 0) {
+                renderState('linkRows', 'empty', 'No completion links have been issued for this client.');
+                return;
+            }
+            el('linkRows').innerHTML = links.map((l) => `<tr>
+                <td>${formatDate(l.createdAt)}</td>
+                <td>${statusBadge(l.status)}${l.secretRequired ? ' <span class="badge badge-warning">Code required</span>' : ''}</td>
+                <td>${formatDate(l.expiresAt)}</td>
+                <td>${l.accessCount}</td>
+                <td>${l.completedAt ? formatDate(l.completedAt) : '-'}</td>
+                <td>
+                    ${l.status === 'ACTIVE' ? `<button class="btn-secondary" onclick="revokeLink('${escapeHtml(l.id)}')">Revoke</button>` : ''}
+                    <button class="btn-secondary" onclick="regenerateLink('${escapeHtml(l.id)}')">Regenerate</button>
+                </td>
+            </tr>`).join('');
+        }
+
+        async function loadEvents(overview) {
+            const links = overview.links || [];
+            if (links.length === 0) {
+                renderState('eventRows', 'empty', 'No client activity yet.');
+                return;
+            }
+            const rows = [];
+            for (const link of links.slice(0, 5)) {
+                try {
+                    const events = await apiFetch(`/api/admin/completion-links/${encodeURIComponent(link.id)}/events`);
+                    for (const e of events) {
+                        rows.push(`<tr>
+                            <td>${formatDate(e.createdAt)}</td>
+                            <td>${escapeHtml(e.eventType)}</td>
+                            <td class="text-muted" style="font-size:12px;">${escapeHtml(JSON.stringify(e.detail || {}))}</td>
+                        </tr>`);
+                    }
+                } catch { /* a single link's feed failing must not blank the panel */ }
+            }
+            if (rows.length === 0) renderState('eventRows', 'empty', 'No client activity yet.');
+            else el('eventRows').innerHTML = rows.join('');
+        }
+
+        function clearPrefillErrors() {
+            document.querySelectorAll('.field-error').forEach((node) => { node.hidden = true; node.textContent = ''; });
+        }
+
+        async function generateLink(event) {
+            event.preventDefault();
+            if (!activeCustomerId) { showToast('Select a client first', 'error'); return; }
+            clearPrefillErrors();
+
+            const prefill = {};
+            for (const field of PREFILL_FIELDS) {
+                const input = el(`prefill-${field.key}`);
+                if (!input) continue;
+                const value = input.value.trim();
+                if (value !== '') prefill[field.key] = value;
+            }
+
+            const body = { prefill };
+            const applicationId = el('applicationId').value;
+            if (applicationId) body.applicationId = applicationId;
+            const ttlHours = Number(el('ttlHours').value);
+            if (Number.isFinite(ttlHours) && ttlHours > 0) body.ttlHours = ttlHours;
+            const secret = el('secret').value.trim();
+            if (secret) body.secret = secret;
+
+            const btn = el('generateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Generating…';
+            try {
+                generated = await apiFetch(`/api/admin/customers/${encodeURIComponent(activeCustomerId)}/completion-link`, {
+                    method: 'POST',
+                    body,
+                });
+                showLink(generated);
+                showToast('Completion link created', 'success');
+                await loadStatus(activeCustomerId);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate secure link';
+            }
+        }
+
+        function absoluteUrl(link) {
+            return new URL(link.url, window.location.origin).toString();
+        }
+
+        function showLink(link) {
+            const url = absoluteUrl(link);
+            el('generatedUrl').textContent = url;
+            const customer = customers.find((c) => c.id === activeCustomerId) || {};
+            el('shareMessage').value = buildMessage(customer, url, link);
+            el('linkCard').hidden = false;
+            el('linkCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function buildMessage(customer, url, link) {
+            const name = customer.full_name ? customer.full_name : 'there';
+            const codeLine = link.secretRequired
+                ? '\nVerification code (sent separately): ____________\n'
+                : '';
+            return [
+                `Dear ${name},`,
+                '',
+                'Gahonsh Finance has started your loan file. Please complete the remaining details,',
+                'your KYC and the required documents using the secure link below:',
+                '',
+                url,
+                codeLine,
+                `This link is valid until ${formatDate(link.expiresAt)}.`,
+                '',
+                'Please do not forward this link: it is personal to you and anyone who has it can see',
+                'and update your information. If it expires, ask us for a new one.',
+                '',
+                'Gahonsh Finance',
+            ].join('\n');
+        }
+
+        async function copyLink() {
+            if (!generated) return;
+            await copyToClipboard(absoluteUrl(generated), 'Link copied');
+        }
+
+        async function copyMessage() {
+            await copyToClipboard(el('shareMessage').value, 'Message copied');
+        }
+
+        async function copyToClipboard(text, successMessage) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const area = document.createElement('textarea');
+                    area.value = text;
+                    area.style.position = 'fixed';
+                    area.style.opacity = '0';
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                }
+                showToast(successMessage, 'success');
+            } catch {
+                showToast('Could not copy automatically. Select the text and copy it manually.', 'error');
+            }
+        }
+
+        function openWhatsApp() {
+            if (!generated) return;
+            window.open(`https://wa.me/?text=${encodeURIComponent(el('shareMessage').value)}`, '_blank', 'noopener');
+        }
+
+        function openSms() {
+            if (!generated) return;
+            const customer = customers.find((c) => c.id === activeCustomerId) || {};
+            const phone = String(customer.phone || '').replace(/[^0-9+]/g, '');
+            window.location.href = `sms:${phone}?&body=${encodeURIComponent(el('shareMessage').value)}`;
+        }
+
+        function openEmail() {
+            if (!generated) return;
+            const customer = customers.find((c) => c.id === activeCustomerId) || {};
+            const subject = 'Complete your Gahonsh Finance loan application';
+            window.location.href = `mailto:${encodeURIComponent(customer.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(el('shareMessage').value)}`;
+        }
+
+        async function revokeLink(id) {
+            const ok = await confirmAction('Revoke link', 'The client will no longer be able to open this link. You can issue a new one afterwards.', 'Revoke');
+            if (!ok) return;
+            try {
+                await apiFetch(`/api/admin/completion-links/${encodeURIComponent(id)}/revoke`, { method: 'POST', body: {} });
+                showToast('Link revoked', 'success');
+                await loadStatus(activeCustomerId);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function regenerateLink(id) {
+            const ok = await confirmAction('Regenerate link', 'The existing link is revoked and a new one is created. Share the new link with the client.', 'Regenerate');
+            if (!ok) return;
+            try {
+                const link = await apiFetch(`/api/admin/completion-links/${encodeURIComponent(id)}/regenerate`, { method: 'POST', body: {} });
+                generated = link;
+                showLink(link);
+                showToast('New link created', 'success');
+                await loadStatus(activeCustomerId);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function downloadDocument(id, name) {
+            try {
+                const response = await fetch(`/api/documents/${encodeURIComponent(id)}/download`, { headers: headers() });
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    throw new Error(payload.error || `Download failed (${response.status})`);
+                }
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = name || 'document';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            el('bulkChannel').addEventListener('change', () => {
+                renderBulkAudience();
+                loadBulkTemplates();
+            });
+            loadCustomers();
+        });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Customers - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="index.html" data-i18n="dashboard">Dashboard / Settings</a>
+                <a href="customers.html" class="active" data-i18n="customers">Customers</a>
+                <a href="loan-products.html">Loan Products</a>
+                <a href="applications.html">Applications</a>
+                <a href="loans.html" data-i18n="loans">Loans</a>
+            </nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()" data-i18n="sign_out">Sign Out</button>
+            </div>
+            <div class="mt-4">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect" onchange="setTheme(this.value)">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 data-i18n="customers">Customers</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <div class="customer-toolbar">
+                    <div class="customer-toolbar-filters">
+                        <input id="search" placeholder="Search name, email, or phone" style="max-width: 300px;">
+                        <select id="status" style="max-width: 200px;">
+                            <option value="">All statuses</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                        <button onclick="load()">Filter</button>
+                    </div>
+                    <button id="addCustomerBtn" class="btn-primary" onclick="openAddCustomerModal()" title="Create a new customer account">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Customer
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th style="min-width: 270px;" data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows">
+                            <tr><td colspan="5">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 1. Customer Profile Modal -->
+    <div id="customerProfileModal" class="modal-overlay" onclick="handleBackdropClick(event, 'customerProfileModal')" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="profileModalTitle">Customer Profile</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('customerProfileModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="profileModalBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer" id="profileModalFooter">
+                <button class="btn-action btn-action-call" id="profileModalCallBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>Call</span>
+                </button>
+                <button class="btn-action btn-action-message" id="profileModalMessageBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Send Message</span>
+                </button>
+                <button class="btn-secondary" onclick="closeModal('customerProfileModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Call Customer Modal -->
+    <div id="callCustomerModal" class="modal-overlay" onclick="handleBackdropClick(event, 'callCustomerModal')" role="dialog" aria-modal="true" aria-labelledby="callModalTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="callModalTitle">Initiate Customer Call</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('callCustomerModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="callModalBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('callCustomerModal')">Close</button>
+                <button class="btn-action btn-action-call" id="callModalDialBtn" onclick="executeDial()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>Open Phone Dialer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Send Message Modal -->
+    <div id="sendMessageModal" class="modal-overlay" onclick="handleBackdropClick(event, 'sendMessageModal')" role="dialog" aria-modal="true" aria-labelledby="messageModalTitle">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="messageModalTitle">Send Message</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('sendMessageModal')" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('sendMessageModal')">Cancel</button>
+                <button class="btn-action btn-action-message" id="messageModalDispatchBtn" onclick="dispatchMessage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    <span>Send Message</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Add Customer Modal -->
+    <div id="addCustomerModal" class="modal-overlay" onclick="handleBackdropClick(event, 'addCustomerModal')" role="dialog" aria-modal="true" aria-labelledby="addCustomerModalTitle">
+        <div class="modal-content modal-content-wide" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h2 class="modal-title" id="addCustomerModalTitle">Add Customer</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('addCustomerModal')" aria-label="Close modal">✕</button>
+            </div>
+            <form id="addCustomerForm" novalidate onsubmit="submitAddCustomer(event)">
+                <div class="modal-body">
+                    <div id="addCustomerError" class="form-error-banner" role="alert" hidden></div>
+
+                    <p class="form-section-label">Identity</p>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="newFullName">Full name <span class="required-mark">*</span></label>
+                            <input id="newFullName" name="fullName" type="text" autocomplete="name" placeholder="e.g. Aarav Sharma" required>
+                            <div class="field-error" id="err-newFullName" hidden></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newEmail">Email address <span class="required-mark">*</span></label>
+                            <input id="newEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+                            <div class="field-error" id="err-newEmail" hidden></div>
+                        </div>
+                    </div>
+
+                    <p class="form-section-label">Contact</p>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="newPhone">Phone number</label>
+                            <input id="newPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210">
+                            <div class="field-error" id="err-newPhone" hidden></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newNationalId">National ID</label>
+                            <input id="newNationalId" name="nationalId" type="text" placeholder="e.g. IN-PAN-XXXXXX">
+                            <div class="field-error" id="err-newNationalId" hidden></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newAddress">Physical address / location</label>
+                        <textarea id="newAddress" name="address" rows="2" placeholder="Street, city, region"></textarea>
+                        <div class="field-error" id="err-newAddress" hidden></div>
+                    </div>
+
+                    <p class="form-section-label">Assignment &amp; risk</p>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="newBranchId">Branch</label>
+                            <select id="newBranchId" name="branchId">
+                                <option value="">Unassigned</option>
+                            </select>
+                            <div class="field-error" id="err-newBranchId" hidden></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newAssignedAgentId">Assigned agent</label>
+                            <select id="newAssignedAgentId" name="assignedAgentId">
+                                <option value="">Unassigned</option>
+                            </select>
+                            <div class="field-error" id="err-newAssignedAgentId" hidden></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newCreditScore">Credit score (0–1000, defaults to 700)</label>
+                        <input id="newCreditScore" name="creditScore" type="number" min="0" max="1000" step="1" placeholder="700">
+                        <div class="field-error" id="err-newCreditScore" hidden></div>
+                    </div>
+
+                    <p class="form-section-label">Account access</p>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="newInitialPassword">Initial password <span class="required-mark">*</span></label>
+                            <input id="newInitialPassword" name="initialPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" required>
+                            <div class="field-error" id="err-newInitialPassword" hidden></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newConfirmPassword">Confirm password <span class="required-mark">*</span></label>
+                            <input id="newConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter password" required>
+                            <div class="field-error" id="err-newConfirmPassword" hidden></div>
+                        </div>
+                    </div>
+                    <p class="form-hint">The customer signs in with this email and password. They can change it after activation.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addCustomerModal')" id="addCustomerCancelBtn">Cancel</button>
+                    <button type="submit" id="addCustomerSubmitBtn">Create Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/loan-account.js"></script>
+    <script>
+        let cachedCustomers = [];
+        let activeCustomer = null;
+        let cachedLoans = null;
+        let cachedApplications = null;
+
+        async function load() {
+            try {
+                const search = document.getElementById('search').value;
+                const status = document.getElementById('status').value;
+                const query = new URLSearchParams({ search, status });
+
+                const r = await fetch(`/api/customers?${query}`, { headers: headers() });
+                const d = await r.json();
+
+                if (!r.ok) throw new Error(apiErrorMessage(d, 'Failed to load customers'));
+                cachedCustomers = Array.isArray(d) ? d : [];
+
+                const rows = document.getElementById('rows');
+                if (cachedCustomers.length === 0) {
+                    rows.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 32px 16px;">No customers found matching criteria</td></tr>';
+                    return;
+                }
+
+                rows.innerHTML = cachedCustomers.map(c => `
+                    <tr id="cust-row-${c.id}">
+                        <td>
+                            <div style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(c.full_name)}</div>
+                            <div style="font-size: 11px; color: var(--color-text-muted); font-family: monospace;">${escapeHtml(c.id)}</div>
+                        </td>
+                        <td>
+                            <a href="mailto:${escapeHtml(c.email)}" style="color: var(--color-primary); text-decoration: none;">
+                                ${escapeHtml(c.email)}
+                            </a>
+                        </td>
+                        <td>
+                            ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" style="color: var(--color-text-main); text-decoration: none;">${escapeHtml(c.phone)}</a>` : '<span style="color: var(--color-text-muted);">-</span>'}
+                        </td>
+                        <td>
+                            <select onchange="changeStatus('${c.id}', this.value)" style="width: auto; padding: 4px 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-main);">
+                                <option value="ACTIVE" ${c.status === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                                <option value="INACTIVE" ${c.status === 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
+                            </select>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="action-btn-group">
+                                <button class="btn-action btn-action-profile" onclick="viewCustomerProfile('${c.id}')" title="View Customer Profile" id="btn-profile-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <span data-i18n="view_profile">View Profile</span>
+                                </button>
+                                <button class="btn-action btn-action-call" onclick="initiateCall('${c.id}')" title="Call Customer" id="btn-call-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                    <span data-i18n="call">Call</span>
+                                </button>
+                                <button class="btn-action btn-action-message" onclick="openSendMessageModal('${c.id}')" title="Send Message" id="btn-message-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                    <span data-i18n="send_message">Send Message</span>
+                                </button>
+                                <button class="btn-action btn-action-profile" onclick="openCompletionLink('${c.id}')" title="Send a secure link so this client completes their own details, KYC and documents" id="btn-completion-${c.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                    <span>Completion Link</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                if (window.i18n && typeof window.i18n.updateDOM === 'function') {
+                    window.i18n.updateDOM();
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function fetchLoansAndApplications() {
+            try {
+                const [loansRes, appsRes] = await Promise.all([
+                    fetch('/api/loans', { headers: headers() }).catch(() => null),
+                    fetch('/api/applications', { headers: headers() }).catch(() => null)
+                ]);
+                if (loansRes && loansRes.ok) cachedLoans = await loansRes.json();
+                if (appsRes && appsRes.ok) cachedApplications = await appsRes.json();
+            } catch (e) {
+                console.warn('Failed to pre-fetch loans/applications:', e);
+            }
+        }
+
+        async function viewCustomerProfile(id) {
+            let cust = cachedCustomers.find(c => c.id === id);
+            if (!cust) {
+                showToast('Customer record not found', 'error');
+                return;
+            }
+            activeCustomer = cust;
+
+            const modal = document.getElementById('customerProfileModal');
+            const body = document.getElementById('profileModalBody');
+            if (!modal || !body) return;
+
+            // Generate initials
+            const initials = cust.full_name
+                ? cust.full_name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+                : 'C';
+
+            // Find matching loans and applications
+            if (!cachedLoans || !cachedApplications) {
+                await fetchLoansAndApplications();
+            }
+
+            // The list endpoint carries identity only; the detail endpoint adds
+            // the ledger-derived portfolio summary (outstanding, interest,
+            // overdue) *and* this customer's own loans/applications. Prefer
+            // those over the cached tenant-wide lists — a loan created after the
+            // list was cached would otherwise be missing here (and its Open
+            // Details button would never appear).
+            let detail = null;
+            try {
+                detail = await apiFetch(`/api/customers/${id}`);
+                if (detail) cust = Object.assign({}, cust, detail);
+            } catch (e) {
+                console.warn('Failed to load customer summary:', e);
+            }
+
+            const customerLoans = Array.isArray(detail?.loans)
+                ? detail.loans
+                : (Array.isArray(cachedLoans)
+                    ? cachedLoans.filter(l => l.customer_id === cust.id || l.user_id === cust.user_id)
+                    : []);
+            const customerApps = Array.isArray(detail?.applications)
+                ? detail.applications
+                : (Array.isArray(cachedApplications)
+                    ? cachedApplications.filter(a => a.customer_id === cust.id || a.user_id === cust.user_id)
+                    : []);
+
+            // Prefer the authoritative ledger-derived summary from the API; fall
+            // back to the cached loan list only when the detail read failed.
+            const summary = cust.summary || null;
+            const totalBorrowed = summary
+                ? summary.totalBorrowed
+                : customerLoans.reduce((sum, l) => sum + (Number(l.principal_amount) || 0), 0);
+            const activeLoans = summary
+                ? summary.activeLoans
+                : customerLoans.filter(l => l.status === 'ACTIVE' || l.status === 'DISBURSED').length;
+
+            body.innerHTML = `
+                <div class="profile-hero">
+                    <div class="profile-avatar">${escapeHtml(initials)}</div>
+                    <div class="profile-info">
+                        <h3>${escapeHtml(cust.full_name)}</h3>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span class="badge ${cust.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${escapeHtml(cust.status)}</span>
+                            ${summary ? `<span class="badge ${summary.isOverdue ? 'badge-danger' : 'badge-success'}">${summary.isOverdue ? 'OVERDUE ' + summary.overdueDays + 'D' : 'CURRENT'}</span>` : ''}
+                            <span style="font-size: 12px; color: var(--color-text-muted);">Customer ID: <code style="font-family: monospace;">${escapeHtml(cust.id)}</code></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="customer-portfolio-stat">
+                    <div class="portfolio-stat-card">
+                        <div class="portfolio-stat-number">${activeLoans}</div>
+                        <div class="portfolio-stat-label">Active Loans</div>
+                    </div>
+                    <div class="portfolio-stat-card">
+                        <div class="portfolio-stat-number">${summary ? summary.totalLoans : customerLoans.length}</div>
+                        <div class="portfolio-stat-label">Total Loans</div>
+                    </div>
+                    <div class="portfolio-stat-card">
+                        <div class="portfolio-stat-number">₹${Number(totalBorrowed).toLocaleString('en-IN')}</div>
+                        <div class="portfolio-stat-label">Total Borrowed</div>
+                    </div>
+                    <div class="portfolio-stat-card">
+                        <div class="portfolio-stat-number">${customerApps.length}</div>
+                        <div class="portfolio-stat-label">Applications</div>
+                    </div>
+                </div>
+
+                ${summary ? `
+                    <div class="customer-portfolio-stat">
+                        <div class="portfolio-stat-card">
+                            <div class="portfolio-stat-number" style="color: var(--color-danger);">₹${Number(summary.totalOutstanding).toLocaleString('en-IN')}</div>
+                            <div class="portfolio-stat-label">Total Outstanding</div>
+                        </div>
+                        <div class="portfolio-stat-card">
+                            <div class="portfolio-stat-number" style="color: var(--color-warning);">₹${Number(summary.totalInterestOutstanding).toLocaleString('en-IN')}</div>
+                            <div class="portfolio-stat-label">Interest Outstanding</div>
+                        </div>
+                        <div class="portfolio-stat-card">
+                            <div class="portfolio-stat-number" style="color: var(--color-secondary);">₹${Number(summary.totalRepaid).toLocaleString('en-IN')}</div>
+                            <div class="portfolio-stat-label">Total Repaid</div>
+                        </div>
+                        <div class="portfolio-stat-card">
+                            <div class="portfolio-stat-number">${summary.isOverdue ? ('🔴 ' + summary.overdueDays + 'd') : (summary.daysRemaining !== null ? summary.daysRemaining + 'd' : '—')}</div>
+                            <div class="portfolio-stat-label">${summary.isOverdue ? 'Overdue' : 'Days Remaining'}</div>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="profile-meta-grid">
+                    <div class="meta-field">
+                        <div class="meta-label">Email Address</div>
+                        <div class="meta-value">
+                            <a href="mailto:${escapeHtml(cust.email)}" style="color: var(--color-primary); text-decoration: none;">
+                                ${escapeHtml(cust.email)}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">Phone Number</div>
+                        <div class="meta-value">
+                            ${cust.phone ? `<a href="tel:${escapeHtml(cust.phone)}" style="color: var(--color-text-main); text-decoration: none;">${escapeHtml(cust.phone)}</a>` : '<span style="color: var(--color-text-muted);">Not provided</span>'}
+                        </div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">Physical Address / Location</div>
+                        <div class="meta-value">${escapeHtml(cust.address || 'Not provided')}</div>
+                    </div>
+                    <div class="meta-field">
+                        <div class="meta-label">KYC Status</div>
+                        <div class="meta-value">${summary && summary.kycStatus ? escapeHtml(summary.kycStatus) : '<span style="color: var(--color-text-muted);">Not provided</span>'}</div>
+                    </div>
+                </div>
+
+                ${customerLoans.length > 0 ? `
+                    <div style="margin-top: 16px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: var(--color-text-main);">Loans</h4>
+                        <div style="border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
+                            <table style="width: 100%; font-size: 12px;">
+                                <thead>
+                                    <tr style="background: var(--color-bg);">
+                                        <th style="padding: 6px 10px; text-align: left;">Loan Number</th>
+                                        <th style="padding: 6px 10px; text-align: right;">Principal</th>
+                                        <th style="padding: 6px 10px; text-align: right;">Outstanding</th>
+                                        <th style="padding: 6px 10px;">Status</th>
+                                        <th style="padding: 6px 10px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${customerLoans.map(l => `
+                                        <tr>
+                                            <td style="padding: 6px 10px; font-family: monospace;">${escapeHtml(l.loan_number || l.id)}</td>
+                                            <td style="padding: 6px 10px; text-align: right; font-weight: 600;">₹${Number(l.principal_amount || 0).toLocaleString('en-IN')}</td>
+                                            <td style="padding: 6px 10px; text-align: right;">₹${Number((Number(l.principal_balance) || 0) + (Number(l.interest_balance) || 0) + (Number(l.fee_balance) || 0)).toLocaleString('en-IN')}</td>
+                                            <td style="padding: 6px 10px;"><span class="badge ${l.status === 'ACTIVE' ? 'badge-success' : (l.status === 'CLOSED' ? 'badge-success' : 'badge-warning')}">${escapeHtml(l.status)}</span></td>
+                                            <td style="padding: 6px 10px;"><button class="btn-secondary" style="font-size: 11px; padding: 3px 10px;" onclick="openLoanDetails('${l.id}')">View Details</button></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Wire footer quick buttons
+            const callBtn = document.getElementById('profileModalCallBtn');
+            const msgBtn = document.getElementById('profileModalMessageBtn');
+            if (callBtn) {
+                callBtn.onclick = () => {
+                    closeModal('customerProfileModal');
+                    initiateCall(cust.id);
+                };
+            }
+            if (msgBtn) {
+                msgBtn.onclick = () => {
+                    closeModal('customerProfileModal');
+                    openSendMessageModal(cust.id);
+                };
+            }
+
+            openModal('customerProfileModal');
+        }
+
+        function initiateCall(id) {
+            let cust = cachedCustomers.find(c => c.id === id);
+            if (!cust) {
+                showToast('Customer record not found', 'error');
+                return;
+            }
+            activeCustomer = cust;
+
+            const modal = document.getElementById('callCustomerModal');
+            const body = document.getElementById('callModalBody');
+            const dialBtn = document.getElementById('callModalDialBtn');
+            if (!modal || !body) return;
+
+            const hasPhone = Boolean(cust.phone && cust.phone.trim() !== '' && cust.phone !== '-');
+            const cleanPhone = hasPhone ? cust.phone.replace(/[^0-9+]/g, '') : '';
+
+            body.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                    <div class="profile-avatar" style="width: 44px; height: 44px; font-size: 16px; background: #059669;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700; color: var(--color-text-main);">${escapeHtml(cust.full_name)}</div>
+                        <div style="font-size: 13px; color: var(--color-text-muted);">${escapeHtml(cust.email)}</div>
+                    </div>
+                </div>
+
+                ${hasPhone ? `
+                    <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; padding: 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 11px; text-transform: uppercase; font-weight: 600; color: var(--color-text-muted);">Registered Phone</div>
+                            <div style="font-size: 17px; font-weight: 700; color: #047857; letter-spacing: 0.5px;">${escapeHtml(cust.phone)}</div>
+                        </div>
+                        <button class="btn-action" onclick="copyToClipboard('${escapeHtml(cust.phone)}', 'Phone number copied!')" style="font-size: 11px; padding: 4px 8px;">
+                            Copy
+                        </button>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px;">Call Disposition & Agent Notes</label>
+                        <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-action" onclick="appendCallTag('Connected - Loan Discussion')" style="font-size: 11px;">Connected</button>
+                            <button type="button" class="btn-action" onclick="appendCallTag('No Answer - Left Voicemail')" style="font-size: 11px;">Left Voicemail</button>
+                            <button type="button" class="btn-action" onclick="appendCallTag('Requested Callback Later')" style="font-size: 11px;">Callback Requested</button>
+                            <button type="button" class="btn-action" onclick="appendCallTag('Document Follow-up')" style="font-size: 11px;">Doc Follow-up</button>
+                        </div>
+                        <textarea id="callAgentNotes" placeholder="Record brief call details or outcome for customer file..." style="width: 100%; min-height: 70px; font-size: 13px; padding: 8px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-text-main);"></textarea>
+                    </div>
+                ` : `
+                    <div class="notice" style="margin-bottom: 16px;">
+                        <strong>No Registered Phone Number</strong><br>
+                        This customer has not listed a telephone contact number yet. You can reach out via their verified email address or update their profile record.
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-action btn-action-message w-100" onclick="closeModal('callCustomerModal'); openSendMessageModal('${cust.id}');" style="justify-content: center; padding: 8px;">
+                            Send Email Instead
+                        </button>
+                    </div>
+                `}
+            `;
+
+            if (dialBtn) {
+                if (hasPhone) {
+                    dialBtn.style.display = 'inline-flex';
+                    dialBtn.onclick = () => {
+                        window.location.href = `tel:${cleanPhone}`;
+                        showToast(`Dialing ${cust.phone}...`, 'info');
+                    };
+                } else {
+                    dialBtn.style.display = 'none';
+                }
+            }
+
+            openModal('callCustomerModal');
+        }
+        /**
+         * Opens the Client Completion page with this customer preselected, so an
+         * operator can pre-fill what they know and issue a secure link. All the
+         * work (issuing, revoking, progress) lives on that page, backed by the
+         * real API - this is only a navigation shortcut from the customer row.
+         */
+        function openCompletionLink(id) {
+            const cust = cachedCustomers.find(c => c.id === id);
+            if (!cust) {
+                showToast('Customer record not found', 'error');
+                return;
+            }
+            window.location.href = `client-completion.html?customer=${encodeURIComponent(id)}`;
+        }
+
+        function appendCallTag(tag) {
+            const textarea = document.getElementById('callAgentNotes');
+            if (textarea) {
+                if (textarea.value) {
+                    textarea.value += ` | ${tag}`;
+                } else {
+                    textarea.value = tag;
+                }
+            }
+        }
+
+        function executeDial() {
+            if (!activeCustomer || !activeCustomer.phone) {
+                showToast('No phone number available', 'error');
+                return;
+            }
+            const cleanPhone = activeCustomer.phone.replace(/[^0-9+]/g, '');
+            window.location.href = `tel:${cleanPhone}`;
+            showToast(`Dialing ${activeCustomer.phone}...`, 'info');
+
+            const notesEl = document.getElementById('callAgentNotes');
+            if (notesEl && notesEl.value.trim()) {
+                showToast('Call notes recorded to agent log', 'success');
+            }
+        }
+
+        function openSendMessageModal(id) {
+            let cust = cachedCustomers.find(c => c.id === id);
+            if (!cust) {
+                showToast('Customer record not found', 'error');
+                return;
+            }
+            activeCustomer = cust;
+
+            const modal = document.getElementById('sendMessageModal');
+            const body = document.getElementById('messageModalBody');
+            if (!modal || !body) return;
+
+            const hasPhone = Boolean(cust.phone && cust.phone.trim() !== '' && cust.phone !== '-');
+
+            body.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border);">
+                    <div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main);">${escapeHtml(cust.full_name)}</div>
+                        <div style="font-size: 12px; color: var(--color-text-muted);">${escapeHtml(cust.email)} ${hasPhone ? `• ${escapeHtml(cust.phone)}` : ''}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px;">Delivery Channel</label>
+                    <div style="display: flex; gap: 12px; font-size: 13px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="msgChannel" value="email" checked onchange="updateMessageChannel(this.value)"> Email (${escapeHtml(cust.email)})
+                        </label>
+                        ${hasPhone ? `
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="msgChannel" value="sms" onchange="updateMessageChannel(this.value)"> SMS
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="msgChannel" value="whatsapp" onchange="updateMessageChannel(this.value)"> WhatsApp
+                            </label>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px;">Quick Message Template</label>
+                    <select id="msgTemplateSelect" onchange="applyMessageTemplate(this.value)" style="width: 100%; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-main);">
+                        <option value="">-- Choose a standard agent template --</option>
+                        <option value="kyc">KYC Document Verification Reminder</option>
+                        <option value="disbursal">Loan Approval & Disbursal Update</option>
+                        <option value="emi">Upcoming EMI Payment Reminder</option>
+                        <option value="callback">Loan Inquiry Follow-Up Request</option>
+                    </select>
+                </div>
+
+                <div id="emailSubjectWrap" style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 4px;">Subject</label>
+                    <input type="text" id="msgSubject" value="Gahonsh Finance - Important Update Regarding Your Account" style="width: 100%; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main);">
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 4px;">Message Content</label>
+                    <textarea id="msgBody" style="width: 100%; min-height: 110px; font-size: 13px; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); font-family: inherit;">Dear ${escapeHtml(cust.full_name)},
+
+Thank you for choosing Gahonsh Finance. Please let us know if you require any assistance with your loan or account.
+
+Best regards,
+Gahonsh Finance Support Team</textarea>
+                </div>
+            `;
+
+            openModal('sendMessageModal');
+        }
+
+        function updateMessageChannel(channel) {
+            const subjectWrap = document.getElementById('emailSubjectWrap');
+            if (subjectWrap) {
+                subjectWrap.style.display = channel === 'email' ? 'block' : 'none';
+            }
+        }
+
+        function applyMessageTemplate(type) {
+            if (!activeCustomer) return;
+            const firstName = activeCustomer.full_name ? activeCustomer.full_name.split(' ')[0] : 'Customer';
+            const subjectInput = document.getElementById('msgSubject');
+            const bodyInput = document.getElementById('msgBody');
+
+            if (type === 'kyc') {
+                if (subjectInput) subjectInput.value = 'Action Required: Submit KYC Verification Documents';
+                if (bodyInput) bodyInput.value = `Dear ${firstName},\n\nTo complete processing of your application with Gahonsh Finance, please provide the required identity and income verification documents at your earliest convenience.\n\nThank you,\nGahonsh Finance Operations`;
+            } else if (type === 'disbursal') {
+                if (subjectInput) subjectInput.value = 'Update: Your Loan Disbursal Status';
+                if (bodyInput) bodyInput.value = `Dear ${firstName},\n\nWe are pleased to inform you that your loan application has been approved. The funds are currently being prepared for electronic transfer to your registered bank account.\n\nWarm regards,\nGahonsh Finance Team`;
+            } else if (type === 'emi') {
+                if (subjectInput) subjectInput.value = 'Reminder: Upcoming EMI Payment Due Date';
+                if (bodyInput) bodyInput.value = `Dear ${firstName},\n\nThis is a friendly reminder that your upcoming loan installment (EMI) is scheduled soon. Please ensure your account has sufficient balance for smooth processing.\n\nThank you,\nGahonsh Finance`;
+            } else if (type === 'callback') {
+                if (subjectInput) subjectInput.value = 'Following up on your loan inquiry';
+                if (bodyInput) bodyInput.value = `Hello ${firstName},\n\nOur loan specialist attempted to reach you today. Please reply to this message or give us a call to discuss your application details.\n\nBest regards,\nGahonsh Finance`;
+            }
+        }
+
+        function dispatchMessage() {
+            if (!activeCustomer) return;
+            const channel = document.querySelector('input[name="msgChannel"]:checked')?.value || 'email';
+            const subject = document.getElementById('msgSubject')?.value || 'Update from Gahonsh Finance';
+            const message = document.getElementById('msgBody')?.value || '';
+
+            if (!message.trim()) {
+                showToast('Please enter a message to send', 'warning');
+                return;
+            }
+
+            const cleanPhone = activeCustomer.phone ? activeCustomer.phone.replace(/[^0-9]/g, '') : '';
+
+            if (channel === 'email') {
+                const mailtoUrl = `mailto:${encodeURIComponent(activeCustomer.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+                window.location.href = mailtoUrl;
+                showToast(`Opened email client for ${activeCustomer.email}`, 'success');
+            } else if (channel === 'whatsapp') {
+                if (!cleanPhone) {
+                    showToast('Customer does not have a phone number for WhatsApp', 'error');
+                    return;
+                }
+                const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                window.open(waUrl, '_blank');
+                showToast(`Opened WhatsApp chat with ${activeCustomer.full_name}`, 'success');
+            } else if (channel === 'sms') {
+                if (!cleanPhone) {
+                    showToast('Customer does not have a phone number for SMS', 'error');
+                    return;
+                }
+                const smsUrl = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+                window.location.href = smsUrl;
+                showToast(`Triggered SMS dispatch to ${activeCustomer.phone}`, 'success');
+            }
+
+            closeModal('sendMessageModal');
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleBackdropClick(event, id) {
+            if (event.target && event.target.id === id) {
+                closeModal(id);
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // The shared loan-account module handles its own Escape (it is
+                // stacked over this profile); by the time this fires the loan
+                // account is already closed.
+                ['customerProfileModal', 'callCustomerModal', 'sendMessageModal', 'addCustomerModal'].forEach(closeModal);
+            }
+        });
+
+        function copyToClipboard(text, successMsg) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMsg || 'Copied to clipboard!', 'success');
+                }).catch(() => {
+                    fallbackCopy(text, successMsg);
+                });
+            } else {
+                fallbackCopy(text, successMsg);
+            }
+        }
+
+        function fallbackCopy(text, successMsg) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast(successMsg || 'Copied to clipboard!', 'success');
+        }
+
+        // --- Add Customer -------------------------------------------------
+        // The create form posts to the existing `POST /api/customers` route
+        // (permission `customer.create`). Field names match the backend body
+        // contract exactly: fullName, email, phone, address, nationalId,
+        // branchId, assignedAgentId, creditScore, initialPassword.
+        let formOptions = { branches: [], agents: [] };
+        let formOptionsLoaded = false;
+
+        async function preloadCustomerFormOptions() {
+            try {
+                const [branches, agents] = await Promise.all([
+                    apiFetch('/api/branches').catch(() => []),
+                    apiFetch('/api/agents').catch(() => [])
+                ]);
+                formOptions = {
+                    branches: Array.isArray(branches) ? branches : [],
+                    agents: Array.isArray(agents) ? agents : []
+                };
+                formOptionsLoaded = true;
+                populateCustomerFormOptions();
+            } catch (err) {
+                // Non-fatal: the form still works with optional selects empty.
+                console.warn('Could not preload branch/agent options:', err);
+            }
+        }
+
+        function populateCustomerFormOptions() {
+            const branchSelect = document.getElementById('newBranchId');
+            const agentSelect = document.getElementById('newAssignedAgentId');
+            if (branchSelect && branchSelect.options.length <= 1) {
+                for (const b of formOptions.branches) {
+                    const opt = document.createElement('option');
+                    opt.value = b.id;
+                    opt.textContent = b.city ? `${b.name} (${b.city})` : b.name;
+                    branchSelect.appendChild(opt);
+                }
+            }
+            if (agentSelect && agentSelect.options.length <= 1) {
+                for (const a of formOptions.agents) {
+                    const opt = document.createElement('option');
+                    opt.value = a.user_id;
+                    opt.textContent = a.agent_name || a.email || a.user_id;
+                    agentSelect.appendChild(opt);
+                }
+            }
+        }
+
+        function openAddCustomerModal() {
+            const form = document.getElementById('addCustomerForm');
+            if (form) form.reset();
+            clearAddCustomerErrors();
+            populateCustomerFormOptions();
+            if (!formOptionsLoaded) preloadCustomerFormOptions();
+            openModal('addCustomerModal');
+            const first = document.getElementById('newFullName');
+            if (first) setTimeout(() => first.focus(), 50);
+        }
+
+        function clearAddCustomerErrors() {
+            const banner = document.getElementById('addCustomerError');
+            if (banner) {
+                banner.hidden = true;
+                banner.textContent = '';
+            }
+            document.querySelectorAll('#addCustomerForm .field-error').forEach((el) => {
+                el.hidden = true;
+                el.textContent = '';
+            });
+            document.querySelectorAll('#addCustomerForm input, #addCustomerForm select, #addCustomerForm textarea')
+                .forEach((el) => el.removeAttribute('aria-invalid'));
+        }
+
+        function setAddCustomerError(message) {
+            const banner = document.getElementById('addCustomerError');
+            if (!banner) return;
+            banner.textContent = message;
+            banner.hidden = false;
+        }
+
+        function setFieldError(fieldId, message) {
+            const el = document.getElementById(`err-${fieldId}`);
+            const input = document.getElementById(fieldId);
+            if (el) {
+                el.textContent = message;
+                el.hidden = false;
+            }
+            if (input) input.setAttribute('aria-invalid', 'true');
+        }
+
+        // Client-side validation is a convenience only; the server remains the
+        // authority and every response is re-validated there.
+        function validateNewCustomer(values) {
+            const errors = {};
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!values.fullName) errors.newFullName = 'Full name is required.';
+            else if (values.fullName.length < 2) errors.newFullName = 'Enter the customer\'s full name.';
+
+            if (!values.email) errors.newEmail = 'Email address is required.';
+            else if (!emailPattern.test(values.email)) errors.newEmail = 'Enter a valid email address.';
+
+            if (values.phone && !/^[+()\-\s\d]{7,20}$/.test(values.phone)) {
+                errors.newPhone = 'Enter a valid phone number.';
+            }
+
+            if (values.creditScore !== '' && !/^\d+$/.test(values.creditScore)) {
+                errors.newCreditScore = 'Credit score must be a whole number.';
+            } else if (values.creditScore !== '' && (Number(values.creditScore) < 0 || Number(values.creditScore) > 1000)) {
+                errors.newCreditScore = 'Credit score must be between 0 and 1000.';
+            }
+
+            if (!values.initialPassword) {
+                errors.newInitialPassword = 'An initial password is required.';
+            } else if (values.initialPassword.length < 8) {
+                errors.newInitialPassword = 'Password must be at least 8 characters.';
+            } else if (values.initialPassword === 'DemoPass123!' || values.initialPassword === 'Password123!') {
+                errors.newInitialPassword = 'Choose a password that is not a known demo password.';
+            }
+
+            if (!values.confirmPassword) {
+                errors.newConfirmPassword = 'Confirm the password.';
+            } else if (values.confirmPassword !== values.initialPassword) {
+                errors.newConfirmPassword = 'Passwords do not match.';
+            }
+
+            return errors;
+        }
+
+        function readAddCustomerForm() {
+            const value = (id) => (document.getElementById(id)?.value || '').trim();
+            return {
+                fullName: value('newFullName'),
+                email: value('newEmail'),
+                phone: value('newPhone'),
+                address: value('newAddress'),
+                nationalId: value('newNationalId'),
+                branchId: value('newBranchId'),
+                assignedAgentId: value('newAssignedAgentId'),
+                creditScore: value('newCreditScore'),
+                initialPassword: document.getElementById('newInitialPassword')?.value || '',
+                confirmPassword: document.getElementById('newConfirmPassword')?.value || ''
+            };
+        }
+
+        /**
+         * Maps a server error back onto a field when the message clearly names
+         * one, so the operator sees the problem in context. Falls back to the
+         * banner for anything ambiguous (permission, conflict, server faults).
+         */
+        function mapServerErrorToField(message) {
+            const m = (message || '').toLowerCase();
+            if (m.includes('email')) return 'newEmail';
+            if (m.includes('initialpassword') || m.includes('password')) return 'newInitialPassword';
+            if (m.includes('creditscore')) return 'newCreditScore';
+            if (m.includes('branchid')) return 'newBranchId';
+            if (m.includes('assignedagentid') || m.includes('agent')) return 'newAssignedAgentId';
+            if (m.includes('fullname')) return 'newFullName';
+            if (m.includes('phone')) return 'newPhone';
+            return null;
+        }
+
+        async function submitAddCustomer(event) {
+            event.preventDefault();
+            clearAddCustomerErrors();
+
+            const values = readAddCustomerForm();
+            const errors = validateNewCustomer(values);
+            const errorKeys = Object.keys(errors);
+            if (errorKeys.length > 0) {
+                for (const key of errorKeys) setFieldError(key, errors[key]);
+                setAddCustomerError('Please correct the highlighted fields before continuing.');
+                return;
+            }
+
+            const payload = {
+                fullName: values.fullName,
+                email: values.email,
+                initialPassword: values.initialPassword
+            };
+            if (values.phone) payload.phone = values.phone;
+            if (values.address) payload.address = values.address;
+            if (values.nationalId) payload.nationalId = values.nationalId;
+            if (values.branchId) payload.branchId = values.branchId;
+            if (values.assignedAgentId) payload.assignedAgentId = values.assignedAgentId;
+            if (values.creditScore !== '') payload.creditScore = Number(values.creditScore);
+
+            const submitBtn = document.getElementById('addCustomerSubmitBtn');
+            const cancelBtn = document.getElementById('addCustomerCancelBtn');
+            const originalLabel = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating…';
+            }
+            if (cancelBtn) cancelBtn.disabled = true;
+
+            try {
+                const created = await apiFetch('/api/customers', { method: 'POST', body: payload });
+
+                closeModal('addCustomerModal');
+                const form = document.getElementById('addCustomerForm');
+                if (form) form.reset();
+                showToast(`Customer "${created?.full_name || values.fullName}" created successfully.`, 'success');
+
+                // Refresh the list so the new record appears, even if the
+                // current search/status filter would not otherwise match it.
+                const search = document.getElementById('search');
+                const status = document.getElementById('status');
+                if (search) search.value = '';
+                if (status) status.value = '';
+                await load();
+            } catch (err) {
+                handleAddCustomerFailure(err, values);
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalLabel;
+                }
+                if (cancelBtn) cancelBtn.disabled = false;
+            }
+        }
+
+        function handleAddCustomerFailure(err, values) {
+            const status = err.status;
+            const code = err.code;
+            const message = err.message || 'Unable to create the customer.';
+
+            if (code === 'NETWORK_ERROR') {
+                setAddCustomerError('Cannot reach the server. Check your connection and try again.');
+                return;
+            }
+            if (status === 401) {
+                // apiFetch redirects to the login page on 401; keep a message
+                // in case the redirect is blocked.
+                setAddCustomerError('Your session has expired. Please sign in again.');
+                return;
+            }
+            if (status === 403) {
+                setAddCustomerError("You don't have permission to create customers. Contact an administrator.");
+                return;
+            }
+            if (status === 409) {
+                setAddCustomerError(message);
+                setFieldError('newEmail', 'A customer with this email already exists.');
+                return;
+            }
+            if (status === 400) {
+                setAddCustomerError(message);
+                const field = mapServerErrorToField(message);
+                if (field) setFieldError(field, message);
+                return;
+            }
+            if (status >= 500) {
+                setAddCustomerError('The server could not create the customer. Please try again shortly.');
+                return;
+            }
+            setAddCustomerError(message);
+        }
+
+        async function changeStatus(id, value) {
+            try {
+                const r = await fetch(`/api/customers/${id}/status`, {
+                    method: 'PUT',
+                    headers: headers(),
+                    body: JSON.stringify({ status: value })
+                });
+                if (!r.ok) throw new Error('Failed to change status');
+                showToast('Status updated', 'success');
+                load();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            load();
+            fetchLoansAndApplications();
+            preloadCustomerFormOptions();
+        });
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>
+

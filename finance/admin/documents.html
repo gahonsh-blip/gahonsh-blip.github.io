@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Documents - Admin</title>
+    <link rel="stylesheet" href="/finance/shared/fonts.css">
+    <link rel="icon" type="image/svg+xml" href="/finance/site/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/finance/site/brand/favicon-32.png">
+    <link rel="icon" href="/finance/site/brand/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" sizes="180x180" href="/finance/site/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-header" href="index.html" aria-label="Gahonsh Finance home">
+                <img src="/finance/site/brand/logo.svg" alt="" width="30" height="30">
+                <span data-gf="text" data-gf-field="brandName">Gahonsh Finance</span>
+            </a>
+            <nav class="sidebar-nav"></nav>
+            <div class="mt-4">
+                <button class="btn-secondary w-100" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Documents</h1>
+                <div id="identity" class="badge"></div>
+            </div>
+
+            <div class="card">
+                <h2>Generate a document</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="docLoanId">Loan ID (sanction letter)</label>
+                        <input id="docLoanId" placeholder="loan_...">
+                    </div>
+                    <div class="form-group">
+                        <label for="docRepaymentId">Repayment ID (receipt)</label>
+                        <input id="docRepaymentId" placeholder="rep_...">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="generateSanctionLetter()">Generate sanction letter</button>
+                    <button onclick="generateReceipt()">Generate receipt</button>
+                </div>
+                <div id="docState"></div>
+            </div>
+
+            <div class="card">
+                <h2>Document library</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Title</th><th>Type</th><th>File</th><th>Size</th><th>Created</th><th>Actions</th></tr></thead>
+                        <tbody id="docRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/admin-shell.js"></script>
+    <script src="/finance/shared/session.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        const el = (id) => document.getElementById(id);
+
+        async function loadDocuments() {
+            renderState('docRows', 'loading', 'Loading documents\u2026');
+            try {
+                const docs = await apiFetch('/api/documents');
+                const items = Array.isArray(docs) ? docs : (docs.items || []);
+                if (items.length === 0) { renderState('docRows', 'empty', 'No documents generated yet.'); return; }
+                el('docRows').innerHTML = items.map((d) => `<tr>
+                    <td>${escapeHtml(d.title || '-')}</td>
+                    <td>${escapeHtml(d.doc_type || d.type || '-')}</td>
+                    <td>${escapeHtml(d.file_name || '-')}</td>
+                    <td>${d.size_bytes ? Math.round(d.size_bytes / 1024) + ' KB' : '-'}</td>
+                    <td>${formatDate(d.created_at)}</td>
+                    <td><button class="btn-secondary" onclick="downloadDoc('${d.id}', '${escapeHtml(d.file_name || 'document')}')">Download</button></td>
+                </tr>`).join('');
+            } catch (err) { renderState('docRows', 'error', err.message); }
+        }
+
+        async function downloadDoc(id, name) {
+            try {
+                const response = await fetch(`/api/documents/${id}/download`, { headers: headers() });
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    throw new Error((payload.error) || `Download failed (${response.status})`);
+                }
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = name || 'document';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function generateSanctionLetter() {
+            const loanId = el('docLoanId').value.trim();
+            if (!loanId) { showToast('Enter a loan ID', 'error'); return; }
+            renderState('docState', 'loading', 'Generating sanction letter\u2026');
+            try {
+                const doc = await apiFetch('/api/documents/sanction-letter', { method: 'POST', body: { loanId } });
+                renderState('docState', 'empty', `Generated ${doc.file_name}.`);
+                loadDocuments();
+            } catch (err) { renderState('docState', 'error', err.message); }
+        }
+
+        async function generateReceipt() {
+            const repaymentId = el('docRepaymentId').value.trim();
+            if (!repaymentId) { showToast('Enter a repayment ID', 'error'); return; }
+            renderState('docState', 'loading', 'Generating receipt\u2026');
+            try {
+                const doc = await apiFetch('/api/documents/receipt', { method: 'POST', body: { repaymentId } });
+                renderState('docState', 'empty', `Generated ${doc.file_name}.`);
+                loadDocuments();
+            } catch (err) { renderState('docState', 'error', err.message); }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDocuments);
+    </script>
+    <script type="module" src="/finance/site/js/platform-config.js"></script>
+</body>
+</html>
