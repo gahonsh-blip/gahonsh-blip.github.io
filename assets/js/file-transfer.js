@@ -245,6 +245,43 @@
             status.className = 'gft-status' + (kind ? ' gft-' + kind : '');
         }
 
+
+    // ------------------------------------------------------------------
+    // Virus scan
+    //
+    // Every upload is submitted to the scanFile backend function, which pulls
+    // the stored object with the service role, asks VirusTotal, and writes the
+    // verdict back to the row. The browser only triggers and reads the status,
+    // so the API key never reaches a visitor. A file is not handed on until it
+    // is 'clean': 'infected' and 'suspicious' stay locked.
+    // ------------------------------------------------------------------
+    const SCAN_URL = 'https://superagent-9fe3eb93.base44.app/functions/scanFile';
+
+    async function requestScan(fileId) {
+        try {
+            const res = await fetch(SCAN_URL, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ fileId: fileId })
+            });
+            return await res.json().catch(() => ({}));
+        } catch (e) {
+            return { ok: false, error: 'scan_unreachable' };
+        }
+    }
+
+    function scanLabel(status) {
+        switch (String(status || 'pending')) {
+            case 'clean': return '✔ Scanned, clean';
+            case 'infected': return '⛔ Virus found, blocked';
+            case 'suspicious': return '⚠ Flagged, blocked';
+            case 'scanning': return 'Scanning…';
+            case 'skipped': return 'Not scanned';
+            case 'error': return 'Scan failed';
+            default: return 'Waiting for scan';
+        }
+    }
+
         function toast(message) {
             if (window.GahonshAuthUI && window.GahonshAuthUI.showToast) {
                 window.GahonshAuthUI.showToast(message);
@@ -366,6 +403,9 @@
                         proposalId: options.proposalId || null,
                         scope: scope,
                         file: file
+                    }).then((row) => {
+                        if (row && row.id) { requestScan(row.id).then(() => refresh && refresh()); }
+                        return row;
                     });
                     uploaded += 1;
                 } catch (err) {
@@ -404,6 +444,12 @@
             let when = '';
             try { when = new Date(record.created_at).toLocaleString(); } catch (e) { when = ''; }
             meta.appendChild(el('span', 'gft-detail', size + ' • ' + who + (when ? ' • ' + when : '')));
+            const scan = el('span', 'gft-scan', scanLabel(record.scan_status));
+            scan.style.cssText = 'display:inline-block;margin-top:4px;font-size:.74rem;font-weight:700;letter-spacing:.02em;' +
+                (record.scan_status === 'clean' ? 'color:#4ade80;' :
+                 record.scan_status === 'infected' ? 'color:#f87171;' :
+                 record.scan_status === 'suspicious' ? 'color:#fbbf24;' : 'color:#9fb0bf;');
+            meta.appendChild(scan);
             item.appendChild(meta);
 
             const actions = el('div', 'gft-actions');
@@ -429,6 +475,28 @@
         }
 
         async function doDownload(id, btn) {
+            // A file is only handed on after a clean verdict. Pending files get
+            // one scan attempt here so the block never feels arbitrary.
+            const rows = await (window.GahonshDB.Files.listForJob(options.jobId).catch(() => []));
+            const row = Array.isArray(rows) ? rows.find((r) => r.id === id) : null;
+            const status = row ? String(row.scan_status || 'pending') : 'pending';
+            if (status === 'infected' || status === 'suspicious') {
+                setStatus('This file was flagged by the virus scan and cannot be downloaded.', 'err');
+                toast('⛔ Blocked: the virus scan flagged this file.');
+                return;
+            }
+            if (status !== 'clean') {
+                btn.disabled = true;
+                btn.textContent = 'Scanning…';
+                await requestScan(id);
+                await refresh();
+                btn.disabled = false;
+                btn.textContent = '';
+                btn.appendChild(icon('fa-solid fa-download'));
+                btn.appendChild(document.createTextNode(' Download'));
+                setStatus('This file is still being scanned. Please try again in a few seconds.', 'busy');
+                return;
+            }
             btn.disabled = true;
             btn.textContent = 'Preparing…';
             try {
