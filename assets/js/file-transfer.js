@@ -443,14 +443,57 @@
             const size = formatBytes(record.file_size_bytes);
             let when = '';
             try { when = new Date(record.created_at).toLocaleString(); } catch (e) { when = ''; }
-            meta.appendChild(el('span', 'gft-detail', size + ' • ' + who + (when ? ' • ' + when : '')));
-            const scan = el('span', 'gft-scan', scanLabel(record.scan_status));
+            const kind = (record.file_type || 'unknown type').replace('application/', '').replace('vnd.openxmlformats-officedocument.', '').replace('image/', 'image/');
+            const detailBits = [
+                size,
+                kind,
+                who,
+                when,
+                'sent ' + (record.scope === 'proposal' ? 'with a proposal' : 'on this project')
+            ].filter(Boolean).join(' • ');
+            meta.appendChild(el('span', 'gft-detail', detailBits));
             scan.style.cssText = 'display:inline-block;margin-top:4px;font-size:.74rem;font-weight:700;letter-spacing:.02em;' +
                 (record.scan_status === 'clean' ? 'color:#4ade80;' :
                  record.scan_status === 'infected' ? 'color:#f87171;' :
                  record.scan_status === 'suspicious' ? 'color:#fbbf24;' : 'color:#9fb0bf;');
             meta.appendChild(scan);
+
+            if (record.scan_report_url) {
+                const report = document.createElement('a');
+                report.href = record.scan_report_url;
+                report.target = '_blank';
+                report.rel = 'noopener noreferrer';
+                report.textContent = 'VirusTotal report';
+                report.style.cssText = 'font-size:.72rem;color:#7fd1c4;margin-left:8px;text-decoration:underline;';
+                scan.appendChild(report);
+            }
+            if (record.scan_detail) {
+                meta.appendChild(el('span', 'gft-scan-detail', record.scan_detail));
+                meta.lastChild.style.cssText = 'font-size:.7rem;color:#8ba0af;margin-top:2px;word-break:break-word;';
+            }
             item.appendChild(meta);
+
+            const flagged = record.scan_status === 'infected' || record.scan_status === 'suspicious';
+            if (flagged) {
+                const warn = el('div', 'gft-warning');
+                warn.style.cssText = 'margin:8px 0 0;padding:10px 12px;border:1px solid #7f3a3a;border-radius:10px;background:#2a1414;color:#ffd7d7;font-size:.82rem;line-height:1.5;';
+                warn.appendChild(el('strong', '', record.scan_status === 'infected'
+                    ? 'VirusTotal found a threat in this file. '
+                    : 'VirusTotal flagged this file as suspicious. '));
+                warn.appendChild(document.createTextNode(
+                    'It has not been opened or previewed anywhere on this site. Send and receive still work, but the download stays locked until you accept the risk yourself.'
+                ));
+                const ignore = el('button', 'gft-btn');
+                ignore.type = 'button';
+                ignore.textContent = 'Ignore this warning and download';
+                ignore.style.cssText = 'display:block;margin-top:8px;background:#7f2d2d;color:#fff;border:0;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:.8rem;';
+                ignore.addEventListener('click', () => {
+                    const sure = window.confirm('This file was flagged by the virus scan. Downloading it may harm your device.\n\nDownload anyway?');
+                    if (sure) doDownload(record.id, ignore, true);
+                });
+                warn.appendChild(ignore);
+                item.appendChild(warn);
+            }
 
             const actions = el('div', 'gft-actions');
 
@@ -474,15 +517,25 @@
             return item;
         }
 
-        async function doDownload(id, btn) {
-            // A file is only handed on after a clean verdict. Pending files get
-            // one scan attempt here so the block never feels arbitrary.
+        async function doDownload(id, btn, acceptedRisk) {
+            // A file is only handed on after a clean verdict. A flagged file can
+            // still be fetched, but only through the explicit "ignore" button
+            // that the downloader presses after reading the warning, so the
+            // decision and its risk stay with the person downloading.
             const rows = await (window.GahonshDB.Files.listForJob(options.jobId).catch(() => []));
             const row = Array.isArray(rows) ? rows.find((r) => r.id === id) : null;
             const status = row ? String(row.scan_status || 'pending') : 'pending';
-            if (status === 'infected' || status === 'suspicious') {
-                setStatus('This file was flagged by the virus scan and cannot be downloaded.', 'err');
+            const flagged = status === 'infected' || status === 'suspicious';
+            if (flagged && !acceptedRisk) {
+                setStatus('This file was flagged by the virus scan. Use "Ignore this warning and download" if you still need it.', 'err');
                 toast('⛔ Blocked: the virus scan flagged this file.');
+                return;
+            }
+            if (flagged && acceptedRisk) {
+                // never previewed, always saved to disk under a safe name
+                const result = await window.GahonshDB.Files.getDownload(id);
+                triggerDownload(result.blob, result.fileName);
+                setStatus('Downloaded a flagged file at your own risk. Do not open it on a work device.', 'err');
                 return;
             }
             if (status !== 'clean') {
