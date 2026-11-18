@@ -15,8 +15,8 @@
  */
 
 // Committed production defaults. Publishable key is public and browser-safe.
-var GAHONSH_PRODUCTION_URL = "https://trhmdgbnjtnanajdnxxb.supabase.co";
-var GAHONSH_PUBLISHABLE_KEY = "sb_publishable_Fe8rUHg-7tNk3RpxhjPijw_fX4c786Z";
+var GAHONSH_PRODUCTION_URL = "https://evdpmombgymthzqegqwr.supabase.co";
+var GAHONSH_PUBLISHABLE_KEY = "sb_publishable_2r2qEViIYoChRsXGFvpGqg__PeH8GFy";
 var GAHONSH_STORAGE_BUCKET = "job-attachments";
 
 function gahonshValidKey(k) {

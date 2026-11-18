@@ -517,7 +517,7 @@
     /* ---------------------------------------------------------- quote capture */
     function submitLead() {
         var cfg = window.GAHONSH_CONFIG || {};
-        var url = cfg.SUPABASE_URL || 'https://trhmdgbnjtnanajdnxxb.supabase.co';
+        var url = cfg.SUPABASE_URL || 'https://evdpmombgymthzqegqwr.supabase.co';
         var key = cfg.SUPABASE_ANON_KEY || 'sb_publishable_Fe8rUHg-7tN3RpxhjPijw_fX4c786Z';
         var payload = {
             name: flow.name.slice(0, 120),
