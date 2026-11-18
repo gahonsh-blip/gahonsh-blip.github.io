@@ -536,12 +536,13 @@
                 const rate = Number(t.hourly_rate) > 0 ? '$' + Number(t.hourly_rate) + '/hr' : 'Rate on request';
 
                 return `
-                    <div class="talent-card">
+                    <div class="talent-card" data-rating-uid="${t.id}">
                         <div class="talent-card-header">
                             <div class="talent-avatar">${initials}</div>
                             <div>
                                 <div class="talent-name">${name}${verifiedBadge}</div>
                                 <div class="talent-title">${escapeHtml(t.title || 'Freelance Specialist')}</div>
+                                <span class="mt-rating" data-rating-uid="${t.id}"></span>
                             </div>
                             <div class="talent-rate-badge">${escapeHtml(rate)}</div>
                         </div>
@@ -577,5 +578,6 @@
         document.addEventListener('DOMContentLoaded', loadTalent);
     </script>
 <script src="chat-widget.js?v=3" defer></script>
+<script src="marketplace-trust.js" defer></script>
 </body>
 </html>

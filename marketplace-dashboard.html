@@ -580,7 +580,7 @@
                 const otherLabel = isClient ? 'Freelancer' : 'Client';
                 const safeId = escapeHtml(c.job?.id || c.job_id || '');
                 return `
-                <div class="portal-card">
+                <div class="portal-card" data-contract-id="${escapeHtml(c.id)}" data-other-id="${escapeHtml(otherParty?.id || '')}" data-job-id-raw="${escapeHtml(c.job?.id || c.job_id || '')}">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
                             <h2 style="font-size:1.15rem; margin-bottom:6px;">${escapeHtml(c.job?.title || 'Contract')}</h2>
@@ -671,5 +671,6 @@
         });
     </script>
 <script src="chat-widget.js?v=3" defer></script>
+<script src="marketplace-trust.js" defer></script>
 </body>
 </html>

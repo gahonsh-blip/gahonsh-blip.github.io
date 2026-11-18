@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contract messages · GAHONSH Freelancing</title>
+<meta name="description" content="Private contract messages between a client and a freelancer on the GAHONSH Freelancing marketplace.">
+<link rel="canonical" href="https://gahonsh-blip.github.io/messages.html">
+<style>
+:root{--bg:#0b1117;--card:#12181f;--line:#26333f;--ink:#e6edf3;--mut:#9fb0bf;--teal:#12776A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+header{border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font-size:1.05rem;margin:0}
+a.back{color:#7fd1c4;text-decoration:none;font-size:.9rem}
+main{max-width:760px;margin:0 auto;padding:18px}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:200px;margin-bottom:16px}
+.msg{max-width:78%;padding:10px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.msg.mine{margin-left:auto;background:#0f2b28;border-color:#1c4c46}
+.msg .meta{font-size:.72rem;color:var(--mut);margin-top:4px}
+.empty{color:var(--mut);text-align:center;padding:30px 0}
+form{display:flex;gap:8px}
+textarea{flex:1;background:#0b1117;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;resize:vertical;min-height:54px}
+button{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:520px){.msg{max-width:92%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Contract messages</h1>
+  <a class="back" href="marketplace-dashboard.html">Back to dashboard</a>
+</header>
+<main>
+  <div id="thread"><div class="empty">Loading…</div></div>
+  <form id="sendForm">
+    <textarea id="bodyInput" placeholder="Write a message…" required></textarea>
+    <button type="submit" id="sendBtn">Send</button>
+  </form>
+</main>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var contractId=params.get('contract')||'';
+  var client=null, me=null, contract=null, rows=[];
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function render(){
+    var t=document.getElementById('thread');
+    if(!rows.length){t.innerHTML='<div class="empty">No messages yet. Say hello and share your requirements.</div>';return;}
+    t.innerHTML=rows.map(function(m){
+      var mine=m.sender_id===me;
+      return '<div class="msg '+(mine?'mine':'')+'">'+esc(m.body)+
+        '<div class="meta">'+(mine?'You':'Them')+' · '+new Date(m.created_at).toLocaleString()+'</div></div>';
+    }).join('');
+    t.scrollTop=t.scrollHeight;
+    window.scrollTo(0,document.body.scrollHeight);
+  }
+  async function load(){
+    client=await window.GahonshDB.getClient();
+    if(!client){document.getElementById('thread').innerHTML='<div class="empty">Marketplace is not configured.</div>';return;}
+    var who=await client.auth.getUser();
+    me=who&&who.data&&who.data.user&&who.data.user.id;
+    if(!me){document.getElementById('thread').innerHTML='<div class="empty">Please <a class="back" href="dashboard.html">sign in</a> to read your messages.</div>';document.getElementById('sendForm').style.display='none';return;}
+    if(contractId){
+      var c=await client.from('contracts').select('*').eq('id',contractId).maybeSingle();
+      contract=c&&c.data;
+    }
+    var q=client.from('messages').select('*').order('created_at',{ascending:true}).limit(200);
+    if(contractId) q=q.eq('contract_id',contractId);
+    var res=await q;
+    rows=(res&&res.data)||[];
+    render();
+  }
+  document.getElementById('sendForm').addEventListener('submit',async function(e){
+    e.preventDefault();
+    var btn=document.getElementById('sendBtn'), box=document.getElementById('bodyInput');
+    var text=(box.value||'').trim(); if(!text) return;
+    var recipient=null;
+    if(contract){recipient=(contract.client_id===me)?contract.freelancer_id:contract.client_id;}
+    if(!recipient){alert('This contract has no other party recorded.');return;}
+    btn.disabled=true;
+    var res=await client.from('messages').insert({contract_id:contractId||null,sender_id:me,recipient_id:recipient,body:text});
+    btn.disabled=false;
+    if(res.error){alert('Could not send: '+res.error.message);return;}
+    box.value='';
+    load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>
