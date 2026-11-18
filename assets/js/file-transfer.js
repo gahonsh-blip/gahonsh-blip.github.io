@@ -119,7 +119,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = fileName || 'download';
+        link.download = sanitizeFileName(fileName);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -251,15 +251,89 @@
             }
         }
 
-        function validate(file) {
+        async function validate(file) {
             if (file.size > MAX_BYTES) {
                 return '“' + file.name + '” is ' + formatBytes(file.size) + ', larger than the ' + formatBytes(MAX_BYTES) + ' limit.';
             }
             if (BLOCKED_EXT.has(fileExt(file.name))) {
                 return '“' + file.name + '” is an executable file type and cannot be uploaded.';
             }
+            return await contentTypeProblem(file);
+        }
+
+
+    // ------------------------------------------------------------------
+    // Content verification
+    //
+    // The extension alone is not proof of what a file is: a "invoice.pdf"
+    // that actually starts with "<html>" or "MZ" is how a shared file becomes
+    // a payload. Before anything is uploaded the first bytes are read and the
+    // real format has to agree with the extension. Storage additionally only
+    // accepts the 15 allow-listed MIME types on the bucket, so the check
+    // cannot be skipped by calling the API directly.
+    // ------------------------------------------------------------------
+    const EXT_FAMILY = {
+        pdf: 'pdf',
+        png: 'png', jpg: 'jpg', jpeg: 'jpg',
+        gif: 'gif', webp: 'webp',
+        zip: 'zip', docx: 'zip', xlsx: 'zip', pptx: 'zip', odt: 'zip', ods: 'zip', odp: 'zip',
+        doc: 'ole', xls: 'ole', ppt: 'ole',
+        txt: 'text', md: 'text', csv: 'text', tsv: 'text', json: 'text', xml: 'text', log: 'text', yml: 'text', yaml: 'text'
+    };
+
+    function sniff(bytes) {
+        const b = bytes;
+        const at = (i) => (b[i] === undefined ? -1 : b[i]);
+        if (at(0) === 0x25 && at(1) === 0x50 && at(2) === 0x44 && at(3) === 0x46) return 'pdf';
+        if (at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47) return 'png';
+        if (at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff) return 'jpg';
+        if (at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46) return 'gif';
+        if (at(0) === 0x52 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x46 &&
+            at(8) === 0x57 && at(9) === 0x45 && at(10) === 0x42 && at(11) === 0x50) return 'webp';
+        if (at(0) === 0x50 && at(1) === 0x4b && (at(2) === 0x03 || at(2) === 0x05)) return 'zip';
+        if (at(0) === 0xd0 && at(1) === 0xcf && at(2) === 0x11 && at(3) === 0xe0) return 'ole';
+        return 'text';
+    }
+
+    function looksBinary(bytes) {
+        for (let i = 0; i < bytes.length; i += 1) {
+            if (bytes[i] === 0) return true;
+        }
+        return false;
+    }
+
+    async function contentTypeProblem(file) {
+        const family = EXT_FAMILY[fileExt(file.name)];
+        if (!family) return '“' + file.name + '” has a file type this marketplace does not accept.';
+        let head;
+        try {
+            const slice = file.slice(0, 512);
+            const buffer = await slice.arrayBuffer();
+            head = new Uint8Array(buffer);
+        } catch (e) {
+            return null; // unreadable in this browser: rely on the server-side bucket rules
+        }
+        const actual = sniff(head);
+        if (family === 'text') {
+            if (looksBinary(head) || actual !== 'text') {
+                return '“' + file.name + '” is named as text but does not contain text. Please check the file.';
+            }
             return null;
         }
+        if (actual !== family) {
+            return '“' + file.name + '” is named .' + fileExt(file.name) + ' but its contents are not a ' + family.toUpperCase() + ' file. Upload blocked.';
+        }
+        return null;
+    }
+
+    function sanitizeFileName(name) {
+        return String(name || 'download')
+            .replace(/[\u0000-\u001f\u007f]/g, '')
+            .replace(/[\\/:*?"<>|]/g, '_')
+            .replace(/\.{2,}/g, '.')
+            .trim()
+            .slice(0, 120) || 'download';
+    }
 
         async function handleFiles(fileList) {
             if (busy) return;
@@ -278,7 +352,7 @@
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const problem = validate(file);
+                const problem = await validate(file);
                 if (problem) {
                     failed += 1;
                     setStatus(problem, 'err');
