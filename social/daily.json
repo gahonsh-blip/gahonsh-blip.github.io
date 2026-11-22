@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-21",
-  "video_url": "https://gahonsh-blip.github.io/social/media/short-2026-11-21.mp4",
+  "date": "2026-11-22",
+  "video_url": "https://gahonsh-blip.github.io/social/media/short-2026-11-22.mp4",
   "duration_seconds": 15.0,
-  "bytes": 152668,
+  "bytes": 154426,
   "source": "github-actions/pillow+ffmpeg",
-  "updated": "2026-11-21T15:36:01+05:30"
+  "updated": "2026-11-22T15:38:15+05:30"
 }
