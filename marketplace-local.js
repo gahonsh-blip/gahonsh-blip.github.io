@@ -305,14 +305,82 @@
         return readTable('profiles').find((p) => p.id === id) || null;
     }
 
+    // Mirrors the `public_profiles` view: an allow-list, never a black-list, so
+    // a new private column cannot leak by default. Email, phone number, the
+    // password salt/hash and `_email` never leave the engine.
     function publicProfile(profile) {
         if (!profile) return null;
-        const { _salt, _hash, ...safe } = profile;
-        const out = clone(safe);
-        // Mirrors the `has_resume` column in the public_profiles view. The
-        // file bytes stay in IndexedDB and are fetched on demand.
-        out.has_resume = !!profile.resume_name;
-        return out;
+        return {
+            id: profile.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url || null,
+            role: profile.role,
+            location: profile.location || null,
+            bio: profile.bio || null,
+            title: profile.title || null,
+            hourly_rate: profile.hourly_rate ?? null,
+            skills: Array.isArray(profile.skills) ? profile.skills.slice() : [],
+            is_verified: !!profile.is_verified,
+            created_at: profile.created_at || null,
+            resume_name: profile.resume_name || null,
+            resume_size_bytes: profile.resume_size_bytes ?? null,
+            resume_updated_at: profile.resume_updated_at || null,
+            has_resume: !!profile.resume_name
+        };
+    }
+
+    // Only these fields may be changed through updateMyProfile(). The
+    // immutable identity and privilege columns (id, email, role, is_verified,
+    // _salt, _hash, _email, created_at) are not in the list, so a crafted
+    // payload can never promote the caller or touch another profile.
+    const PROFILE_EDITABLE_FIELDS = [
+        'full_name', 'avatar_url', 'location', 'bio', 'title',
+        'hourly_rate', 'skills', 'phone_number'
+    ];
+
+    function sanitizeProfileUpdates(updates) {
+        const source = updates && typeof updates === 'object' ? updates : {};
+        const safe = {};
+        for (const key of PROFILE_EDITABLE_FIELDS) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) safe[key] = source[key];
+        }
+        if ('full_name' in safe) {
+            const name = String(safe.full_name || '').trim();
+            if (name.length < 2) throw new Error('Full name must be at least 2 characters.');
+            safe.full_name = name.slice(0, 80);
+        }
+        if ('title' in safe) safe.title = String(safe.title || '').trim().slice(0, 120);
+        if ('location' in safe) safe.location = String(safe.location || '').trim().slice(0, 120);
+        if ('bio' in safe) safe.bio = String(safe.bio || '').trim().slice(0, 2000);
+        if ('avatar_url' in safe) {
+            const url = String(safe.avatar_url || '').trim();
+            if (url && !/^https?:\/\//i.test(url)) {
+                throw new Error('Avatar URL must start with http:// or https://.');
+            }
+            safe.avatar_url = url ? url.slice(0, 500) : null;
+        }
+        if ('phone_number' in safe) {
+            const phone = String(safe.phone_number || '').trim();
+            if (phone && !/^[+0-9()\-\s]{6,24}$/.test(phone)) {
+                throw new Error('Please enter a valid phone number.');
+            }
+            safe.phone_number = phone || null;
+        }
+        if ('hourly_rate' in safe) {
+            const rate = Number(safe.hourly_rate);
+            if (!Number.isFinite(rate) || rate < 0 || rate > 100000) {
+                throw new Error('Hourly rate must be between 0 and 100000.');
+            }
+            safe.hourly_rate = rate;
+        }
+        if ('skills' in safe) {
+            if (!Array.isArray(safe.skills)) throw new Error('Skills must be a list.');
+            safe.skills = safe.skills
+                .map((s) => String(s || '').trim().slice(0, 40))
+                .filter(Boolean)
+                .slice(0, 30);
+        }
+        return safe;
     }
 
     function clientSnippet(profile) {
@@ -489,9 +557,9 @@
 
         async updateMyProfile(updates) {
             const profile = requireUser('Unauthorized: Please sign in first.');
+            const safe = sanitizeProfileUpdates(updates);
             const profiles = readTable('profiles');
             const index = profiles.findIndex((p) => p.id === profile.id);
-            const { id, email, role, is_verified, created_at, _salt, _hash, ...safe } = updates || {};
             profiles[index] = Object.assign({}, profiles[index], safe, { updated_at: nowIso() });
             writeTable('profiles', profiles);
             return publicProfile(profiles[index]);

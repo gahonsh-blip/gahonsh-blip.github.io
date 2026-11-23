@@ -29,7 +29,8 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 
 ### Public Views
 
-- `public_profiles` — Exposes safe, non-sensitive profile information (`id`, `full_name`, `avatar_url`, `role`, `title`, `hourly_rate`, `skills`, `bio`, `rating`, `total_reviews`, `created_at`) for public marketplace talent discovery, plus resume metadata (`resume_name`, `resume_size_bytes`, `resume_updated_at`, `has_resume`). The storage path is never exposed.
+- `public_profiles` — Exposes safe, non-sensitive profile information (`id`, `full_name`, `avatar_url`, `role`, `location`, `bio`, `title`, `hourly_rate`, `skills`, `is_verified`, `created_at`) for public marketplace talent discovery, plus resume metadata (`resume_name`, `resume_size_bytes`, `resume_updated_at`, `has_resume`). `email`, `phone_number` and the storage path are never exposed.
+- `admin_profiles` — Owner-only directory (`id`, `full_name`, `email`, `role`, `is_verified`, `location`, `title`, `hourly_rate`, `created_at`). The view is granted to `authenticated`, but its `WHERE public.is_admin()` clause returns zero rows for everyone else, so the admin page can show contact email without granting it to the public roles.
 - `worker_ratings` — Aggregates `reviews` into `reviewee_id`, `avg_rating`, `review_count` for the talent directory. It runs with the view owner's privileges so anonymous visitors can read the aggregate while the base `reviews` rows stay participant-protected.
 
 ---
@@ -39,8 +40,8 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`):
 
 - **Profiles**:
-  - `SELECT`: Public can read all profiles.
-  - `INSERT` / `UPDATE`: Users can only create or update their own profile (`auth.uid() = id`).
+  - `SELECT`: The public directory reads the `public_profiles` view. A direct table read is limited by column grants to the safe directory fields (`id`, `full_name`, `avatar_url`, `role`, `location`, `bio`, `title`, `hourly_rate`, `skills`, `is_verified`, `created_at`, `updated_at`, plus resume metadata). `email` and `phone_number` are never granted to `anon` or `authenticated`; the admin reads email through the `admin_profiles` view, which returns rows only when `public.is_admin()` is true.
+  - `INSERT` / `UPDATE`: Users can only create or update their own profile (`auth.uid() = id`). The `protect_profile_immutable_fields` trigger blocks self-service changes to `role`, `email` and `is_verified`, and the client `updateMyProfile()` allow-lists editable fields.
 - **Jobs**:
   - `SELECT`: Public can view `open` jobs; clients can view all their own posted jobs.
   - `INSERT`: Authenticated users with role `client` can create jobs.
@@ -68,7 +69,7 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
   - `SELECT`: Any authenticated user (clients reviewing talent) may read a resume; anonymous visitors cannot.
   - `INSERT` / `UPDATE`: Only the owner, and only inside their own folder (`(storage.foldername(name))[1] = auth.uid()::text`), so one user cannot overwrite another's CV.
   - `DELETE`: Only the owner.
-  - `public_profiles` exposes only the display name and size; the bytes are fetched through a short-lived signed URL created by `Profiles.getResume()`.
+  - `public_profiles` exposes only safe profile fields plus the resume display name/size; `email`, `phone_number` and the storage path are never exposed. The bytes are fetched through a short-lived signed URL created by `Profiles.getResume()`.
 
 ---
 

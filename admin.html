@@ -136,8 +136,16 @@ async function boot(){
     const { data: { session } } = await client.auth.getSession();
     if(!session){ showGate(); return; }
 
-    const { data: profile, error } = await client.from('profiles').select('id, full_name, email, role').eq('id', session.user.id).single();
-    if(error || !profile){ showGate('Could not load your profile.'); return; }
+    // admin_profiles is the admin-gated view that can read the private email
+    // column. Fall back to the safe profile columns on an older deployment
+    // that has not applied the privacy migration yet.
+    let profileRes = await client.from('admin_profiles').select('id, full_name, email, role').eq('id', session.user.id).single();
+    if(profileRes.error){
+        profileRes = await client.from('profiles').select('id, full_name, role').eq('id', session.user.id).single();
+        if(!profileRes.error && profileRes.data) profileRes.data.email = session.user.email;
+    }
+    const profile = profileRes.data;
+    if(profileRes.error || !profile){ showGate('Could not load your profile.'); return; }
     if(profile.role !== 'admin'){ showGate('This account is not the owner. Sign in with the owner account.', true); return; }
 
     me = profile;
@@ -185,7 +193,16 @@ async function loadAll(){
 
     const [overview, people, jobs, proposals, contracts, enquiries] = await Promise.all([
         q(() => client.rpc('admin_overview')),
-        q(() => client.from('profiles').select('id, full_name, email, role, is_verified, location, title, hourly_rate, created_at').order('created_at', {ascending:false}).limit(500)),
+        q(async () => {
+            const full = await client.from('admin_profiles')
+                .select('id, full_name, email, role, is_verified, location, title, hourly_rate, created_at')
+                .order('created_at', {ascending:false}).limit(500);
+            if(!full.error) return full;
+            console.warn('admin_profiles is not available; apply the profile privacy migration.', full.error.message);
+            return client.from('profiles')
+                .select('id, full_name, role, is_verified, location, title, hourly_rate, created_at')
+                .order('created_at', {ascending:false}).limit(500);
+        }),
         q(() => client.from('jobs').select('id, title, status, category, budget_min, proposals_count, created_at, client_id').order('created_at', {ascending:false}).limit(300)),
         q(() => client.from('proposals').select('id, job_id, freelancer_id, bid_amount, delivery_time_days, status, created_at').order('created_at', {ascending:false}).limit(300)),
         q(() => client.from('contracts').select('id, job_id, client_id, freelancer_id, agreed_amount, status, created_at').order('created_at', {ascending:false}).limit(300)),

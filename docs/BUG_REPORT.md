@@ -326,3 +326,83 @@ fixed.
   0 violations below 4.5:1 (3:1 for large text).
 - Desktop and mobile load sweep — 0 console errors, page errors, dialogs or
   failed requests.
+
+---
+
+# Profile privacy & authorization audit — 2026-11-23
+
+Scope: who may read or change a marketplace profile, and whether email,
+phone number or password material can leak. Reviewed
+`docs/marketplace-schema.sql`, `supabase-client.js`, `marketplace-local.js`,
+`auth.js`, `chat-widget.js`, `admin.html` and the profile callers.
+
+## Summary
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | High | Offline engine | `publicProfile()` was a black-list: it removed `_salt`/`_hash` but returned `email`, `_email` and `phone_number`, so the demo talent directory exposed private contact data | Fixed |
+| 2 | High | Schema install | `docs/marketplace-schema.sql` granted only the resume columns after the view but never revoked the default table-level `SELECT`, so a fresh install could expose `email`/`phone_number` | Fixed |
+| 3 | Medium | Client update | `updateMyProfile()` used a black-list and accepted unknown fields; no client-side validation | Fixed (allow-list + validation) |
+| 4 | Medium | Admin email | `admin.html` read `email` from `profiles`; granting that column to all authenticated users would expose every email | Fixed (`admin_profiles` view gated by `is_admin()`) |
+| 5 | Info | Passwords | Supabase Auth owns passwords; the offline engine stores a salted SHA-256 hash only, never plaintext | Verified |
+
+## 1. Offline public profile leaked private fields
+
+`publicProfile()` returned the whole profile row after deleting `_salt` and
+`_hash`. Every demo profile carries `_email`, and real local profiles can carry
+`email`/`phone_number`, so `getPublicFreelancers()` and `getPublicProfile()`
+handed those to any caller. It is now an explicit allow-list that matches the
+`public_profiles` view: `id`, `full_name`, `avatar_url`, `role`, `location`,
+`bio`, `title`, `hourly_rate`, `skills`, `is_verified`, `created_at`, resume
+metadata and `has_resume`. A new private column cannot leak by default.
+
+## 2. Fresh schema install could expose email and phone
+
+The hardening migration `20250913000000_harden_profiles_column_privileges.sql`
+revoked table-level `SELECT`, but the canonical schema file only added the
+resume-column grant. Running the schema alone on a fresh Supabase project left
+the default grants in place. The schema now revokes table-level `SELECT` and
+grants only the safe directory columns, so the install and the migration agree.
+
+## 3. Profile updates are now allow-listed
+
+Both `supabase-client.js` and `marketplace-local.js` accepted a payload and
+removed a few known-bad keys. A future column (or an alias such as `_email`)
+could slip through. Both now copy only `full_name`, `avatar_url`, `location`,
+`bio`, `title`, `hourly_rate`, `skills` and `phone_number`, validate the values,
+and keep the update scoped to the signed-in user (`auth.uid() = id` in SQL,
+`profiles[index]` in the offline engine). `id`, `email`, `role`, `is_verified`,
+`_salt`, `_hash` and `_email` are never writable through this path. The SQL
+`protect_profile_immutable_fields` trigger remains the second line of defence.
+
+## 4. Admin email without a public email grant
+
+`admin.html` needs contact email. Granting `email` to `authenticated` while the
+`profiles` read policy is public would expose every address. The new
+`admin_profiles` view is owned by the schema owner and filtered with
+`WHERE public.is_admin()`: an admin sees all rows, a signed-in non-admin sees
+zero rows, and anonymous callers have no grant. `admin.html` uses the view and
+falls back to the safe columns plus `session.user.email` on an older
+deployment that has not applied the migration.
+
+## 5. Password handling
+
+Supabase Auth stores password hashes outside `public.profiles`; the client never
+selects `auth.users`. The offline engine stores only a per-user salt and a
+SHA-256 hash, and the new public allow-list removes both. The profile editor and
+the chat assistant never receive them.
+
+## Verification
+
+- `npm run test:local` — 28 cases, including: anonymous cannot update; public
+  and own profiles exclude `email`, `phone_number`, `_email`, `_hash`, `_salt`;
+  a crafted update with another `id` cannot edit that row; `role`,
+  `is_verified`, `email`, `_hash` and `_salt` cannot be changed; invalid name,
+  rate, skills and avatar URL are rejected.
+- `npm run test:security` — asserts the schema revokes table-level `SELECT`,
+  the safe grant excludes `email`/`phone_number`, `public_profiles` excludes
+  them, and `admin_profiles` exists and is gated by `is_admin()`.
+- `npm run test:schema` — 50 client references resolve against 22 schema
+  objects, including the new `admin_profiles` view.
+- RLS UPDATE remains `auth.uid() = id OR public.is_admin()`, and the trigger
+  blocks self-service `role` / `email` / `is_verified` changes.

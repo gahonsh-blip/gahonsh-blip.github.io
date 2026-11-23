@@ -97,6 +97,46 @@ if (!/span\.textContent\s*=/.test(auth)) {
     fail('auth.js', 'showToast should set the message via textContent');
 }
 
+// 5. Profile privacy. `profiles` is the private account table: email and
+//    phone_number must never be granted to the public roles, and the only
+//    admin path that reads email must be gated by is_admin().
+const schema = readFileSync(join(root, 'docs/marketplace-schema.sql'), 'utf8');
+
+if (!/REVOKE SELECT ON public\.profiles FROM anon, authenticated;/i.test(schema)) {
+    fail('docs/marketplace-schema.sql', 'profiles table-level SELECT is not revoked from anon/authenticated');
+}
+
+const profileGrant = schema.match(/GRANT SELECT \(([^)]*)\) ON public\.profiles TO anon, authenticated;/i);
+if (!profileGrant) {
+    fail('docs/marketplace-schema.sql', 'profiles safe-column grant is missing');
+} else if (/\b(email|phone_number)\b/i.test(profileGrant[1])) {
+    fail('docs/marketplace-schema.sql', 'profiles grants email/phone_number to anon/authenticated');
+}
+
+const publicView = schema.match(/CREATE OR REPLACE VIEW public\.public_profiles AS([\s\S]*?)FROM public\.profiles;/i);
+if (!publicView) {
+    fail('docs/marketplace-schema.sql', 'public_profiles view is missing');
+} else if (/\b(email|phone_number)\b/i.test(publicView[1])) {
+    fail('docs/marketplace-schema.sql', 'public_profiles exposes email/phone_number');
+}
+
+if (!/CREATE OR REPLACE VIEW public\.admin_profiles AS[\s\S]*?WHERE public\.is_admin\(\)/i.test(schema)) {
+    fail('docs/marketplace-schema.sql', 'admin_profiles view is missing or not gated by is_admin()');
+}
+if (/GRANT SELECT ON public\.admin_profiles TO[^;]*\banon\b/i.test(schema)) {
+    fail('docs/marketplace-schema.sql', 'admin_profiles is granted to anon');
+}
+
+for (const file of ['supabase-client.js', 'marketplace-local.js']) {
+    const src = readFileSync(join(root, file), 'utf8');
+    if (!/PROFILE_EDITABLE_FIELDS/.test(src)) {
+        fail(file, 'profile update allow-list is missing');
+    }
+    if (!/\.eq\('id', user\.id\)/.test(src) && !/profiles\[index\]/.test(src)) {
+        fail(file, 'profile update is not scoped to the signed-in user');
+    }
+}
+
 if (failures.length) {
     console.error(`security check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);

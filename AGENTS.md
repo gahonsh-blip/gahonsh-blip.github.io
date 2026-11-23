@@ -178,6 +178,11 @@ serving; it does **not** publish to GitHub Pages. To publish, commit and push
   is not enough. Use `data-*` attributes with event delegation instead.
 - Numeric fields (budgets, bids, amounts) must be coerced with `Number(...)`
   before interpolation; PostgREST returns them as strings.
+- Profile privacy is documented in `docs/SECURITY.md`: public reads use
+  `public_profiles`, the private `profiles` table grants only safe columns,
+  email is admin-only through `admin_profiles`, and `updateMyProfile()` is
+  allow-listed and scoped to `auth.uid()`. Never grant `email`/`phone_number`
+  to `anon` or `authenticated`, and never accept an `id` in a profile update.
 
 
 ## External Services & Endpoints

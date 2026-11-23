@@ -105,7 +105,9 @@ function makeContext() {
 }
 
 const failures = [];
+let checks = 0;
 function check(name, condition, detail) {
+  checks++;
   if (condition) console.log('  ok   ' + name);
   else { console.log('  FAIL ' + name + (detail ? ' — ' + detail : '')); failures.push(name); }
 }
@@ -217,9 +219,75 @@ async function refuse(fn) {
   check('a removed resume is no longer viewable',
     (await DB.Profiles.getResume(freelancers[0].id)) === null);
 
+  // --- profile privacy (public_profiles view + column grants) -------------
+  // Mirrors the SQL grants: email, phone_number and the password salt/hash are
+  // never part of a public profile, and a crafted update cannot touch another
+  // row or a privilege column.
+  await DB.Auth.signOut();
+  check('anonymous visitors cannot update a profile',
+    await refuse(() => DB.Profiles.updateMyProfile({ full_name: 'Anon' })) !== null);
+
+  const privateKeys = ['email', 'phone_number', '_email', '_hash', '_salt'];
+  const publicRow = await DB.Profiles.getPublicProfile(freelancers[0].id);
+  const publicRows = await DB.Profiles.getPublicFreelancers({});
+  check('public profile never exposes email, phone or password material',
+    !!publicRow &&
+    privateKeys.every((k) => !(k in publicRow)) &&
+    publicRows.every((p) => privateKeys.every((k) => !(k in p))));
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const myProfile = await DB.Profiles.getMyProfile();
+  check('own profile also hides the password hash and private contact fields',
+    !!myProfile && privateKeys.every((k) => !(k in myProfile)));
+
+  const beforeMe = read(ctx, 'profiles').find((p) => p.id === freelancers[0].id);
+  const beforeOther = read(ctx, 'profiles').find((p) => p.id === freelancers[1].id);
+  await DB.Profiles.updateMyProfile({
+    id: freelancers[1].id,
+    email: 'attacker@example.com',
+    role: 'admin',
+    is_verified: true,
+    _email: 'attacker@example.com',
+    _hash: 'forged',
+    _salt: 'forged',
+    full_name: 'Privacy Probe',
+    title: 'Privacy Tester'
+  });
+  const afterMe = read(ctx, 'profiles').find((p) => p.id === freelancers[0].id);
+  const afterOther = read(ctx, 'profiles').find((p) => p.id === freelancers[1].id);
+  check('a crafted update cannot edit another profile',
+    afterOther.full_name === beforeOther.full_name &&
+    afterOther.role === beforeOther.role &&
+    afterOther.is_verified === beforeOther.is_verified);
+  check('a crafted update cannot change role, email, verification or password material',
+    afterMe.role === beforeMe.role &&
+    afterMe.email === beforeMe.email &&
+    afterMe.is_verified === beforeMe.is_verified &&
+    afterMe._email === beforeMe._email &&
+    afterMe._hash === beforeMe._hash &&
+    afterMe._salt === beforeMe._salt);
+  check('a crafted update applies only the allow-listed fields',
+    afterMe.full_name === 'Privacy Probe' && afterMe.title === 'Privacy Tester');
+
+  const fresh = await DB.Auth.signUp('privacy-' + Date.now() + '@example.com', 'password123', 'Privacy New', 'freelancer');
+  const beforeFresh = read(ctx, 'profiles').find((p) => p.id === fresh.id);
+  await DB.Profiles.updateMyProfile({ is_verified: true, role: 'admin', full_name: 'Privacy New' });
+  const afterFresh = read(ctx, 'profiles').find((p) => p.id === fresh.id);
+  check('a new user cannot self-verify or self-promote',
+    beforeFresh.is_verified === false && afterFresh.is_verified === false && afterFresh.role === 'freelancer');
+
+  check('rejects a too-short full name',
+    await refuse(() => DB.Profiles.updateMyProfile({ full_name: 'A' })) !== null);
+  check('rejects a negative hourly rate',
+    await refuse(() => DB.Profiles.updateMyProfile({ hourly_rate: -5 })) !== null);
+  check('rejects a non-list skills value',
+    await refuse(() => DB.Profiles.updateMyProfile({ skills: 'Excel' })) !== null);
+  check('rejects an unsafe avatar URL',
+    await refuse(() => DB.Profiles.updateMyProfile({ avatar_url: 'javascript:alert(1)' })) !== null);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);
   }
-  console.log('\nlocal engine check passed: 17 authorization case(s) verified.');
+  console.log('\nlocal engine check passed: ' + checks + ' authorization case(s) verified.');
 })();
