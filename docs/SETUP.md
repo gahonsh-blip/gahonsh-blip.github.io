@@ -41,6 +41,13 @@ The marketplace features client-side Supabase integration with Row Level Securit
    - It configures Row Level Security (RLS) policies ensuring users can only edit their own data, and that contact leads can only be read by the owner.
    - It sets up database triggers for automatic profile creation upon signup and proposal count synchronizations.
    - It defines atomic RPC procedures like `accept_proposal_and_create_contract`, plus `admin_overview` and `provision_admin_user`.
+   - It creates the private `resumes` Storage bucket and its policies, so freelancers can attach a PDF CV that signed-in clients can view from the talent directory.
+
+> **Upgrading an existing project?** Re-running the full schema does not add
+> columns to an existing table. Apply
+> `supabase/migrations/20261123000000_add_freelancer_resumes.sql` in the SQL
+> Editor (or with `supabase db push`) to add the resume fields, the `resumes`
+> bucket and its policies.
 
 ### Step 2b: Create the Owner Account
 

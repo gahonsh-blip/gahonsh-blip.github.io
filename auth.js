@@ -371,6 +371,25 @@
                             <label>Professional Bio / About</label>
                             <textarea id="editProfileBio" rows="4" placeholder="Describe your experience, technical expertise, and delivered solutions..."></textarea>
                         </div>
+                        <div class="gahonsh-input-group" id="resumeFieldGroup" style="display: none;">
+                            <label>Resume / CV (PDF)</label>
+                            <p id="resumeCurrentText" style="font-size: 0.8rem; color: #8a99ad; margin: 0 0 8px;">No resume uploaded yet.</p>
+                            <input type="file" id="editProfileResume" accept="application/pdf,.pdf" aria-describedby="resumeHint">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                                <button type="button" id="btnUploadResume" class="gahonsh-submit-btn" style="width: auto; margin: 0; padding: 9px 16px;">
+                                    <i class="fa-solid fa-upload"></i> Upload Resume
+                                </button>
+                                <button type="button" id="btnViewResume" style="background: transparent; color: #eaf1ff; border: 1px solid rgba(255,255,255,0.2); padding: 9px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;" disabled>
+                                    <i class="fa-solid fa-eye"></i> View
+                                </button>
+                                <button type="button" id="btnRemoveResume" style="background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.4); padding: 9px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;" disabled>
+                                    <i class="fa-solid fa-trash"></i> Remove
+                                </button>
+                            </div>
+                            <p id="resumeHint" style="font-size: 0.72rem; color: #8a99ad; margin: 8px 0 0;">
+                                PDF only, up to 5 MB. Clients can view it from your talent profile.
+                            </p>
+                        </div>
                         <button type="submit" class="gahonsh-submit-btn" id="btnSaveProfile">Save Profile Changes</button>
                     </form>
                 </div>
@@ -385,6 +404,43 @@
     // 2. MODAL EVENT LISTENERS
     // ========================================================================
     let _selectedRole = 'client';
+
+    function formatBytes(bytes) {
+        const n = Number(bytes);
+        if (!n || n <= 0) return '';
+        if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
+        return Math.max(1, Math.round(n / 1024)) + ' KB';
+    }
+
+    function currentUserId() {
+        return _currentUser?.profile?.id || _currentUser?.id || null;
+    }
+
+    function setResumeButtons(hasResume) {
+        ['btnViewResume', 'btnRemoveResume'].forEach((id) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.disabled = !hasResume;
+            btn.style.opacity = hasResume ? '1' : '0.5';
+            btn.style.cursor = hasResume ? 'pointer' : 'not-allowed';
+        });
+    }
+
+    function renderResumeState(profile) {
+        const text = document.getElementById('resumeCurrentText');
+        if (!text) return;
+        if (profile && profile.resume_name) {
+            const size = formatBytes(profile.resume_size_bytes);
+            const when = profile.resume_updated_at
+                ? ' · updated ' + new Date(profile.resume_updated_at).toLocaleDateString()
+                : '';
+            text.textContent = 'Current: ' + profile.resume_name + (size ? ' · ' + size : '') + when;
+            setResumeButtons(true);
+        } else {
+            text.textContent = 'No resume uploaded yet.';
+            setResumeButtons(false);
+        }
+    }
 
     function attachModalEvents() {
         const authBackdrop = document.getElementById('authModalBackdrop');
@@ -593,6 +649,81 @@
             };
         }
 
+        // Resume upload / view / remove (freelancers only)
+        const btnUploadResume = document.getElementById('btnUploadResume');
+        const btnViewResume = document.getElementById('btnViewResume');
+        const btnRemoveResume = document.getElementById('btnRemoveResume');
+        const resumeInput = document.getElementById('editProfileResume');
+
+        if (btnUploadResume && resumeInput) {
+            btnUploadResume.onclick = async () => {
+                const file = resumeInput.files && resumeInput.files[0];
+                if (!file) {
+                    showToast('Please choose a PDF file first.');
+                    return;
+                }
+                const original = btnUploadResume.innerHTML;
+                btnUploadResume.disabled = true;
+                btnUploadResume.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+                try {
+                    if (!window.GahonshDB?.Profiles?.uploadResume) {
+                        throw new Error('Marketplace service is not ready. Please try again shortly.');
+                    }
+                    const updated = await window.GahonshDB.Profiles.uploadResume(file);
+                    resumeInput.value = '';
+                    renderResumeState(updated || await window.GahonshDB.Profiles.getMyProfile());
+                    showToast('✅ Resume uploaded. Clients can now view it from your talent profile.');
+                } catch (err) {
+                    showToast('❌ ' + (err.message || 'Resume upload failed.'));
+                } finally {
+                    btnUploadResume.disabled = false;
+                    btnUploadResume.innerHTML = original;
+                }
+            };
+        }
+
+        if (btnViewResume) {
+            btnViewResume.onclick = async () => {
+                const uid = currentUserId();
+                if (!uid || !window.GahonshDB?.Profiles?.getResume) return;
+                // Open the tab before awaiting so the async signed-URL fetch
+                // is not blocked as a popup.
+                const popup = window.open('', '_blank');
+                try {
+                    const resume = await window.GahonshDB.Profiles.getResume(uid);
+                    if (!resume || !resume.url) {
+                        if (popup) popup.close();
+                        showToast('No resume has been uploaded yet.');
+                        return;
+                    }
+                    if (popup) popup.location.href = resume.url;
+                    else window.open(resume.url, '_blank', 'noopener');
+                    if (typeof resume.revoke === 'function') {
+                        setTimeout(resume.revoke, 60000);
+                    }
+                } catch (err) {
+                    if (popup) popup.close();
+                    showToast('❌ ' + (err.message || 'Could not open the resume.'));
+                }
+            };
+        }
+
+        if (btnRemoveResume) {
+            btnRemoveResume.onclick = async () => {
+                if (!window.GahonshDB?.Profiles?.removeResume) return;
+                if (!confirm('Remove your resume? Clients will no longer see it.')) return;
+                btnRemoveResume.disabled = true;
+                try {
+                    await window.GahonshDB.Profiles.removeResume();
+                    renderResumeState({ resume_name: null });
+                    showToast('Resume removed.');
+                } catch (err) {
+                    showToast('❌ ' + (err.message || 'Could not remove the resume.'));
+                    btnRemoveResume.disabled = false;
+                }
+            };
+        }
+
         // Supabase Config Form Handler
         const cfgForm = document.getElementById('supabaseConfigForm');
         if (cfgForm) {
@@ -653,9 +784,10 @@
         const backdrop = document.getElementById('profileEditModalBackdrop');
         if (!backdrop) return;
 
+        let profile = null;
         try {
             if (window.GahonshDB?.Profiles?.getMyProfile) {
-                const profile = await window.GahonshDB.Profiles.getMyProfile();
+                profile = await window.GahonshDB.Profiles.getMyProfile();
                 if (profile) {
                     document.getElementById('editProfileTitle').value = profile.title || '';
                     document.getElementById('editProfileLocation').value = profile.location || '';
@@ -666,6 +798,14 @@
             }
         } catch (err) {
             console.warn('[openProfileModal]', err);
+        }
+
+        // Resume upload is a freelancer-only capability; clients never see it.
+        const role = (profile && profile.role) || _currentUser?.profile?.role;
+        const resumeGroup = document.getElementById('resumeFieldGroup');
+        if (resumeGroup) resumeGroup.style.display = role === 'freelancer' ? 'block' : 'none';
+        if (role === 'freelancer') {
+            renderResumeState(profile || _currentUser?.profile || null);
         }
 
         backdrop.classList.add('active');

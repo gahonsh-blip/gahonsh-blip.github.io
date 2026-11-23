@@ -97,8 +97,26 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     the matching policies/RPCs in the schema.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
-  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards).
+  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards).
   - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
+
+## Resume Uploads (PDF)
+
+Freelancers attach a CV from the profile editor (`auth.js` → Edit Profile).
+The file goes to the private `resumes` Storage bucket at
+`<user id>/resume.pdf`; only metadata (`resume_name`, `resume_size_bytes`,
+`resume_updated_at`) is stored on `profiles`, and `public_profiles` exposes
+`has_resume` plus the display name. Clients view it from the Resume button in
+`find-talent.html` and on proposal cards in `job-details.html`. Viewing needs a
+signed-in user because the bucket is private; anonymous visitors get a sign-in
+prompt. The offline engine keeps the bytes in IndexedDB under
+`resume:<user id>`.
+
+Keep `uploadResume` / `getResume` / `removeResume` in step between
+`supabase-client.js` and `marketplace-local.js`, and run `npm run test:local`
+after changing either. Existing Supabase projects need
+`supabase/migrations/20261123000000_add_freelancer_resumes.sql`; fresh
+installs get the bucket and columns from `docs/marketplace-schema.sql`.
 
 ## Owner Studio Editor (local only)
 
