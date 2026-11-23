@@ -5,7 +5,7 @@ body.light-mode {
     --border-hover: rgba(0, 119, 255, 0.4) !important;
     --text-main: #0f172a !important;
     --text-slate: #475569 !important;
-    --accent-cyan: #0284c7 !important;
+    --accent-cyan: #0369a1 !important;
     --accent-blue: #1558d6 !important;
     --accent-green: #059669 !important;
     background-color: #f8fafc !important;
@@ -44,7 +44,7 @@ body.light-mode nav a {
 
 body.light-mode nav a:hover,
 body.light-mode nav a.active {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     background: rgba(2, 132, 199, 0.08) !important;
 }
 
@@ -60,7 +60,7 @@ body.light-mode .dropdown-content a {
 
 body.light-mode .dropdown-content a:hover {
     background: #f1f5f9 !important;
-    color: #0077ff !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .mobile-nav-menu {
@@ -79,7 +79,7 @@ body.light-mode .mobile-nav-menu a {
 body.light-mode .mobile-nav-menu a:hover,
 body.light-mode .mobile-nav-menu a:focus {
     background: rgba(2, 132, 199, 0.08) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     border-color: rgba(2, 132, 199, 0.25) !important;
 }
 
@@ -93,7 +93,7 @@ body.light-mode #menu-close-btn {
 body.light-mode .mobile-nav-close:hover,
 body.light-mode #menu-close-btn:hover {
     background: rgba(2, 132, 199, 0.1) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     border-color: rgba(2, 132, 199, 0.3) !important;
 }
 
@@ -130,7 +130,7 @@ body.light-mode .hero-badge,
 body.light-mode .badge-logo {
     background: #ffffff !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -142,8 +142,8 @@ body.light-mode .btn-secondary {
 
 body.light-mode .btn-secondary:hover {
     background: #f1f5f9 !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    border-color: #0369a1 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .port-mockup {
@@ -158,7 +158,15 @@ body.light-mode .port-card {
 
 body.light-mode .port-tag {
     background: rgba(2, 132, 199, 0.1) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
+}
+
+/* Portfolio thumbnails keep a dark image overlay in light mode, so the
+   category pill needs a light surface instead of the dark accent colour. */
+body.light-mode .project-tag {
+    background: rgba(255, 255, 255, 0.94) !important;
+    color: #0369a1 !important;
+    border-color: rgba(3, 105, 161, 0.22) !important;
 }
 
 /* MARKETPLACE SPECIFIC LIGHT THEME OVERRIDES */
@@ -204,17 +212,17 @@ body.light-mode .profile-name {
 }
 
 body.light-mode .job-card-title:hover {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .job-budget-badge {
     background: rgba(2, 132, 199, 0.1) !important;
     border: 1px solid rgba(2, 132, 199, 0.25) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .talent-rate-badge {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .skill-tag,
@@ -228,7 +236,7 @@ body.light-mode .meta-badge {
 body.light-mode .meta-badge.highlight {
     background: rgba(2, 132, 199, 0.1) !important;
     border-color: rgba(2, 132, 199, 0.3) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .skill-chip {
@@ -239,8 +247,8 @@ body.light-mode .skill-chip {
 
 body.light-mode .skill-chip.active {
     background: rgba(2, 132, 199, 0.12) !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    border-color: #0369a1 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .portal-tab-btn {
@@ -248,13 +256,13 @@ body.light-mode .portal-tab-btn {
 }
 
 body.light-mode .portal-tab-btn.active {
-    color: #0284c7 !important;
-    border-bottom-color: #0284c7 !important;
+    color: #0369a1 !important;
+    border-bottom-color: #0369a1 !important;
 }
 
 body.light-mode .status-open {
     background: rgba(2, 132, 199, 0.1) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .status-accepted,
@@ -272,7 +280,7 @@ body.light-mode .status-active {
 body.light-mode .profile-role-tag {
     background: rgba(2, 132, 199, 0.1) !important;
     border-color: rgba(2, 132, 199, 0.3) !important;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .btn-outline {
@@ -282,8 +290,8 @@ body.light-mode .btn-outline {
 }
 
 body.light-mode .btn-outline:hover {
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    border-color: #0369a1 !important;
+    color: #0369a1 !important;
     background: #f8fafc !important;
 }
 
@@ -299,7 +307,7 @@ body.light-mode textarea {
 body.light-mode input:focus,
 body.light-mode select:focus,
 body.light-mode textarea:focus {
-    border-color: #0284c7 !important;
+    border-color: #0369a1 !important;
     background: #ffffff !important;
     box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
@@ -314,7 +322,7 @@ body.light-mode .social-icons a {
 }
 
 body.light-mode .social-icons a:hover {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .config-banner-notice {
@@ -324,7 +332,7 @@ body.light-mode .config-banner-notice {
 }
 
 body.light-mode .config-banner-btn {
-    background: #0284c7 !important;
+    background: #0369a1 !important;
     color: #ffffff !important;
 }
 
@@ -347,7 +355,7 @@ body.light-mode .gahonsh-role-card h4 {
 
 body.light-mode .gahonsh-role-card.selected {
     background: rgba(2, 132, 199, 0.08) !important;
-    border-color: #0284c7 !important;
+    border-color: #0369a1 !important;
 }
 
 body.light-mode .gahonsh-tab-btn {
@@ -355,8 +363,8 @@ body.light-mode .gahonsh-tab-btn {
 }
 
 body.light-mode .gahonsh-tab-btn.active {
-    color: #0284c7 !important;
-    border-bottom-color: #0284c7 !important;
+    color: #0369a1 !important;
+    border-bottom-color: #0369a1 !important;
 }
 
 /* ============================================
@@ -597,7 +605,7 @@ html.gs-anim .process-card.gs-visible:hover {
 }
 
 body.light-mode .mobile-nav-menu a.active {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     background: rgba(2, 132, 199, 0.08) !important;
     border-color: rgba(2, 132, 199, 0.25) !important;
 }
@@ -866,11 +874,11 @@ body.light-mode .flip-front p {
 body.light-mode .flip-back {
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
     color: #0f172a !important;
-    border-color: #0284c7 !important;
+    border-color: #0369a1 !important;
 }
 
 body.light-mode .flip-back h3 {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .flip-back ul li {
@@ -878,7 +886,7 @@ body.light-mode .flip-back ul li {
 }
 
 body.light-mode .card-price-tag {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     background: rgba(2, 132, 199, 0.08) !important;
     border-color: rgba(2, 132, 199, 0.3) !important;
 }
@@ -940,7 +948,7 @@ body.light-mode .legal-topbar .lb-brand {
 }
 
 body.light-mode .legal-topbar .lb-brand span {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .legal-topbar nav a {
@@ -948,11 +956,11 @@ body.light-mode .legal-topbar nav a {
 }
 
 body.light-mode .legal-topbar nav a:hover {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .back-link {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .back-link:hover {
@@ -961,7 +969,7 @@ body.light-mode .back-link:hover {
 
 /* Shared footer link rows (legal pages, thank-you.html) */
 body.light-mode .footer-links a {
-    color: #0284c7 !important;
+    color: #0369a1 !important;
 }
 
 body.light-mode .footer-links a:hover {

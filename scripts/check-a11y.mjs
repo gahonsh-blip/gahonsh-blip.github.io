@@ -82,6 +82,56 @@ if (!/aria-hidden="true"><\/i>\s*(Dark|Light)/.test(script.replace(/\\'/g, "'"))
     fail('script.js', 'theme toggle icon should be aria-hidden so it is not read as text');
 }
 
+// 7. Light-theme text contrast. The old light accent (#0284c7) only reached
+//    4.1:1 on white and 3.6:1 on the tinted pills, so light mode had text that
+//    was hard to read. Keep the accent and the theme button at WCAG AA 4.5:1.
+const hexToRgb = (hex) => {
+    const h = hex.replace('#', '');
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+};
+const luminance = (rgb) => {
+    const f = (v) => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
+};
+const contrast = (a, b) => {
+    const l1 = luminance(a);
+    const l2 = luminance(b);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+};
+const checkContrast = (file, label, fg, bg) => {
+    const ratio = contrast(hexToRgb(fg), hexToRgb(bg));
+    if (ratio < 4.5) {
+        fail(file, `${label} ${fg} on ${bg} is ${ratio.toFixed(2)}:1, needs 4.5:1`);
+    }
+};
+
+const themeCss = readFileSync(join(root, 'theme.css'), 'utf8');
+const accent = (themeCss.match(/body\.light-mode\s*\{[^}]*--accent-cyan:\s*(#[0-9a-f]{6})/i) || [])[1];
+if (!accent) {
+    fail('theme.css', 'light-mode --accent-cyan is missing');
+} else {
+    checkContrast('theme.css', 'light-mode accent', accent, '#ffffff');
+    checkContrast('theme.css', 'light-mode accent', accent, '#f8fafc');
+}
+
+const lightBtn = (script.match(/isCurrentLight \? "(#[0-9a-f]{6})" :/) || [])[1];
+if (!lightBtn) {
+    fail('script.js', 'light theme toggle background not found');
+} else {
+    checkContrast('script.js', 'light theme toggle', lightBtn, '#ffffff');
+}
+
+const contact = readFileSync(join(root, 'contact.html'), 'utf8');
+const whatsapp = (contact.match(/\.btn-whatsapp-direct\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i) || [])[1];
+if (!whatsapp) {
+    fail('contact.html', 'WhatsApp button background not found');
+} else {
+    checkContrast('contact.html', 'WhatsApp button text', whatsapp, '#ffffff');
+}
+
 if (failures.length) {
     console.error(`a11y check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);
