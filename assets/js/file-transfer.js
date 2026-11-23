@@ -41,6 +41,15 @@
         return parts.length > 1 ? parts.pop().toLowerCase() : '';
     }
 
+    function sanitizeFileName(name) {
+        return String(name || 'download')
+            .replace(/[\u0000-\u001f\u007f]/g, '')
+            .replace(/[\\/:*?"<>|]/g, '_')
+            .replace(/\.{2,}/g, '.')
+            .trim()
+            .slice(0, 120) || 'download';
+    }
+
     function iconFor(name) {
         const ext = fileExt(name);
         if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'avif'].includes(ext)) return 'fa-file-image';
@@ -67,6 +76,8 @@
             .gft-title { font-size: 1.05rem; font-weight: 800; color: var(--text-main, #e2e8f0); margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
             .gft-title i { color: var(--accent-cyan, #00ffcc); }
             .gft-sub { font-size: 0.85rem; color: var(--text-slate, #94a3b8); margin: 0 0 16px; line-height: 1.5; }
+            .gft-safety-note { font-size: 0.78rem; color: var(--text-slate, #94a3b8); margin: -6px 0 16px; line-height: 1.5; }
+            .gft-safety-note i { color: var(--accent-cyan, #00ffcc); margin-right: 6px; }
             .gft-drop { border: 1.5px dashed var(--border-color, #1e293b); border-radius: 12px; padding: 18px; text-align: center; transition: border-color 0.2s, background 0.2s; }
             .gft-drop.gft-over { border-color: var(--accent-cyan, #00ffcc); background: rgba(0, 255, 204, 0.06); }
             .gft-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -173,6 +184,14 @@
 
         panel.appendChild(el('p', 'gft-sub', subtitle));
 
+        const safetyNote = el('p', 'gft-safety-note');
+        safetyNote.appendChild(icon('fa-solid fa-shield-halved'));
+        safetyNote.appendChild(document.createTextNode(
+            'Every file is safety-scanned in this browser before upload and again before download. ' +
+            'This blocks common unsafe files, but it is not a full antivirus guarantee.'
+        ));
+        panel.appendChild(safetyNote);
+
         const status = el('div', 'gft-status');
         status.setAttribute('role', 'status');
         status.setAttribute('aria-live', 'polite');
@@ -247,39 +266,189 @@
 
 
     // ------------------------------------------------------------------
-    // Virus scan
+    // Browser safety scan
     //
-    // Every upload is submitted to the scanFile backend function, which pulls
-    // the stored object with the service role, asks VirusTotal, and writes the
-    // verdict back to the row. The browser only triggers and reads the status,
-    // so the API key never reaches a visitor. A file is not handed on until it
-    // is 'clean': 'infected' and 'suspicious' stay locked.
+    // This is a local content check, not a VirusTotal call. The file never
+    // leaves the browser during the scan. It runs before upload and again on
+    // the downloaded bytes, so a file that was safe at upload time is checked
+    // again before it is handed to the other party.
+    //
+    // It catches the common delivery risks: executable signatures, double
+    // extensions, EICAR test files, PDFs with active content, and Office/ZIP
+    // archives containing executables or VBA macros. It cannot prove that a
+    // file is malware-free; a real antivirus engine belongs on a server. See
+    // docs/FILE-SAFETY.md for that boundary.
     // ------------------------------------------------------------------
-    const SCAN_URL = 'https://superagent-9fe3eb93.base44.app/functions/scanFile';
-
-    async function requestScan(fileId) {
-        try {
-            const res = await fetch(SCAN_URL, {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ fileId: fileId })
-            });
-            return await res.json().catch(() => ({}));
-        } catch (e) {
-            return { ok: false, error: 'scan_unreachable' };
-        }
-    }
+    const EICAR_SIGNATURE = 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*';
+    const DANGEROUS_EXT = new Set([
+        ...BLOCKED_EXT, 'js', 'jse', 'vbs', 'vbe', 'ps1', 'psm1', 'sh', 'bash',
+        'zsh', 'jar', 'apk', 'dmg', 'deb', 'rpm', 'iso', 'img', 'hta', 'lnk',
+        'reg', 'wsf', 'wsh', 'html', 'htm', 'xhtml', 'svg', 'tar', 'gz'
+    ]);
+    const ZIP_DANGEROUS_EXT = new Set([
+        ...DANGEROUS_EXT, 'class', 'php', 'py', 'rb', 'pl', 'cgi', 'jsp', 'aspx'
+    ]);
+    const PDF_ACTIVE_PATTERNS = [
+        /\/JavaScript\b/i, /\/Launch\b/i, /\/EmbeddedFile\b/i,
+        /\/OpenAction\b/i, /\/AA\b/i
+    ];
+    const EXECUTABLE_MAGIC = [
+        [0x4d, 0x5a],                         // Windows PE / DOS
+        [0x7f, 0x45, 0x4c, 0x46],             // ELF
+        [0xcf, 0xfa, 0xed, 0xfe],             // Mach-O 64 little endian
+        [0xca, 0xfe, 0xba, 0xbe],             // Mach-O universal
+        [0xfe, 0xed, 0xfa, 0xcf]              // Mach-O 64 big endian
+    ];
+    const scanCache = new Map();
 
     function scanLabel(status) {
         switch (String(status || 'pending')) {
-            case 'clean': return '✔ Scanned, clean';
-            case 'infected': return '⛔ Virus found, blocked';
-            case 'suspicious': return '⚠ Flagged, blocked';
+            case 'clean': return '✔ Safety scan passed';
+            case 'infected': return '⛔ Unsafe file, blocked';
+            case 'suspicious': return '⚠ Needs review, blocked';
             case 'scanning': return 'Scanning…';
-            case 'skipped': return 'Not scanned';
-            case 'error': return 'Scan failed';
-            default: return 'Waiting for scan';
+            case 'error': return 'Safety scan failed';
+            default: return 'Safety scan on download';
         }
+    }
+
+    function scanCacheKey(id) {
+        return String(id || '');
+    }
+
+    function hasDangerousName(name) {
+        const parts = String(name || '').toLowerCase().split('.');
+        return parts.some((part) => part && DANGEROUS_EXT.has(part));
+    }
+
+    function startsWithBytes(bytes, signature) {
+        if (bytes.length < signature.length) return false;
+        for (let i = 0; i < signature.length; i += 1) {
+            if (bytes[i] !== signature[i]) return false;
+        }
+        return true;
+    }
+
+    function zipEntryNames(bytes) {
+        if (bytes.length < 22) return [];
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        let eocd = -1;
+        const start = Math.max(0, bytes.length - 66000);
+        for (let i = bytes.length - 22; i >= start; i -= 1) {
+            if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+        }
+        if (eocd < 0) return [];
+        const count = view.getUint16(eocd + 10, true);
+        const size = view.getUint32(eocd + 12, true);
+        const offset = view.getUint32(eocd + 16, true);
+        const end = Math.min(bytes.length, offset + size);
+        let cursor = offset;
+        const names = [];
+        for (let i = 0; i < count && cursor + 46 <= end && names.length < 500; i += 1) {
+            if (view.getUint32(cursor, true) !== 0x02014b50) break;
+            const nameLength = view.getUint16(cursor + 28, true);
+            const extraLength = view.getUint16(cursor + 30, true);
+            const commentLength = view.getUint16(cursor + 32, true);
+            const nameStart = cursor + 46;
+            if (nameStart + nameLength > bytes.length) break;
+            try {
+                names.push(new TextDecoder().decode(bytes.subarray(nameStart, nameStart + nameLength)));
+            } catch (e) {
+                names.push('');
+            }
+            cursor = nameStart + nameLength + extraLength + commentLength;
+        }
+        return names;
+    }
+
+    function decodeText(bytes) {
+        try { return new TextDecoder('utf-8', { fatal: false }).decode(bytes); } catch (e) { return ''; }
+    }
+
+    async function scanFile(fileOrBlob, name) {
+        const fileName = String(name || (fileOrBlob && fileOrBlob.name) || 'file');
+        const result = { status: 'clean', detail: '', checkedAt: Date.now(), sha256: '' };
+
+        if (hasDangerousName(fileName)) {
+            return Object.assign(result, {
+                status: 'suspicious',
+                detail: 'The file name contains an executable or script extension.'
+            });
+        }
+
+        let buffer;
+        try {
+            buffer = await fileOrBlob.arrayBuffer();
+        } catch (e) {
+            return Object.assign(result, { status: 'error', detail: 'The file could not be read for scanning.' });
+        }
+        const bytes = new Uint8Array(buffer);
+
+        try {
+            if (window.crypto && window.crypto.subtle) {
+                const digest = await window.crypto.subtle.digest('SHA-256', buffer);
+                result.sha256 = Array.from(new Uint8Array(digest))
+                    .map((b) => b.toString(16).padStart(2, '0')).join('');
+            }
+        } catch (e) { /* hashing is a convenience, not a gate */ }
+
+        const head = bytes.subarray(0, Math.min(bytes.length, 512));
+        const actual = sniff(head);
+        const family = EXT_FAMILY[fileExt(fileName)];
+        if (family && family !== 'text' && actual !== family) {
+            return Object.assign(result, {
+                status: 'suspicious',
+                detail: 'The file contents do not match its extension.'
+            });
+        }
+        if (family === 'text' && (looksBinary(head) || actual !== 'text')) {
+            return Object.assign(result, {
+                status: 'suspicious',
+                detail: 'The file is named as text but contains binary data.'
+            });
+        }
+
+        const textHead = decodeText(bytes.subarray(0, Math.min(bytes.length, 2 * 1024 * 1024)));
+        if (textHead.includes(EICAR_SIGNATURE)) {
+            return Object.assign(result, {
+                status: 'infected',
+                detail: 'The EICAR antivirus test signature was found.'
+            });
+        }
+
+        if (EXECUTABLE_MAGIC.some((signature) => startsWithBytes(bytes, signature))) {
+            return Object.assign(result, {
+                status: 'infected',
+                detail: 'An executable file signature was found.'
+            });
+        }
+
+        if (family === 'pdf' || actual === 'pdf') {
+            const pdfText = decodeText(bytes);
+            const active = PDF_ACTIVE_PATTERNS.filter((pattern) => pattern.test(pdfText));
+            if (active.length) {
+                return Object.assign(result, {
+                    status: 'suspicious',
+                    detail: 'The PDF contains active content (JavaScript, launch action or embedded file).'
+                });
+            }
+        }
+
+        if (family === 'zip' || actual === 'zip') {
+            const names = zipEntryNames(bytes);
+            const unsafe = names.filter((entry) => {
+                const base = entry.split('/').pop() || entry;
+                return ZIP_DANGEROUS_EXT.has(fileExt(base)) || /^vbaProject\.bin$/i.test(base);
+            });
+            if (unsafe.length) {
+                return Object.assign(result, {
+                    status: 'suspicious',
+                    detail: 'The archive contains an executable, script or VBA macro: ' + unsafe.slice(0, 3).join(', ')
+                });
+            }
+        }
+
+        return result;
     }
 
         function toast(message) {
@@ -363,15 +532,6 @@
         return null;
     }
 
-    function sanitizeFileName(name) {
-        return String(name || 'download')
-            .replace(/[\u0000-\u001f\u007f]/g, '')
-            .replace(/[\\/:*?"<>|]/g, '_')
-            .replace(/\.{2,}/g, '.')
-            .trim()
-            .slice(0, 120) || 'download';
-    }
-
         async function handleFiles(fileList) {
             if (busy) return;
             const all = Array.prototype.slice.call(fileList);
@@ -396,17 +556,23 @@
                     continue;
                 }
 
+                setStatus('Safety scan: ' + file.name + '…', 'busy');
+                const scan = await scanFile(file, file.name);
+                if (scan.status !== 'clean') {
+                    failed += 1;
+                    setStatus('“' + file.name + '” was blocked by the safety scan: ' + scan.detail, 'err');
+                    continue;
+                }
+
                 setStatus('Uploading ' + (i + 1) + ' of ' + files.length + ': ' + file.name + '…', 'busy');
                 try {
-                    await window.GahonshDB.Files.upload({
+                    const row = await window.GahonshDB.Files.upload({
                         jobId: options.jobId,
                         proposalId: options.proposalId || null,
                         scope: scope,
                         file: file
-                    }).then((row) => {
-                        if (row && row.id) { requestScan(row.id).then(() => refresh && refresh()); }
-                        return row;
                     });
+                    if (row && row.id) scanCache.set(scanCacheKey(row.id), scan);
                     uploaded += 1;
                 } catch (err) {
                     failed += 1;
@@ -452,46 +618,24 @@
                 'sent ' + (record.scope === 'proposal' ? 'with a proposal' : 'on this project')
             ].filter(Boolean).join(' • ');
             meta.appendChild(el('span', 'gft-detail', detailBits));
-            scan.style.cssText = 'display:inline-block;margin-top:4px;font-size:.74rem;font-weight:700;letter-spacing:.02em;' +
-                (record.scan_status === 'clean' ? 'color:#4ade80;' :
-                 record.scan_status === 'infected' ? 'color:#f87171;' :
-                 record.scan_status === 'suspicious' ? 'color:#fbbf24;' : 'color:#9fb0bf;');
-            meta.appendChild(scan);
 
-            if (record.scan_report_url) {
-                const report = document.createElement('a');
-                report.href = record.scan_report_url;
-                report.target = '_blank';
-                report.rel = 'noopener noreferrer';
-                report.textContent = 'VirusTotal report';
-                report.style.cssText = 'font-size:.72rem;color:#7fd1c4;margin-left:8px;text-decoration:underline;';
-                scan.appendChild(report);
-            }
-            if (record.scan_detail) {
-                meta.appendChild(el('span', 'gft-scan-detail', record.scan_detail));
+            const scanResult = scanCache.get(scanCacheKey(record.id));
+            const scan = el('span', 'gft-scan', scanLabel(scanResult && scanResult.status));
+            scan.style.cssText = 'display:inline-block;margin-top:4px;font-size:.74rem;font-weight:700;letter-spacing:.02em;' +
+                (scanResult && scanResult.status === 'clean' ? 'color:#4ade80;' :
+                 scanResult && scanResult.status === 'infected' ? 'color:#f87171;' :
+                 scanResult && scanResult.status === 'suspicious' ? 'color:#fbbf24;' : 'color:#9fb0bf;');
+            meta.appendChild(scan);
+            if (scanResult && scanResult.detail) {
+                meta.appendChild(el('span', 'gft-scan-detail', scanResult.detail));
                 meta.lastChild.style.cssText = 'font-size:.7rem;color:#8ba0af;margin-top:2px;word-break:break-word;';
             }
             item.appendChild(meta);
 
-            const flagged = record.scan_status === 'infected' || record.scan_status === 'suspicious';
-            if (flagged) {
+            if (scanResult && scanResult.status !== 'clean') {
                 const warn = el('div', 'gft-warning');
                 warn.style.cssText = 'margin:8px 0 0;padding:10px 12px;border:1px solid #7f3a3a;border-radius:10px;background:#2a1414;color:#ffd7d7;font-size:.82rem;line-height:1.5;';
-                warn.appendChild(el('strong', '', record.scan_status === 'infected'
-                    ? 'VirusTotal found a threat in this file. '
-                    : 'VirusTotal flagged this file as suspicious. '));
-                warn.appendChild(document.createTextNode(
-                    'It has not been opened or previewed anywhere on this site. Send and receive still work, but the download stays locked until you accept the risk yourself.'
-                ));
-                const ignore = el('button', 'gft-btn');
-                ignore.type = 'button';
-                ignore.textContent = 'Ignore this warning and download';
-                ignore.style.cssText = 'display:block;margin-top:8px;background:#7f2d2d;color:#fff;border:0;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:.8rem;';
-                ignore.addEventListener('click', () => {
-                    const sure = window.confirm('This file was flagged by the virus scan. Downloading it may harm your device.\n\nDownload anyway?');
-                    if (sure) doDownload(record.id, ignore, true);
-                });
-                warn.appendChild(ignore);
+                warn.textContent = 'The browser safety scan flagged this file, so download is blocked. Ask the sender to send a safer copy.';
                 item.appendChild(warn);
             }
 
@@ -517,45 +661,24 @@
             return item;
         }
 
-        async function doDownload(id, btn, acceptedRisk) {
-            // A file is only handed on after a clean verdict. A flagged file can
-            // still be fetched, but only through the explicit "ignore" button
-            // that the downloader presses after reading the warning, so the
-            // decision and its risk stay with the person downloading.
-            const rows = await (window.GahonshDB.Files.listForJob(options.jobId).catch(() => []));
-            const row = Array.isArray(rows) ? rows.find((r) => r.id === id) : null;
-            const status = row ? String(row.scan_status || 'pending') : 'pending';
-            const flagged = status === 'infected' || status === 'suspicious';
-            if (flagged && !acceptedRisk) {
-                setStatus('This file was flagged by the virus scan. Use "Ignore this warning and download" if you still need it.', 'err');
-                toast('⛔ Blocked: the virus scan flagged this file.');
-                return;
-            }
-            if (flagged && acceptedRisk) {
-                // never previewed, always saved to disk under a safe name
-                const result = await window.GahonshDB.Files.getDownload(id);
-                triggerDownload(result.blob, result.fileName);
-                setStatus('Downloaded a flagged file at your own risk. Do not open it on a work device.', 'err');
-                return;
-            }
-            if (status !== 'clean') {
-                btn.disabled = true;
-                btn.textContent = 'Scanning…';
-                await requestScan(id);
-                await refresh();
-                btn.disabled = false;
-                btn.textContent = '';
-                btn.appendChild(icon('fa-solid fa-download'));
-                btn.appendChild(document.createTextNode(' Download'));
-                setStatus('This file is still being scanned. Please try again in a few seconds.', 'busy');
-                return;
-            }
+        async function doDownload(id, btn) {
             btn.disabled = true;
-            btn.textContent = 'Preparing…';
+            btn.textContent = 'Scanning…';
             try {
                 const result = await window.GahonshDB.Files.getDownload(id);
+                const scan = await scanFile(result.blob, result.fileName);
+                scanCache.set(scanCacheKey(id), scan);
+
+                if (scan.status !== 'clean') {
+                    setStatus('Download blocked: ' + scan.detail, 'err');
+                    toast('⛔ Download blocked by the safety scan.');
+                    await refresh();
+                    return;
+                }
+
                 triggerDownload(result.blob, result.fileName);
-                setStatus('Download started.', 'ok');
+                setStatus('Safety scan passed. Download started.', 'ok');
+                await refresh();
             } catch (err) {
                 console.warn('[file-transfer] download failed:', err);
                 setStatus(err.message || 'The file could not be downloaded.', 'err');

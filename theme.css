@@ -161,6 +161,19 @@ body.light-mode .port-tag {
     color: #0369a1 !important;
 }
 
+/* The numbered step badge keeps the dark-mode white text. Without this it
+   inherits the light-mode dark body text and disappears into the blue disc. */
+body.light-mode .process-card .step-num,
+body.light-mode .step-num {
+    color: #ffffff !important;
+}
+
+/* The transfer panel's error red is tuned for a dark surface; on white it
+   needs a deeper red to stay readable. */
+body.light-mode .gft-status.gft-err {
+    color: #b91c1c !important;
+}
+
 /* Portfolio thumbnails keep a dark image overlay in light mode, so the
    category pill needs a light surface instead of the dark accent colour. */
 body.light-mode .project-tag {

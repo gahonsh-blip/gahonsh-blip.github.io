@@ -80,7 +80,11 @@ function userMayUploadFiles(user, proposal) {
     if (!user) return false;
     if (user.profile?.role === 'admin') return true;
     if (currentJob && currentJob.client_id === user.id) return true;
-    return !!(proposal && ['submitted', 'shortlisted', 'accepted'].includes(proposal.status));
+    if (proposal && ['submitted', 'shortlisted'].includes(proposal.status)) return true;
+    // An accepted proposal becomes a contract. Only an in-progress job keeps
+    // the freelancer's upload permission; completed work stays read-only.
+    if (proposal && proposal.status === 'accepted') return currentJob?.status === 'in_progress';
+    return false;
 }
 
 async function loadJobDetails() {

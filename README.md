@@ -99,6 +99,8 @@ To enable persistent database storage and real user authentication for the marke
 │   ├── marketplace-schema.sql  PostgreSQL Schema + RLS + Triggers
 │   ├── SETUP.md                Comprehensive Setup Guide
 │   ├── DATABASE.md             Database Architecture & RLS Documentation
+│   ├── FILE-SAFETY.md          File safety scanner, limits and server-side AV notes
+│   ├── RECORDS.md              Worker/client records and export reference
 │   └── API.md                  API & Integration Reference
 └── package.json                Dev Server & Build Scripts
 ```

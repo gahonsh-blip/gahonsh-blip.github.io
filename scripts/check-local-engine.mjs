@@ -384,6 +384,76 @@ async function refuse(fn) {
   check('a missing worker id has no public record',
     (await DB.Records.getWorkerRecord('missing-user')) === null);
 
+  // --- in-site file transfer ---------------------------------------------
+  // The client uploads a brief, the hired freelancer downloads it and replies,
+  // the client downloads the reply, and completed work stays readable without
+  // allowing new uploads.
+  const namedText = (text, name) => {
+    const blob = new Blob([text], { type: 'text/plain' });
+    Object.defineProperty(blob, 'name', { value: name });
+    return blob;
+  };
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const fileJob = await DB.Jobs.createJob({
+    title: 'File transfer end-to-end check',
+    description: 'A project used to verify upload, download and reply permissions.',
+    category: 'Web Engineering',
+    job_type: 'fixed',
+    budget_min: 100,
+    required_skills: ['Testing']
+  });
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const fileProposal = await DB.Proposals.submitProposal(fileJob.id, 'I can test the file transfer flow for this project.', 100, 3);
+  await DB.Auth.signIn(recordClient._email, password);
+  const fileContractId = await DB.Contracts.acceptProposalAndHire(fileProposal.id);
+
+  const clientFile = await DB.Files.upload({
+    jobId: fileJob.id,
+    file: namedText('Client brief contents\n', 'client-brief.txt')
+  });
+  check('client can upload a project brief', !!clientFile && clientFile.file_name === 'client-brief.txt');
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('a freelancer who was not hired cannot list the client file',
+    (await DB.Files.listForJob(fileJob.id)).length === 0);
+  check('a freelancer who was not hired cannot download the client file',
+    await refuse(() => DB.Files.getDownload(clientFile.id)) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const workerFiles = await DB.Files.listForJob(fileJob.id);
+  check('the hired freelancer can list the client file',
+    workerFiles.some((row) => row.id === clientFile.id));
+  const workerDownload = await DB.Files.getDownload(clientFile.id);
+  check('the hired freelancer can download the client file',
+    workerDownload.fileName === 'client-brief.txt' &&
+    (await workerDownload.blob.text()) === 'Client brief contents\n');
+
+  const workerReply = await DB.Files.upload({
+    jobId: fileJob.id,
+    file: namedText('Worker reply contents\n', 'worker-reply.txt')
+  });
+  check('the hired freelancer can send a reply file', !!workerReply && workerReply.file_name === 'worker-reply.txt');
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const clientFiles = await DB.Files.listForJob(fileJob.id);
+  check('the client can see the worker reply',
+    clientFiles.some((row) => row.id === workerReply.id));
+  const clientDownload = await DB.Files.getDownload(workerReply.id);
+  check('the client can download the worker reply',
+    clientDownload.fileName === 'worker-reply.txt' &&
+    (await clientDownload.blob.text()) === 'Worker reply contents\n');
+
+  await DB.Contracts.completeContract(fileContractId);
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('a completed contract keeps the project files readable',
+    (await DB.Files.listForJob(fileJob.id)).length === 2);
+  check('a completed contract cannot be used to upload new files',
+    await refuse(() => DB.Files.upload({
+      jobId: fileJob.id,
+      file: namedText('Late file\n', 'late.txt')
+    })) !== null);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

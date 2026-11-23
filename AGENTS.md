@@ -93,8 +93,9 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
     it enforces the same access rules as the SQL policies (who may hire,
     withdraw, list proposals, read a contract, change a job status, and which
-    status transitions are legal). Run it after editing the offline engine or
-    the matching policies/RPCs in the schema.
+    status transitions are legal, plus the client → freelancer file transfer
+    flow). Run it after editing the offline engine or the matching
+    policies/RPCs in the schema.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards), guided chat tasks (`chat-widget.js` — profile, job, proposal, resume handoff).
@@ -202,6 +203,16 @@ serving; it does **not** publish to GitHub Pages. To publish, commit and push
 
 ## Security Notes
 
+- **File safety is a browser scan, not a server antivirus.** `file-transfer.js`
+  scans content locally before upload and again before download. Do not
+  reintroduce the retired external `scanFile` endpoint: it was credit-limited,
+  the table has no verdict columns, and the download path stalled waiting for
+  a `clean` status. The boundary and the optional ClamAV/VirusTotal design are
+  documented in `docs/FILE-SAFETY.md`.
+- The private `job-attachments` bucket keeps a 25 MB object limit and a MIME
+  allow-list in `docs/marketplace-schema.sql` and
+  `supabase/migrations/20261126000000_harden_file_transfers.sql`. Keep the
+  browser extension list and the bucket allow-list in step.
 - User- and DB-supplied values must never reach `innerHTML` unescaped. Escape
   with `escapeHtml()`/`escHtml()`, or set the value with `textContent`.
 - Never place interpolated values inside inline `onclick`/`onchange`
