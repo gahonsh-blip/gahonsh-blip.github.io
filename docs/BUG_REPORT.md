@@ -524,3 +524,54 @@ now expose `Jobs.updateJob(jobId, updates)`:
     colours; a 390 px viewport keeps 48 px chips and a contained panel.
   - Sign-out clears the log and history; signing in as another demo account
     shows the "different account" message and the new role chips.
+
+---
+
+# Mobile layout audit — 2026-11-23
+
+Scope: 320 px and 390 px viewports across 14 public pages, in dark and light
+mode. The browser run also checked page errors, dialogs, failed requests,
+broken images and unresponsive-page timeouts.
+
+## Summary
+
+| # | Page | Bug | Status |
+|---|------|-----|--------|
+| 1 | `index.html` / `home.html` | The hero CTA row was 456 px wide on a 390 px screen, clipping **Start Your Project** on the left and **Ask the Assistant** on the right | Fixed |
+| 2 | `jobs.html` | The search input's intrinsic width pushed the **Search Jobs** button past a 320 px viewport | Fixed |
+| 3 | `find-talent.html` | The same search-row overflow appeared at 320 px, clipping the **Search** button | Fixed |
+
+## 1. Home hero CTA row
+
+`.cta-group` was `display: flex` with a 20 px gap and no wrapping. The three
+buttons need 456 px, so at 390 px the group started at `left: -33` and ended at
+`right: 423`, and `document.documentElement.scrollWidth` was 423. The row now
+uses `flex-wrap: wrap` and `justify-content: center`, so the buttons stack and
+centre on narrow screens. Measured at 390 px: the group is 328 px wide,
+`left: 31`, `right: 359`, and `scrollWidth` equals `innerWidth` (390).
+
+## 2. Jobs search row
+
+The input had `flex: 1` but no `min-width: 0`, so its placeholder's minimum
+content width kept the flex row wider than the container. The button was
+clipped at 320 px. The input now has `min-width: 0` and the button has
+`flex-shrink: 0`; the input truncates and the button stays fully visible.
+Measured at 390 px: the wrapper is 343 px wide and the button ends at 358.
+
+## 3. Find-talent search row
+
+The same pattern in `.search-talent-box` overflowed by 42 px at 320 px, with
+the **Search** button ending at `right: 362`. The input now has
+`min-width: 0` and the button `flex-shrink: 0`. Measured at 320 px:
+`scrollWidth` equals `innerWidth` (320).
+
+## Verification
+
+- `npm run test:a11y` passes and now fails if any of the three rules is
+  removed.
+- Headless Chromium at 390 px and 320 px: `index.html`, `jobs.html` and
+  `find-talent.html` all report `scrollWidth === innerWidth`.
+- The same run covered the other public pages: no page errors, dialogs, failed
+  requests, broken images or unresponsive-page timeouts.
+- Screenshots confirm the stacked hero CTAs and the fully visible search
+  buttons.
