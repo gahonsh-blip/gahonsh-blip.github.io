@@ -217,7 +217,7 @@
         },
         {
             id: 'human',
-            kw: ['human', 'person', 'talk to someone', 'call', 'phone', 'whatsapp', 'contact', 'email', 'support', 'baat karni', 'बात करनी', 'संपर्क', 'मदद', 'help', 'agent'],
+            kw: ['human', 'person', 'talk to someone', 'call', 'phone', 'whatsapp', 'contact', 'email', 'support', 'baat karni', 'बात करनी', 'संपर्क', 'agent'],
             chips: ['contactPage', 'quote', 'pricing'],
             en: 'Happy to connect you with the team:<br><br>• WhatsApp: ' + a(L.whatsapp, '+91 88251 83628') + '<br>• Email: ' + a(L.email, 'gahonsh@gmail.com') + '<br>• Contact form: ' + a(L.contact, 'contact page') + '<br><br>Normal reply time is 1-3 hours during the day (IST). Tell me your project too and I can prepare the details for them.',
             hi: 'Team से जोड़ देता हूँ:<br><br>• WhatsApp: ' + a(L.whatsapp, '+91 88251 83628') + '<br>• Email: ' + a(L.email, 'gahonsh@gmail.com') + '<br>• Contact form: ' + a(L.contact, 'contact page') + '<br><br>दिन में (IST) जवाब आम तौर पर 1-3 घंटे में आता है. अपना project भी बता दीजिए, मैं details तैयार कर दूँगा.'
@@ -282,6 +282,34 @@
             kw: ['bye', 'goodbye', 'see you', 'अलविदा', 'बाय'],
             en: 'Thanks for stopping by. The samples stay open at ' + a(L.portfolio, 'portfolio') + ' whenever you need them.',
             hi: 'आने के लिए धन्यवाद. Sample ' + a(L.portfolio, 'portfolio') + ' पर हमेशा खुले हैं, जब ज़रूरत हो देख लीजिए.'
+        },
+        // Action intents start a guided task instead of returning a canned answer.
+        {
+            id: 'buildProfileBot', action: 'profile',
+            kw: ['build my profile', 'build profile', 'profile banao', 'profile banani', 'profile update', 'update profile', 'edit profile', 'mera profile', 'my profile', 'profile complete', 'profile fill', 'प्रोफाइल बनाओ', 'प्रोफाइल अपडेट', 'प्रोफ़ाइल'],
+            chips: []
+        },
+        {
+            id: 'postJobBot', action: 'job',
+            kw: ['post a job', 'post job', 'job post', 'job dalna', 'job daal', 'project post', 'hire someone', 'job publish', 'publish job', 'जॉब पोस्ट', 'काम देना', 'project dalna'],
+            chips: []
+        },
+        {
+            id: 'proposalBot', action: 'proposal',
+            kw: ['submit a proposal', 'proposal bhej', 'proposal submit', 'submit proposal', 'apply to a job', 'bid karna', 'bid submit', 'प्रस्ताव भेज', 'proposal भेज'],
+            chips: []
+        },
+        {
+            id: 'uploadResumeBot', action: 'resume',
+            kw: ['upload resume', 'resume upload', 'upload cv', 'cv upload', 'resume add', 'add resume', 'रिज्यूमे अपलोड', 'सीवी अपलोड'],
+            chips: []
+        },
+        {
+            id: 'botHelp',
+            kw: ['what can you do', 'what can i do', 'what do you do for me', 'help', 'kya kar sakta', 'kya kya kaam', 'kya kar sakte', 'commands', 'options', 'capabilities', 'तुम क्या कर सकते', 'क्या कर सकते हो', 'मदद'],
+            chips: ['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'hireTalent', 'quote', 'human'],
+            en: 'I can do these tasks with you:<br><br>• <b>Post a job</b> — I ask title, category, scope, budget, duration and skills, then publish it (client account).<br>• <b>Build or update a profile</b> — name, title, location, skills, rate and bio (worker or client).<br>• <b>Upload a resume</b> — I open the profile editor for a PDF up to 5 MB (worker).<br>• <b>Submit a proposal</b> — paste a job link, then give your bid, days and cover letter (worker).<br>• <b>Find work / Find talent</b> — open the right directory.<br>• <b>Quote</b> — I take your name, email and project and send it to the team.<br><br>Sign-in is required for posting, applying and saving a profile. I cannot take payments, approve accounts or bypass the site rules.',
+            hi: 'मैं आपके साथ ये काम कर सकता हूँ:<br><br>• <b>Job post</b> — title, category, scope, budget, duration और skills पूछकर publish करता हूँ (client account).<br>• <b>Profile बनाना/अपडेट</b> — नाम, title, location, skills, rate और bio (worker या client).<br>• <b>Resume upload</b> — 5 MB तक PDF के लिए profile editor खोलता हूँ (worker).<br>• <b>Proposal भेजना</b> — job link paste कीजिए, फिर bid, days और cover letter (worker).<br>• <b>Find work / Find talent</b> — सही directory खोलता हूँ.<br>• <b>Quote</b> — नाम, email और project लेकर team तक भेजता हूँ.<br><br>Post, apply और profile सेव करने के लिए sign-in ज़रूरी है. Payment, account approval या site के नियम bypass करना मैं नहीं कर सकता.'
         }
     ];
 
@@ -309,10 +337,31 @@
         quote: { en: 'Get a quote', hi: 'Quote लीजिए' },
         human: { en: 'Talk to a human', hi: 'Team से बात' },
         contactPage: { en: 'Contact form', hi: 'Contact form' },
-        links: { en: 'All links', hi: 'सारे link' }
+        links: { en: 'All links', hi: 'सारे link' },
+        findWork: { en: 'Find work', hi: 'काम खोजें' },
+        hireTalent: { en: 'Find talent', hi: 'Talent खोजें' },
+        botHelp: { en: 'What I can do', hi: 'मैं क्या कर सकता हूँ' },
+        postJobBot: { en: 'Post a job', hi: 'Job post करें' },
+        buildProfileBot: { en: 'Build my profile', hi: 'Profile बनाएँ' },
+        proposalBot: { en: 'Submit a proposal', hi: 'Proposal भेजें' },
+        uploadResume: { en: 'Upload resume', hi: 'Resume upload' },
+        dashboard: { en: 'My portal', hi: 'मेरा portal' },
+        signIn: { en: 'Sign in', hi: 'Sign in' },
+        continueTask: { en: 'Continue', hi: 'जारी रखें' },
+        cancelTask: { en: 'Cancel', hi: 'रद्द करें' },
+        skipTask: { en: 'Skip', hi: 'छोड़ें' },
+        confirmTask: { en: 'Confirm', hi: 'पक्का करें' },
+        editTask: { en: 'Edit', hi: 'बदलें' }
     };
 
-    var DEFAULT_CHIPS = ['services', 'pricing', 'portfolio', 'quote', 'human'];
+    // Chips that drive a guided task get a stronger visual treatment.
+    var ACTION_CHIPS = {
+        postJobBot: 1, buildProfileBot: 1, proposalBot: 1, uploadResume: 1,
+        dashboard: 1, signIn: 1, continueTask: 1, cancelTask: 1,
+        skipTask: 1, confirmTask: 1, editTask: 1
+    };
+
+    var DEFAULT_CHIPS = ['postJobBot', 'buildProfileBot', 'botHelp', 'services', 'pricing', 'human'];
 
     /* -------------------------------------------------------------- language */
     var HINGLISH = /\b(kya|kyu|kyun|kaise|kaisa|kitna|kitne|kitni|chahiye|chaiye|batao|bataiye|hai|hain|nahi|nahin|mujhe|muje|karna|karwana|karwane|kaam|kam|paisa|paise|kab|jaldi|accha|acha|theek|thik|haan|han|bhai|bhaiya|dijiye|dijie|kijiye|banwana|banwana|banana|banao|dekho|dikhao|sakte|sakta|milega|milegi|lagta|lagega|aap|tu|tum|mera|meri|apna|koi|kuch|sab|zyada|kam)\b/i;
@@ -382,7 +431,7 @@
     /* ------------------------------------------------------------- the widget */
     var CSS = ''
         + '#gc-root{--gc-bg:#0b1220;--gc-panel:#0e1728;--gc-line:rgba(255,255,255,.10);--gc-text:#eaf1ff;--gc-muted:#93a4bd;--gc-accent:#00e0b8;--gc-accent2:#2b8cff;--gc-bubble:#18233a;--gc-user:linear-gradient(135deg,#00d9b2,#2b8cff);'
-        + 'position:fixed;z-index:2147483000;right:24px;bottom:108px;font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif;}'
+        + 'position:fixed;z-index:99998;right:24px;bottom:108px;font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif;}'
         + 'body.light-mode #gc-root{--gc-bg:#ffffff;--gc-panel:#ffffff;--gc-line:rgba(15,23,42,.12);--gc-text:#0f172a;--gc-muted:#54637a;--gc-accent:#0d9488;--gc-accent2:#1d4ed8;--gc-bubble:#f1f5f9;}'
         + '#gc-launch{width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#00d9b2,#2b8cff);box-shadow:0 10px 30px rgba(0,180,180,.35);position:relative;transition:transform .18s ease;}'
         + '#gc-launch:hover{transform:scale(1.07);}'
@@ -412,6 +461,11 @@
         + '.gc-chip{border:1px solid var(--gc-line);background:rgba(255,255,255,.04);color:var(--gc-text);font-size:12px;padding:6px 11px;border-radius:20px;cursor:pointer;font-family:inherit;}'
         + '.gc-chip:hover{border-color:var(--gc-accent);color:var(--gc-accent);}'
         + 'body.light-mode .gc-chip{background:#f8fafc;}'
+        + '.gc-chip.gc-chip-action{border-color:rgba(0,224,184,.5);background:rgba(0,224,184,.09);font-weight:600;}'
+        + 'body.light-mode .gc-chip.gc-chip-action{background:#ecfdf5;border-color:#0d9488;}'
+        + '.gc-step{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--gc-accent);margin-bottom:4px;}'
+        + '.gc-summary{margin-top:8px;padding:10px 11px;border:1px solid var(--gc-line);border-radius:10px;background:rgba(255,255,255,.03);font-size:12.5px;line-height:1.6;}'
+        + 'body.light-mode .gc-summary{background:#f8fafc;}'
         + '.gc-form{display:flex;gap:8px;padding:10px 11px;border-top:1px solid var(--gc-line);background:var(--gc-panel);}'
         + '#gc-in{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--gc-line);border-radius:22px;padding:11px 14px;color:var(--gc-text);font-size:13.5px;font-family:inherit;outline:none;min-width:0;}'
         + 'body.light-mode #gc-in{background:#f8fafc;}'
@@ -433,10 +487,10 @@
         + '<svg viewBox="0 0 24 24"><path d="M12 3C6.9 3 2.8 6.5 2.8 10.9c0 2.4 1.2 4.6 3.2 6.1v3.6l3.3-1.8c.9.2 1.8.3 2.7.3 5.1 0 9.2-3.5 9.2-7.9S17.1 3 12 3zm1.1 10.7-2.3-2.4-4.3 2.4 4.7-5 2.4 2.4 4.2-2.4-4.7 5z"/></svg>'
         + '</button>'
         + '<div id="gc-panel" role="dialog" aria-label="Gahonsh assistant">'
-        + '<div class="gc-head"><div class="gc-av">G</div><div class="gc-tt"><b>Gahonsh Assistant</b><span>Replies instantly ·हिंदी / English</span></div><button class="gc-x" id="gc-close" aria-label="Close">&times;</button></div>'
-        + '<div id="gc-log"></div><div class="gc-chips" id="gc-chips"></div>'
+        + '<div class="gc-head"><div class="gc-av">G</div><div class="gc-tt"><b>Gahonsh Assistant</b><span>Jobs, profiles, quotes · हिंदी / English</span></div><button class="gc-x" id="gc-close" aria-label="Close">&times;</button></div>'
+        + '<div id="gc-log" aria-live="polite"></div><div class="gc-chips" id="gc-chips"></div>'
         + '<div class="gc-form"><input id="gc-in" type="text" autocomplete="off" placeholder="Type in English or हिंदी…" aria-label="Message"><button id="gc-send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21 12 3 3.5v6.2L15 12 3 14.3z"/></svg></button></div>'
-        + '<div class="gc-foot">Sample names and figures are illustrative.</div>'
+        + '<div class="gc-foot">I can post a job or build your profile for you.</div>'
         + '</div>';
 
     var style = el('style', '', CSS);
@@ -485,7 +539,7 @@
         (ids && ids.length ? ids : DEFAULT_CHIPS).forEach(function (id) {
             var label = CHIP_LABEL[id];
             if (!label) return;
-            var c = el('button', 'gc-chip', label[lang] || label.en);
+            var c = el('button', 'gc-chip' + (ACTION_CHIPS[id] ? ' gc-chip-action' : ''), label[lang] || label.en);
             c.type = 'button';
             c.addEventListener('click', function () {
                 handleClickChip(id);
@@ -495,15 +549,35 @@
     }
 
     function handleClickChip(id) {
+        var label = CHIP_LABEL[id] ? (CHIP_LABEL[id][lang] || CHIP_LABEL[id].en) : id;
+        if (ACTION_HANDLERS[id]) {
+            addMsg('me', label);
+            if (!ACTION_CHIPS[id]) pendingTask = null;
+            ACTION_HANDLERS[id]();
+            return;
+        }
         var intent = INTENTS[id];
         if (!intent) return;
-        addMsg('me', CHIP_LABEL[id] ? (CHIP_LABEL[id][lang] || CHIP_LABEL[id].en) : id);
+        if (task) {
+            task = null;
+            addMsg('bot', t('I stopped the previous task. Nothing was saved.', 'पिछला काम रोक दिया. कुछ सेव नहीं हुआ.'));
+        }
+        pendingTask = null;
+        addMsg('me', label);
         answerIntent(intent);
     }
 
     function answerIntent(intent, extra) {
+        if (intent.action) {
+            startTask(intent.action);
+            return;
+        }
         lastIntent = intent.id;
-        if (intent.id === 'quote') flow = { step: 'name', name: '', email: '', project: '' };
+        if (intent.id === 'quote') {
+            task = null;
+            pendingTask = null;
+            flow = { step: 'name', name: '', email: '', project: '' };
+        }
         addTyping();
         setTimeout(function () {
             killTyping();
@@ -513,6 +587,657 @@
             setChips(intent.chips);
         }, 380 + Math.min(500, intent.id.length * 12));
     }
+
+    /* ------------------------------------------------------------ guided tasks */
+    // The assistant can collect a profile, a job or a proposal step by step and
+    // then call the same GahonshDB service the page forms use. No API key and no
+    // server: the browser does the work, and the existing RLS rules still apply.
+    var task = null;
+    var pendingTask = null;
+
+    var JOB_CATEGORIES = [
+        { value: 'Excel Automation', en: 'Excel & Spreadsheet Automation', hi: 'Excel और Spreadsheet Automation' },
+        { value: 'Web Engineering', en: 'Full-Stack Web Development', hi: 'Full-Stack Web Development' },
+        { value: 'PDF & Design', en: 'PDF Layouts & Brand Documents', hi: 'PDF Layout और Brand Documents' },
+        { value: 'Python & AI', en: 'Python & AI Workflow Automation', hi: 'Python और AI Workflow Automation' },
+        { value: 'Data & Analytics', en: 'Data Intelligence & Dashboards', hi: 'Data Intelligence और Dashboards' },
+        { value: 'Mobile Development', en: 'Mobile Application Development', hi: 'Mobile Application Development' }
+    ];
+    var JOB_DURATIONS = [
+        { value: 'Less than 1 month', en: 'Less than 1 month', hi: '1 महीने से कम' },
+        { value: '1 to 3 months', en: '1 to 3 months', hi: '1 से 3 महीने' },
+        { value: '3 to 6 months', en: '3 to 6 months', hi: '3 से 6 महीने' },
+        { value: 'More than 6 months', en: 'More than 6 months', hi: '6 महीने से ज़्यादा' }
+    ];
+    var JOB_LEVELS = [
+        { value: 'entry', en: 'Entry level', hi: 'Entry level' },
+        { value: 'intermediate', en: 'Intermediate', hi: 'Intermediate' },
+        { value: 'expert', en: 'Expert', hi: 'Expert' }
+    ];
+    var JOB_TYPES = [
+        { value: 'fixed', en: 'Fixed price for the whole project', hi: 'पूरे project की fixed price' },
+        { value: 'hourly', en: 'Hourly rate', hi: 'Hourly rate' }
+    ];
+
+    function choiceList(options) {
+        return options.map(function (o, i) {
+            return (i + 1) + '. ' + (lang === 'hi' ? (o.hi || o.en) : o.en);
+        }).join('<br>');
+    }
+
+    function parseChoice(text, options) {
+        var raw = String(text).trim();
+        var num = parseInt(raw, 10);
+        if (/^\d+$/.test(raw) && num >= 1 && num <= options.length) {
+            return { value: options[num - 1].value };
+        }
+        var lower = raw.toLowerCase();
+        var match = options.filter(function (o) {
+            return String(o.value).toLowerCase() === lower ||
+                String(o.en || '').toLowerCase() === lower;
+        })[0];
+        if (match) return { value: match.value };
+        match = options.filter(function (o) {
+            var hay = (String(o.value) + ' ' + String(o.en || '')).toLowerCase();
+            return lower.length > 2 && hay.indexOf(lower) > -1;
+        })[0];
+        if (match) return { value: match.value };
+        return { error: true };
+    }
+
+    function parseNumber(text) {
+        var n = Number(String(text).replace(/[^0-9.]/g, ''));
+        return isFinite(n) ? n : NaN;
+    }
+
+    function parseSkillList(text) {
+        var seen = {};
+        return String(text).split(',').map(function (s) {
+            return s.trim();
+        }).filter(function (s) {
+            if (!s || seen[s.toLowerCase()]) return false;
+            seen[s.toLowerCase()] = 1;
+            return true;
+        }).slice(0, 20).map(function (s) {
+            return s.slice(0, 40);
+        });
+    }
+
+    function displayTaskValue(value) {
+        if (value === undefined || value === null || value === '') return '—';
+        if (Array.isArray(value)) return value.join(', ') || '—';
+        if (typeof value === 'object') {
+            if (value.title) return value.title;
+            if (value.fixed !== undefined) return '$' + value.fixed;
+            if (value.min !== undefined) return '$' + value.min + '/hr – $' + value.max + '/hr';
+        }
+        return String(value);
+    }
+
+    async function ensureUser() {
+        try {
+            if (window.GahonshAuthUI && window.GahonshAuthUI.ensureCurrentUser) {
+                return await window.GahonshAuthUI.ensureCurrentUser();
+            }
+            if (window.GahonshDB && window.GahonshDB.Auth && window.GahonshDB.Auth.getCurrentUser) {
+                return await window.GahonshDB.Auth.getCurrentUser();
+            }
+        } catch (e) { /* treat as signed out */ }
+        return null;
+    }
+
+    function profileSteps(profile) {
+        var freelancer = profile.role === 'freelancer' || profile.role === 'admin';
+        var steps = [
+            {
+                key: 'full_name', label_en: 'Full name', label_hi: 'पूरा नाम',
+                prompt_en: 'What is your full name?',
+                prompt_hi: 'आपका पूरा नाम क्या है?',
+                default: profile.full_name || '',
+                parse: function (v) {
+                    if (v.length < 2) return { error: t('Please enter at least 2 characters.', 'कम से कम 2 अक्षर लिखिए.') };
+                    return { value: v.slice(0, 80) };
+                }
+            },
+            {
+                key: 'title', label_en: 'Professional title', label_hi: 'Professional title',
+                prompt_en: 'What is your professional title? Example: "Excel Automation Expert" or "Full-Stack Developer".',
+                prompt_hi: 'आपका professional title क्या है? जैसे: "Excel Automation Expert" या "Full-Stack Developer".',
+                default: profile.title || '',
+                parse: function (v) {
+                    if (v.length < 3) return { error: t('Please enter at least 3 characters.', 'कम से कम 3 अक्षर लिखिए.') };
+                    return { value: v.slice(0, 120) };
+                }
+            },
+            {
+                key: 'location', label_en: 'Location', label_hi: 'Location',
+                prompt_en: 'Where are you based? Example: "Ranchi, India" or "Remote". Tap Skip to leave it blank.',
+                prompt_hi: 'आप कहाँ से हैं? जैसे: "Ranchi, India" या "Remote". खाली छोड़ने के लिए Skip दबाएँ.',
+                optional: true,
+                default: profile.location || '',
+                parse: function (v) { return { value: v.slice(0, 80) }; }
+            }
+        ];
+        if (freelancer) {
+            steps.push({
+                key: 'skills', label_en: 'Skills', label_hi: 'Skills',
+                prompt_en: 'List your skills, separated by commas. Example: Excel VBA, Python, React.',
+                prompt_hi: 'अपनी skills comma से अलग लिखिए. जैसे: Excel VBA, Python, React.',
+                default: Array.isArray(profile.skills) ? profile.skills.slice() : [],
+                parse: function (v) {
+                    var arr = parseSkillList(v);
+                    if (!arr.length) return { error: t('Please enter at least one skill.', 'कम से कम एक skill लिखिए.') };
+                    return { value: arr };
+                }
+            });
+            steps.push({
+                key: 'hourly_rate', label_en: 'Hourly rate (USD)', label_hi: 'Hourly rate (USD)',
+                prompt_en: 'What is your hourly rate in USD? Example: 25. Tap Skip to keep the current rate.',
+                prompt_hi: 'आपकी hourly rate USD में क्या है? जैसे: 25. मौजूदा rate रखने के लिए Skip दबाएँ.',
+                default: profile.hourly_rate || '',
+                parse: function (v) {
+                    var n = parseNumber(v);
+                    if (!isFinite(n) || n <= 0 || n > 1000) {
+                        return { error: t('Please enter a number between 1 and 1000.', '1 से 1000 के बीच संख्या लिखिए.') };
+                    }
+                    return { value: Math.round(n * 100) / 100 };
+                }
+            });
+        }
+        steps.push({
+            key: 'bio', label_en: 'Bio', label_hi: 'Bio',
+            prompt_en: 'Write a short bio (at least 15 characters): what you do and what you have delivered. Tap Skip to leave it unchanged.',
+            prompt_hi: 'छोटा bio लिखिए (कम से कम 15 अक्षर): आप क्या करते हैं और क्या deliver किया है. बदलना न हो तो Skip दबाएँ.',
+            optional: true,
+            default: profile.bio || '',
+            parse: function (v) {
+                if (v.length < 15) return { error: t('Please write at least 15 characters.', 'कम से कम 15 अक्षर लिखिए.') };
+                return { value: v.slice(0, 1200) };
+            }
+        });
+        return steps;
+    }
+
+    function jobSteps() {
+        return [
+            {
+                key: 'title', label_en: 'Project title', label_hi: 'Project title',
+                prompt_en: 'What is the project title? Example: "Automated Excel financial dashboard".',
+                prompt_hi: 'Project का title क्या है? जैसे: "Automated Excel financial dashboard".',
+                parse: function (v) {
+                    if (v.length < 10) return { error: t('Please use at least 10 characters.', 'कम से कम 10 अक्षर लिखिए.') };
+                    return { value: v.slice(0, 120) };
+                }
+            },
+            {
+                key: 'category', label_en: 'Category', label_hi: 'Category',
+                prompt_en: 'Choose a category by number, or type its name:<br>' + choiceList(JOB_CATEGORIES),
+                prompt_hi: 'Category number चुनिए, या नाम लिखिए:<br>' + choiceList(JOB_CATEGORIES),
+                parse: function (v) {
+                    var r = parseChoice(v, JOB_CATEGORIES);
+                    if (r.error) return { error: t('Please choose 1-6 or type a category name.', '1-6 में से चुनिए या category का नाम लिखिए.') };
+                    return { value: r.value };
+                }
+            },
+            {
+                key: 'description', label_en: 'Scope', label_hi: 'Scope',
+                prompt_en: 'Describe the work in a few lines. What must be delivered, and which tools or skills matter? (At least 30 characters.)',
+                prompt_hi: 'काम कुछ लाइनों में बताइए. क्या deliver करना है, और कौन सी tools/skills ज़रूरी हैं? (कम से कम 30 अक्षर.)',
+                parse: function (v) {
+                    if (v.length < 30) return { error: t('Please write at least 30 characters.', 'कम से कम 30 अक्षर लिखिए.') };
+                    return { value: v.slice(0, 2000) };
+                }
+            },
+            {
+                key: 'job_type', label_en: 'Pricing model', label_hi: 'Pricing model',
+                prompt_en: 'How should it be priced?<br>' + choiceList(JOB_TYPES),
+                prompt_hi: 'कीमत कैसे तय हो?<br>' + choiceList(JOB_TYPES),
+                parse: function (v) {
+                    var r = parseChoice(v, JOB_TYPES);
+                    if (r.error) return { error: t('Please choose 1 or 2.', '1 या 2 चुनिए.') };
+                    return { value: r.value };
+                }
+            },
+            {
+                key: 'budget', label_en: 'Budget', label_hi: 'Budget',
+                prompt_en: function () {
+                    return task.data.job_type === 'hourly'
+                        ? 'What is your hourly range in USD? Example: 25-60 (minimum $5).'
+                        : 'What is the total fixed budget in USD? Minimum $20. Example: 500.';
+                },
+                prompt_hi: function () {
+                    return task.data.job_type === 'hourly'
+                        ? 'आपकी hourly range USD में क्या है? जैसे: 25-60 (कम से कम $5).'
+                        : 'कुल fixed budget USD में क्या है? कम से कम $20. जैसे: 500.';
+                },
+                parse: function (v) {
+                    if (task.data.job_type === 'hourly') {
+                        var parts = String(v).match(/\d+(?:\.\d+)?/g) || [];
+                        if (parts.length < 2) {
+                            return { error: t('Please write a range like 25-60.', '25-60 जैसी range लिखिए.') };
+                        }
+                        var lo = Number(parts[0]);
+                        var hi = Number(parts[1]);
+                        if (!isFinite(lo) || !isFinite(hi) || lo < 5 || hi < lo || hi > 500) {
+                            return { error: t('Use a range from $5 to $500, with the maximum at least the minimum.', '$5 से $500 के बीच range लिखिए, maximum minimum से कम न हो.') };
+                        }
+                        return { value: { min: Math.round(lo), max: Math.round(hi) } };
+                    }
+                    var n = parseNumber(v);
+                    if (!isFinite(n) || n < 20 || n > 1000000) {
+                        return { error: t('Please enter a budget between $20 and $1,000,000.', '$20 से $1,000,000 के बीच budget लिखिए.') };
+                    }
+                    return { value: { fixed: Math.round(n) } };
+                }
+            },
+            {
+                key: 'duration', label_en: 'Duration', label_hi: 'Duration',
+                prompt_en: 'How long will it take?<br>' + choiceList(JOB_DURATIONS),
+                prompt_hi: 'काम में कितना समय लगेगा?<br>' + choiceList(JOB_DURATIONS),
+                parse: function (v) {
+                    var r = parseChoice(v, JOB_DURATIONS);
+                    if (r.error) return { error: t('Please choose 1-4.', '1-4 में से चुनिए.') };
+                    return { value: r.value };
+                }
+            },
+            {
+                key: 'experience', label_en: 'Experience level', label_hi: 'Experience level',
+                prompt_en: 'Which experience level do you need?<br>' + choiceList(JOB_LEVELS),
+                prompt_hi: 'किस experience level की ज़रूरत है?<br>' + choiceList(JOB_LEVELS),
+                parse: function (v) {
+                    var r = parseChoice(v, JOB_LEVELS);
+                    if (r.error) return { error: t('Please choose 1-3.', '1-3 में से चुनिए.') };
+                    return { value: r.value };
+                }
+            },
+            {
+                key: 'skills', label_en: 'Required skills', label_hi: 'Required skills',
+                prompt_en: 'Which skills are required? Separate them with commas, or tap Skip. Example: Excel VBA, Financial Modeling.',
+                prompt_hi: 'कौन सी skills चाहिए? Comma से अलग लिखिए, या Skip दबाएँ. जैसे: Excel VBA, Financial Modeling.',
+                optional: true,
+                emptyValue: [],
+                parse: function (v) { return { value: parseSkillList(v) }; }
+            }
+        ];
+    }
+
+    function proposalSteps() {
+        return [
+            {
+                key: 'job', label_en: 'Job', label_hi: 'Job',
+                prompt_en: 'Paste the job link or job ID you want to apply to. You can copy it from the job page.',
+                prompt_hi: 'जिस job पर apply करना है, उसका link या job ID paste कीजिए. Job page से copy कर सकते हैं.',
+                parse: async function (v) {
+                    var raw = String(v).trim();
+                    var m = raw.match(/[?&]id=([^&\s#]+)/i);
+                    if (m) raw = decodeURIComponent(m[1]);
+                    var looksLikeId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw) ||
+                        /^job[_-][A-Za-z0-9-]+$/i.test(raw);
+                    if (!looksLikeId) {
+                        return { error: t('That does not look like a job link or ID. Open the job page and copy the full link.', 'ये job link या ID नहीं लग रहा. Job page खोलकर पूरा link copy कीजिए.') };
+                    }
+                    var job = null;
+                    try { job = await window.GahonshDB.Jobs.getJobById(raw); } catch (e) { job = null; }
+                    if (!job) return { error: t('I could not find that job. Please check the link and try again.', 'वो job नहीं मिला. Link जाँचकर फिर कोशिश कीजिए.') };
+                    if (job.status && job.status !== 'open') {
+                        return { error: t('That job is not open for proposals right now.', 'वो job अभी proposals के लिए open नहीं है.') };
+                    }
+                    return { value: { id: job.id, title: job.title } };
+                }
+            },
+            {
+                key: 'bid', label_en: 'Your bid (USD)', label_hi: 'आपका bid (USD)',
+                prompt_en: 'What is your bid in USD? Example: 250.',
+                prompt_hi: 'आपका bid USD में क्या है? जैसे: 250.',
+                parse: function (v) {
+                    var n = parseNumber(v);
+                    if (!isFinite(n) || n <= 0 || n > 1000000) {
+                        return { error: t('Please enter a bid between $1 and $1,000,000.', '$1 से $1,000,000 के बीच bid लिखिए.') };
+                    }
+                    return { value: Math.round(n * 100) / 100 };
+                }
+            },
+            {
+                key: 'days', label_en: 'Delivery days', label_hi: 'Delivery days',
+                prompt_en: 'How many days will you need? Example: 7.',
+                prompt_hi: 'आपको कितने दिन लगेंगे? जैसे: 7.',
+                parse: function (v) {
+                    var n = parseInt(String(v).replace(/[^0-9]/g, ''), 10);
+                    if (!isFinite(n) || n < 1 || n > 365) {
+                        return { error: t('Please enter a number of days between 1 and 365.', '1 से 365 के बीच दिन लिखिए.') };
+                    }
+                    return { value: n };
+                }
+            },
+            {
+                key: 'cover', label_en: 'Cover letter', label_hi: 'Cover letter',
+                prompt_en: 'Write a short cover letter (at least 20 characters): why you are the right fit and how you will deliver it.',
+                prompt_hi: 'छोटा cover letter लिखिए (कम से कम 20 अक्षर): आप सही क्यों हैं और कैसे deliver करेंगे.',
+                parse: function (v) {
+                    if (v.length < 20) return { error: t('Please write at least 20 characters.', 'कम से कम 20 अक्षर लिखिए.') };
+                    return { value: v.slice(0, 2000) };
+                }
+            }
+        ];
+    }
+
+    function askTaskStep() {
+        if (!task) return;
+        if (task.index >= task.steps.length) {
+            renderTaskSummary();
+            return;
+        }
+        var step = task.steps[task.index];
+        var current = task.data[step.key] !== undefined ? task.data[step.key] : step.default;
+        var hasCurrent = current !== undefined && current !== null && String(current).trim() !== '';
+        var promptEn = typeof step.prompt_en === 'function' ? step.prompt_en() : step.prompt_en;
+        var promptHi = typeof step.prompt_hi === 'function' ? step.prompt_hi() : step.prompt_hi;
+        var hint = hasCurrent
+            ? t(' Current: ' + escapeHtml(displayTaskValue(current)) + '. Type a new value or tap Skip to keep it.',
+                ' अभी: ' + escapeHtml(displayTaskValue(current)) + '. नया लिखिए या Skip दबाएँ.')
+            : '';
+        var progress = t('Step ' + (task.index + 1) + ' of ' + task.steps.length + ' — ',
+            'Step ' + (task.index + 1) + ' / ' + task.steps.length + ' — ');
+        addMsg('bot', '<span class="gc-step">' + progress + '</span>' + t(promptEn, promptHi) + hint);
+        setChips(step.optional || hasCurrent ? ['skipTask', 'cancelTask'] : ['cancelTask']);
+    }
+
+    function nextTaskStep() {
+        task.index += 1;
+        askTaskStep();
+    }
+
+    function renderTaskSummary() {
+        task.index = task.steps.length;
+        var rows = task.steps.map(function (step) {
+            var value = task.data[step.key];
+            return '<b>' + escapeHtml(t(step.label_en, step.label_hi)) + ':</b> ' + escapeHtml(displayTaskValue(value));
+        });
+        addMsg('bot', t('Please review:', 'नीचे देख लीजिए:') +
+            '<div class="gc-summary">' + rows.join('<br>') + '</div>' +
+            t('<br>Type *yes* to save or post, *edit* to change, or *cancel*.',
+                '<br>सेव/पोस्ट करने के लिए *yes* लिखिए, बदलने के लिए *edit*, या *cancel*.'));
+        setChips(['confirmTask', 'editTask', 'cancelTask']);
+    }
+
+    function cancelTask() {
+        task = null;
+        pendingTask = null;
+        addMsg('bot', t('Cancelled. Nothing was saved. What else can I do?', 'रद्द कर दिया. कुछ सेव नहीं हुआ. और क्या कर सकता हूँ?'));
+        setChips();
+    }
+
+    async function handleTaskInput(text) {
+        if (!task || task.busy) return;
+        var clean = String(text).trim();
+        if (/^(cancel|stop|रद्द|band|बंद)\b/i.test(clean)) {
+            cancelTask();
+            return;
+        }
+        if (task.index >= task.steps.length) {
+            handleTaskConfirm(clean);
+            return;
+        }
+        var step = task.steps[task.index];
+        if (/^(skip|छोड़ें|chhod|chhod do)\b/i.test(clean)) {
+            var current = task.data[step.key] !== undefined ? task.data[step.key] : step.default;
+            if (current === undefined || current === null || String(current).trim() === '') {
+                if (step.optional) {
+                    task.data[step.key] = step.emptyValue !== undefined ? step.emptyValue : '';
+                    nextTaskStep();
+                    return;
+                }
+                addMsg('bot', t('This one is required, please answer it.', 'ये ज़रूरी है, कृपया जवाब दीजिए.'));
+                return;
+            }
+            task.data[step.key] = current;
+            nextTaskStep();
+            return;
+        }
+        task.busy = true;
+        var result;
+        try {
+            result = await step.parse(clean);
+        } catch (err) {
+            if (task) task.busy = false;
+            addMsg('bot', t('Something went wrong while checking that. Please try again.',
+                'जाँच में कुछ गड़बड़ हुई. फिर कोशिश कीजिए.'));
+            return;
+        }
+        if (task) task.busy = false;
+        if (!task) return;
+        if (result.error) {
+            addMsg('bot', result.error);
+            return;
+        }
+        task.data[step.key] = result.value;
+        nextTaskStep();
+    }
+
+    function handleTaskConfirm(text) {
+        if (/^(yes|y|confirm|post|save|submit|ok|okay|हाँ|हां|ठीक|पक्का|करो|कर दो)\b/i.test(text)) {
+            submitTask();
+            return;
+        }
+        if (/^(edit|change|बदलें|badal)\b/i.test(text)) {
+            task.index = 0;
+            askTaskStep();
+            return;
+        }
+        if (/^(cancel|stop|रद्द|band)\b/i.test(text)) {
+            cancelTask();
+            return;
+        }
+        addMsg('bot', t('Please type *yes* to confirm, *edit* to change, or *cancel*.',
+            '*yes* लिखिए पक्का करने के लिए, *edit* बदलने के लिए, या *cancel*.'));
+    }
+
+    async function submitTask() {
+        if (!task || task.busy) return;
+        task.busy = true;
+        addTyping();
+        var success = false;
+        try {
+            if (task.type === 'profile') {
+                var updates = {
+                    full_name: task.data.full_name,
+                    title: task.data.title,
+                    location: task.data.location,
+                    bio: task.data.bio
+                };
+                if (task.data.skills !== undefined) updates.skills = task.data.skills;
+                if (task.data.hourly_rate !== undefined) updates.hourly_rate = task.data.hourly_rate;
+                var saved = await window.GahonshDB.Profiles.updateMyProfile(updates);
+                success = true;
+                killTyping();
+                addMsg('bot', t('Profile saved. Your public profile now shows <b>' + escapeHtml(saved.title || task.data.title) + '</b>.<br><br>' +
+                    a(BASE + 'find-talent.html', 'See the talent directory') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'Open your portal') + '<br><br>Want a PDF CV on your profile too? Tap *Upload resume*.',
+                    'Profile सेव हो गया. आपके public profile पर अब <b>' + escapeHtml(saved.title || task.data.title) + '</b> दिखेगा.<br><br>' +
+                    a(BASE + 'find-talent.html', 'Talent directory देखें') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'Portal खोलें') + '<br><br>PDF CV भी जोड़ना है? *Upload resume* दबाइए.'));
+                setChips(['uploadResume', 'findWork', 'dashboard', 'human']);
+            } else if (task.type === 'job') {
+                var jobType = task.data.job_type;
+                var job = await window.GahonshDB.Jobs.createJob({
+                    title: task.data.title,
+                    category: task.data.category,
+                    job_type: jobType,
+                    description: task.data.description,
+                    estimated_duration: task.data.duration,
+                    experience_level: task.data.experience,
+                    required_skills: task.data.skills || [],
+                    budget_min: jobType === 'fixed' ? task.data.budget.fixed : 0,
+                    hourly_rate_min: jobType === 'hourly' ? task.data.budget.min : null,
+                    hourly_rate_max: jobType === 'hourly' ? task.data.budget.max : null
+                });
+                success = true;
+                killTyping();
+                var jobUrl = BASE + 'job-details.html?id=' + encodeURIComponent(job.id);
+                addMsg('bot', t('Job posted. <b>' + escapeHtml(job.title) + '</b> is now open for proposals.<br><br>' +
+                    a(jobUrl, 'Open your job') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'See proposals in your portal'),
+                    'Job post हो गया. <b>' + escapeHtml(job.title) + '</b> अब proposals के लिए open है.<br><br>' +
+                    a(jobUrl, 'अपना job खोलें') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'Portal में proposals देखें')));
+                setChips(['postJobBot', 'hireTalent', 'dashboard', 'human']);
+            } else if (task.type === 'proposal') {
+                await window.GahonshDB.Proposals.submitProposal(
+                    task.data.job.id, task.data.cover, task.data.bid, task.data.days
+                );
+                success = true;
+                killTyping();
+                var proposalUrl = BASE + 'job-details.html?id=' + encodeURIComponent(task.data.job.id);
+                addMsg('bot', t('Proposal sent for <b>' + escapeHtml(task.data.job.title) + '</b>. The client can now review your bid.<br><br>' +
+                    a(proposalUrl, 'View the job') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'Track it in your portal'),
+                    '<b>' + escapeHtml(task.data.job.title) + '</b> के लिए proposal भेज दिया. अब client आपका bid देख सकता है.<br><br>' +
+                    a(proposalUrl, 'Job देखें') + ' &middot; ' +
+                    a(BASE + 'marketplace-dashboard.html', 'Portal में track करें')));
+                setChips(['findWork', 'dashboard', 'human']);
+            }
+        } catch (err) {
+            killTyping();
+            addMsg('bot', t('Could not save that: ' + escapeHtml(err.message || 'unknown error') + '<br><br>You can try again, or use the page form.',
+                'सेव नहीं हो सका: ' + escapeHtml(err.message || 'unknown error') + '<br><br>फिर कोशिश कीजिए, या page form इस्तेमाल कीजिए.'));
+            setChips(['confirmTask', 'cancelTask']);
+        } finally {
+            if (task) task.busy = false;
+            if (success) task = null;
+        }
+    }
+
+    function promptSignIn() {
+        addMsg('bot', t('Please sign in first. The post has to belong to your account, and I can only save it for you.<br><br>Tap *Sign in*, then *Continue*.',
+            'पहले sign in कीजिए. Post आपके account का होना चाहिए, और मैं इसे सिर्फ आपके लिए सेव कर सकता हूँ.<br><br>*Sign in* दबाइए, फिर *Continue*.'));
+        setChips(['signIn', 'continueTask', 'cancelTask']);
+    }
+
+    function handleSignIn() {
+        if (window.GahonshAuthUI && window.GahonshAuthUI.openAuthModal) {
+            window.GahonshAuthUI.openAuthModal('signin');
+        } else {
+            window.location.href = BASE + 'marketplace-dashboard.html';
+            return;
+        }
+        addMsg('bot', t('Sign in in the window that opened, then tap *Continue*.', 'खुली window में sign in कीजिए, फिर *Continue* दबाइए.'));
+        setChips(['continueTask', 'cancelTask']);
+    }
+
+    async function handleContinue() {
+        addTyping();
+        var user = await ensureUser();
+        killTyping();
+        if (!user) {
+            addMsg('bot', t('I still do not see a signed-in account. Please sign in first.', 'अभी भी sign-in नहीं दिख रहा. पहले sign in कीजिए.'));
+            setChips(['signIn', 'continueTask', 'cancelTask']);
+            return;
+        }
+        var next = pendingTask;
+        pendingTask = null;
+        if (next) startTask(next);
+    }
+
+    async function startResumeUpload() {
+        addTyping();
+        var user = await ensureUser();
+        killTyping();
+        if (!user) {
+            pendingTask = 'resume';
+            promptSignIn();
+            return;
+        }
+        var role = (user.profile && user.profile.role) || '';
+        if (role !== 'freelancer' && role !== 'admin') {
+            addMsg('bot', t('Resume upload is for worker profiles. Sign in with a worker account, or update your client profile instead.',
+                'Resume upload worker profile के लिए है. Worker account से sign in कीजिए, या अपना client profile अपडेट कीजिए.'));
+            setChips(['buildProfileBot', 'human']);
+            return;
+        }
+        if (window.GahonshAuthUI && window.GahonshAuthUI.openProfileModal) {
+            addMsg('bot', t('Opening your profile editor. Scroll to *Resume / CV (PDF)*, choose a PDF up to 5 MB, then press *Upload Resume*.',
+                'आपका profile editor खोल रहा हूँ. *Resume / CV (PDF)* तक scroll कीजिए, 5 MB तक की PDF चुनिए, फिर *Upload Resume* दबाइए.'));
+            try {
+                await window.GahonshAuthUI.openProfileModal();
+            } catch (e) { /* the modal logs its own error */ }
+        } else {
+            addMsg('bot', t('Open your portal and use Edit Profile to add the PDF: ' + a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal'),
+                'Portal खोलकर Edit Profile से PDF जोड़िए: ' + a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal')));
+            setChips(['dashboard', 'human']);
+        }
+    }
+
+    async function startTask(type) {
+        if (task && task.busy) {
+            addMsg('bot', t('One moment — I am still saving the previous step.', 'एक पल — पिछला step सेव हो रहा है.'));
+            return;
+        }
+        if (task) {
+            task = null;
+            addMsg('bot', t('Switching tasks. The previous one was not saved.', 'नया काम शुरू कर रहा हूँ. पिछला सेव नहीं हुआ.'));
+        }
+        pendingTask = null;
+        flow = { step: 'idle', name: '', email: '', project: '' };
+        if (type === 'resume') {
+            await startResumeUpload();
+            return;
+        }
+        addTyping();
+        var user = await ensureUser();
+        killTyping();
+        if (!user) {
+            pendingTask = type;
+            promptSignIn();
+            return;
+        }
+        var profile = user.profile || {};
+        var role = profile.role || '';
+        if (type === 'job' && role !== 'client' && role !== 'admin') {
+            addMsg('bot', t('Job posting is for client accounts. Sign in with a client account, or switch your role in the portal.',
+                'Job post करना client account के लिए है. Client account से sign in कीजिए, या portal में role बदलिए.'));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        if (type === 'proposal' && role !== 'freelancer' && role !== 'admin') {
+            addMsg('bot', t('Proposals are for worker accounts. Sign in with a worker account to apply.',
+                'Proposal worker account के लिए है. Apply करने के लिए worker account से sign in कीजिए.'));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        var steps = type === 'profile' ? profileSteps(profile)
+            : type === 'job' ? jobSteps()
+            : type === 'proposal' ? proposalSteps()
+            : null;
+        if (!steps) return;
+        task = { type: type, index: 0, steps: steps, data: {} };
+        addMsg('bot', t('Let us do it together. I will ask a few questions, then you confirm and I save it. Type *cancel* anytime.',
+            'चलिए साथ में करते हैं. मैं कुछ सवाल पूछूँगा, फिर आप confirm करेंगे और मैं सेव कर दूँगा. कभी भी *cancel* लिख सकते हैं.'));
+        askTaskStep();
+    }
+
+    var ACTION_HANDLERS = {
+        postJobBot: function () { startTask('job'); },
+        buildProfileBot: function () { startTask('profile'); },
+        proposalBot: function () { startTask('proposal'); },
+        uploadResume: function () { startTask('resume'); },
+        dashboard: function () {
+            addTyping();
+            setTimeout(function () {
+                killTyping();
+                addMsg('bot', t('Your portal holds your profile, jobs, proposals and contracts:<br><br>' +
+                    a(BASE + 'marketplace-dashboard.html', 'Open Marketplace Portal'),
+                    'आपके portal में profile, jobs, proposals और contracts हैं:<br><br>' +
+                    a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal खोलें')));
+                setChips(['buildProfileBot', 'postJobBot', 'uploadResume', 'human']);
+            }, 300);
+        },
+        signIn: handleSignIn,
+        continueTask: handleContinue,
+        cancelTask: cancelTask,
+        skipTask: function () { handleTaskInput('skip'); },
+        confirmTask: function () { handleTaskInput('yes'); },
+        editTask: function () { handleTaskInput('edit'); }
+    };
 
     /* ---------------------------------------------------------- quote capture */
     function submitLead() {
@@ -578,6 +1303,13 @@
         // language follows the visitor's message
         lang = detectLang(clean) === 'hi' ? 'hi' : 'en';
         store('gc_lang', lang);
+
+        // A guided task owns the next message, so "yes", "skip" and field
+        // answers are not mistaken for a new question.
+        if (task) {
+            handleTaskInput(clean);
+            return;
+        }
 
         if (flow.step === 'name') {
             if (/^(cancel|stop|रद्द)\b/i.test(clean)) {
@@ -665,7 +1397,7 @@
                 'I did not catch that exactly. I can help with services, prices, timelines, samples and quotes.<br><br>Try: "Excel dashboard price", "show portfolio", "how long for a PDF", or tap a button below. For anything else, ' + a(L.whatsapp, 'WhatsApp the team') + ' or ' + a(L.email, 'email us') + '.',
                 'ये ठीक से समझ नहीं आया. मैं service, कीमत, timeline, sample और quote में मदद कर सकता हूँ.<br><br>जैसे लिखिए: "Excel dashboard की कीमत", "portfolio दिखाओ", "PDF में कितना समय", या नीचे button दबाइए. बाकी किसी बात के लिए ' + a(L.whatsapp, 'WhatsApp कीजिए') + ' या ' + a(L.email, 'email कीजिए') + '.'
             ));
-            setChips(['services', 'pricing', 'portfolio', 'quote', 'human']);
+            setChips(['postJobBot', 'buildProfileBot', 'botHelp', 'services', 'pricing', 'human']);
         }, 360);
     }
 
@@ -690,12 +1422,12 @@
             }
             if (!restored) {
                 addMsg('bot', t(
-                    'Hi! I am the Gahonsh assistant. Ask me anything: services, prices, timelines, or see real sample files.<br><br>For a quote, I only need your name, email and one line about the work.',
-                    'नमस्ते! मैं GAHONSH का assistant हूँ. Service, कीमत, timeline कुछ भी पूछिए, या असली sample file देखिए.<br><br>Quote के लिए सिर्फ नाम, email और काम की एक लाइन चाहिए.'
+                    'Hi! I am the Gahonsh assistant. I can answer questions, and I can also do tasks with you:<br><br>• *Post a job* (client)<br>• *Build or update your profile* (worker or client)<br>• *Upload a resume* (worker)<br>• *Submit a proposal* (worker)<br><br>Tap a button below, or just tell me what you need.',
+                    'नमस्ते! मैं GAHONSH का assistant हूँ. सवालों के जवाब के साथ-साथ मैं काम भी कर सकता हूँ:<br><br>• *Job post करना* (client)<br>• *Profile बनाना/अपडेट करना* (worker या client)<br>• *Resume upload* (worker)<br>• *Proposal भेजना* (worker)<br><br>नीचे button दबाइए, या सीधे बताइए क्या चाहिए.'
                 ));
-                setChips();
+                setChips(['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'botHelp']);
             } else {
-                setChips(['services', 'pricing', 'portfolio', 'quote', 'human']);
+                setChips(['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'botHelp']);
             }
         }
     }
