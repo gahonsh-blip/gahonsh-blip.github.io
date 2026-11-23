@@ -97,7 +97,7 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     the matching policies/RPCs in the schema.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
-  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards).
+  - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards), guided chat tasks (`chat-widget.js` — profile, job, proposal, resume handoff).
   - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
 
 ## Resume Uploads (PDF)
@@ -117,6 +117,25 @@ Keep `uploadResume` / `getResume` / `removeResume` in step between
 after changing either. Existing Supabase projects need
 `supabase/migrations/20261123000000_add_freelancer_resumes.sql`; fresh
 installs get the bucket and columns from `docs/marketplace-schema.sql`.
+
+## Chat Assistant (guided tasks)
+
+`chat-widget.js` answers questions from a curated knowledge base and can run
+real tasks step by step: **post a job** (client), **build/update a profile**
+(worker or client), **upload a resume** (worker) and **submit a proposal**
+(worker). It calls the same `GahonshDB` services as the page forms, so RLS and
+the offline fallback still apply. Every write is gated on sign-in and role; the
+bot opens the normal auth modal and offers a **Continue** action. User input is
+escaped before it reaches the chat log.
+
+The task state lives in memory (`task` in the IIFE); it is deliberately not
+persisted. Chat history is stored in `localStorage`. The chat panel uses
+`z-index: 99998` so the auth and profile modals (`99999`) always sit above it.
+
+Keep the knowledge-base action intents (`buildProfileBot`, `postJobBot`,
+`proposalBot`, `uploadResumeBot`, `botHelp`) and the task step definitions in
+step when a service field changes. See `docs/CHAT-ASSISTANT.md` for the
+capability table, commands, safety rules and browser test steps.
 
 ## Owner Studio Editor (local only)
 

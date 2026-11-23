@@ -7,6 +7,14 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 ## [Unreleased]
 
 ### Added
+- **Guided chat assistant tasks.** The site-wide assistant (`chat-widget.js`) can now run real tasks step by step instead of only answering questions. It asks for the required fields, shows a review summary, and then calls the same service the page form uses:
+  - **Post a job** (client): title, category, scope, pricing model, fixed budget or hourly range, duration, experience level and optional skills → `Jobs.createJob()`.
+  - **Build / update a profile** (worker or client): full name, professional title, location, skills and hourly rate (worker only) and bio → `Profiles.updateMyProfile()`.
+  - **Upload a resume** (worker): opens the profile editor at the Resume / CV (PDF) section.
+  - **Submit a proposal** (worker): job link/ID, bid, delivery days and cover letter → `Proposals.submitProposal()`.
+  - Sign-in and role checks gate every write; the bot opens the normal auth modal and offers a **Continue** action. Every user value is escaped before rendering, and the offline fallback works because the bot calls `GahonshDB`.
+  - A new **What I can do** help intent lists the capabilities and limits (no payments, no account approval), with quick-action chips for each task.
+  - `docs/CHAT-ASSISTANT.md` documents the capability table, commands, safety rules and browser test steps; `AGENTS.md` records the maintenance contract.
 - **Freelancer resume / CV uploads (PDF):**
   - `Profiles.uploadResume()`, `getResume()` and `removeResume()` in both `supabase-client.js` (private `resumes` Storage bucket plus short-lived signed URLs) and `marketplace-local.js` (IndexedDB blobs), so the feature works online and in the offline fallback.
   - The profile editor (`auth.js`) now shows a freelancer-only "Resume / CV (PDF)" section with Upload, View and Remove, a 5 MB cap and PDF validation.
@@ -26,6 +34,7 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 - The file-transfer panel shows a clear setup message when the deployment has not been migrated yet, instead of leaking a raw `PGRST205` / `Bucket not found` error.
 
 ### Fixed
+- **The chat panel covered the sign-in and profile modals on small screens.** `#gc-root` used `z-index: 2147483000`, while the auth and profile modals use `99999`, so the bottom sheet sat on top of the form it had just opened. It now uses `99998`, below both modals, and the assistant closes cleanly into the normal sign-in flow.
 - **Saving a page from the Owner Studio baked runtime widgets into the HTML.** The editor serialized the live iframe DOM, so every save captured what the site's scripts had injected at runtime — the auth modal and its styles, the chat panel (`#gc-root`), the theme toggle, the nav Sign In button, `gs-hide` scroll-reveal classes and even a `light-mode` body class. The file grew by ~23 KB per save, and the chat panel could be injected twice on the next load. The preview now sets `window.__GAHONSH_STUDIO_PREVIEW__` before the page's scripts run, and `script.js`, `auth.js`, `chat-widget.js` and `marketplace-trust.js` skip their DOM injection while it is set. A new `cleanForSave()` strips any leftover injected node plus the preview flag, scroll-reveal classes and the `light-mode` class before serializing, for both Save and Download.
 - **The editor preview threw `Identifier 'menuOpenBtn' has already been declared` after a save.** Re-rendering reused the iframe's `Window` via `document.open()`/`write()`, which keeps top-level `const`/`let` bindings, so the page's inline scripts aborted on the second render. `renderEditablePage()` now replaces the iframe element on each render to get a fresh JS realm.
 - **The Owner Studio API could overwrite non-page files.** `/api/save-page` accepted `.js`, `.css`, `.json` and `.xml` at the repo root, so `filename: "server.js"` replaced the server; `/api/upload-file` accepted any folder, so a caller could write into `.git/hooks`. Saving is now limited to `.html`/`.htm` at the repo root, and uploads are limited to `images`, `assets/projects`, `assets/media` and `assets/files` with a resolved-path containment check. Verified: `server.js` save → 403, `../../tmp` upload → 403, normal page save/upload → 200.
