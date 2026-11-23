@@ -305,11 +305,31 @@
             chips: []
         },
         {
+            id: 'profileAudit', action: 'profileAudit',
+            kw: ['check my profile', 'profile check', 'profile audit', 'profile review', 'what is missing in my profile', 'profile me kya kami', 'profile mein kya kami', 'mera profile kaisa', 'profile kaisi hai', 'profile improve', 'profile strong', 'प्रोफाइल चेक', 'प्रोफाइल में क्या कमी', 'प्रोफाइल कैसी'],
+            chips: []
+        },
+        {
+            id: 'jobAudit', action: 'jobAudit',
+            kw: ['check my job', 'job check', 'job audit', 'job review', 'improve my job', 'job improve', 'what is missing in my job post', 'job post me kya kami', 'job post mein kya kami', 'mera job kaisa', 'job post improve', 'जॉब चेक', 'जॉब में क्या कमी', 'जॉब कैसा'],
+            chips: []
+        },
+        {
+            id: 'profileFix', action: 'profileFix',
+            kw: ['fix my profile', 'profile fix', 'complete my profile', 'profile complete karo', 'profile theek karo', 'profile bhar do', 'profile gaps', 'प्रोफाइल पूरा करो', 'प्रोफाइल ठीक करो'],
+            chips: []
+        },
+        {
+            id: 'jobFix', action: 'jobFix',
+            kw: ['fix my job', 'job fix', 'improve this job', 'job theek karo', 'job sudharo', 'job post fix', 'जॉब ठीक करो', 'जॉब सुधारो'],
+            chips: []
+        },
+        {
             id: 'botHelp',
             kw: ['what can you do', 'what can i do', 'what do you do for me', 'help', 'kya kar sakta', 'kya kya kaam', 'kya kar sakte', 'commands', 'options', 'capabilities', 'तुम क्या कर सकते', 'क्या कर सकते हो', 'मदद'],
-            chips: ['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'hireTalent', 'quote', 'human'],
-            en: 'I can do these tasks with you:<br><br>• <b>Post a job</b> — I ask title, category, scope, budget, duration and skills, then publish it (client account).<br>• <b>Build or update a profile</b> — name, title, location, skills, rate and bio (worker or client).<br>• <b>Upload a resume</b> — I open the profile editor for a PDF up to 5 MB (worker).<br>• <b>Submit a proposal</b> — paste a job link, then give your bid, days and cover letter (worker).<br>• <b>Find work / Find talent</b> — open the right directory.<br>• <b>Quote</b> — I take your name, email and project and send it to the team.<br><br>Sign-in is required for posting, applying and saving a profile. I cannot take payments, approve accounts or bypass the site rules.',
-            hi: 'मैं आपके साथ ये काम कर सकता हूँ:<br><br>• <b>Job post</b> — title, category, scope, budget, duration और skills पूछकर publish करता हूँ (client account).<br>• <b>Profile बनाना/अपडेट</b> — नाम, title, location, skills, rate और bio (worker या client).<br>• <b>Resume upload</b> — 5 MB तक PDF के लिए profile editor खोलता हूँ (worker).<br>• <b>Proposal भेजना</b> — job link paste कीजिए, फिर bid, days और cover letter (worker).<br>• <b>Find work / Find talent</b> — सही directory खोलता हूँ.<br>• <b>Quote</b> — नाम, email और project लेकर team तक भेजता हूँ.<br><br>Post, apply और profile सेव करने के लिए sign-in ज़रूरी है. Payment, account approval या site के नियम bypass करना मैं नहीं कर सकता.'
+            chips: ['profileAudit', 'jobAudit', 'postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'human'],
+            en: 'I can do these tasks with you:<br><br>• <b>Check my profile</b> — I score your saved profile and tell you what is missing or weak, then I can fill the gaps.<br>• <b>Check my job post</b> — I score a job you posted and tell you what to improve so the offer is clear and attractive.<br>• <b>Post a job</b> — I ask title, category, scope, budget, duration and skills, then publish it (client account).<br>• <b>Build or update a profile</b> — name, title, location, skills, rate and bio (worker or client).<br>• <b>Upload a resume</b> — I open the profile editor for a PDF up to 5 MB (worker).<br>• <b>Submit a proposal</b> — paste a job link, then give your bid, days and cover letter (worker).<br>• <b>Find work / Find talent</b> — open the right directory.<br>• <b>Quote</b> — I take your name, email and project and send it to the team.<br><br>Sign-in is required for checks, posting, applying and saving a profile. I cannot take payments, approve accounts or bypass the site rules.',
+            hi: 'मैं आपके साथ ये काम कर सकता हूँ:<br><br>• <b>Profile check</b> — आपकी सेव की हुई profile को score करके बताता हूँ कि क्या कमी है, फिर उसे भर भी सकता हूँ.<br>• <b>Job post check</b> — आपकी post की हुई job को score करके बताता हूँ कि offer को साफ और आकर्षक बनाने के लिए क्या सुधारें.<br>• <b>Job post</b> — title, category, scope, budget, duration और skills पूछकर publish करता हूँ (client account).<br>• <b>Profile बनाना/अपडेट</b> — नाम, title, location, skills, rate और bio (worker या client).<br>• <b>Resume upload</b> — 5 MB तक PDF के लिए profile editor खोलता हूँ (worker).<br>• <b>Proposal भेजना</b> — job link paste कीजिए, फिर bid, days और cover letter (worker).<br>• <b>Find work / Find talent</b> — सही directory खोलता हूँ.<br>• <b>Quote</b> — नाम, email और project लेकर team तक भेजता हूँ.<br><br>Check, post, apply और profile सेव करने के लिए sign-in ज़रूरी है. Payment, account approval या site के नियम bypass करना मैं नहीं कर सकता.'
         }
     ];
 
@@ -341,6 +361,10 @@
         findWork: { en: 'Find work', hi: 'काम खोजें' },
         hireTalent: { en: 'Find talent', hi: 'Talent खोजें' },
         botHelp: { en: 'What I can do', hi: 'मैं क्या कर सकता हूँ' },
+        profileAudit: { en: 'Check my profile', hi: 'Profile check करें' },
+        jobAudit: { en: 'Check my job post', hi: 'Job post check करें' },
+        fixProfile: { en: 'Fix my profile', hi: 'Profile पूरा करें' },
+        fixJob: { en: 'Improve this job', hi: 'Job सुधारें' },
         postJobBot: { en: 'Post a job', hi: 'Job post करें' },
         buildProfileBot: { en: 'Build my profile', hi: 'Profile बनाएँ' },
         proposalBot: { en: 'Submit a proposal', hi: 'Proposal भेजें' },
@@ -357,11 +381,12 @@
     // Chips that drive a guided task get a stronger visual treatment.
     var ACTION_CHIPS = {
         postJobBot: 1, buildProfileBot: 1, proposalBot: 1, uploadResume: 1,
+        profileAudit: 1, jobAudit: 1, fixProfile: 1, fixJob: 1,
         dashboard: 1, signIn: 1, continueTask: 1, cancelTask: 1,
         skipTask: 1, confirmTask: 1, editTask: 1
     };
 
-    var DEFAULT_CHIPS = ['postJobBot', 'buildProfileBot', 'botHelp', 'services', 'pricing', 'human'];
+    var DEFAULT_CHIPS = ['postJobBot', 'buildProfileBot', 'proposalBot', 'botHelp', 'services', 'pricing', 'human'];
 
     /* -------------------------------------------------------------- language */
     var HINGLISH = /\b(kya|kyu|kyun|kaise|kaisa|kitna|kitne|kitni|chahiye|chaiye|batao|bataiye|hai|hain|nahi|nahin|mujhe|muje|karna|karwana|karwane|kaam|kam|paisa|paise|kab|jaldi|accha|acha|theek|thik|haan|han|bhai|bhaiya|dijiye|dijie|kijiye|banwana|banwana|banana|banao|dekho|dikhao|sakte|sakta|milega|milegi|lagta|lagega|aap|tu|tum|mera|meri|apna|koi|kuch|sab|zyada|kam)\b/i;
@@ -373,7 +398,9 @@
     }
 
     function norm(s) {
-        return ' ' + String(s).toLowerCase().replace(/[^\p{L}\p{N}\s']/gu, ' ').replace(/\s+/g, ' ') + ' ';
+        // Keep combining marks (\p{M}) so Devanagari vowel signs survive;
+        // otherwise "प्रोफाइल" is stripped and never matches its keyword.
+        return ' ' + String(s).toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s']/gu, ' ').replace(/\s+/g, ' ') + ' ';
     }
 
     function score(text, intent) {
@@ -466,6 +493,21 @@
         + '.gc-step{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--gc-accent);margin-bottom:4px;}'
         + '.gc-summary{margin-top:8px;padding:10px 11px;border:1px solid var(--gc-line);border-radius:10px;background:rgba(255,255,255,.03);font-size:12.5px;line-height:1.6;}'
         + 'body.light-mode .gc-summary{background:#f8fafc;}'
+        + '.gc-audit{margin-top:2px;}'
+        + '.gc-audit-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;margin-bottom:6px;}'
+        + '.gc-audit-head span{font-weight:800;color:var(--gc-accent);white-space:nowrap;}'
+        + '.gc-audit-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:9px;}'
+        + 'body.light-mode .gc-audit-bar{background:#e2e8f0;}'
+        + '.gc-audit-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#00d9b2,#2b8cff);}'
+        + '.gc-audit-item{display:flex;gap:7px;font-size:12.5px;line-height:1.45;margin:6px 0;}'
+        + '.gc-audit-item>div{min-width:0;overflow-wrap:anywhere;}'
+        + '.gc-audit-icon{flex:0 0 auto;}'
+        + '.gc-audit-item b{font-weight:700;}'
+        + '.gc-audit-missing b{color:#f87171;}'
+        + '.gc-audit-warn b{color:#fbbf24;}'
+        + 'body.light-mode .gc-audit-missing b{color:#b91c1c;}'
+        + 'body.light-mode .gc-audit-warn b{color:#b45309;}'
+        + '.gc-audit-tips{margin-top:9px;padding-top:8px;border-top:1px dashed var(--gc-line);font-size:12px;line-height:1.55;color:var(--gc-muted);}'
         + '.gc-form{display:flex;gap:8px;padding:10px 11px;border-top:1px solid var(--gc-line);background:var(--gc-panel);}'
         + '#gc-in{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--gc-line);border-radius:22px;padding:11px 14px;color:var(--gc-text);font-size:13.5px;font-family:inherit;outline:none;min-width:0;}'
         + 'body.light-mode #gc-in{background:#f8fafc;}'
@@ -477,7 +519,9 @@
         + '.gc-typing i{width:6px;height:6px;border-radius:50%;background:var(--gc-muted);animation:gcB 1s infinite;}'
         + '.gc-typing i:nth-child(2){animation-delay:.15s}.gc-typing i:nth-child(3){animation-delay:.3s}'
         + '@keyframes gcB{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}'
-        + '@media(max-width:480px){#gc-root{right:16px;bottom:98px;}#gc-panel{width:calc(100vw - 24px);right:-4px;height:min(74vh,560px);}}';
+        + '@media(max-width:480px){#gc-root{right:16px;bottom:98px;}#gc-panel{width:calc(100vw - 24px);right:-4px;height:min(74vh,560px);}'
+        + '.gc-chip{min-height:48px;padding:10px 14px;font-size:13px;}.gc-x{width:48px;height:48px;padding:0;display:inline-flex;align-items:center;justify-content:center;}'
+        + '#gc-in{min-height:48px;}#gc-send{width:48px;height:48px;}}';
 
     var root = el('div', '');
     root.id = 'gc-root';
@@ -549,6 +593,9 @@
     }
 
     function handleClickChip(id) {
+        // A chip always starts a fresh action. Clear a pending job picker so
+        // the next typed message is not swallowed by the picker state.
+        jobPicker = null;
         var label = CHIP_LABEL[id] ? (CHIP_LABEL[id][lang] || CHIP_LABEL[id].en) : id;
         if (ACTION_HANDLERS[id]) {
             addMsg('me', label);
@@ -594,6 +641,14 @@
     // server: the browser does the work, and the existing RLS rules still apply.
     var task = null;
     var pendingTask = null;
+    var jobPicker = null;
+    var lastProfileAudit = null;
+    var lastJobAudit = null;
+    var greetedUserId = null;
+    // Bumped when the account changes or signs out. Async reads and writes
+    // compare it before showing data, so a late response cannot leak the
+    // previous user's profile or job into the cleared chat.
+    var chatEpoch = 0;
 
     var JOB_CATEGORIES = [
         { value: 'Excel Automation', en: 'Excel & Spreadsheet Automation', hi: 'Excel और Spreadsheet Automation' },
@@ -672,6 +727,582 @@
             if (value.min !== undefined) return '$' + value.min + '/hr – $' + value.max + '/hr';
         }
         return String(value);
+    }
+
+    /* ----------------------------------------------------------- audit engine */
+    // A profile/job check is a deterministic rubric, not a guess: each item has
+    // a weight, a status (ok / warn / missing) and a fixable flag. The same
+    // checks drive the summary and the guided "fill the gaps" flow.
+    function auditItem(key, labelEn, labelHi, weight, status, detailEn, detailHi, fixable) {
+        return {
+            key: key,
+            label_en: labelEn,
+            label_hi: labelHi,
+            weight: weight,
+            status: status,
+            detail_en: detailEn,
+            detail_hi: detailHi,
+            fixable: fixable !== false
+        };
+    }
+
+    // A title is generic when every meaningful word is a role label or a
+    // seniority modifier. "Freelance Specialist" is generic; "Senior Excel
+    // Automation Specialist" and "React Developer" are specific.
+    var GENERIC_TITLE_MODIFIERS = /^(senior|junior|lead|principal|chief|head|freelance|independent|फ्रीलांस|स्वतंत्र|वरिष्ठ|जूनियर|प्रमुख|लीड)$/i;
+    var GENERIC_TITLE_ROLES = /^(freelancer|professional|expert|specialist|consultant|developer|designer|engineer|worker|client|architect|analyst|writer|marketer|strategist|फ्रीलांसर|पेशेवर|विशेषज्ञ|सलाहकार|डेवलपर|डिज़ाइनर|इंजीनियर|कर्मचारी|ग्राहक|आर्किटेक्ट|विश्लेषक|लेखक|मार्केटर|रणनीतिकार)$/i;
+
+    function isGenericProfileTitle(title) {
+        var tokens = String(title || '').toLowerCase().split(/[\s,./-]+/).filter(Boolean);
+        var meaningful = tokens.filter(function (token) {
+            return !GENERIC_TITLE_MODIFIERS.test(token);
+        });
+        return meaningful.length === 0 || meaningful.every(function (token) {
+            return GENERIC_TITLE_ROLES.test(token);
+        });
+    }
+
+    var JOB_TITLE_FILLER = /^(need|needs|needed|help|work|project|job|task|urgent|simple|cheap|quick|easy|someone|person|required|wanted|looking|for|a|an|the|please|my|our|build|create|design|make|fix|do|done|small|big|new|काम|मदद|प्रोजेक्ट|परियोजना|जरूरत|ज़रूरत|चाहिए|तुरंत|सरल|सस्ता|जल्दी|आसान|कोई|व्यक्ति|आवश्यक|ढूंढ|रहा|हूँ|हूं|के|लिए|एक|मेरा|हमारा|बनाओ|बनाएं|डिजाइन|करो|करें|ठीक|छोटा|बड़ा|नया)$/i;
+    var JOB_TITLE_ROLES = /^(developer|designer|expert|freelancer|engineer|consultant|specialist|programmer|writer|marketer|assistant|manager|analyst|architect|डेवलपर|डिज़ाइनर|विशेषज्ञ|फ्रीलांसर|इंजीनियर|सलाहकार|प्रोग्रामर|लेखक|मार्केटर|सहायक|मैनेजर|विश्लेषक|आर्किटेक्ट)$/i;
+
+    function isGenericJobTitle(title) {
+        var tokens = String(title || '').toLowerCase().split(/[\s,./-]+/).filter(Boolean);
+        var meaningful = tokens.filter(function (token) {
+            return !JOB_TITLE_FILLER.test(token);
+        });
+        return meaningful.length === 0 || meaningful.every(function (token) {
+            return JOB_TITLE_ROLES.test(token);
+        });
+    }
+
+    function auditScore(items) {
+        var total = items.reduce(function (sum, item) { return sum + item.weight; }, 0) || 1;
+        var earned = items.reduce(function (sum, item) {
+            if (item.status === 'ok') return sum + item.weight;
+            if (item.status === 'warn') return sum + item.weight * 0.5;
+            return sum;
+        }, 0);
+        return Math.round((earned / total) * 100);
+    }
+
+    function auditProfile(profile) {
+        profile = profile || {};
+        var role = profile.role === 'client' ? 'client' : 'freelancer';
+        var items = [];
+
+        var name = String(profile.full_name || '').trim();
+        items.push(auditItem('full_name', 'Full name', 'पूरा नाम', role === 'client' ? 20 : 10,
+            name.length >= 2 ? 'ok' : 'missing',
+            name.length >= 2 ? 'Your name is visible on your profile.' : 'Add your full name so clients know who they are talking to.',
+            name.length >= 2 ? 'आपका नाम profile पर दिख रहा है.' : 'अपना पूरा नाम जोड़िए ताकि client जान सके किससे बात हो रही है.'));
+
+        var title = String(profile.title || '').trim();
+        var genericTitle = isGenericProfileTitle(title);
+        if (!title) {
+            items.push(auditItem('title', 'Professional title', 'Professional title', role === 'client' ? 25 : 20, 'missing',
+                'Add a specific title, e.g. "Excel Automation Expert" or "Full-Stack Developer".',
+                'खास title जोड़िए, जैसे "Excel Automation Expert" या "Full-Stack Developer".'));
+        } else if (title.length < 8 || genericTitle) {
+            items.push(auditItem('title', 'Professional title', 'Professional title', role === 'client' ? 25 : 20, 'warn',
+                '“' + title + '” is too broad. Name the role and speciality, e.g. "Senior React Developer".',
+                '“' + title + '” बहुत सामान्य है. Role और speciality लिखिए, जैसे "Senior React Developer".'));
+        } else {
+            items.push(auditItem('title', 'Professional title', 'Professional title', role === 'client' ? 25 : 20, 'ok',
+                'Your title is specific enough.', 'आपका title ठीक है.'));
+        }
+
+        var location = String(profile.location || '').trim();
+        items.push(auditItem('location', 'Location', 'Location', role === 'client' ? 15 : 10,
+            location ? 'ok' : 'missing',
+            location ? 'Location is set.' : 'Add your city or "Remote" so clients can see your time zone.',
+            location ? 'Location सेट है.' : 'अपना शहर या "Remote" जोड़िए ताकि client time zone देख सके.'));
+
+        if (role === 'freelancer') {
+            var skills = Array.isArray(profile.skills) ? profile.skills.filter(Boolean) : [];
+            if (!skills.length) {
+                items.push(auditItem('skills', 'Skills', 'Skills', 20, 'missing',
+                    'Add 3-5 tools you actually use, e.g. Excel VBA, Python, React.',
+                    '3-5 tools जोड़िए जो आप सच में इस्तेमाल करते हैं, जैसे Excel VBA, Python, React.'));
+            } else if (skills.length < 3) {
+                items.push(auditItem('skills', 'Skills', 'Skills', 20, 'warn',
+                    'You have ' + skills.length + ' skill(s). Add 2-3 more so clients can find you.',
+                    'आपके पास ' + skills.length + ' skill हैं. 2-3 और जोड़िए ताकि client आपको ढूँढ सके.'));
+            } else {
+                items.push(auditItem('skills', 'Skills', 'Skills', 20, 'ok',
+                    skills.length + ' skills listed.', skills.length + ' skills listed.'));
+            }
+
+            var rate = Number(profile.hourly_rate) || 0;
+            items.push(auditItem('hourly_rate', 'Hourly rate (USD)', 'Hourly rate (USD)', 15,
+                rate > 0 ? 'ok' : 'missing',
+                rate > 0 ? 'Your rate is $' + rate + '/hr.' : 'Set an hourly rate so clients can compare budgets.',
+                rate > 0 ? 'आपकी rate $' + rate + '/hr है.' : 'Hourly rate सेट कीजिए ताकि client budget compare कर सके.'));
+
+            var bio = String(profile.bio || '').trim();
+            if (!bio) {
+                items.push(auditItem('bio', 'Bio', 'Bio', 15, 'missing',
+                    'Write 3-4 lines: years of experience, 2 delivered outcomes and the tools you use.',
+                    '3-4 लाइन लिखिए: अनुभव, 2 delivered outcomes और tools.'));
+            } else if (bio.length < 80) {
+                items.push(auditItem('bio', 'Bio', 'Bio', 15, 'warn',
+                    'Your bio is ' + bio.length + ' characters. Add a delivered outcome with a number.',
+                    'आपका bio ' + bio.length + ' अक्षर है. किसी delivered outcome को number के साथ जोड़िए.'));
+            } else {
+                items.push(auditItem('bio', 'Bio', 'Bio', 15, 'ok',
+                    'Your bio has enough detail.', 'आपका bio ठीक है.'));
+            }
+
+            var resumeKnown = profile.has_resume !== undefined ||
+                profile.resume_name !== undefined || profile.resume_size_bytes !== undefined;
+            if (resumeKnown) {
+                var hasResume = profile.has_resume === true || !!profile.resume_name;
+                items.push(auditItem('resume', 'Resume / CV', 'Resume / CV', 10,
+                    hasResume ? 'ok' : 'missing',
+                    hasResume ? 'A PDF resume is on your profile.' : 'Upload a PDF resume so clients can review your CV.',
+                    hasResume ? 'आपकी profile पर PDF resume है.' : 'PDF resume अपलोड कीजिए ताकि client आपका CV देख सके.',
+                    false));
+            }
+        } else {
+            var about = String(profile.bio || '').trim();
+            if (!about) {
+                items.push(auditItem('bio', 'Company / about', 'Company / about', 40, 'missing',
+                    'Write 3-4 lines about your business, the team and the kind of projects you hire for.',
+                    'अपने business, team और किस तरह के projects पर hire करते हैं, 3-4 लाइन में लिखिए.'));
+            } else if (about.length < 80) {
+                items.push(auditItem('bio', 'Company / about', 'Company / about', 40, 'warn',
+                    'Your about section is ' + about.length + ' characters. Add what your company does and the results you need.',
+                    'आपका about ' + about.length + ' अक्षर है. Company क्या करती है और क्या result चाहिए, जोड़िए.'));
+            } else {
+                items.push(auditItem('bio', 'Company / about', 'Company / about', 40, 'ok',
+                    'Your about section has enough detail.', 'आपका about ठीक है.'));
+            }
+        }
+
+        var tips = role === 'freelancer' ? [
+            t('Lead with outcomes, not duties: "cut reporting time by 60%".', 'Duties नहीं, outcomes लीड कीजिए: "reporting time 60% कम किया".'),
+            t('Use 5-8 skills you can demo in a call.', '5-8 ऐसी skills लिखिए जो call में दिखा सकें.'),
+            t('Add a PDF resume and keep it to 1-2 pages.', 'PDF resume जोड़िए और 1-2 page रखिए.'),
+            t('Set a realistic hourly rate; you can adjust it later.', 'वास्तविक hourly rate रखिए; बाद में बदल सकते हैं.')
+        ] : [
+            t('Say what your company does and the kind of projects you hire for.', 'बताइए आपकी company क्या करती है और किस तरह के projects पर hire करती है.'),
+            t('Add the results you need, not just the tasks.', 'सिर्फ tasks नहीं, जो result चाहिए वो भी लिखिए.'),
+            t('Mention your time zone and how you like to communicate.', 'अपना time zone और communication style लिखिए.')
+        ];
+        var gaps = items.filter(function (item) { return item.status !== 'ok'; });
+        return { kind: 'profile', role: role, items: items, score: auditScore(items), gaps: gaps.length, tips: tips };
+    }
+
+    function auditJob(job) {
+        job = job || {};
+        var items = [];
+
+        var title = String(job.title || '').trim();
+        var genericTitle = isGenericJobTitle(title);
+        if (!title) {
+            items.push(auditItem('title', 'Project title', 'Project title', 15, 'missing',
+                'Add a specific title with the outcome, e.g. "Automated Excel Sales Dashboard with Monthly KPIs".',
+                'Outcome के साथ खास title लिखिए, जैसे "Automated Excel Sales Dashboard with Monthly KPIs".'));
+        } else if (title.length < 15 || genericTitle) {
+            items.push(auditItem('title', 'Project title', 'Project title', 15, 'warn',
+                '“' + title + '” is short or generic. Name the outcome, e.g. "Automated Excel Sales Dashboard".',
+                '“' + title + '” छोटा या सामान्य है. Outcome लिखिए, जैसे "Automated Excel Sales Dashboard".'));
+        } else {
+            items.push(auditItem('title', 'Project title', 'Project title', 15, 'ok',
+                'Your title is specific.', 'आपका title ठीक है.'));
+        }
+
+        items.push(auditItem('category', 'Category', 'Category', 5,
+            job.category ? 'ok' : 'missing',
+            job.category ? 'Category: ' + job.category : 'Choose a category so the right workers see it.',
+            job.category ? 'Category: ' + job.category : 'Category चुनिए ताकि सही worker को दिखे.'));
+
+        var desc = String(job.description || '').trim();
+        var lower = desc.toLowerCase();
+        var keywords = ['deliver', 'build', 'create', 'design', 'automate', 'report', 'dashboard', 'page', 'app',
+            'api', 'data', 'excel', 'pdf', 'website', 'tool', 'format', 'example', 'success', 'timeline',
+            'deadline', 'require', 'accept'];
+        var hits = keywords.filter(function (k) { return lower.indexOf(k) > -1; }).length;
+        // The keyword list is English. A long Hindi description should not be
+        // marked weak just because it has no English keywords.
+        var englishWords = (desc.match(/[A-Za-z]{3,}/g) || []).length;
+        if (desc.length < 30) {
+            items.push(auditItem('description', 'Scope', 'Scope', 30, 'missing',
+                'Describe the work: deliverables, tools, timeline and what success looks like. Aim for 120+ characters.',
+                'काम बताइए: deliverables, tools, timeline और success क्या होगा. 120+ अक्षर लिखिए.'));
+        } else if (desc.length < 120 || (englishWords >= 3 && hits < 2)) {
+            items.push(auditItem('description', 'Scope', 'Scope', 30, 'warn',
+                'Your scope is ' + desc.length + ' characters. Add the exact deliverables, tools and what success looks like.',
+                'आपका scope ' + desc.length + ' अक्षर है. साफ deliverables, tools और success जोड़िए.'));
+        } else {
+            items.push(auditItem('description', 'Scope', 'Scope', 30, 'ok',
+                'Your scope explains the deliverables and context.', 'आपका scope deliverables और context समझाता है.'));
+        }
+
+        var jobType = job.job_type === 'hourly' ? 'hourly' : 'fixed';
+        var fixed = Number(job.budget_min) || 0;
+        var hmin = Number(job.hourly_rate_min) || 0;
+        var hmax = Number(job.hourly_rate_max) || 0;
+        if (jobType === 'hourly') {
+            if (!hmin || !hmax || hmax < hmin) {
+                items.push(auditItem('budget', 'Hourly range', 'Hourly range', 15, 'missing',
+                    'Add an hourly range, e.g. 25-60 USD.', 'Hourly range जोड़िए, जैसे 25-60 USD.'));
+            } else if (hmax < 10) {
+                items.push(auditItem('budget', 'Hourly range', 'Hourly range', 15, 'warn',
+                    'Your hourly range is $' + hmin + '-$' + hmax + '. Very low rates can attract fewer serious bids.',
+                    'आपकी hourly range $' + hmin + '-$' + hmax + ' है. बहुत कम rate पर कम serious bids आ सकते हैं.'));
+            } else {
+                items.push(auditItem('budget', 'Hourly range', 'Hourly range', 15, 'ok',
+                    'Hourly range: $' + hmin + '-$' + hmax + '.', 'Hourly range: $' + hmin + '-$' + hmax + '.'));
+            }
+        } else if (fixed < 20) {
+            items.push(auditItem('budget', 'Fixed budget', 'Fixed budget', 15, 'missing',
+                'Add a fixed budget of at least $20.', 'कम से कम $20 का fixed budget जोड़िए.'));
+        } else if (fixed < 50) {
+            items.push(auditItem('budget', 'Fixed budget', 'Fixed budget', 15, 'warn',
+                'Your fixed budget is $' + fixed + '. Very low budgets can attract fewer serious bids; check that it matches the scope.',
+                'आपका fixed budget $' + fixed + ' है. बहुत कम budget पर कम serious bids आ सकते हैं; scope से मिलाइए.'));
+        } else {
+            items.push(auditItem('budget', 'Fixed budget', 'Fixed budget', 15, 'ok',
+                'Fixed budget: $' + fixed + '.', 'Fixed budget: $' + fixed + '.'));
+        }
+
+        items.push(auditItem('duration', 'Duration', 'Duration', 10,
+            job.estimated_duration ? 'ok' : 'missing',
+            job.estimated_duration ? 'Duration: ' + job.estimated_duration : 'Add an estimated duration.',
+            job.estimated_duration ? 'Duration: ' + job.estimated_duration : 'अनुमानित duration जोड़िए.'));
+
+        items.push(auditItem('experience', 'Experience level', 'Experience level', 10,
+            job.experience_level ? 'ok' : 'missing',
+            job.experience_level ? 'Level: ' + job.experience_level : 'Choose the experience level you need.',
+            job.experience_level ? 'Level: ' + job.experience_level : 'ज़रूरी experience level चुनिए.'));
+
+        var skills = Array.isArray(job.required_skills) ? job.required_skills.filter(Boolean) : [];
+        if (!skills.length) {
+            items.push(auditItem('skills', 'Required skills', 'Required skills', 15, 'missing',
+                'Add 3-5 required skills so the right workers find it.',
+                '3-5 required skills जोड़िए ताकि सही worker को दिखे.'));
+        } else if (skills.length < 3) {
+            items.push(auditItem('skills', 'Required skills', 'Required skills', 15, 'warn',
+                'You listed ' + skills.length + ' skill(s). Add 1-2 more.',
+                'आपने ' + skills.length + ' skill लिखी हैं. 1-2 और जोड़िए.'));
+        } else {
+            items.push(auditItem('skills', 'Required skills', 'Required skills', 15, 'ok',
+                skills.length + ' skills listed.', skills.length + ' skills listed.'));
+        }
+
+        var tips = [
+            t('Start with one line about your business and the outcome you need.', 'पहली लाइन में business और ज़रूरी outcome लिखिए.'),
+            t('List exact deliverables and file formats.', 'साफ deliverables और file formats लिखिए.'),
+            t('Name the tools and add one example if you have it.', 'Tools के नाम लिखिए और एक example दीजिए.'),
+            t('Say what success looks like, and mention the timeline and budget range.', 'Success क्या होगा बताइए, timeline और budget range लिखिए.')
+        ];
+        var gaps = items.filter(function (item) { return item.status !== 'ok'; });
+        return { kind: 'job', items: items, score: auditScore(items), gaps: gaps.length, tips: tips };
+    }
+
+    function renderAudit(audit) {
+        var heading = audit.kind === 'profile'
+            ? t('Profile check', 'प्रोफाइल चेक')
+            : t('Job post check', 'जॉब पोस्ट चेक');
+        var rows = audit.items.map(function (item) {
+            var icon = item.status === 'ok' ? '✅' : item.status === 'warn' ? '⚠️' : '❌';
+            return '<div class="gc-audit-item gc-audit-' + item.status + '"><span class="gc-audit-icon" aria-hidden="true">' + icon + '</span><div><b>' +
+                escapeHtml(t(item.label_en, item.label_hi)) + '</b><br>' +
+                escapeHtml(t(item.detail_en, item.detail_hi)) + '</div></div>';
+        }).join('');
+        var tips = audit.tips && audit.tips.length
+            ? '<div class="gc-audit-tips"><b>' + t('To make it stronger', 'और मजबूत बनाने के लिए') + '</b><br>• ' +
+                audit.tips.map(function (tip) { return escapeHtml(tip); }).join('<br>• ') + '</div>'
+            : '';
+        var score = Math.max(0, Math.min(100, Math.round(audit.score)));
+        return '<div class="gc-audit"><div class="gc-audit-head"><b>' + escapeHtml(heading) + '</b><span>' + score + '/100</span></div>' +
+            '<div class="gc-audit-bar" role="progressbar" aria-label="' + escapeHtml(t('Score', 'स्कोर')) +
+            '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + score + '"><i style="width:' + score + '%"></i></div>' +
+            rows + tips + '</div>';
+    }
+
+    function showProfileAudit(profile) {
+        var audit = auditProfile(profile);
+        lastProfileAudit = { profile: profile, audit: audit };
+        addMsg('bot', renderAudit(audit));
+        var fixableGaps = audit.items.some(function (item) {
+            return item.status !== 'ok' && item.fixable;
+        });
+        var resumeGap = audit.items.some(function (item) {
+            return item.key === 'resume' && item.status !== 'ok';
+        });
+        if (fixableGaps) {
+            setChips(audit.role === 'client'
+                ? ['fixProfile', 'dashboard', 'human']
+                : ['fixProfile', 'uploadResume', 'dashboard', 'human']);
+        } else if (resumeGap) {
+            setChips(['uploadResume', 'dashboard', 'human']);
+        } else if (audit.role === 'client') {
+            setChips(['jobAudit', 'postJobBot', 'dashboard', 'human']);
+        } else {
+            setChips(['findWork', 'dashboard', 'human']);
+        }
+        return audit;
+    }
+
+    function showJobAudit(job) {
+        var audit = auditJob(job);
+        lastJobAudit = { job: job, audit: audit };
+        addMsg('bot', renderAudit(audit));
+        if (audit.gaps) {
+            setChips(['fixJob', 'postJobBot', 'dashboard', 'human']);
+        } else {
+            setChips(['postJobBot', 'hireTalent', 'dashboard', 'human']);
+        }
+        return audit;
+    }
+
+    function extractJobId(text) {
+        var raw = String(text || '').trim();
+        var match = raw.match(/[?&]id=([^&\s#]+)/i);
+        if (match) {
+            try {
+                raw = decodeURIComponent(match[1]);
+            } catch (e) {
+                return null;
+            }
+        }
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
+            return raw.toLowerCase();
+        }
+        if (/^(demo-)?job[_-][A-Za-z0-9-]+$/i.test(raw)) return raw.toLowerCase();
+        return null;
+    }
+
+    async function fetchMyProfile(user) {
+        var profile = (user && user.profile) || {};
+        try {
+            if (window.GahonshDB && window.GahonshDB.Profiles && window.GahonshDB.Profiles.getMyProfile) {
+                profile = (await window.GahonshDB.Profiles.getMyProfile()) || profile;
+            }
+        } catch (e) { /* fall back to the auth profile */ }
+        return profile;
+    }
+
+    async function startProfileAudit() {
+        var epoch = chatEpoch;
+        addTyping();
+        var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        if (!user) {
+            killTyping();
+            pendingTask = 'profileAudit';
+            promptSignIn();
+            return;
+        }
+        var profile = await fetchMyProfile(user);
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        killTyping();
+        addMsg('bot', t('I read your saved profile. Here is the check:', 'मैंने आपकी सेव की हुई profile पढ़ी. यह check है:'));
+        showProfileAudit(profile);
+    }
+
+    async function startJobAudit() {
+        var epoch = chatEpoch;
+        addTyping();
+        var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        if (!user) {
+            killTyping();
+            pendingTask = 'jobAudit';
+            promptSignIn();
+            return;
+        }
+        var role = (user.profile && user.profile.role) || '';
+        if (role !== 'client' && role !== 'admin') {
+            killTyping();
+            addMsg('bot', t('Job post checks are for client accounts. Sign in with a client account to check a job post.',
+                'Job post check client account के लिए है. Job post check करने के लिए client account से sign in कीजिए.'));
+            setChips(['profileAudit', 'dashboard', 'human']);
+            return;
+        }
+        if (!window.GahonshDB || !window.GahonshDB.Jobs || !window.GahonshDB.Jobs.getMyJobs) {
+            killTyping();
+            addMsg('bot', t('The job service is not available right now. Open your portal and try again.',
+                'Job service अभी उपलब्ध नहीं है. Portal खोलकर फिर कोशिश कीजिए.'));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        var jobs = [];
+        var loadError = null;
+        try {
+            jobs = (await window.GahonshDB.Jobs.getMyJobs()) || [];
+        } catch (e) {
+            loadError = e;
+            jobs = [];
+        }
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        jobs = Array.isArray(jobs) ? jobs.filter(function (job) { return job && job.id; }) : [];
+        killTyping();
+        if (loadError) {
+            addMsg('bot', t('I could not load your job posts: ' + escapeHtml(loadError.message || 'unknown error') +
+                '<br><br>Please try again, or open your portal.',
+                'आपकी job posts load नहीं हो सकीं: ' + escapeHtml(loadError.message || 'unknown error') +
+                '<br><br>फिर कोशिश कीजिए, या portal खोलिए.'));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        if (!jobs.length) {
+            addMsg('bot', t('You have not posted a job yet. I can post one with you now, then check it.',
+                'आपने अभी कोई job post नहीं की है. मैं अभी आपके साथ post कर सकता हूँ, फिर check करूँगा.'));
+            setChips(['postJobBot', 'human']);
+            return;
+        }
+        if (jobs.length === 1) {
+            showJobAudit(jobs[0]);
+            return;
+        }
+        jobPicker = jobs;
+        var list = jobPicker.slice(0, 8).map(function (job, index) {
+            return (index + 1) + '. ' + escapeHtml(job.title) + ' — ' + escapeHtml(job.status || 'open');
+        }).join('<br>');
+        var more = jobPicker.length > 8
+            ? '<br><br>' + t('Showing the first 8. Paste a job link to check any other job.',
+                'पहली 8 दिख रही हैं. कोई भी दूसरी job check करने के लिए job link paste कीजिए.')
+            : '';
+        addMsg('bot', t('Which job should I check?<br><br>' + list + more + '<br><br>Type a number, a title, or paste a job link.',
+            'कौन सी job check करूँ?<br><br>' + list + more + '<br><br>Number, title या job link लिखिए.'));
+        setChips(['cancelTask', 'human']);
+    }
+
+    function handleJobPicker(text) {
+        var clean = String(text || '').trim();
+        if (/^(cancel|stop|रद्द|band)\b/i.test(clean)) {
+            jobPicker = null;
+            addMsg('bot', t('Cancelled.', 'रद्द कर दिया.'));
+            setChips();
+            return;
+        }
+        var chosen = null;
+        var num = parseInt(clean, 10);
+        if (/^\d+[.)]?$/.test(clean) && num >= 1 && num <= jobPicker.length) {
+            chosen = jobPicker[num - 1];
+        } else {
+            var id = extractJobId(clean);
+            if (id) {
+                chosen = jobPicker.filter(function (job) {
+                    return String(job.id).toLowerCase() === id.toLowerCase();
+                })[0] || null;
+            }
+            if (!chosen && clean.length >= 3) {
+                chosen = jobPicker.filter(function (job) {
+                    return String(job.title || '').toLowerCase().indexOf(clean.toLowerCase()) > -1;
+                })[0] || null;
+            }
+        }
+        if (!chosen) {
+            addMsg('bot', t('Please type a number from the list, a title, or one of your job links.',
+                'सूची में से number, title या अपनी job का link लिखिए.'));
+            return;
+        }
+        jobPicker = null;
+        showJobAudit(chosen);
+    }
+
+    async function startProfileFix() {
+        var epoch = chatEpoch;
+        addTyping();
+        var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        if (!user) {
+            killTyping();
+            pendingTask = 'profileFix';
+            promptSignIn();
+            return;
+        }
+        var profile = await fetchMyProfile(user);
+        if (epoch !== chatEpoch) { killTyping(); return; }
+        killTyping();
+        var audit = auditProfile(profile);
+        var keys = audit.items.filter(function (item) {
+            return item.status !== 'ok' && item.fixable;
+        }).map(function (item) { return item.key; });
+        if (!keys.length) {
+            if (audit.items.some(function (item) { return item.key === 'resume' && item.status !== 'ok'; })) {
+                addMsg('bot', t('Everything else is filled in. The only gap is the resume PDF. Tap *Upload resume* to add it.',
+                    'बाकी सब भरा हुआ है. सिर्फ resume PDF की कमी है. *Upload resume* दबाइए.'));
+                setChips(['uploadResume', 'dashboard', 'human']);
+            } else {
+                addMsg('bot', t('Your profile is complete. Nothing to fix right now.',
+                    'आपकी profile पूरी है. अभी कुछ ठीक करने को नहीं है.'));
+                setChips(['findWork', 'dashboard', 'human']);
+            }
+            return;
+        }
+        var steps = profileSteps(profile).filter(function (step) { return keys.indexOf(step.key) > -1; });
+        task = { type: 'profile', mode: 'fix', index: 0, steps: steps, data: {} };
+        steps.forEach(function (step) {
+            if (step.default !== undefined) task.data[step.key] = step.default;
+        });
+        addMsg('bot', t('I will ask only the gaps. Tap Skip to keep a current value.',
+            'मैं सिर्फ कमियाँ पूछूँगा. मौजूदा value रखने के लिए Skip दबाइए.'));
+        askTaskStep();
+    }
+
+    async function startJobFix() {
+        if (!lastJobAudit || !lastJobAudit.job) {
+            await startJobAudit();
+            return;
+        }
+        var job = lastJobAudit.job;
+        var audit = auditJob(job);
+        var keys = audit.items.filter(function (item) { return item.status !== 'ok'; })
+            .map(function (item) { return item.key; });
+        if (!keys.length) {
+            addMsg('bot', t('This job post already looks complete. Nothing to fix right now.',
+                'यह job post पहले से पूरी लग रही है. अभी कुछ ठीक करने को नहीं है.'));
+            setChips(['postJobBot', 'hireTalent', 'dashboard', 'human']);
+            return;
+        }
+        var steps = jobSteps(job).filter(function (step) { return keys.indexOf(step.key) > -1; });
+        task = { type: 'job', mode: 'fix', target: job, index: 0, steps: steps, data: {} };
+        task.data.job_type = job.job_type || 'fixed';
+        steps.forEach(function (step) {
+            if (step.default !== undefined) task.data[step.key] = step.default;
+        });
+        addMsg('bot', t('I will ask only the gaps. Tap Skip to keep a current value.',
+            'मैं सिर्फ कमियाँ पूछूँगा. मौजूदा value रखने के लिए Skip दबाइए.'));
+        askTaskStep();
+    }
+
+    async function greetUser() {
+        if (!window.GahonshDB) return;
+        var epoch = chatEpoch;
+        var user = null;
+        try { user = await ensureUser(); } catch (e) { return; }
+        if (epoch !== chatEpoch) return;
+        if (!user) return;
+        if (greetedUserId === user.id) return;
+        greetedUserId = user.id;
+        var profile = await fetchMyProfile(user);
+        if (epoch !== chatEpoch) return;
+        var audit = auditProfile(profile);
+        var role = profile.role === 'client' ? 'client' : profile.role === 'admin' ? 'admin' : 'worker';
+        var roleLabelEn = role === 'admin' ? 'an admin' : 'a ' + role;
+        var name = String(profile.full_name || '').trim().split(' ')[0] || t('there', 'दोस्त');
+        var top = audit.items.filter(function (item) { return item.status !== 'ok'; }).slice(0, 2)
+            .map(function (item) {
+                return '• ' + escapeHtml(t(item.label_en, item.label_hi)) + ': ' +
+                    escapeHtml(t(item.detail_en, item.detail_hi));
+            }).join('<br>');
+        addMsg('bot', t(
+            'Welcome back, ' + escapeHtml(name) + '. You are signed in as ' + roleLabelEn + '. Your profile is <b>' + audit.score + '/100</b>.<br><br>' + (top || 'Everything important is filled in.'),
+            'वापसी पर स्वागत, ' + escapeHtml(name) + '. आप ' + role + ' के रूप में signed in हैं. आपकी profile <b>' + audit.score + '/100</b> है.<br><br>' + (top || 'ज़रूरी चीज़ें भरी हुई हैं.')
+        ));
+        if (!task && !jobPicker && !pendingTask && flow.step === 'idle') {
+            if (role === 'client') {
+                setChips(['profileAudit', 'jobAudit', 'postJobBot', 'botHelp']);
+            } else if (role === 'admin') {
+                setChips(['profileAudit', 'jobAudit', 'postJobBot', 'uploadResume', 'botHelp']);
+            } else {
+                setChips(['profileAudit', 'uploadResume', 'proposalBot', 'findWork', 'botHelp']);
+            }
+        }
     }
 
     async function ensureUser() {
@@ -758,10 +1389,21 @@
         return steps;
     }
 
-    function jobSteps() {
+    function jobSteps(job) {
+        var current = job || {};
+        var currentBudget;
+        if (current.job_type === 'hourly') {
+            var hMin = Number(current.hourly_rate_min);
+            var hMax = Number(current.hourly_rate_max);
+            currentBudget = hMin > 0 && hMax >= hMin ? { min: hMin, max: hMax } : undefined;
+        } else {
+            var fixedBudget = Number(current.budget_min);
+            currentBudget = fixedBudget >= 20 ? { fixed: fixedBudget } : undefined;
+        }
         return [
             {
                 key: 'title', label_en: 'Project title', label_hi: 'Project title',
+                default: current.title || '',
                 prompt_en: 'What is the project title? Example: "Automated Excel financial dashboard".',
                 prompt_hi: 'Project का title क्या है? जैसे: "Automated Excel financial dashboard".',
                 parse: function (v) {
@@ -771,6 +1413,7 @@
             },
             {
                 key: 'category', label_en: 'Category', label_hi: 'Category',
+                default: current.category || '',
                 prompt_en: 'Choose a category by number, or type its name:<br>' + choiceList(JOB_CATEGORIES),
                 prompt_hi: 'Category number चुनिए, या नाम लिखिए:<br>' + choiceList(JOB_CATEGORIES),
                 parse: function (v) {
@@ -781,6 +1424,7 @@
             },
             {
                 key: 'description', label_en: 'Scope', label_hi: 'Scope',
+                default: current.description || '',
                 prompt_en: 'Describe the work in a few lines. What must be delivered, and which tools or skills matter? (At least 30 characters.)',
                 prompt_hi: 'काम कुछ लाइनों में बताइए. क्या deliver करना है, और कौन सी tools/skills ज़रूरी हैं? (कम से कम 30 अक्षर.)',
                 parse: function (v) {
@@ -790,6 +1434,7 @@
             },
             {
                 key: 'job_type', label_en: 'Pricing model', label_hi: 'Pricing model',
+                default: current.job_type || '',
                 prompt_en: 'How should it be priced?<br>' + choiceList(JOB_TYPES),
                 prompt_hi: 'कीमत कैसे तय हो?<br>' + choiceList(JOB_TYPES),
                 parse: function (v) {
@@ -800,6 +1445,7 @@
             },
             {
                 key: 'budget', label_en: 'Budget', label_hi: 'Budget',
+                default: job ? currentBudget : undefined,
                 prompt_en: function () {
                     return task.data.job_type === 'hourly'
                         ? 'What is your hourly range in USD? Example: 25-60 (minimum $5).'
@@ -832,6 +1478,7 @@
             },
             {
                 key: 'duration', label_en: 'Duration', label_hi: 'Duration',
+                default: current.estimated_duration || '',
                 prompt_en: 'How long will it take?<br>' + choiceList(JOB_DURATIONS),
                 prompt_hi: 'काम में कितना समय लगेगा?<br>' + choiceList(JOB_DURATIONS),
                 parse: function (v) {
@@ -842,6 +1489,7 @@
             },
             {
                 key: 'experience', label_en: 'Experience level', label_hi: 'Experience level',
+                default: current.experience_level || '',
                 prompt_en: 'Which experience level do you need?<br>' + choiceList(JOB_LEVELS),
                 prompt_hi: 'किस experience level की ज़रूरत है?<br>' + choiceList(JOB_LEVELS),
                 parse: function (v) {
@@ -852,6 +1500,7 @@
             },
             {
                 key: 'skills', label_en: 'Required skills', label_hi: 'Required skills',
+                default: job && Array.isArray(current.required_skills) ? current.required_skills.slice() : [],
                 prompt_en: 'Which skills are required? Separate them with commas, or tap Skip. Example: Excel VBA, Financial Modeling.',
                 prompt_hi: 'कौन सी skills चाहिए? Comma से अलग लिखिए, या Skip दबाएँ. जैसे: Excel VBA, Financial Modeling.',
                 optional: true,
@@ -868,12 +1517,8 @@
                 prompt_en: 'Paste the job link or job ID you want to apply to. You can copy it from the job page.',
                 prompt_hi: 'जिस job पर apply करना है, उसका link या job ID paste कीजिए. Job page से copy कर सकते हैं.',
                 parse: async function (v) {
-                    var raw = String(v).trim();
-                    var m = raw.match(/[?&]id=([^&\s#]+)/i);
-                    if (m) raw = decodeURIComponent(m[1]);
-                    var looksLikeId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw) ||
-                        /^job[_-][A-Za-z0-9-]+$/i.test(raw);
-                    if (!looksLikeId) {
+                    var raw = extractJobId(v);
+                    if (!raw) {
                         return { error: t('That does not look like a job link or ID. Open the job page and copy the full link.', 'ये job link या ID नहीं लग रहा. Job page खोलकर पूरा link copy कीजिए.') };
                     }
                     var job = null;
@@ -933,8 +1578,8 @@
         var promptEn = typeof step.prompt_en === 'function' ? step.prompt_en() : step.prompt_en;
         var promptHi = typeof step.prompt_hi === 'function' ? step.prompt_hi() : step.prompt_hi;
         var hint = hasCurrent
-            ? t(' Current: ' + escapeHtml(displayTaskValue(current)) + '. Type a new value or tap Skip to keep it.',
-                ' अभी: ' + escapeHtml(displayTaskValue(current)) + '. नया लिखिए या Skip दबाएँ.')
+            ? t(' Current: ' + escapeHtml(displayTaskValue(current)) + ' — type a new value or tap Skip to keep it.',
+                ' अभी: ' + escapeHtml(displayTaskValue(current)) + ' — नया लिखिए या Skip दबाएँ.')
             : '';
         var progress = t('Step ' + (task.index + 1) + ' of ' + task.steps.length + ' — ',
             'Step ' + (task.index + 1) + ' / ' + task.steps.length + ' — ');
@@ -963,12 +1608,14 @@
     function cancelTask() {
         task = null;
         pendingTask = null;
+        jobPicker = null;
         addMsg('bot', t('Cancelled. Nothing was saved. What else can I do?', 'रद्द कर दिया. कुछ सेव नहीं हुआ. और क्या कर सकता हूँ?'));
         setChips();
     }
 
     async function handleTaskInput(text) {
         if (!task || task.busy) return;
+        var currentTask = task;
         var clean = String(text).trim();
         if (/^(cancel|stop|रद्द|band|बंद)\b/i.test(clean)) {
             cancelTask();
@@ -999,13 +1646,19 @@
         try {
             result = await step.parse(clean);
         } catch (err) {
-            if (task) task.busy = false;
+            if (task !== currentTask) return;
+            task.busy = false;
             addMsg('bot', t('Something went wrong while checking that. Please try again.',
                 'जाँच में कुछ गड़बड़ हुई. फिर कोशिश कीजिए.'));
             return;
         }
-        if (task) task.busy = false;
-        if (!task) return;
+        if (task !== currentTask) return;
+        task.busy = false;
+        if (!result || typeof result !== 'object') {
+            addMsg('bot', t('Something went wrong while checking that. Please try again.',
+                'जाँच में कुछ गड़बड़ हुई. फिर कोशिश कीजिए.'));
+            return;
+        }
         if (result.error) {
             addMsg('bot', result.error);
             return;
@@ -1034,57 +1687,68 @@
 
     async function submitTask() {
         if (!task || task.busy) return;
+        var current = task;
+        var epoch = chatEpoch;
         task.busy = true;
         addTyping();
         var success = false;
         try {
             if (task.type === 'profile') {
-                var updates = {
-                    full_name: task.data.full_name,
-                    title: task.data.title,
-                    location: task.data.location,
-                    bio: task.data.bio
-                };
-                if (task.data.skills !== undefined) updates.skills = task.data.skills;
-                if (task.data.hourly_rate !== undefined) updates.hourly_rate = task.data.hourly_rate;
+                var updates = {};
+                ['full_name', 'title', 'location', 'skills', 'hourly_rate', 'bio'].forEach(function (key) {
+                    if (task.data[key] !== undefined) updates[key] = task.data[key];
+                });
                 var saved = await window.GahonshDB.Profiles.updateMyProfile(updates);
+                if (task !== current || epoch !== chatEpoch) return;
                 success = true;
                 killTyping();
-                addMsg('bot', t('Profile saved. Your public profile now shows <b>' + escapeHtml(saved.title || task.data.title) + '</b>.<br><br>' +
+                var shownTitle = saved.title || task.data.title || '';
+                var titleLineEn = shownTitle ? ' Your public profile now shows <b>' + escapeHtml(shownTitle) + '</b>.' : '';
+                var titleLineHi = shownTitle ? ' आपके public profile पर अब <b>' + escapeHtml(shownTitle) + '</b> दिखेगा.' : '';
+                addMsg('bot', t('Profile saved.' + titleLineEn + '<br><br>' +
                     a(BASE + 'find-talent.html', 'See the talent directory') + ' &middot; ' +
-                    a(BASE + 'marketplace-dashboard.html', 'Open your portal') + '<br><br>Want a PDF CV on your profile too? Tap *Upload resume*.',
-                    'Profile सेव हो गया. आपके public profile पर अब <b>' + escapeHtml(saved.title || task.data.title) + '</b> दिखेगा.<br><br>' +
+                    a(BASE + 'marketplace-dashboard.html', 'Open your portal') + '<br><br>Here is the updated check:',
+                    'Profile सेव हो गया.' + titleLineHi + '<br><br>' +
                     a(BASE + 'find-talent.html', 'Talent directory देखें') + ' &middot; ' +
-                    a(BASE + 'marketplace-dashboard.html', 'Portal खोलें') + '<br><br>PDF CV भी जोड़ना है? *Upload resume* दबाइए.'));
-                setChips(['uploadResume', 'findWork', 'dashboard', 'human']);
+                    a(BASE + 'marketplace-dashboard.html', 'Portal खोलें') + '<br><br>अब यह updated check है:'));
+                showProfileAudit(saved);
             } else if (task.type === 'job') {
-                var jobType = task.data.job_type;
-                var job = await window.GahonshDB.Jobs.createJob({
-                    title: task.data.title,
-                    category: task.data.category,
-                    job_type: jobType,
-                    description: task.data.description,
-                    estimated_duration: task.data.duration,
-                    experience_level: task.data.experience,
-                    required_skills: task.data.skills || [],
-                    budget_min: jobType === 'fixed' ? task.data.budget.fixed : 0,
-                    hourly_rate_min: jobType === 'hourly' ? task.data.budget.min : null,
-                    hourly_rate_max: jobType === 'hourly' ? task.data.budget.max : null
-                });
+                var jobType = task.data.job_type || (task.target && task.target.job_type) || 'fixed';
+                var payload = {};
+                if (task.data.title !== undefined) payload.title = task.data.title;
+                if (task.data.category !== undefined) payload.category = task.data.category;
+                if (task.data.description !== undefined) payload.description = task.data.description;
+                if (task.data.duration !== undefined) payload.estimated_duration = task.data.duration;
+                if (task.data.experience !== undefined) payload.experience_level = task.data.experience;
+                if (task.data.skills !== undefined) payload.required_skills = task.data.skills;
+                if (task.data.job_type !== undefined) payload.job_type = task.data.job_type;
+                if (task.data.budget !== undefined) {
+                    payload.budget_min = jobType === 'fixed' ? task.data.budget.fixed : 0;
+                    payload.hourly_rate_min = jobType === 'hourly' ? task.data.budget.min : null;
+                    payload.hourly_rate_max = jobType === 'hourly' ? task.data.budget.max : null;
+                }
+                var isFix = task.mode === 'fix' && !!task.target;
+                var job = isFix
+                    ? await window.GahonshDB.Jobs.updateJob(task.target.id, payload)
+                    : await window.GahonshDB.Jobs.createJob(payload);
+                if (task !== current || epoch !== chatEpoch) return;
                 success = true;
                 killTyping();
                 var jobUrl = BASE + 'job-details.html?id=' + encodeURIComponent(job.id);
-                addMsg('bot', t('Job posted. <b>' + escapeHtml(job.title) + '</b> is now open for proposals.<br><br>' +
+                addMsg('bot', t((isFix ? 'Job updated.' : 'Job posted.') + ' <b>' + escapeHtml(job.title) + '</b> ' +
+                    (isFix ? 'now shows the changes.' : 'is now open for proposals.') + '<br><br>' +
                     a(jobUrl, 'Open your job') + ' &middot; ' +
-                    a(BASE + 'marketplace-dashboard.html', 'See proposals in your portal'),
-                    'Job post हो गया. <b>' + escapeHtml(job.title) + '</b> अब proposals के लिए open है.<br><br>' +
+                    a(BASE + 'marketplace-dashboard.html', 'See proposals in your portal') + '<br><br>Here is the updated check:',
+                    (isFix ? 'Job update हो गया.' : 'Job post हो गया.') + ' <b>' + escapeHtml(job.title) + '</b> ' +
+                    (isFix ? 'अब बदलाव दिख रहे हैं.' : 'अब proposals के लिए open है.') + '<br><br>' +
                     a(jobUrl, 'अपना job खोलें') + ' &middot; ' +
-                    a(BASE + 'marketplace-dashboard.html', 'Portal में proposals देखें')));
-                setChips(['postJobBot', 'hireTalent', 'dashboard', 'human']);
+                    a(BASE + 'marketplace-dashboard.html', 'Portal में proposals देखें') + '<br><br>अब यह updated check है:'));
+                showJobAudit(job);
             } else if (task.type === 'proposal') {
                 await window.GahonshDB.Proposals.submitProposal(
                     task.data.job.id, task.data.cover, task.data.bid, task.data.days
                 );
+                if (task !== current || epoch !== chatEpoch) return;
                 success = true;
                 killTyping();
                 var proposalUrl = BASE + 'job-details.html?id=' + encodeURIComponent(task.data.job.id);
@@ -1097,13 +1761,16 @@
                 setChips(['findWork', 'dashboard', 'human']);
             }
         } catch (err) {
+            if (task !== current || epoch !== chatEpoch) return;
             killTyping();
             addMsg('bot', t('Could not save that: ' + escapeHtml(err.message || 'unknown error') + '<br><br>You can try again, or use the page form.',
                 'सेव नहीं हो सका: ' + escapeHtml(err.message || 'unknown error') + '<br><br>फिर कोशिश कीजिए, या page form इस्तेमाल कीजिए.'));
             setChips(['confirmTask', 'cancelTask']);
         } finally {
-            if (task) task.busy = false;
-            if (success) task = null;
+            if (task === current) {
+                task.busy = false;
+                if (success) task = null;
+            }
         }
     }
 
@@ -1125,8 +1792,10 @@
     }
 
     async function handleContinue() {
+        var epoch = chatEpoch;
         addTyping();
         var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
         killTyping();
         if (!user) {
             addMsg('bot', t('I still do not see a signed-in account. Please sign in first.', 'अभी भी sign-in नहीं दिख रहा. पहले sign in कीजिए.'));
@@ -1139,8 +1808,10 @@
     }
 
     async function startResumeUpload() {
+        var epoch = chatEpoch;
         addTyping();
         var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
         killTyping();
         if (!user) {
             pendingTask = 'resume';
@@ -1177,13 +1848,32 @@
             addMsg('bot', t('Switching tasks. The previous one was not saved.', 'नया काम शुरू कर रहा हूँ. पिछला सेव नहीं हुआ.'));
         }
         pendingTask = null;
+        jobPicker = null;
         flow = { step: 'idle', name: '', email: '', project: '' };
         if (type === 'resume') {
             await startResumeUpload();
             return;
         }
+        if (type === 'profileAudit') {
+            await startProfileAudit();
+            return;
+        }
+        if (type === 'jobAudit') {
+            await startJobAudit();
+            return;
+        }
+        if (type === 'profileFix') {
+            await startProfileFix();
+            return;
+        }
+        if (type === 'jobFix') {
+            await startJobFix();
+            return;
+        }
+        var epoch = chatEpoch;
         addTyping();
         var user = await ensureUser();
+        if (epoch !== chatEpoch) { killTyping(); return; }
         killTyping();
         if (!user) {
             pendingTask = type;
@@ -1220,6 +1910,10 @@
         buildProfileBot: function () { startTask('profile'); },
         proposalBot: function () { startTask('proposal'); },
         uploadResume: function () { startTask('resume'); },
+        profileAudit: function () { startTask('profileAudit'); },
+        jobAudit: function () { startTask('jobAudit'); },
+        fixProfile: function () { startTask('profileFix'); },
+        fixJob: function () { startTask('jobFix'); },
         dashboard: function () {
             addTyping();
             setTimeout(function () {
@@ -1228,7 +1922,7 @@
                     a(BASE + 'marketplace-dashboard.html', 'Open Marketplace Portal'),
                     'आपके portal में profile, jobs, proposals और contracts हैं:<br><br>' +
                     a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal खोलें')));
-                setChips(['buildProfileBot', 'postJobBot', 'uploadResume', 'human']);
+                setChips(['profileAudit', 'buildProfileBot', 'postJobBot', 'uploadResume', 'human']);
             }, 300);
         },
         signIn: handleSignIn,
@@ -1308,6 +2002,10 @@
         // answers are not mistaken for a new question.
         if (task) {
             handleTaskInput(clean);
+            return;
+        }
+        if (jobPicker) {
+            handleJobPicker(clean);
             return;
         }
 
@@ -1422,12 +2120,14 @@
             }
             if (!restored) {
                 addMsg('bot', t(
-                    'Hi! I am the Gahonsh assistant. I can answer questions, and I can also do tasks with you:<br><br>• *Post a job* (client)<br>• *Build or update your profile* (worker or client)<br>• *Upload a resume* (worker)<br>• *Submit a proposal* (worker)<br><br>Tap a button below, or just tell me what you need.',
-                    'नमस्ते! मैं GAHONSH का assistant हूँ. सवालों के जवाब के साथ-साथ मैं काम भी कर सकता हूँ:<br><br>• *Job post करना* (client)<br>• *Profile बनाना/अपडेट करना* (worker या client)<br>• *Resume upload* (worker)<br>• *Proposal भेजना* (worker)<br><br>नीचे button दबाइए, या सीधे बताइए क्या चाहिए.'
+                    'Hi! I am the Gahonsh assistant. I can answer questions, and I can also do tasks with you:<br><br>• *Check my profile* — score and missing details<br>• *Check my job post* — score and improvements (client)<br>• *Post a job* (client)<br>• *Build or update your profile* (worker or client)<br>• *Upload a resume* (worker)<br>• *Submit a proposal* (worker)<br><br>Tap a button below, or just tell me what you need.',
+                    'नमस्ते! मैं GAHONSH का assistant हूँ. सवालों के जवाब के साथ-साथ मैं काम भी कर सकता हूँ:<br><br>• *Profile check* — score और क्या कमी है<br>• *Job post check* — score और सुधार (client)<br>• *Job post करना* (client)<br>• *Profile बनाना/अपडेट करना* (worker या client)<br>• *Resume upload* (worker)<br>• *Proposal भेजना* (worker)<br><br>नीचे button दबाइए, या सीधे बताइए क्या चाहिए.'
                 ));
-                setChips(['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'botHelp']);
+                setChips(['profileAudit', 'jobAudit', 'postJobBot', 'buildProfileBot', 'uploadResume', 'botHelp']);
+                greetUser().catch(function () { /* keep the greeting visible */ });
             } else {
-                setChips(['postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'botHelp']);
+                setChips(['profileAudit', 'jobAudit', 'postJobBot', 'buildProfileBot', 'uploadResume', 'botHelp']);
+                greetUser().catch(function () { /* refresh chips for a signed-in user */ });
             }
         }
     }
@@ -1461,6 +2161,74 @@
             if (!panel.classList.contains('open')) $('#gc-badge').style.display = 'flex';
         }, 6000);
     }
+
+    // Profile and job audits put private details in the chat log. Clear the
+    // log and its localStorage copy when the account signs out or changes, so
+    // a shared browser does not show the previous user's data.
+    var chatUserId = null;
+
+    function clearPrivateChat(messageEn, messageHi) {
+        chatEpoch += 1;
+        task = null;
+        pendingTask = null;
+        jobPicker = null;
+        lastProfileAudit = null;
+        lastJobAudit = null;
+        greetedUserId = null;
+        flow = { step: 'idle', name: '', email: '', project: '' };
+        history = [];
+        store('gc_hist', '[]');
+        log.innerHTML = '';
+        addMsg('bot', t(messageEn, messageHi));
+        setChips();
+    }
+
+    function watchPrivateChatAuth() {
+        if (!window.GahonshDB || !window.GahonshDB.Auth) return;
+        var auth = window.GahonshDB.Auth;
+        if (typeof auth.getCurrentUser === 'function') {
+            try {
+                Promise.resolve(auth.getCurrentUser()).then(function (user) {
+                    if (user && user.id) chatUserId = user.id;
+                }).catch(function () {});
+            } catch (e) { /* auth state is optional */ }
+        }
+        if (typeof auth.onAuthStateChange !== 'function') return;
+        try {
+            var sub = auth.onAuthStateChange(function (event, sessionOrUser, maybeUser) {
+                var user = maybeUser || (sessionOrUser && sessionOrUser.user) || sessionOrUser || null;
+                var userId = user && user.id ? user.id : null;
+                if (event === 'SIGNED_OUT') {
+                    // A guest has no private chat to clear. Only clear when a
+                    // signed-in user was active in this tab.
+                    if (!chatUserId) return;
+                    chatUserId = null;
+                    clearPrivateChat(
+                        'You are signed out. The previous chat was cleared. Ask me anything, or sign in to check your profile.',
+                        'आप sign out हैं. पिछली chat clear कर दी गई. कुछ भी पूछिए, या profile check करने के लिए sign in कीजिए.'
+                    );
+                    return;
+                }
+                if (event === 'SIGNED_IN' && chatUserId && userId && chatUserId !== userId) {
+                    clearPrivateChat(
+                        'Signed in with a different account. The previous chat was cleared.',
+                        'दूसरे account से sign in हुए. पिछली chat clear कर दी गई.'
+                    );
+                }
+                if (userId) chatUserId = userId;
+                // If the visitor signs in while the chat is open, refresh the
+                // role-specific chips. Do not disturb a running task, a pending
+                // task's Continue chip, a job picker, or a quote form.
+                if (event === 'SIGNED_IN' && !task && !jobPicker && !pendingTask &&
+                    flow.step === 'idle' && panel.classList.contains('open')) {
+                    greetUser().catch(function () {});
+                }
+            });
+            if (sub && typeof sub.catch === 'function') sub.catch(function () {});
+        } catch (e) { /* auth state is optional */ }
+    }
+
+    watchPrivateChatAuth();
 
     // Public opener so page buttons and links can start a conversation.
     window.openGahonshChat = openPanel;

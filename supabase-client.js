@@ -572,6 +572,52 @@
             return data || [];
         },
 
+        async updateJob(jobId, updates) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to edit this project.');
+
+            // Identity, ownership and counters are immutable. The SQL trigger
+            // enforces this too; dropping them here keeps a crafted payload
+            // from even attempting the change.
+            const {
+                id, client_id, proposals_count, created_at, updated_at, status,
+                ...safeUpdates
+            } = updates || {};
+
+            ['budget_min', 'budget_max', 'hourly_rate_min', 'hourly_rate_max'].forEach((key) => {
+                if (safeUpdates[key] !== undefined && safeUpdates[key] !== null) {
+                    safeUpdates[key] = Number(safeUpdates[key]);
+                }
+            });
+            if (safeUpdates.required_skills !== undefined) {
+                safeUpdates.required_skills = Array.isArray(safeUpdates.required_skills)
+                    ? safeUpdates.required_skills.map((s) => String(s).trim()).filter(Boolean)
+                    : [];
+            }
+
+            const { data: existing, error: readError } = await client
+                .from('jobs')
+                .select('status')
+                .eq('id', jobId)
+                .single();
+            if (readError) throw readError;
+            if (existing.status === 'completed' || existing.status === 'cancelled') {
+                throw new Error('Closed jobs cannot be edited.');
+            }
+
+            const { data, error } = await client
+                .from('jobs')
+                .update(safeUpdates)
+                .eq('id', jobId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+
         async updateJobStatus(jobId, newStatus) {
             const client = await getClient();
             if (!client) throw new Error('Supabase not configured');

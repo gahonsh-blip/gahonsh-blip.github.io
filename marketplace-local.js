@@ -727,6 +727,69 @@
             });
         },
 
+        async updateJob(jobId, updates) {
+            updates = updates || {};
+            const profile = requireUser('Please sign in to edit this project.');
+            const rows = readTable('jobs');
+            const index = rows.findIndex((j) => j.id === jobId);
+            if (index < 0) throw new Error('Job not found.');
+            const job = rows[index];
+            // Mirror the UPDATE policy: only the project owner or an admin.
+            if (job.client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the project owner can edit this job.');
+            }
+            if (job.status === 'completed' || job.status === 'cancelled') {
+                throw new Error('Closed jobs cannot be edited.');
+            }
+
+            const next = Object.assign({}, job);
+            ['title', 'description', 'category', 'estimated_duration', 'experience_level'].forEach((key) => {
+                if (updates[key] !== undefined) next[key] = String(updates[key]).trim();
+            });
+            if (updates.required_skills !== undefined) {
+                next.required_skills = Array.isArray(updates.required_skills)
+                    ? updates.required_skills.map((s) => String(s).trim()).filter(Boolean)
+                    : [];
+            }
+            if (updates.job_type !== undefined) next.job_type = updates.job_type;
+            ['budget_min', 'budget_max', 'hourly_rate_min', 'hourly_rate_max'].forEach((key) => {
+                if (updates[key] !== undefined) {
+                    next[key] = updates[key] === null ? null : (parseFloat(updates[key]) || 0);
+                }
+            });
+
+            // Mirror the CHECK constraints the database enforces.
+            if (next.title.length < 5 || next.title.length > 150) {
+                throw new Error('Job title must be 5-150 characters.');
+            }
+            if (next.description.length < 20) {
+                throw new Error('Job description must be at least 20 characters.');
+            }
+            if (!next.category) throw new Error('Job category is required.');
+            if (next.job_type !== 'fixed' && next.job_type !== 'hourly') {
+                throw new Error('Invalid job type.');
+            }
+            if (!['entry', 'intermediate', 'expert'].includes(next.experience_level)) {
+                throw new Error('Invalid experience level.');
+            }
+            if (next.budget_min < 0) throw new Error('Budget cannot be negative.');
+            if (next.budget_max !== null && next.budget_max < next.budget_min) {
+                throw new Error('Maximum budget must be at least the minimum.');
+            }
+            if (next.hourly_rate_min !== null && next.hourly_rate_min < 0) {
+                throw new Error('Hourly rate cannot be negative.');
+            }
+            if (next.hourly_rate_min !== null && next.hourly_rate_max !== null &&
+                next.hourly_rate_max < next.hourly_rate_min) {
+                throw new Error('Maximum hourly rate must be at least the minimum.');
+            }
+
+            next.updated_at = nowIso();
+            rows[index] = next;
+            writeTable('jobs', rows);
+            return decorateJob(next);
+        },
+
         async updateJobStatus(jobId, newStatus) {
             const profile = requireUser('Please sign in to update this project.');
             const rows = readTable('jobs');
