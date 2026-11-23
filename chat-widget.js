@@ -1775,8 +1775,8 @@
     }
 
     function promptSignIn() {
-        addMsg('bot', t('Please sign in first. The post has to belong to your account, and I can only save it for you.<br><br>Tap *Sign in*, then *Continue*.',
-            'पहले sign in कीजिए. Post आपके account का होना चाहिए, और मैं इसे सिर्फ आपके लिए सेव कर सकता हूँ.<br><br>*Sign in* दबाइए, फिर *Continue*.'));
+        addMsg('bot', t('Please sign in first. I need your account to read or save this for you.<br><br>Tap *Sign in*, then *Continue*.',
+            'पहले sign in कीजिए. यह पढ़ने या सेव करने के लिए आपका account चाहिए.<br><br>*Sign in* दबाइए, फिर *Continue*.'));
         setChips(['signIn', 'continueTask', 'cancelTask']);
     }
 

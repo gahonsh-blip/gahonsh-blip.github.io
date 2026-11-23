@@ -46,6 +46,7 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 - The file-transfer panel shows a clear setup message when the deployment has not been migrated yet, instead of leaking a raw `PGRST205` / `Bucket not found` error.
 
 ### Fixed
+- **The chat's sign-in prompt described every task as a "post".** A guest who tapped **Check my profile** or **Upload resume** was told "The post has to belong to your account". The prompt now says "I need your account to read or save this for you", which fits profile checks, job checks, resumes and proposals.
 - **Chat job links using the offline demo IDs were rejected.** `extractJobId()` only accepted UUIDs and `job-*` IDs, so the site's own `?id=demo-job-1` link failed the proposal and job-check steps with "That does not look like a job link or ID." It now accepts `demo-job-*` and normalises the ID.
 - **Hindi / Devanagari chat commands did not match.** `norm()` stripped Unicode combining marks, so `प्रोफाइल` became a different string from the keyword. It now preserves `\p{M}` before matching.
 - **A previous account's chat could survive sign-out or account switch.** The widget cleared nothing, so the audit cards and `gc_hist` stayed visible on a shared browser. It now clears both and resets the task, picker, quote flow and greeting. In-flight reads and writes are tied to the account with `chatEpoch` and a task token, so a late response is discarded instead of rendering the previous user's data.
