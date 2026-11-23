@@ -220,6 +220,55 @@ CREATE TABLE IF NOT EXISTS public.contracts (
 );
 
 -- ----------------------------------------------------------------------------
+-- 7b. REVIEWS, WORKER RATINGS & CONTRACT MESSAGES
+-- ----------------------------------------------------------------------------
+-- One review per completed engagement. `rating` is 1-5 stars; the talent
+-- directory reads the aggregate `worker_ratings` view rather than the rows.
+CREATE TABLE IF NOT EXISTS public.reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    contract_id UUID REFERENCES public.contracts(id) ON DELETE SET NULL,
+    job_id UUID REFERENCES public.jobs(id) ON DELETE SET NULL,
+    reviewer_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    reviewee_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS reviews_reviewee_idx
+    ON public.reviews (reviewee_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS reviews_contract_idx
+    ON public.reviews (contract_id);
+
+-- Public star-rating aggregate consumed by marketplace-trust.js. It runs with
+-- the view owner's privileges (security_invoker off) so anonymous visitors can
+-- read the aggregate while the base reviews table stays row-protected.
+CREATE OR REPLACE VIEW public.worker_ratings AS
+SELECT
+    reviewee_id,
+    ROUND(AVG(rating)::numeric, 2) AS avg_rating,
+    COUNT(*)::int AS review_count
+FROM public.reviews
+GROUP BY reviewee_id;
+
+GRANT SELECT ON public.worker_ratings TO anon, authenticated;
+
+-- Private contract messages between the two parties of a contract.
+CREATE TABLE IF NOT EXISTS public.messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    contract_id UUID REFERENCES public.contracts(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    recipient_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    body TEXT NOT NULL CHECK (char_length(body) > 0),
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS messages_contract_idx
+    ON public.messages (contract_id, created_at);
+CREATE INDEX IF NOT EXISTS messages_recipient_idx
+    ON public.messages (recipient_id, created_at DESC);
+
+-- ----------------------------------------------------------------------------
 -- 8. HELPER FUNCTIONS & TRIGGERS
 -- ----------------------------------------------------------------------------
 
@@ -521,6 +570,8 @@ ALTER TABLE public.file_transfers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Public Directory Read for non-sensitive data, Owner/Admin Update
 DROP POLICY IF EXISTS "Public can view basic profiles" ON public.profiles;
@@ -709,6 +760,61 @@ CREATE POLICY "Only admin can delete contact messages"
 ON public.contact_messages FOR DELETE
 TO authenticated
 USING (public.is_admin());
+
+-- Reviews: public to read, participant-only to write, immutable once written.
+DROP POLICY IF EXISTS "Reviews are public" ON public.reviews;
+CREATE POLICY "Reviews are public"
+ON public.reviews FOR SELECT
+TO anon, authenticated
+USING (TRUE);
+
+DROP POLICY IF EXISTS "Participants can review a contract" ON public.reviews;
+CREATE POLICY "Participants can review a contract"
+ON public.reviews FOR INSERT
+TO authenticated
+WITH CHECK (
+    reviewer_id = auth.uid()
+    AND reviewer_id <> reviewee_id
+    AND (
+        contract_id IS NULL
+        OR contract_id IN (
+            SELECT id FROM public.contracts
+            WHERE client_id = auth.uid() OR freelancer_id = auth.uid()
+        )
+    )
+);
+
+DROP POLICY IF EXISTS "Admins can delete reviews" ON public.reviews;
+CREATE POLICY "Admins can delete reviews"
+ON public.reviews FOR DELETE
+TO authenticated
+USING (public.is_admin());
+
+-- Contract messages: only the two parties (or an admin) may read or send.
+DROP POLICY IF EXISTS "Contract parties can read messages" ON public.messages;
+CREATE POLICY "Contract parties can read messages"
+ON public.messages FOR SELECT
+TO authenticated
+USING (
+    sender_id = auth.uid()
+    OR recipient_id = auth.uid()
+    OR public.is_admin()
+);
+
+DROP POLICY IF EXISTS "Contract parties can send messages" ON public.messages;
+CREATE POLICY "Contract parties can send messages"
+ON public.messages FOR INSERT
+TO authenticated
+WITH CHECK (
+    sender_id = auth.uid()
+    AND (
+        contract_id IS NULL
+        OR contract_id IN (
+            SELECT id FROM public.contracts
+            WHERE client_id = auth.uid() OR freelancer_id = auth.uid()
+        )
+    )
+);
 
 -- ----------------------------------------------------------------------------
 -- 12. STORAGE BUCKET FOR IN-SITE FILE TRANSFER

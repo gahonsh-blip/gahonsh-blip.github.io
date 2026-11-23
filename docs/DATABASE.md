@@ -24,14 +24,13 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 | `contracts` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `client_id` → `profiles(id)`, `freelancer_id` → `profiles(id)` | Active working agreements with agreed amount, start date, completion date, and status (`active`, `completed`, `disputed`, `cancelled`). |
 | `file_transfers` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `uploaded_by` → `profiles(id)` | In-site file send/receive metadata: `file_name`, `storage_path`, `file_type`, `file_size_bytes`, `scope` (`job` or `proposal`), `created_at`. The bytes live in the private `job-attachments` Storage bucket under `<job_id>/<uuid>-<name>`. |
 | `contact_messages` | `id` (`UUID`) | — | Public lead intake written by `contact.html` and `chat-widget.js`: `name`, `email`, `service`, `budget`, `message`, `source`, `is_handled`, `created_at`. Visitors may insert only; the owner reads and marks handled from `admin.html`. |
-
-> The `reviews` table is not part of the current schema. Ratings shown on the
-> talent directory come from `public_profiles`; add a `reviews` table and its
-> policies before wiring up any review UI.
+| `reviews` | `id` (`UUID`) | `contract_id` → `contracts(id)`, `job_id` → `jobs(id)`, `reviewer_id` / `reviewee_id` → `profiles(id)` | Star reviews written from `marketplace-trust.js`: `rating` (1–5), `comment`, `created_at`. Read publicly, written only by a contract participant, immutable once stored. |
+| `messages` | `id` (`UUID`) | `contract_id` → `contracts(id)`, `sender_id` / `recipient_id` → `profiles(id)` | Private contract chat used by `messages.html`: `body`, `created_at`. Only the two parties of the contract (or an admin) may read or send. |
 
 ### Public Views
 
 - `public_profiles` — Exposes safe, non-sensitive profile information (`id`, `full_name`, `avatar_url`, `role`, `title`, `hourly_rate`, `skills`, `bio`, `rating`, `total_reviews`, `created_at`) for public marketplace talent discovery.
+- `worker_ratings` — Aggregates `reviews` into `reviewee_id`, `avg_rating`, `review_count` for the talent directory. It runs with the view owner's privileges so anonymous visitors can read the aggregate while the base `reviews` rows stay participant-protected.
 
 ---
 
@@ -59,6 +58,12 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
 - **Contact messages**:
   - `INSERT`: Anyone (anonymous visitors included) may submit a lead.
   - `SELECT` / `UPDATE` / `DELETE`: Owner only (`public.is_admin()`). Leads can never be read back with the public key.
+- **Reviews**:
+  - `SELECT`: Public (anonymous included) so star ratings and comments can be shown on profiles.
+  - `INSERT`: Authenticated users only, and only as themselves (`reviewer_id = auth.uid()`, never self-review). A review attached to a contract must come from that contract's client or freelancer.
+  - `DELETE`: Owner only (`public.is_admin()`). Reviews are immutable once written.
+- **Messages**:
+  - `SELECT` / `INSERT`: Only the sender or recipient of a message, or an admin, may read or send. A message attached to a contract must come from one of that contract's two parties, and `sender_id` must equal `auth.uid()`.
 
 ---
 
