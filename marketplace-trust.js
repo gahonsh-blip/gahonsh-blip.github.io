@@ -27,17 +27,35 @@
     return cache;
   }
 
+  var painting = false;
+
   async function paintRatings() {
-    var nodes = document.querySelectorAll('[data-rating-uid]');
-    if (!nodes.length) return;
-    var map = await loadRatings();
-    nodes.forEach(function (el) {
-      var uid = el.getAttribute('data-rating-uid');
-      var r = map[uid];
-      el.textContent = r ? starText(Number(r.avg_rating), Number(r.review_count)) : 'New';
-      el.title = r ? (r.review_count + ' reviews') : 'No reviews yet';
-      el.style.cssText = 'display:inline-block;font-size:0.78rem;letter-spacing:0.02em;color:#C9922E;margin-top:2px;';
-    });
+    // Only the dedicated placeholder is painted. The same data-rating-uid
+    // attribute also sits on the parent card for styling, so selecting every
+    // match would overwrite the whole card with the star text.
+    var nodes = document.querySelectorAll('.mt-rating[data-rating-uid]');
+    if (!nodes.length || painting) return;
+    painting = true;
+    try {
+      var map = await loadRatings();
+      nodes.forEach(function (el) {
+        var uid = el.getAttribute('data-rating-uid');
+        var r = map[uid];
+        var text = r ? starText(Number(r.avg_rating), Number(r.review_count)) : 'New';
+        var title = r ? (r.review_count + ' reviews') : 'No reviews yet';
+        // Write only when the value actually changes. Assigning textContent
+        // always replaces the text node, which the MutationObserver below
+        // would read as a new change and re-enter this function forever.
+        if (el.textContent !== text) el.textContent = text;
+        if (el.title !== title) el.title = title;
+        if (!el.hasAttribute('data-mt-styled')) {
+          el.style.cssText = 'display:inline-block;font-size:0.78rem;letter-spacing:0.02em;color:#C9922E;margin-top:2px;';
+          el.setAttribute('data-mt-styled', '');
+        }
+      });
+    } finally {
+      painting = false;
+    }
   }
 
   function modal(html) {

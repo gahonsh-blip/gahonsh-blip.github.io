@@ -842,3 +842,146 @@ html.gs-anim .faq-answer.gs-open {
 .footer-heading {
     font-weight: 700;
 }
+
+/* ============================================
+   LIGHT THEME FIXES FOR DARK PANELS
+   Some pages paint their own near-black surfaces (#070c19, #02050c, dark
+   gradients) and then colour the text with theme variables. In light mode
+   those variables flip to dark ink, so the text turned near-invisible on the
+   still-dark panel. These rules give the panels a light surface (or the text
+   a light-safe colour) so every label stays readable in light mode.
+   ============================================ */
+
+/* Services page flip cards */
+body.light-mode .flip-front {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .flip-front p {
+    color: #475569 !important;
+}
+
+body.light-mode .flip-back {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    color: #0f172a !important;
+    border-color: #0284c7 !important;
+}
+
+body.light-mode .flip-back h3 {
+    color: #0284c7 !important;
+}
+
+body.light-mode .flip-back ul li {
+    color: #334155 !important;
+}
+
+body.light-mode .card-price-tag {
+    color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.08) !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+/* Comparison tables on the services and pricing pages */
+body.light-mode .comp-table th {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .comp-table td {
+    color: #334155 !important;
+}
+
+body.light-mode .comp-table tr:hover td {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* About page trust section and portfolio stat cards */
+body.light-mode .trust-element-section {
+    background: #f8fafc !important;
+}
+
+body.light-mode .trust-grid div {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .trust-grid p {
+    color: #475569 !important;
+}
+
+/* Star-rating placeholder uses a fixed amber that is faint on white cards. */
+body.light-mode .mt-rating {
+    color: #8a5a00 !important;
+}
+
+/* "Custom solution" / "Not sure which plan" conversion banners */
+body.light-mode .custom-solution-banner {
+    background: #f8fafc !important;
+}
+
+body.light-mode .custom-solution-banner h2 {
+    color: #0f172a !important;
+}
+
+body.light-mode .btn-custom-quote {
+    color: #04121c !important;
+}
+
+/* Legal pages (privacy-policy.html, terms.html) */
+body.light-mode .legal-topbar {
+    background: #ffffff !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .legal-topbar .lb-brand {
+    color: #0f172a !important;
+}
+
+body.light-mode .legal-topbar .lb-brand span {
+    color: #0284c7 !important;
+}
+
+body.light-mode .legal-topbar nav a {
+    color: #334155 !important;
+}
+
+body.light-mode .legal-topbar nav a:hover {
+    color: #0284c7 !important;
+}
+
+body.light-mode .back-link {
+    color: #0284c7 !important;
+}
+
+body.light-mode .back-link:hover {
+    color: #0f172a !important;
+}
+
+/* Shared footer link rows (legal pages, thank-you.html) */
+body.light-mode .footer-links a {
+    color: #0284c7 !important;
+}
+
+body.light-mode .footer-links a:hover {
+    color: #0f172a !important;
+}
+
+body.light-mode footer p {
+    color: #475569 !important;
+}
+
+/* Thank-you page return button: its text uses --bg-dark, which turns pale in
+   light mode and disappears against the cyan gradient. */
+body.light-mode .return-btn {
+    color: #04121c !important;
+}
+
+/* Post-job sign-in notice is injected with an inline light-blue colour that
+   has almost no contrast on the light banner. */
+body.light-mode #postJobBlockedBanner {
+    background: rgba(0, 119, 255, 0.06) !important;
+    border-color: rgba(0, 119, 255, 0.3) !important;
+    color: #0f172a !important;
+}

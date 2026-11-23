@@ -29,7 +29,9 @@ Repository guide for AI agents and human contributors working on the
 
 - **HTML:** Semantic sections with unique element IDs where required. CSS custom properties defined in each page's `:root` (`--bg-dark`, `--accent-cyan`, `--text-main`, etc.).
 - **CSS:** Shared light-mode overrides and mobile touch-target rules in `theme.css`; page-specific styles in `<style>` blocks.
+  - Never leave a hardcoded dark surface (e.g. `#070c19`, `#02050c`, a dark gradient) whose text is coloured by a theme variable: in light mode the variable turns dark and the text disappears. Add a `body.light-mode` override in `theme.css` that lightens the surface or fixes the text colour.
 - **JS:** Plain ES6 functions, modules, and clear comments.
+  - A `MutationObserver` must never observe mutations its own callback produces. `textContent` assignment always replaces the text node, so a painter that rewrites text inside an observed subtree re-triggers itself forever and hangs the tab. Guard by writing only when the value changed, and scope selectors to the specific placeholder (e.g. `.mt-rating[data-rating-uid]`, not every `[data-rating-uid]`).
 - **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls.
 
 ## Main Menu Contract
