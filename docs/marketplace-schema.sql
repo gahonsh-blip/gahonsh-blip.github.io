@@ -104,6 +104,17 @@ FROM public.profiles;
 -- Grant public read access to the safe directory view
 GRANT SELECT ON public.public_profiles TO anon, authenticated;
 
+-- Privacy hardening: `profiles` is a private table. Revoke the default
+-- table-level SELECT and grant only the public directory columns. Email and
+-- phone_number are never granted to anon/authenticated; the admin reads them
+-- through the admin_profiles view, which returns rows only for is_admin().
+REVOKE SELECT ON public.profiles FROM anon, authenticated;
+
+GRANT SELECT (
+    id, full_name, avatar_url, role, location, bio, title, hourly_rate,
+    skills, is_verified, created_at, updated_at
+) ON public.profiles TO anon, authenticated;
+
 -- The resume display name/size are part of the owner's editable profile.
 -- This grant keeps them readable after the column-privilege hardening
 -- migration revokes table-level SELECT on `profiles`.
@@ -298,6 +309,18 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- Admin-only profile directory. The view is owned by the schema owner, so it
+-- can read the private email column, but the WHERE clause is evaluated with
+-- the caller's auth.uid(). A non-admin authenticated user gets zero rows, and
+-- an anonymous caller has no grant at all.
+CREATE OR REPLACE VIEW public.admin_profiles AS
+SELECT id, full_name, email, role, is_verified, location, title,
+       hourly_rate, created_at
+FROM public.profiles
+WHERE public.is_admin();
+
+GRANT SELECT ON public.admin_profiles TO authenticated;
 
 -- True when the current user may read files on a project: the client who owns
 -- it, a freelancer with an active contract on it, or an admin. Declared after
@@ -589,7 +612,11 @@ ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
--- Profiles: Public Directory Read for non-sensitive data, Owner/Admin Update
+-- Profiles: public directory read for non-sensitive data, owner/admin update.
+-- This row policy is paired with the column grants above: `email` and
+-- `phone_number` are not granted to anon/authenticated, so a direct table
+-- read can only see the safe directory columns. The public directory uses
+-- `public_profiles`; the admin uses `admin_profiles` for email.
 DROP POLICY IF EXISTS "Public can view basic profiles" ON public.profiles;
 CREATE POLICY "Public can view basic profiles" 
 ON public.profiles FOR SELECT 

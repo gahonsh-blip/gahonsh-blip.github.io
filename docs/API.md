@@ -29,8 +29,11 @@ The application integrates with Supabase via the client-side JavaScript SDK (`@s
 | `acceptProposal(proposalId, jobId)` | `rpc('accept_proposal_and_create_contract', ...)` | Executes atomic transaction to hire freelancer and generate an active contract. |
 | `getContracts(userId)` | `SELECT * FROM contracts` | Fetches active and past contracts for the authenticated user. |
 | `getTalents(filters)` | `SELECT * FROM public_profiles` | Retrieves verified freelancer profiles with skill and rate filtering. |
-| `getProfile(userId)` | `SELECT * FROM profiles WHERE id = ...` | Retrieves user profile data. |
-| `updateProfile(userId, data)` | `UPDATE profiles SET ... WHERE id = ...` | Updates full name, title, hourly rate, bio, and skills array. |
+| `getPublicProfile(userId)` | `SELECT * FROM public_profiles WHERE id = ...` | Retrieves a public talent profile. Email, phone number and password material are never part of this view. |
+| `getMyProfile()` | `SELECT ... FROM profiles WHERE id = auth.uid()` | Retrieves the signed-in user's own profile. |
+| `updateMyProfile(data)` | `UPDATE profiles SET ... WHERE id = auth.uid()` | Updates only the allow-listed profile fields: `full_name`, `avatar_url`, `location`, `bio`, `title`, `hourly_rate`, `skills`, `phone_number`. `id`, `email`, `role` and `is_verified` are ignored, so a crafted payload cannot edit another profile or escalate a role. |
+
+Public profile reads use `public_profiles`. The private `profiles` table grants only the safe directory columns to `anon`/`authenticated`; email and phone number are not granted. The admin page reads email through the `admin_profiles` view, which returns rows only when `public.is_admin()` is true.
 
 ### File Transfer API (`window.GahonshDB.Files`)
 

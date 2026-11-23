@@ -48,6 +48,13 @@ The marketplace features client-side Supabase integration with Row Level Securit
 > `supabase/migrations/20261123000000_add_freelancer_resumes.sql` in the SQL
 > Editor (or with `supabase db push`) to add the resume fields, the `resumes`
 > bucket and its policies.
+>
+> Then apply
+> `supabase/migrations/20261124000000_harden_profiles_read_access.sql`. It
+> revokes table-level `SELECT` on `profiles`, grants only the safe directory
+> columns, and creates the admin-only `admin_profiles` view used by
+> `admin.html` to show contact email. The admin page falls back to the safe
+> columns until the view exists, but the People list will not show email.
 
 ### Step 2b: Create the Owner Account
 

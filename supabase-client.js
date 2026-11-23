@@ -194,6 +194,59 @@
         return /column .*resume.* does not exist|could not find the .*resume.* column|permission denied for column resume/i.test(message);
     }
 
+    // Allow-list of fields the profile editor may change. Identity and
+    // privilege columns (id, email, role, is_verified) are deliberately absent,
+    // so a crafted payload cannot edit another row or escalate the caller.
+    const PROFILE_EDITABLE_FIELDS = [
+        'full_name', 'avatar_url', 'location', 'bio', 'title',
+        'hourly_rate', 'skills', 'phone_number'
+    ];
+
+    function sanitizeProfileUpdates(updates) {
+        const source = updates && typeof updates === 'object' ? updates : {};
+        const safe = {};
+        for (const key of PROFILE_EDITABLE_FIELDS) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) safe[key] = source[key];
+        }
+        if ('full_name' in safe) {
+            const name = String(safe.full_name || '').trim();
+            if (name.length < 2) throw new Error('Full name must be at least 2 characters.');
+            safe.full_name = name.slice(0, 80);
+        }
+        if ('title' in safe) safe.title = String(safe.title || '').trim().slice(0, 120);
+        if ('location' in safe) safe.location = String(safe.location || '').trim().slice(0, 120);
+        if ('bio' in safe) safe.bio = String(safe.bio || '').trim().slice(0, 2000);
+        if ('avatar_url' in safe) {
+            const url = String(safe.avatar_url || '').trim();
+            if (url && !/^https?:\/\//i.test(url)) {
+                throw new Error('Avatar URL must start with http:// or https://.');
+            }
+            safe.avatar_url = url ? url.slice(0, 500) : null;
+        }
+        if ('phone_number' in safe) {
+            const phone = String(safe.phone_number || '').trim();
+            if (phone && !/^[+0-9()\-\s]{6,24}$/.test(phone)) {
+                throw new Error('Please enter a valid phone number.');
+            }
+            safe.phone_number = phone || null;
+        }
+        if ('hourly_rate' in safe) {
+            const rate = Number(safe.hourly_rate);
+            if (!Number.isFinite(rate) || rate < 0 || rate > 100000) {
+                throw new Error('Hourly rate must be between 0 and 100000.');
+            }
+            safe.hourly_rate = rate;
+        }
+        if ('skills' in safe) {
+            if (!Array.isArray(safe.skills)) throw new Error('Skills must be a list.');
+            safe.skills = safe.skills
+                .map((s) => String(s || '').trim().slice(0, 40))
+                .filter(Boolean)
+                .slice(0, 30);
+        }
+        return safe;
+    }
+
     const Profiles = {
         async getMyProfile() {
             const client = await getClient();
@@ -228,15 +281,29 @@
             const user = (await client.auth.getUser())?.data?.user;
             if (!user) throw new Error('Unauthorized: Please sign in first.');
 
-            // Sanitize updates: eliminate immutable fields from client payload
-            const { id, email, role, is_verified, created_at, ...safeUpdates } = updates;
+            const safeUpdates = sanitizeProfileUpdates(updates);
+            if (!Object.keys(safeUpdates).length) {
+                throw new Error('No editable profile fields were provided.');
+            }
 
-            const { data, error } = await client
+            const resumeSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, created_at, updated_at';
+            const baseSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at';
+
+            let { data, error } = await client
                 .from('profiles')
                 .update(safeUpdates)
                 .eq('id', user.id)
-                .select()
+                .select(resumeSelect)
                 .single();
+
+            if (error && isResumeSchemaGap(error)) {
+                ({ data, error } = await client
+                    .from('profiles')
+                    .update(safeUpdates)
+                    .eq('id', user.id)
+                    .select(baseSelect)
+                    .single());
+            }
 
             if (error) throw error;
             return data;

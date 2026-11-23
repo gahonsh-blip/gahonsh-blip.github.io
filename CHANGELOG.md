@@ -7,6 +7,7 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 ## [Unreleased]
 
 ### Added
+- **Profile privacy hardening.** The private `profiles` table no longer grants `email` or `phone_number` to `anon`/`authenticated`. The public directory reads `public_profiles`, and the admin reads email through the new `admin_profiles` view, which returns rows only when `public.is_admin()` is true. `updateMyProfile()` now allow-lists editable fields and ignores `id`, `email`, `role`, `is_verified`, `_salt`, `_hash`, so a crafted payload cannot edit another profile or escalate a role. The offline engine's `publicProfile()` is now an allow-list matching the view, so email, phone and password material never leave the engine. Migration: `supabase/migrations/20261124000000_harden_profiles_read_access.sql`.
 - **Guided chat assistant tasks.** The site-wide assistant (`chat-widget.js`) can now run real tasks step by step instead of only answering questions. It asks for the required fields, shows a review summary, and then calls the same service the page form uses:
   - **Post a job** (client): title, category, scope, pricing model, fixed budget or hourly range, duration, experience level and optional skills → `Jobs.createJob()`.
   - **Build / update a profile** (worker or client): full name, professional title, location, skills and hourly rate (worker only) and bio → `Profiles.updateMyProfile()`.
@@ -34,6 +35,7 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 - The file-transfer panel shows a clear setup message when the deployment has not been migrated yet, instead of leaking a raw `PGRST205` / `Bucket not found` error.
 
 ### Fixed
+- **The offline engine's public profile exposed email and phone number.** `publicProfile()` stripped only the password salt/hash and returned the rest of the row, so the demo talent directory handed out `_email`/`phone_number`. It is now an allow-list matching `public_profiles`. `updateMyProfile()` also switched from a black-list to an allow-list, so unknown fields can no longer reach the stored row.
 - **Light-mode text was hard to read.** The light theme accent was `#0284c7`, which only reached 4.1:1 on white and 3.6:1 on the tinted pills. It is now `#0369a1` (5.9:1 on white). The active nav link, portfolio category pills, `.project-tag` pills over dark thumbnails, the theme toggle and the contact page's WhatsApp button were all corrected. `npm run test:a11y` now asserts the light accent, the theme button and the WhatsApp button meet WCAG AA 4.5:1.
 - **Scroll-reveal cards could stay blank if `IntersectionObserver` never fired** (background tab, zero-height container or a browser quirk). `script.js` now reveals any remaining `.gs-hide` elements after 2.5s, so content can never stay hidden.
 - **The finance entry redirected to a 404 and its PWA manifest used root paths.** `finance/index.html`'s meta refresh pointed at `/site/` instead of `/finance/site/`, and `finance/site/manifest.webmanifest` used `/site/` for its `id`, `start_url`, `scope` and icons. Both now use the `/finance/site/` deployment path.
