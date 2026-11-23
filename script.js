@@ -2,6 +2,7 @@
 // LIGHT/DARK MODE BUTTON – ROBUST & ELEGANT
 // ============================================
 (function() {
+    if (window.__GAHONSH_STUDIO_PREVIEW__) return;
     if (document.getElementById("themeToggleBtn")) return;
 
     function initThemeButton() {
@@ -83,6 +84,7 @@
 // the site renders exactly as it did before.
 // ============================================
 (function() {
+    if (window.__GAHONSH_STUDIO_PREVIEW__) return;
     document.documentElement.classList.add('gs-anim');
 
     const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

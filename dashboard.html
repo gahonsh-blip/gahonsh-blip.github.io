@@ -520,15 +520,18 @@
             <span id="saveStatus" style="font-size: 0.82rem; color: var(--text-slate); display: flex; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> Ready
             </span>
+            <span style="font-size: 0.72rem; color: var(--text-slate); opacity: 0.75;" title="यह एडिटर फाइल को local server पर सेव करता है। GitHub Pages पर publish करने के लिए बदलाव commit और push करें।">
+                Local save · publish = git push
+            </span>
 
-            <!-- SAVE LIVE BUTTON -->
-            <button class="btn-ctrl btn-save-live" id="btnSaveLive">
-                <i class="fa-solid fa-rocket"></i> लाइव सेव करें (Save & Make Live)
+            <!-- SAVE BUTTON -->
+            <button class="btn-ctrl btn-save-live" id="btnSaveLive" title="फाइल local server पर सेव होती है। Publish करने के लिए git commit & push करें।">
+                <i class="fa-solid fa-floppy-disk"></i> सेव करें (Save)
             </button>
 
-            <!-- VIEW LIVE -->
-            <button class="btn-ctrl" id="btnViewLive" title="लाइव वेबसाइट नए टैब में देखें">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> लाइव पेज
+            <!-- PREVIEW -->
+            <button class="btn-ctrl" id="btnViewLive" title="सेव किया हुआ पेज नए टैब में देखें (local preview)">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> प्रीव्यू (Preview)
             </button>
 
             <!-- DOWNLOAD BACKUP -->
@@ -907,7 +910,7 @@
         const passInput = document.getElementById("passInput");
         const btnUnlock = document.getElementById("btnUnlock");
         const pageSelectDropdown = document.getElementById("pageSelectDropdown");
-        const editorFrame = document.getElementById("editorFrame");
+        let editorFrame = document.getElementById("editorFrame");
         const btnAddSectionTop = document.getElementById("btnAddSectionTop");
         const btnSaveLive = document.getElementById("btnSaveLive");
         const btnViewLive = document.getElementById("btnViewLive");
@@ -1022,15 +1025,59 @@
             }
         }
 
+        // Set before the page's own scripts run inside the preview iframe. The
+        // shared scripts bail out on this flag, so the preview DOM stays the
+        // authored markup instead of a snapshot of the live, widget-injected
+        // DOM (which would be baked into the saved file).
+        const STUDIO_PREVIEW_FLAG = '<script id="studio-preview-flag">window.__GAHONSH_STUDIO_PREVIEW__=true;<\/script>';
+
         function renderEditablePage(htmlContent) {
+            const previewHTML = /<head[^>]*>/i.test(htmlContent)
+                ? htmlContent.replace(/<head([^>]*)>/i, '<head$1>' + STUDIO_PREVIEW_FLAG)
+                : STUDIO_PREVIEW_FLAG + htmlContent;
+
+            // Recreate the iframe so every render gets a fresh JS realm.
+            // Reusing one document via open()/write() keeps the Window's
+            // top-level const/let bindings, so a second render throws
+            // "Identifier ... has already been declared" and aborts the
+            // page's own scripts.
+            const freshFrame = editorFrame.cloneNode(false);
+            editorFrame.parentNode.replaceChild(freshFrame, editorFrame);
+            editorFrame = freshFrame;
+
             const iframeDoc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             iframeDoc.open();
-            iframeDoc.write(htmlContent);
+            iframeDoc.write(previewHTML);
             iframeDoc.close();
 
             // Wait for iframe DOM to be ready then attach live click listeners
             iframeDoc.addEventListener("DOMContentLoaded", () => setupIframeInteractions(iframeDoc));
             setTimeout(() => setupIframeInteractions(iframeDoc), 350);
+        }
+
+        // Remove editor helpers and anything the site's scripts inject at
+        // runtime before serializing, so a save stores the authored page and
+        // not a snapshot of the live DOM. Without this each save duplicated
+        // the auth modal, chat panel, theme button and scroll-reveal state.
+        function cleanForSave(doc) {
+            const helperTag = doc.getElementById("editor-helper-styles");
+            if (helperTag) helperTag.remove();
+
+            doc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
+            doc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
+            doc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
+            ["data-editor-bound", "data-editor-img", "data-editor-link", "data-editor-video"]
+                .forEach(attr => doc.querySelectorAll("[" + attr + "]").forEach(el => el.removeAttribute(attr)));
+
+            ["#studio-preview-flag", "#themeToggleBtn", "#gahonsh-auth-styles", "#gahonsh-auth-modal-root",
+             "#nav-auth-container", "#mobile-auth-container", "#gc-root", ".gahonsh-toast", ".config-banner-notice"]
+                .forEach(sel => doc.querySelectorAll(sel).forEach(el => el.remove()));
+
+            doc.querySelectorAll(".gs-hide, .gs-visible, .revealed").forEach(el => {
+                el.classList.remove("gs-hide", "gs-visible", "revealed");
+            });
+            if (doc.documentElement) doc.documentElement.classList.remove("gs-anim");
+            if (doc.body) doc.body.classList.remove("light-mode");
         }
 
         // 4. ATTACH CLICK-TO-EDIT & HIGHLIGHTING
@@ -1936,23 +1983,14 @@
         }
         document.addEventListener("keydown", handleGlobalShortcuts);
 
-        // 10. SAVE PAGE TO LIVE SERVER (WITH CLEAN SERIALIZATION)
+        // 10. SAVE PAGE TO THE LOCAL SERVER (WITH CLEAN SERIALIZATION)
         btnSaveLive.addEventListener("click", async () => {
-            saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-cyan);"></i> लाइव सेव हो रहा है...`;
+            saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-cyan);"></i> सेव हो रहा है...`;
 
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             
-            // Clean helper styling tag, toolbars, contenteditable, and injected dataset before saving clean HTML
-            const helperTag = doc.getElementById("editor-helper-styles");
-            if (helperTag) helperTag.remove();
-
-            doc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
-            doc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
-            doc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
-            doc.querySelectorAll("[data-editor-bound]").forEach(el => el.removeAttribute("data-editor-bound"));
-            doc.querySelectorAll("[data-editor-img]").forEach(el => el.removeAttribute("data-editor-img"));
-            doc.querySelectorAll("[data-editor-link]").forEach(el => el.removeAttribute("data-editor-link"));
-            doc.querySelectorAll("[data-editor-video]").forEach(el => el.removeAttribute("data-editor-video"));
+            // Strip editor helpers and runtime-injected widgets before saving.
+            cleanForSave(doc);
 
             // Serialize clean HTML
             const updatedHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
@@ -1970,8 +2008,8 @@
                 const data = await res.json();
                 if (data.success) {
                     isDirty = false;
-                    saveStatus.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> लाइव सेव हो गया!`;
-                    showToast("🎉 " + currentPage + " लाइव सर्वर पर सेव हो गया है!", "success");
+                    saveStatus.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> सेव हो गया!`;
+                    showToast("🎉 " + currentPage + " सेव हो गया। GitHub Pages पर publish करने के लिए commit & push करें।", "success");
                     // Re-render to restore interactive editing hooks
                     renderEditablePage(updatedHTML);
                 } else {
@@ -1990,15 +2028,7 @@
         btnDownload.addEventListener("click", () => {
             const doc = editorFrame.contentDocument || editorFrame.contentWindow.document;
             const cloneDoc = doc.cloneNode(true);
-            const helperTag = cloneDoc.getElementById("editor-helper-styles");
-            if (helperTag) helperTag.remove();
-            cloneDoc.querySelectorAll(".card-editor-toolbar").forEach(el => el.remove());
-            cloneDoc.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
-            cloneDoc.querySelectorAll(".editable-img").forEach(el => el.classList.remove("editable-img"));
-            cloneDoc.querySelectorAll("[data-editor-bound]").forEach(el => el.removeAttribute("data-editor-bound"));
-            cloneDoc.querySelectorAll("[data-editor-img]").forEach(el => el.removeAttribute("data-editor-img"));
-            cloneDoc.querySelectorAll("[data-editor-link]").forEach(el => el.removeAttribute("data-editor-link"));
-            cloneDoc.querySelectorAll("[data-editor-video]").forEach(el => el.removeAttribute("data-editor-video"));
+            cleanForSave(cloneDoc);
 
             const updatedHTML = "<!DOCTYPE html>\n" + cloneDoc.documentElement.outerHTML;
             const blob = new Blob([updatedHTML], { type: "text/html" });
@@ -2011,7 +2041,7 @@
             showToast(currentPage + " डाउनलोड हो गया!", "success");
         });
 
-        // 12. VIEW LIVE PAGE
+        // 12. PREVIEW THE SAVED PAGE
         btnViewLive.addEventListener("click", () => {
             window.open(currentPage, "_blank");
         });
