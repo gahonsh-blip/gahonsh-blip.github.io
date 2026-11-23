@@ -1203,6 +1203,13 @@ ON CONFLICT (id) DO UPDATE SET
     file_size_limit = EXCLUDED.file_size_limit,
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
+-- Earlier setup scripts created a public read policy and an unrestricted
+-- authenticated upload policy. Remove them before installing the participant
+-- policies; leaving the public policy behind would make every project file
+-- readable by anyone who knows its path.
+DROP POLICY IF EXISTS "Public read job attachments" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated upload job attachments" ON storage.objects;
+
 -- Reads: any authenticated user who is a participant on the folder's project,
 -- or the uploader themselves (mirrors the `uploaded_by = auth.uid()` clause on
 -- the metadata policy, so a bidder can always fetch back what they uploaded).

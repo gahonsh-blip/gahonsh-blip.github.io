@@ -1,4 +1,16 @@
 -- ============================================================================
+-- DEPRECATED: DO NOT RUN THIS FILE.
+--
+-- This is the old Phase 1 foundation schema. It does not include
+-- `file_transfers`, the participant Storage policies, worker/client records,
+-- or the later RLS hardening. Running it can also create a PUBLIC
+-- `job-attachments` bucket.
+--
+-- Use `docs/marketplace-schema.sql` for a new project, or apply the files in
+-- `supabase/migrations/` in order for an existing project. See
+-- `docs/SETUP.md` and `docs/FILE-SAFETY.md`.
+-- ============================================================================
+-- ============================================================================
 -- GAHONSH FREELANCING MARKETPLACE - PRODUCTION-READY DATABASE SCHEMA
 -- Phase 1 Foundation: Profiles, Public Profiles Directory, Jobs, Proposals,
 -- Contracts, Attachments, Row Level Security, Triggers & Atomic RPCs.
@@ -569,19 +581,10 @@ GRANT SELECT ON public.public_profiles TO anon, authenticated;
 
 COMMIT;
 -- ----------------------------------------------------------------------------
--- STORAGE BUCKET (referenced by supabase-config.js)
+-- STORAGE BUCKET
 -- ----------------------------------------------------------------------------
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('job-attachments', 'job-attachments', true)
-ON CONFLICT (id) DO NOTHING;
-
-DROP POLICY IF EXISTS "Public read job attachments" ON storage.objects;
-CREATE POLICY "Public read job attachments"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'job-attachments');
-
-DROP POLICY IF EXISTS "Authenticated upload job attachments" ON storage.objects;
-CREATE POLICY "Authenticated upload job attachments"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'job-attachments');
+-- Removed from this deprecated file on purpose. The old block created a public
+-- bucket and a public read policy, which would expose every project file.
+-- The private bucket, 25 MB limit, MIME allow-list and participant policies
+-- live in `docs/marketplace-schema.sql` and
+-- `supabase/migrations/20261126000000_harden_file_transfers.sql`.
