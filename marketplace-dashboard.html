@@ -260,7 +260,7 @@
             .user-profile-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=6">
 </head>
 <body>
 
@@ -334,6 +334,7 @@
         <div class="portal-tabs" id="portalTabsNav">
             <button class="portal-tab-btn active" id="tabJobsOrProposals">My Projects / Proposals</button>
             <button class="portal-tab-btn" id="tabContracts">Active Contracts</button>
+            <button class="portal-tab-btn" id="tabRecords">My Record</button>
         </div>
 
         <div id="portalTabContent">
@@ -437,13 +438,15 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js"></script>
-    <script src="supabase-client.js"></script>
+    <script src="marketplace-local.js?v=6"></script>
+    <script src="supabase-client.js?v=6"></script>
     <script src="auth.js"></script>
+    <script src="records.js?v=6"></script>
     <script src="assets/js/file-transfer.js"></script>
     <script>
         let currentUser = null;
-        let currentTab = 'primary'; // 'primary' or 'contracts'
+        let currentTab = 'primary'; // 'primary', 'contracts' or 'records'
+        let myRecord = null;
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>"']/g, (m) => ({
@@ -483,6 +486,10 @@
             const container = document.getElementById('tabListingsContainer');
             if (currentTab === 'contracts') {
                 await loadContracts();
+                return;
+            }
+            if (currentTab === 'records') {
+                await loadRecords();
                 return;
             }
 
@@ -579,6 +586,13 @@
                 const otherName = escapeHtml(otherParty?.full_name || (isClient ? 'Freelancer' : 'Client'));
                 const otherLabel = isClient ? 'Freelancer' : 'Client';
                 const safeId = escapeHtml(c.job?.id || c.job_id || '');
+                const canComplete = isClient && c.status === 'active';
+                const completeBtn = canComplete
+                    ? `<button type="button" class="btn-outline" data-complete-contract="${escapeHtml(c.id)}"><i class="fa-solid fa-circle-check"></i> Mark complete</button>`
+                    : '';
+                const workerNote = !isClient && c.status === 'active'
+                    ? '<p style="font-size:0.8rem; color:var(--text-slate); margin-top:6px;">The client marks this contract complete. It then appears in both records.</p>'
+                    : '';
                 return `
                 <div class="portal-card" data-contract-id="${escapeHtml(c.id)}" data-other-id="${escapeHtml(otherParty?.id || '')}" data-job-id-raw="${escapeHtml(c.job?.id || c.job_id || '')}">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -588,14 +602,50 @@
                             <p style="font-size:0.85rem; color:var(--text-slate); margin-top:6px;">
                                 ${otherLabel}: <strong>${otherName}</strong> • Hired on ${new Date(c.created_at).toLocaleDateString()}
                             </p>
+                            ${workerNote}
                         </div>
-                        <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            ${completeBtn}
+                            <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
+                        </div>
                     </div>
                     <div class="gft-host" data-job-id="${safeId}" data-can-upload="${(c.status === 'active' || isClient) ? '1' : '0'}"></div>
                 </div>
             `;
             }).join('');
             mountContractTransfers();
+        }
+
+        async function loadRecords() {
+            const container = document.getElementById('tabListingsContainer');
+            myRecord = null;
+            let recordError = null;
+            if (window.isMarketplaceReady()) {
+                try {
+                    myRecord = await window.GahonshDB.Records.getMyRecord();
+                } catch (err) {
+                    recordError = err;
+                    console.warn('[marketplace-dashboard] getMyRecord failed:', err);
+                }
+            }
+            if (!myRecord) {
+                const needsSetup = recordError && window.GahonshDB.isBackendNotProvisioned(recordError);
+                container.innerHTML = needsSetup
+                    ? `<div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:14px;">The live database is missing the record functions. Run <code>docs/marketplace-schema.sql</code> (or the worker_client_records migration) once in the Supabase SQL Editor, then refresh.</p>
+                        <a href="docs/RECORDS.md" class="btn-outline" target="_blank" rel="noopener noreferrer">Open record setup guide</a>
+                    </div>`
+                    : `<div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:14px;">Your record is not available yet. Sign in and complete a project to start it.</p>
+                        <button type="button" class="btn-outline" onclick="window.GahonshAuthUI.openAuthModal('signin')">Sign In / Join</button>
+                    </div>`;
+                return;
+            }
+            if (!window.GahonshRecords || typeof window.GahonshRecords.renderMyRecord !== 'function') {
+                container.innerHTML = '<div class="portal-card"><p style="color:var(--text-slate);">The record viewer is not available. Please refresh the page.</p></div>';
+                return;
+            }
+            container.innerHTML = window.GahonshRecords.renderMyRecord(myRecord);
         }
 
         // Attach an in-site send/receive panel to each contract so a client and
@@ -631,6 +681,7 @@
             currentTab = 'primary';
             document.getElementById('tabJobsOrProposals').classList.add('active');
             document.getElementById('tabContracts').classList.remove('active');
+            document.getElementById('tabRecords').classList.remove('active');
             if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
         };
 
@@ -638,8 +689,51 @@
             currentTab = 'contracts';
             document.getElementById('tabContracts').classList.add('active');
             document.getElementById('tabJobsOrProposals').classList.remove('active');
+            document.getElementById('tabRecords').classList.remove('active');
             if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
         };
+
+        document.getElementById('tabRecords').onclick = () => {
+            currentTab = 'records';
+            document.getElementById('tabRecords').classList.add('active');
+            document.getElementById('tabJobsOrProposals').classList.remove('active');
+            document.getElementById('tabContracts').classList.remove('active');
+            if (currentUser) loadRecords();
+        };
+
+        // Record downloads and client sign-off use event delegation so no
+        // database value ever enters an inline handler.
+        document.getElementById('tabListingsContainer').addEventListener('click', async (e) => {
+            const downloadBtn = e.target.closest('[data-record-download]');
+            if (downloadBtn) {
+                if (!myRecord || !window.GahonshRecords) return;
+                window.GahonshRecords.download(
+                    downloadBtn.dataset.recordDownload,
+                    myRecord,
+                    myRecord.profile?.full_name || 'member',
+                    downloadBtn.dataset.recordFormat
+                );
+                return;
+            }
+
+            const completeBtn = e.target.closest('[data-complete-contract]');
+            if (!completeBtn) return;
+            if (!confirm('Mark this contract complete? This closes the job and adds it to both records.')) return;
+            completeBtn.disabled = true;
+            try {
+                if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                await window.GahonshDB.Contracts.completeContract(completeBtn.dataset.completeContract);
+                window.GahonshAuthUI.showToast('Contract completed. It now appears in both records.');
+                await loadContracts();
+            } catch (err) {
+                console.error('[marketplace-dashboard] completeContract failed:', err);
+                const message = window.GahonshDB.isBackendNotProvisioned(err)
+                    ? 'The live database is missing complete_contract. Run docs/marketplace-schema.sql once, then refresh.'
+                    : (err.message || 'please try again.');
+                window.GahonshAuthUI.showToast('Could not complete the contract: ' + message);
+                completeBtn.disabled = false;
+            }
+        });
 
         // Edit profile button
         document.getElementById('btnEditProfileTrigger').onclick = () => {
