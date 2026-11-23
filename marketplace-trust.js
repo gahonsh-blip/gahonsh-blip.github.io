@@ -30,6 +30,7 @@
   var painting = false;
 
   async function paintRatings() {
+    if (window.__GAHONSH_STUDIO_PREVIEW__) return;
     // Only the dedicated placeholder is painted. The same data-rating-uid
     // attribute also sits on the parent card for styling, so selecting every
     // match would overwrite the whole card with the star text.
@@ -130,6 +131,7 @@
   }
 
   function boot() {
+    if (window.__GAHONSH_STUDIO_PREVIEW__) return;
     paintRatings();
     decorateContracts();
     var target = document.querySelector('#tabListingsContainer') || document.body;

@@ -111,6 +111,27 @@ If `STUDIO_PASS` is unset the server generates a random one and prints it on
 startup. Never reintroduce a hardcoded passcode — `npm run test:security`
 fails the build if one appears.
 
+**Login.** There is no username/password pair and no default passcode. Start
+the server with a passcode of your choice (`STUDIO_PASS=yourpass npm run dev`)
+or read the random one it prints, then open
+`http://localhost:3000/dashboard.html` and enter it. The dashboard only works
+while `server.js` is running; on GitHub Pages it has no write API.
+
+**Save model.** The editor fetches the page and previews it in an iframe with
+`window.__GAHONSH_STUDIO_PREVIEW__` set before the page's own scripts run.
+Every script that injects DOM at runtime (`script.js`, `auth.js`,
+`chat-widget.js`, `marketplace-trust.js`) must bail out when that flag is set,
+otherwise the injected widget is captured by `cleanForSave()` and baked into
+the page. `cleanForSave()` also strips editor helpers, scroll-reveal classes
+and the `light-mode` class before serializing, and the preview iframe is
+recreated on each render so a re-render gets a fresh JS realm.
+
+**Save vs publish.** `/api/save-page` writes `.html`/`.htm` to the repo root
+only, and `/api/upload-file` is limited to `images`, `assets/projects`,
+`assets/media` and `assets/files`. A save updates the local file the server is
+serving; it does **not** publish to GitHub Pages. To publish, commit and push
+`main`. The UI labels say this — do not restore the old "LIVE" wording.
+
 ## Security Notes
 
 - User- and DB-supplied values must never reach `innerHTML` unescaped. Escape

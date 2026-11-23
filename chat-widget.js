@@ -7,7 +7,7 @@
 (function () {
     'use strict';
 
-    if (window.__gahonshChatLoaded) return;
+    if (window.__gahonshChatLoaded || window.__GAHONSH_STUDIO_PREVIEW__ || document.getElementById('gc-root')) return;
     window.__gahonshChatLoaded = true;
 
     /* ---------------------------------------------------------------- config */

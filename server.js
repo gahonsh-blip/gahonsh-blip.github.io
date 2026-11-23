@@ -40,9 +40,11 @@ app.post('/api/save-page', requireStudioAuth, (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid file or content' });
         }
 
-        // Sanitize filename to prevent directory traversal
+        // Sanitize filename to prevent directory traversal. The editor only
+        // edits site pages, so only HTML is writable — never server.js, the
+        // shared JS/CSS, or config files.
         const safeFilename = path.basename(filename);
-        const allowedExtensions = ['.html', '.htm', '.xml', '.txt', '.css', '.js', '.json'];
+        const allowedExtensions = ['.html', '.htm'];
         const ext = path.extname(safeFilename).toLowerCase();
 
         if (!allowedExtensions.includes(ext)) {
@@ -50,12 +52,15 @@ app.post('/api/save-page', requireStudioAuth, (req, res) => {
         }
 
         const filePath = path.join(__dirname, safeFilename);
+        if (path.dirname(filePath) !== __dirname) {
+            return res.status(403).json({ success: false, message: 'Invalid path' });
+        }
         fs.writeFileSync(filePath, content, 'utf8');
 
         console.log(`[Owner Studio] Successfully saved ${safeFilename} (${content.length} bytes)`);
         return res.json({ 
             success: true, 
-            message: `${safeFilename} has been saved and is now LIVE!`,
+            message: `${safeFilename} has been saved to the local site. Commit and push to publish it on GitHub Pages.`,
             filename: safeFilename,
             timestamp: new Date().toISOString()
         });
@@ -89,10 +94,21 @@ app.post('/api/upload-file', requireStudioAuth, (req, res) => {
             }
         }
 
-        // Clean folder name to prevent directory traversal
-        const sanitizedFolder = targetSubfolder.replace(/\.\./g, '').replace(/^\/+/, '');
+        // Clean folder name to prevent directory traversal, then require it to
+        // be one of the site's asset folders. Without this allow-list a caller
+        // could write into .git/hooks or overwrite server.js.
+        const ALLOWED_UPLOAD_FOLDERS = ['images', 'assets/projects', 'assets/media', 'assets/files'];
+        const sanitizedFolder = path.posix
+            .normalize(String(targetSubfolder).replace(/\\/g, '/').replace(/\.\./g, ''))
+            .replace(/^\/+|\/+$/g, '');
+        if (!ALLOWED_UPLOAD_FOLDERS.includes(sanitizedFolder)) {
+            return res.status(403).json({ success: false, message: 'Upload folder not allowed' });
+        }
         const safeName = path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
-        const targetDir = path.join(__dirname, sanitizedFolder);
+        const targetDir = path.resolve(__dirname, sanitizedFolder);
+        if (!targetDir.startsWith(__dirname + path.sep)) {
+            return res.status(403).json({ success: false, message: 'Invalid folder' });
+        }
         
         if (!fs.existsSync(targetDir)) {
             fs.mkdirSync(targetDir, { recursive: true });

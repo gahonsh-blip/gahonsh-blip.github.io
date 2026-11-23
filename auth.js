@@ -687,6 +687,7 @@
     }
 
     function updateHeaderNav(user) {
+        if (window.__GAHONSH_STUDIO_PREVIEW__) return;
         // 1. Update Desktop Navigation
         const nav = document.querySelector('header nav');
         if (nav) {
@@ -815,6 +816,7 @@
 
     // Initialize on DOM Ready
     function init() {
+        if (window.__GAHONSH_STUDIO_PREVIEW__) return;
         injectStylesAndDOM();
         checkConfigBanner();
         refreshUserState();
