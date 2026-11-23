@@ -56,6 +56,9 @@ database schema therefore adds a second gate:
   freelancer on an active or completed contract, and admins to read files.
 - Only the owner, an active-contract freelancer, a live proposer, or an admin
   may upload. A completed contract is read-only.
+- The migration drops the legacy `Public read job attachments` and
+  `Authenticated upload job attachments` policies from old setup scripts. If
+  those remain, every project file is readable by anyone who knows its path.
 
 Apply the latest migration to an existing project:
 

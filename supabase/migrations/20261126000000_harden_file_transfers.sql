@@ -8,6 +8,8 @@
 --    allow-list, matching the browser scanner and the page's extension list.
 --    This closes the gap where a caller could bypass the page and upload an
 --    executable through the Storage API.
+-- 3. Legacy public read/upload policies from old setup scripts are removed.
+--    Leaving them in place would expose every project file by URL.
 --
 -- Apply after 20261125000000_worker_client_records.sql.
 
@@ -89,3 +91,9 @@ ON CONFLICT (id) DO UPDATE SET
     public = FALSE,
     file_size_limit = EXCLUDED.file_size_limit,
     allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+-- Legacy setup scripts left a public read policy and an unrestricted upload
+-- policy on this bucket. Drop them so the participant policies are the only
+-- path to a project file.
+DROP POLICY IF EXISTS "Public read job attachments" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated upload job attachments" ON storage.objects;
