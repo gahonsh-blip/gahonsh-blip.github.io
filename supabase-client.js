@@ -877,6 +877,25 @@
     // (RLS restricts both to the client, the hired freelancer and admins).
     // Bytes are streamed back to the browser with storage.download(), so a
     // signed-in participant can fetch a shared file without leaving the site.
+    // Browsers often report `application/octet-stream` (or nothing) for Office
+    // and text files. The storage bucket has a MIME allow-list, so derive the
+    // correct type from the extension instead of letting a valid file fail.
+    const FILE_MIME_BY_EXT = {
+        pdf: 'application/pdf',
+        png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
+        zip: 'application/zip',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        odt: 'application/vnd.oasis.opendocument.text',
+        ods: 'application/vnd.oasis.opendocument.spreadsheet',
+        odp: 'application/vnd.oasis.opendocument.presentation',
+        doc: 'application/msword', xls: 'application/vnd.ms-excel', ppt: 'application/vnd.ms-powerpoint',
+        txt: 'text/plain', md: 'text/markdown', csv: 'text/csv', tsv: 'text/tab-separated-values',
+        json: 'application/json', xml: 'application/xml', log: 'text/plain',
+        yml: 'text/yaml', yaml: 'text/yaml'
+    };
+
     const Files = {
         bucket() {
             return (window.GAHONSH_CONFIG && window.GAHONSH_CONFIG.STORAGE_BUCKET) || 'job-attachments';
@@ -896,6 +915,10 @@
             if (!file) throw new Error('No file was selected.');
 
             const safeName = Files.safeName(file.name);
+            const ext = safeName.split('.').pop().toLowerCase();
+            const reportedType = String(file.type || '').trim();
+            const contentType = FILE_MIME_BY_EXT[ext]
+                || (reportedType && reportedType !== 'application/octet-stream' ? reportedType : 'application/octet-stream');
             const unique = (window.crypto && window.crypto.randomUUID)
                 ? window.crypto.randomUUID()
                 : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -903,7 +926,7 @@
 
             const { error: uploadError } = await client.storage
                 .from(Files.bucket())
-                .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || 'application/octet-stream' });
+                .upload(path, file, { cacheControl: '3600', upsert: false, contentType: contentType });
             if (uploadError) throw uploadError;
 
             const payload = {
@@ -912,7 +935,7 @@
                 uploaded_by: user.id,
                 file_name: safeName,
                 storage_path: path,
-                file_type: file.type || 'application/octet-stream',
+                file_type: contentType,
                 file_size_bytes: file.size || 0,
                 scope: scope === 'proposal' ? 'proposal' : 'job'
             };

@@ -1270,19 +1270,23 @@
     };
 
     // Mirrors can_access_job_files() in the SQL schema: the project owner, the
-    // freelancer on an active contract for that job, and admins. A freelancer
-    // who has only *proposed* is deliberately excluded, matching the SELECT
-    // policy, so a bidder cannot read the client's files before being hired.
+    // freelancer on an active or completed contract for that job, and admins.
+    // A freelancer who has only *proposed* is deliberately excluded, matching
+    // the SELECT policy, so a bidder cannot read the client's files before
+    // being hired. Completed work stays readable as a project record.
     function isProjectParticipant(job, profile) {
         if (!job || !profile) return false;
         if (profile.role === 'admin') return true;
         if (job.client_id === profile.id) return true;
         return readTable('contracts').some(
-            (c) => c.job_id === job.id && c.freelancer_id === profile.id && c.status === 'active'
+            (c) => c.job_id === job.id && c.freelancer_id === profile.id &&
+                ['active', 'completed'].includes(c.status)
         );
     }
 
-    // A file is visible to its uploader and to project participants.
+    // A file is visible to its uploader and to project participants, including
+    // a freelancer whose contract has completed, so the project record stays
+    // downloadable after delivery.
     function canAccessTransfer(record, profile) {
         if (!record || !profile) return false;
         if (record.uploaded_by === profile.id) return true;
@@ -1290,15 +1294,19 @@
         return isProjectParticipant(job, profile);
     }
 
-    // Mirrors can_upload_job_files() in the SQL schema: anyone who can read the
-    // workspace, plus a freelancer with a live proposal, so samples and briefs
-    // can be attached before a contract exists.
+    // Mirrors can_upload_job_files() in the SQL schema: the project owner, an
+    // admin, the freelancer on an active contract, or a freelancer with a live
+    // proposal. A completed contract is read-only.
     function canUploadTransfer(job, profile) {
-        if (isProjectParticipant(job, profile)) return true;
         if (!job || !profile) return false;
+        if (profile.role === 'admin') return true;
+        if (job.client_id === profile.id) return true;
+        if (readTable('contracts').some(
+            (c) => c.job_id === job.id && c.freelancer_id === profile.id && c.status === 'active'
+        )) return true;
         return readTable('proposals').some(
             (p) => p.job_id === job.id && p.freelancer_id === profile.id &&
-                ['submitted', 'shortlisted', 'accepted'].includes(p.status)
+                ['submitted', 'shortlisted'].includes(p.status)
         );
     }
 

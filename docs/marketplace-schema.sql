@@ -343,28 +343,43 @@ BEGIN
         SELECT 1 FROM public.contracts
         WHERE contracts.job_id::TEXT = target_job_id
           AND contracts.freelancer_id = auth.uid()
-          AND contracts.status = 'active'
+          AND contracts.status IN ('active', 'completed')
     );
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
 
--- True when the current user may add files to a project: anyone who can read
--- the workspace, plus a freelancer with a live proposal on the project, so
--- samples and briefs can be attached before a contract exists.
+-- True when the current user may add files to a project: the project owner,
+-- an admin, the freelancer on an active contract, or a freelancer with a live
+-- proposal (so samples and briefs can be attached before a contract exists).
+-- A completed contract is read-only and cannot be used to add new files.
 CREATE OR REPLACE FUNCTION public.can_upload_job_files(target_job_id TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
-    IF public.can_access_job_files(target_job_id) THEN
+    IF auth.uid() IS NULL OR target_job_id IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    IF public.is_admin() THEN
         RETURN TRUE;
     END IF;
-    IF auth.uid() IS NULL THEN
-        RETURN FALSE;
+    IF EXISTS (
+        SELECT 1 FROM public.jobs
+        WHERE jobs.id::TEXT = target_job_id AND jobs.client_id = auth.uid()
+    ) THEN
+        RETURN TRUE;
+    END IF;
+    IF EXISTS (
+        SELECT 1 FROM public.contracts
+        WHERE contracts.job_id::TEXT = target_job_id
+          AND contracts.freelancer_id = auth.uid()
+          AND contracts.status = 'active'
+    ) THEN
+        RETURN TRUE;
     END IF;
     RETURN EXISTS (
         SELECT 1 FROM public.proposals
         WHERE proposals.job_id::TEXT = target_job_id
           AND proposals.freelancer_id = auth.uid()
-          AND proposals.status IN ('submitted', 'shortlisted', 'accepted')
+          AND proposals.status IN ('submitted', 'shortlisted')
     );
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
@@ -1159,9 +1174,34 @@ WITH CHECK (
 -- and the path's first segment is checked against the same participant rule
 -- used for the file_transfers table, so a client can only reach their own
 -- projects' files and a freelancer only the projects they hold a contract on.
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('job-attachments', 'job-attachments', FALSE)
-ON CONFLICT (id) DO UPDATE SET public = FALSE;
+-- The bucket-level size and MIME allow-list are a second gate behind the
+-- browser scanner; it stops a caller who bypasses the page from storing an
+-- executable or an oversized object through the Storage API.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'job-attachments',
+    'job-attachments',
+    FALSE,
+    26214400,
+    ARRAY[
+        'application/pdf',
+        'image/png', 'image/jpeg', 'image/gif', 'image/webp',
+        'application/zip',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.oasis.opendocument.presentation',
+        'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint',
+        'text/plain', 'text/markdown', 'text/csv', 'text/tab-separated-values',
+        'application/json', 'application/xml', 'text/xml', 'text/yaml', 'application/x-yaml'
+    ]
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = FALSE,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- Reads: any authenticated user who is a participant on the folder's project,
 -- or the uploader themselves (mirrors the `uploaded_by = auth.uid()` clause on

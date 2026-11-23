@@ -575,3 +575,19 @@ the **Search** button ending at `right: 362`. The input now has
   requests, broken images or unresponsive-page timeouts.
 - Screenshots confirm the stacked hero CTAs and the fully visible search
   buttons.
+
+## 2026-11-23 — File transfer and light-mode follow-up
+
+| Severity | Area | Bug | Status |
+| --- | --- | --- | --- |
+| High | File transfer | The upload scanner called an external `scanFile` endpoint that returned HTTP 402, and `file_transfers` has no scan columns, so the download path waited forever for a `clean` verdict | Fixed: browser safety scan with a local verdict |
+| High | File transfer | The download handler called an undefined `scan()` and `sanitizeFileName()` was scoped inside `mount()`, so opening a project with a file threw a page error and froze the panel | Fixed: module-level download helper and in-browser scan |
+| High | Access control | A freelancer lost read access as soon as a contract was completed, so delivered files disappeared; uploads were still allowed on completed work | Fixed: completed contracts are readable and read-only |
+| Medium | Storage | The private `job-attachments` bucket had no size or MIME limit, so a caller could bypass the page scanner through the Storage API | Fixed: 25 MB limit and MIME allow-list in the schema and migration |
+| Medium | Light theme | `.step-num` inherited dark body text on the blue step circle (2.89:1 contrast) and became unreadable | Fixed: white text in light mode |
+| Low | Docs | There was no user-facing explanation of what the scanner does and does not guarantee | Fixed: `docs/FILE-SAFETY.md` |
+
+Verified with a two-account local flow: client uploads a brief, hired
+freelancer downloads it and sends a reply, client downloads the reply, and the
+files remain readable after the contract is completed. `npm test` now covers
+the same authorization rules in the local engine.

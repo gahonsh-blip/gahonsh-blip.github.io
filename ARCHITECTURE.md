@@ -68,6 +68,8 @@ gahonsh-blip.github.io/
 │   ├── marketplace-schema.sql  PostgreSQL schema, RLS policies, triggers, RPC
 │   ├── SETUP.md                Comprehensive setup & deployment guide
 │   ├── DATABASE.md             Database architecture & entity relationships
+│   ├── FILE-SAFETY.md          Browser safety scan, bucket limits and AV boundary
+│   ├── RECORDS.md              Worker/client records and export reference
 │   └── API.md                  API endpoints & integration specifications
 └── README.md / AGENTS.md / ARCHITECTURE.md / SECURITY.md / CHANGELOG.md / CONTRIBUTING.md
 ```
