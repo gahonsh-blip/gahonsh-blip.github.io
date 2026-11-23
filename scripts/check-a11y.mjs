@@ -132,6 +132,35 @@ if (!whatsapp) {
     checkContrast('contact.html', 'WhatsApp button text', whatsapp, '#ffffff');
 }
 
+// 9. Mobile layout guards. The home hero CTA row and the jobs/talent search
+//    rows must wrap or shrink instead of forcing a horizontal scroll at 390 px
+//    or 320 px.
+const indexHtml = readFileSync(join(root, 'index.html'), 'utf8');
+const ctaGroup = indexHtml.match(/\.cta-group\s*\{([^}]*)\}/);
+if (!ctaGroup || !/flex-wrap\s*:\s*wrap/.test(ctaGroup[1])) {
+    fail('index.html', 'hero .cta-group must wrap on narrow screens');
+}
+
+const jobsHtml = readFileSync(join(root, 'jobs.html'), 'utf8');
+const searchInput = jobsHtml.match(/\.search-bar-wrapper input\s*\{([^}]*)\}/);
+if (!searchInput || !/min-width\s*:\s*0/.test(searchInput[1])) {
+    fail('jobs.html', 'search input must be allowed to shrink on narrow screens');
+}
+const searchButton = jobsHtml.match(/\.btn-search\s*\{([^}]*)\}/);
+if (!searchButton || !/flex-shrink\s*:\s*0/.test(searchButton[1])) {
+    fail('jobs.html', 'search button must not shrink out of the bar');
+}
+
+const talentHtml = readFileSync(join(root, 'find-talent.html'), 'utf8');
+const talentInput = talentHtml.match(/\.search-talent-box input\s*\{([^}]*)\}/);
+if (!talentInput || !/min-width\s*:\s*0/.test(talentInput[1])) {
+    fail('find-talent.html', 'search input must be allowed to shrink on narrow screens');
+}
+const talentButton = talentHtml.match(/\.btn-search\s*\{([^}]*)\}/);
+if (!talentButton || !/flex-shrink\s*:\s*0/.test(talentButton[1])) {
+    fail('find-talent.html', 'search button must not shrink out of the bar');
+}
+
 if (failures.length) {
     console.error(`a11y check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);

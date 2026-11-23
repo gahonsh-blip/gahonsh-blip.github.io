@@ -46,6 +46,8 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 - The file-transfer panel shows a clear setup message when the deployment has not been migrated yet, instead of leaking a raw `PGRST205` / `Bucket not found` error.
 
 ### Fixed
+- **The home hero CTA row overflowed on phones.** The three buttons (Start Your Project, Explore Portfolio, Ask the Assistant) sat in a non-wrapping flex row, so at 390 px the row was 456 px wide and the outer buttons were clipped. `.cta-group` now wraps and centres, and the buttons stack cleanly.
+- **The jobs and find-talent search bars overflowed at 320 px.** The text input kept its intrinsic minimum width, pushing the search button past the viewport. Both inputs now use `min-width: 0`, and both buttons use `flex-shrink: 0`, so the input truncates and the button stays visible. `npm run test:a11y` now guards all three rules.
 - **The chat's sign-in prompt described every task as a "post".** A guest who tapped **Check my profile** or **Upload resume** was told "The post has to belong to your account". The prompt now says "I need your account to read or save this for you", which fits profile checks, job checks, resumes and proposals.
 - **Chat job links using the offline demo IDs were rejected.** `extractJobId()` only accepted UUIDs and `job-*` IDs, so the site's own `?id=demo-job-1` link failed the proposal and job-check steps with "That does not look like a job link or ID." It now accepts `demo-job-*` and normalises the ID.
 - **Hindi / Devanagari chat commands did not match.** `norm()` stripped Unicode combining marks, so `प्रोफाइल` became a different string from the keyword. It now preserves `\p{M}` before matching.
