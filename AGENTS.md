@@ -137,6 +137,37 @@ Keep the knowledge-base action intents (`buildProfileBot`, `postJobBot`,
 step when a service field changes. See `docs/CHAT-ASSISTANT.md` for the
 capability table, commands, safety rules and browser test steps.
 
+## Chat Assistant (site-wide)
+
+`chat-widget.js` is the assistant loaded on every page. It answers from a
+curated knowledge base, runs guided tasks through `GahonshDB`, and audits a
+saved profile or job post with a deterministic score. There is no LLM call and
+no API key; keep it that way.
+
+- **Audit engine.** `auditProfile()` and `auditJob()` return
+  `{ score, items }` with `ok` / `warn` / `missing` states and both English and
+  Hindi copy. `renderAudit()` escapes every value. The profile weights are
+  name 10, title 20, location 10, skills 20, hourly rate 15, bio 15, resume 10
+  (client: name 20, title 25, location 15, about 40); the job weights are title
+  15, category 5, scope 30, budget 15, duration 10, experience 10, skills 15.
+- **Guided fixes.** `startProfileFix()` / `startJobFix()` ask only the gaps,
+  reuse `profileSteps()` / `jobSteps()`, save through
+  `Profiles.updateMyProfile()` / `Jobs.updateJob()`, then re-audit. The job
+  picker accepts a number, title, UUID, `job-*` or `demo-job-*` ID.
+- **Auth changes clear private state.** `clearPrivateChat()` clears the log and
+  `gc_hist`, resets the task, picker and quote flow, and bumps `chatEpoch`.
+  Async reads/writes compare the epoch (and the task object) before rendering,
+  so a late response cannot show the previous account's data. Do not remove
+  these guards when adding a new async flow.
+- **Bilingual.** `norm()` preserves Unicode combining marks (`\p{M}`), so
+  Devanagari keywords such as `प्रोफाइल` match. Keep that behaviour.
+- **Security.** User and DB values must stay behind `escapeHtml()` or
+  `textContent`; `npm run test:security` scans this file. Never put an
+  interpolated value into an inline handler.
+- **Docs/tests.** See `docs/CHAT-ASSISTANT.md` and the chat section of
+  `docs/BUG_REPORT.md`. `npm test` covers the static checks; browser flows use
+  the demo accounts and `demo-job-1`.
+
 ## Owner Studio Editor (local only)
 
 `dashboard.html` is a private visual editor served by `server.js`. Its write

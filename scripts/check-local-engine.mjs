@@ -177,6 +177,38 @@ async function refuse(fn) {
   check('allows a legal status transition (open -> in_progress)',
     (await DB.Jobs.updateJobStatus('demo-job-1', 'in_progress')).status === 'in_progress');
 
+  // --- editing a job (owner-only UPDATE policy) --------------------------
+  const edited = await DB.Jobs.updateJob('demo-job-1', {
+    title: 'Updated demo project title',
+    required_skills: ['Excel VBA', 'SQL', 'Power BI'],
+    budget_min: 750
+  });
+  check('owner can edit an open or active job',
+    edited.title === 'Updated demo project title' &&
+    edited.required_skills.length === 3 &&
+    Number(edited.budget_min) === 750);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('refuses a job edit by a non-owner',
+    await refuse(() => DB.Jobs.updateJob('demo-job-1', { title: 'Hijacked title' })) !== null);
+
+  await DB.Auth.signIn(client._email, password);
+  const protectedEdit = await DB.Jobs.updateJob('demo-job-1', {
+    title: 'Second edit title',
+    client_id: 'someone-else',
+    proposals_count: 999
+  });
+  check('keeps immutable job fields on edit',
+    protectedEdit.client_id === client.id && protectedEdit.proposals_count !== 999);
+
+  // A closed job is read-only, mirroring the trigger/policy guard.
+  const jobs = read(ctx, 'jobs');
+  const closed = jobs.find((j) => j.id === 'demo-job-1');
+  closed.status = 'cancelled';
+  write(ctx, 'jobs', jobs);
+  check('refuses to edit a closed job',
+    await refuse(() => DB.Jobs.updateJob('demo-job-1', { title: 'Closed job edit' })) !== null);
+
   // --- resumes (PDF) -----------------------------------------------------
   // Mirrors the private `resumes` bucket: only signed-in users may read a
   // resume, and only freelancers may upload one.

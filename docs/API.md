@@ -24,6 +24,7 @@ The application integrates with Supabase via the client-side JavaScript SDK (`@s
 | `getJobs(filters)` | `SELECT * FROM jobs` | Retrieves open jobs with keyword search, category, budget, and sort filters. |
 | `getJobById(id)` | `SELECT *, profiles(...) FROM jobs` | Retrieves specific job details along with client verification metadata. |
 | `createJob(jobData)` | `INSERT INTO jobs (...)` | Creates a new job posting for authenticated clients. |
+| `updateJob(jobId, updates)` | `UPDATE jobs SET ... WHERE id = ...` | Edits an open or in-progress job. The owner or an admin only; `id`, `client_id`, counters, `status` and timestamps are stripped; closed jobs are read-only. |
 | `getProposals(jobId)` | `SELECT *, profiles(...) FROM proposals` | Retrieves proposals submitted for a specific job (Client only) or by a freelancer. |
 | `submitProposal(data)` | `INSERT INTO proposals (...)` | Submits a proposal with bid amount, delivery days, and cover letter. |
 | `acceptProposal(proposalId, jobId)` | `rpc('accept_proposal_and_create_contract', ...)` | Executes atomic transaction to hire freelancer and generate an active contract. |

@@ -406,3 +406,121 @@ the chat assistant never receive them.
   objects, including the new `admin_profiles` view.
 - RLS UPDATE remains `auth.uid() = id OR public.is_admin()`, and the trigger
   blocks self-service `role` / `email` / `is_verified` changes.
+
+---
+
+# Chat assistant audit & guided fixes — 2026-11-23
+
+Scope: the `chat-widget.js` profile/job audit engine, the guided fix flows, the
+bilingual matcher, auth-change privacy and `Jobs.updateJob()` in
+`supabase-client.js` / `marketplace-local.js`.
+
+## Summary
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | High | Privacy | A previous account's chat log and `gc_hist` survived sign-out or an account switch on a shared browser | Fixed |
+| 2 | High | Privacy | An in-flight audit or save could render the previous account's profile/job after the chat was cleared | Fixed |
+| 3 | High | Functional | Job links with the offline `demo-job-*` IDs were rejected by `extractJobId()` | Fixed |
+| 4 | Medium | Bilingual | Devanagari keywords did not match because `norm()` stripped combining marks | Fixed |
+| 5 | Medium | UX | Role-specific chips stayed stale when the visitor signed in with the chat already open | Fixed |
+| 6 | Medium | Privacy | The quote form (`flow`) survived a sign-out and could take the next message | Fixed |
+| 7 | Low | A11y | Light-mode audit warnings used the dark-theme amber and red | Fixed |
+| 8 | Low | Robustness | A synchronous `getCurrentUser()` throw could stop the chat widget from initialising | Fixed |
+| 9 | Info | Service gap | The job-fix flow needed `Jobs.updateJob()`, which neither client provided | Added |
+
+## 1. Previous account's chat survived an auth change
+
+`chat-widget.js` kept its log, `localStorage` history and in-memory task when
+the user signed out or signed in as someone else. On a shared browser the next
+visitor could read the previous profile audit, job titles or proposal details.
+The widget now watches `GahonshDB.Auth.onAuthStateChange`, clears the log and
+`gc_hist`, resets the task, job picker, quote flow and greeting, and shows a
+short "previous chat was cleared" message.
+
+## 2. Late responses could leak the previous account's data
+
+Clearing the DOM was not enough while an audit or save was awaiting the
+service. The continuation still held the old profile/job and could append it
+after the clear. A `chatEpoch` counter is bumped on every auth change, and
+`startProfileAudit`, `startJobAudit`, `startProfileFix`, `greetUser`,
+`handleContinue`, `startResumeUpload`, `startTask` and `submitTask` compare the
+epoch after each await. `submitTask` and `handleTaskInput` also compare the
+task object, so a late result cannot mutate a replacement task. The service
+call may still complete for the old account, but its result is never rendered
+in the new session.
+
+## 3. Demo job links were rejected
+
+`extractJobId()` accepted UUIDs and IDs starting with `job-` / `job_`. The
+site's own demo job link is `job-details.html?id=demo-job-1`, so the proposal
+and job-check steps answered "That does not look like a job link or ID." The
+pattern now accepts `demo-job-*`, and the ID is lower-cased. Verified with the
+proposal flow: `demo-job-1` advanced to the bid step and saved a proposal.
+
+## 4. Devanagari keywords did not match
+
+`norm()` removed every character in `\p{M}`, which includes the vowel signs
+and virama that Hindi/Devanagari needs. `प्रोफाइल` was reduced to a different
+string from the keyword. The normaliser now preserves combining marks while
+still lower-casing and collapsing whitespace. Verified: the Hindi profile
+audit heading and items render in Devanagari.
+
+## 5. Stale role-specific chips
+
+The greeting and its chips ran only when the panel opened. A visitor who
+opened the chat as a guest and then signed in kept the guest chips. The
+`SIGNED_IN` handler now calls `greetUser()` when the panel is open and no task,
+pending task, job picker or quote form is active, and a `greetedUserId` guard
+prevents duplicate welcomes. The freelancer chips also include **Submit a
+proposal**.
+
+## 6. The quote form survived a sign-out
+
+`clearPrivateChat()` reset the task and picker but not `flow`, so a signed-out
+visitor could still be asked for the previous account's quote details. It now
+resets `flow` to idle.
+
+## 7. Light-mode audit warnings were hard to read
+
+The audit card used the dark-theme amber (`#f59e0b`) and red for `warn` and
+`missing` items. On the light card those colours were low-contrast. `theme.css`
+now sets `#b45309` (amber) and `#b91c1c` (red) in light mode. The browser check
+reported `rgb(180, 83, 9)` and `rgb(185, 28, 28)` against the light background.
+
+## 8. A synchronous auth probe could stop the widget
+
+`watchPrivateChatAuth()` called `auth.getCurrentUser()` inside
+`Promise.resolve(...)`, which still evaluates the call synchronously. A custom
+or broken auth implementation that throws would abort the rest of the widget
+setup. The probe is now wrapped in `try/catch`; auth state remains optional.
+
+## 9. Job edits needed a service
+
+The **Improve this job** flow cannot save through `createJob()`. Both clients
+now expose `Jobs.updateJob(jobId, updates)`:
+
+- `supabase-client.js` strips `id`, `client_id`, counters, `status` and
+  timestamps, coerces numeric budget fields, normalises `required_skills`, and
+  refuses a job whose status is `completed` or `cancelled`.
+- `marketplace-local.js` mirrors the owner-or-admin UPDATE policy and the SQL
+  CHECK constraints (title length, description length, category, job type,
+  experience level, non-negative and ordered budgets/rates), and refuses a
+  closed job.
+- `scripts/check-local-engine.mjs` now covers an owner edit, a non-owner
+  refusal, immutable fields and a closed-job refusal.
+
+## Verification
+
+- `npm test` — all four suites pass. `test:local` now reports 32 authorization
+  cases, including the four new job-edit cases.
+- Browser E2E (headless Chromium, Supabase network aborted, offline engine):
+  - Profile audit `20/100` → fix flow → `90/100`; the remaining gap is the
+    resume.
+  - Job audit `40/100` → fix flow → `100/100`.
+  - Job posting flow: 8 steps, review, save, re-audit `100/100`.
+  - Proposal flow: `demo-job-1`, bid, days, cover letter, save.
+  - Hindi audit renders Devanagari; light mode shows the corrected warning
+    colours; a 390 px viewport keeps 48 px chips and a contained panel.
+  - Sign-out clears the log and history; signing in as another demo account
+    shows the "different account" message and the new role chips.
