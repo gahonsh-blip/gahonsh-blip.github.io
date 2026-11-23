@@ -2,9 +2,9 @@
   "name": "Gahonsh Finance — Simple, Transparent Loans",
   "short_name": "Gahonsh",
   "description": "Apply for a personal, business, agriculture, education, vehicle or gold loan with Gahonsh Finance.",
-  "id": "/site/",
-  "start_url": "/site/",
-  "scope": "/site/",
+  "id": "/finance/site/",
+  "start_url": "/finance/site/",
+  "scope": "/finance/site/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F8FAFC",
@@ -13,9 +13,9 @@
   "dir": "ltr",
   "categories": ["finance", "business"],
   "icons": [
-    { "src": "/site/brand/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/site/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/site/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/site/brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/finance/site/brand/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/finance/site/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/finance/site/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/finance/site/brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

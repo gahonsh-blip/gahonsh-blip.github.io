@@ -244,3 +244,85 @@ non-existent table.
   static assets stay 200.
 - Editor login exercised end-to-end: wrong passcode rejected, correct passcode
   unlocks and loads `index.html` into the preview.
+
+---
+
+# Live-site follow-up — 2026-11-23
+
+Scope: the live GitHub Pages deployment (`https://gahonsh-blip.github.io/`)
+plus the linked finance site under `/finance/`. Focus: light-mode text that
+was hard to read and reports of pages that appeared to hang or crash Chrome on
+load.
+
+Method: headless Chromium at 1440×1000 and 390×844 (4× CPU throttle), both
+light and dark themes, on 18 main pages and 11 finance pages. Captured console
+errors, `pageerror`, dialogs, failed requests, 4xx responses, long tasks and an
+alpha-composited WCAG contrast scan of every visible text node.
+
+## Summary
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | Medium | Light mode | Accent `#0284c7` reached only 4.1:1 on white and 3.6:1 on tinted pills; active nav, category pills and links were hard to read | Fixed (`#0369a1`) |
+| 2 | Medium | Light mode | `.project-tag` pills sit on a dark thumbnail but used the dark light-mode accent (3.33:1) | Fixed (light pill + dark text) |
+| 3 | Medium | Contrast | Contact page WhatsApp button was white on `#25d366` (1.98:1) | Fixed (`#0f7a3d`, 5.6:1) |
+| 4 | Medium | Load | Scroll-reveal cards could stay at `opacity: 0` if `IntersectionObserver` never fired | Fixed (2.5s fail-safe reveal) |
+| 5 | Low | Redirect | `finance/index.html` meta refresh pointed at `/site/` (404) instead of `/finance/site/` | Fixed |
+| 6 | Low | PWA | Finance manifest `id`/`start_url`/`scope`/icons used root `/site/` paths | Fixed |
+
+## 1–2. Light-mode text contrast
+
+`theme.css` sets the light-theme accent in `body.light-mode`. It was
+`#0284c7`; against the page background `#f8fafc` that is 3.91:1, and against
+the `rgba(2,132,199,.08)` active-nav tint it is 3.7:1. Both are below the WCAG
+AA 4.5:1 threshold for normal text, so links, badges and the active menu item
+looked washed out. The accent is now `#0369a1` (5.9:1 on white, 5.6:1 on the
+tint).
+
+Portfolio thumbnails keep a dark image overlay in both themes, so the
+`.project-tag` pill needs a light surface in light mode. It now uses a white
+pill with `#0369a1` text instead of the dark accent on a dark overlay.
+
+`npm run test:a11y` now computes the contrast of the light accent, the theme
+toggle background and the WhatsApp button, and fails the build below 4.5:1.
+
+## 3. WhatsApp button
+
+`.btn-whatsapp-direct` on `contact.html` used white text on `#25d366`
+(1.98:1). The background is now `#0f7a3d` (5.6:1), with the shadow matched to
+the new green.
+
+## 4. Scroll-reveal fail-safe
+
+`script.js` hides below-the-fold cards with `.gs-hide` and reveals them from
+an `IntersectionObserver`. If the observer never reports (background tab,
+zero-height container, browser quirk), the cards stay invisible. A 2.5-second
+fail-safe now removes `.gs-hide` from anything still hidden and adds the
+visible classes, so content cannot stay blank.
+
+## 5–6. Finance redirect and manifest
+
+`finance/index.html` carried both a script redirect to `/finance/site/` and a
+meta refresh to `/site/`, which 404s on GitHub Pages. The meta refresh now
+matches the script. `finance/site/manifest.webmanifest` used `/site/` for its
+`id`, `start_url`, `scope` and icon URLs, so a PWA install or icon fetch hit
+the 404 root path; all now use `/finance/site/`.
+
+## Load-audit result
+
+No uncaught JS errors, page errors, dialogs, failed requests or long tasks were
+reproduced on the 18 main pages at desktop or mobile sizes. The finance pages
+log 404s only for the optional `/api/public/config` and
+`/api/public/loan-products` backend calls; the app already falls back to its
+bundled catalogue, so the pages render. The only reproducible load-blocking
+patterns were the finance redirect race and the reveal fail-safe above, both
+fixed.
+
+## Verification
+
+- `npm test` — a11y (20 pages), security (115 files), schema (47 references)
+  and local engine (17 cases) all pass.
+- Alpha-composited contrast sweep of 13 main pages in light and dark themes —
+  0 violations below 4.5:1 (3:1 for large text).
+- Desktop and mobile load sweep — 0 console errors, page errors, dialogs or
+  failed requests.

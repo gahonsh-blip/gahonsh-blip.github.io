@@ -28,7 +28,7 @@
         btn.style.padding = "10px 18px";
         btn.style.borderRadius = "30px";
         btn.style.cursor = "pointer";
-        btn.style.background = isCurrentLight ? "#0284c7" : "#0f172a";
+        btn.style.background = isCurrentLight ? "#0369a1" : "#0f172a";
         btn.style.color = "#ffffff";
         btn.style.border = "1px solid rgba(255, 255, 255, 0.15)";
         btn.style.fontWeight = "600";
@@ -58,7 +58,7 @@
             if (isLight) {
                 this.innerHTML = '<i class="fa-solid fa-moon" aria-hidden="true"></i> Dark';
                 this.setAttribute("aria-label", "Switch to Dark theme");
-                this.style.background = "#0284c7";
+                this.style.background = "#0369a1";
             } else {
                 this.innerHTML = '<i class="fa-solid fa-sun" aria-hidden="true"></i> Light';
                 this.setAttribute("aria-label", "Switch to Light theme");
@@ -125,6 +125,16 @@
             el.classList.add('gs-hide');
             observer.observe(el);
         });
+
+        // Fail-safe: a background tab, a zero-height container, or a browser
+        // quirk can stop IntersectionObserver from reporting. Reveal anything
+        // still hidden after a short delay so content can never stay blank.
+        setTimeout(function() {
+            document.querySelectorAll('.gs-hide').forEach(function(el) {
+                el.classList.remove('gs-hide');
+                el.classList.add('gs-visible', 'revealed');
+            });
+        }, 2500);
     }
 
     if (document.readyState === 'loading') {
