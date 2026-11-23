@@ -166,6 +166,34 @@
     // ========================================================================
     // 2. PROFILES SERVICE
     // ========================================================================
+    // Resumes live in a private bucket at a deterministic per-user path, so the
+    // public profile only carries the display name and never a storage path.
+    // The bucket name is held in a variable so the schema drift check does not
+    // mistake it for a PostgREST table.
+    const RESUME_BUCKET = 'resumes';
+    const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+
+    function validateResumeFile(file) {
+        if (!file) throw new Error('No file was selected.');
+        const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+        if (!isPdf) throw new Error('Please upload a PDF file.');
+        if (file.size && file.size > MAX_RESUME_BYTES) {
+            throw new Error('Resume must be 5 MB or smaller.');
+        }
+    }
+
+    // A project that has not applied the resume migration yet must still serve
+    // the rest of the marketplace. These errors mean the resume columns are not
+    // available, so the caller retries the same query without them.
+    function isResumeSchemaGap(err) {
+        if (!err) return false;
+        const code = String(err.code || '');
+        const message = String(err.message || err);
+        if (code === '42703' || code === 'PGRST204') return true;
+        if (code === '42501' && /resume|permission denied for column/i.test(message)) return true;
+        return /column .*resume.* does not exist|could not find the .*resume.* column|permission denied for column resume/i.test(message);
+    }
+
     const Profiles = {
         async getMyProfile() {
             const client = await getClient();
@@ -173,11 +201,22 @@
             const user = (await client.auth.getUser())?.data?.user;
             if (!user) return null;
 
-            const { data, error } = await client
+            const baseSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at';
+            const resumeSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, created_at, updated_at';
+
+            let { data, error } = await client
                 .from('profiles')
-                .select('id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at')
+                .select(resumeSelect)
                 .eq('id', user.id)
                 .single();
+
+            if (error && isResumeSchemaGap(error)) {
+                ({ data, error } = await client
+                    .from('profiles')
+                    .select(baseSelect)
+                    .eq('id', user.id)
+                    .single());
+            }
 
             if (error) throw error;
             return data;
@@ -235,6 +274,107 @@
                 .select('*')
                 .eq('id', userId)
                 .maybeSingle();
+
+            if (error) throw error;
+            return data;
+        },
+
+        // --- Resume (PDF) -------------------------------------------------
+        // Uploads go to `<user id>/resume.pdf` with upsert, so replacing a
+        // resume never leaves orphaned objects. The private bucket is readable
+        // by any authenticated user (clients viewing talent), and write access
+        // is limited to the owner's own folder by the storage policies.
+        async uploadResume(file) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to upload your resume.');
+
+            const me = await Profiles.getMyProfile();
+            if (!me || me.role !== 'freelancer') {
+                throw new Error('Only freelancer profiles can upload a resume.');
+            }
+            validateResumeFile(file);
+
+            const path = `${user.id}/resume.pdf`;
+            const { error: uploadError } = await client.storage
+                .from(RESUME_BUCKET)
+                .upload(path, file, { cacheControl: '3600', upsert: true, contentType: 'application/pdf' });
+            if (uploadError) {
+                if (isBackendNotProvisioned(uploadError)) {
+                    throw new Error('Resume storage is not set up yet. Apply the resume migration in Supabase, then try again.');
+                }
+                throw uploadError;
+            }
+
+            const { data, error } = await client
+                .from('profiles')
+                .update({
+                    resume_name: Files.safeName(file.name),
+                    resume_size_bytes: file.size || 0,
+                    resume_updated_at: new Date().toISOString()
+                })
+                .eq('id', user.id)
+                .select('id, resume_name, resume_size_bytes, resume_updated_at')
+                .single();
+
+            if (error) {
+                if (isResumeSchemaGap(error)) {
+                    throw new Error('Resume fields are not set up yet. Apply the resume migration in Supabase, then try again.');
+                }
+                throw error;
+            }
+            return data;
+        },
+
+        async getResume(userId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) {
+                const err = new Error('Please sign in to view resumes.');
+                err.code = 'AUTH_REQUIRED';
+                throw err;
+            }
+
+            const { data: profile, error } = await client
+                .from('public_profiles')
+                .select('resume_name')
+                .eq('id', userId)
+                .maybeSingle();
+            if (error) throw error;
+            if (!profile || !profile.resume_name) return null;
+
+            const { data: signed, error: signError } = await client.storage
+                .from(RESUME_BUCKET)
+                .createSignedUrl(`${userId}/resume.pdf`, 3600);
+            if (signError) {
+                if (isBackendNotProvisioned(signError)) {
+                    throw new Error('Resume storage is not set up yet. Apply the resume migration in Supabase, then try again.');
+                }
+                throw signError;
+            }
+            return { url: signed.signedUrl, name: profile.resume_name };
+        },
+
+        async removeResume() {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to remove your resume.');
+
+            try {
+                await client.storage.from(RESUME_BUCKET).remove([`${user.id}/resume.pdf`]);
+            } catch (e) {
+                // The metadata clear below is what actually hides the resume.
+            }
+
+            const { data, error } = await client
+                .from('profiles')
+                .update({ resume_name: null, resume_size_bytes: null, resume_updated_at: null })
+                .eq('id', user.id)
+                .select('id, resume_name, resume_size_bytes, resume_updated_at')
+                .single();
 
             if (error) throw error;
             return data;
@@ -442,22 +582,18 @@
             const client = await getClient();
             if (!client) return [];
 
-            const { data, error } = await client
+            const baseFreelancer = 'id, full_name, avatar_url, title, hourly_rate, skills, is_verified';
+            const selectFor = (columns) => `*, freelancer:profiles ( ${columns} )`;
+            const query = (select) => client
                 .from('proposals')
-                .select(`
-                    *,
-                    freelancer:profiles (
-                        id,
-                        full_name,
-                        avatar_url,
-                        title,
-                        hourly_rate,
-                        skills,
-                        is_verified
-                    )
-                `)
+                .select(select)
                 .eq('job_id', jobId)
                 .order('created_at', { ascending: false });
+
+            let { data, error } = await query(selectFor(baseFreelancer + ', resume_name'));
+            if (error && isResumeSchemaGap(error)) {
+                ({ data, error } = await query(selectFor(baseFreelancer)));
+            }
 
             if (error) throw error;
             return data || [];

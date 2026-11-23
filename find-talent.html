@@ -281,10 +281,115 @@
 
         .btn-hire-talent:hover { opacity: 0.9; }
 
+        .talent-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .talent-actions .btn-hire-talent { flex: 1 1 150px; }
+
+        .btn-resume {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-resume:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 204, 0.06);
+        }
+        .btn-resume i { color: #ef4444; }
+
+        /* Resume PDF viewer */
+        .resume-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 16px;
+        }
+        .resume-modal.active { display: flex; }
+        .resume-modal-box {
+            width: min(920px, 100%);
+            height: min(86vh, 900px);
+            display: flex;
+            flex-direction: column;
+            background: #0b1220;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        }
+        .resume-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .resume-modal-head h2 {
+            font-size: 1.05rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+        .resume-modal-head h2 i { color: #ef4444; }
+        .resume-modal-close {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .resume-modal iframe {
+            flex: 1;
+            width: 100%;
+            border: 0;
+            background: #ffffff;
+        }
+        .resume-modal-foot {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 18px;
+            border-top: 1px solid var(--border-color);
+        }
+        .resume-modal-foot a { flex: 1 1 180px; }
+
+        /* The viewer keeps its own surface, so give it a light palette too. */
+        body.light-mode .resume-modal-box { background: #ffffff; }
+        body.light-mode .resume-modal-head { border-color: rgba(15, 23, 42, 0.12); }
+        body.light-mode .resume-modal-close { background: #f1f5f9; }
+        body.light-mode .resume-modal-foot { border-color: rgba(15, 23, 42, 0.12); }
+
         @media (max-width: 768px) {
             .talent-grid { grid-template-columns: 1fr; }
             .menu-toggle { display: block; }
             header nav { display: none; }
+            .resume-modal-box { height: 88vh; }
+            .btn-resume, .btn-hire-talent { min-height: 48px; }
         }
     </style>
 <link rel="stylesheet" href="theme.css">
@@ -363,6 +468,7 @@
         <h2 id="find-talent-info">Hire World-Class Verified Talent</h2>
         <p>Hire world-class verified talent directly, without agency mark-ups or long procurement cycles. Gahonsh lists independent specialists who have been reviewed for the skills they claim, so the profile you open is the person who does the work.</p>
         <p>Every freelancer profile shows a headline role, a short bio, a skills cloud and an indicative hourly rate. Verified members carry a badge earned through a completed review of their submitted samples and references.</p>
+        <p>Freelancers can attach a PDF resume to their profile from the marketplace portal. Profiles that include one show a Resume button; signed-in clients can open the PDF in an in-page viewer or download it for offline review, while anonymous visitors are asked to sign in first so personal documents are not exposed to crawlers.</p>
         <h3>Specialist areas on the bench</h3>
         <ul>
             <li><strong>Excel and spreadsheet engineering</strong> &mdash; VBA macros, SUMIFS-driven models, dashboards and reporting packs.</li>
@@ -441,6 +547,25 @@
             </div>
         </div>
     </footer>
+
+    <!-- RESUME PDF VIEWER -->
+    <div class="resume-modal" id="resumeModal" role="dialog" aria-modal="true" aria-labelledby="resumeModalTitle">
+        <div class="resume-modal-box">
+            <div class="resume-modal-head">
+                <h2 id="resumeModalTitle"><i class="fa-solid fa-file-pdf"></i> Freelancer Resume</h2>
+                <button type="button" class="resume-modal-close" id="resumeModalClose" aria-label="Close resume viewer">&times;</button>
+            </div>
+            <iframe id="resumeFrame" title="Resume PDF preview"></iframe>
+            <div class="resume-modal-foot">
+                <a id="resumeOpen" class="btn-resume" href="#" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in new tab
+                </a>
+                <a id="resumeDownload" class="btn-hire-talent" href="#" download>
+                    <i class="fa-solid fa-download"></i> Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
     <script src="theme.js"></script>
@@ -534,23 +659,32 @@
                 const skillsHtml = (t.skills || []).map(s => `<span class="talent-skill">${escapeHtml(s)}</span>`).join('');
                 const verifiedBadge = t.is_verified ? ' <i class="fa-solid fa-circle-check" title="Verified" style="color:var(--accent-cyan); font-size:0.9rem;"></i>' : '';
                 const rate = Number(t.hourly_rate) > 0 ? '$' + Number(t.hourly_rate) + '/hr' : 'Rate on request';
+                const hasResume = !!(t.has_resume || t.resume_name);
+                const resumeBtn = hasResume
+                    ? `<button type="button" class="btn-resume" data-resume-uid="${escapeHtml(t.id)}" aria-label="View resume of ${name}">
+                           <i class="fa-solid fa-file-pdf"></i> Resume
+                       </button>`
+                    : '';
 
                 return `
-                    <div class="talent-card" data-rating-uid="${t.id}">
+                    <div class="talent-card" data-rating-uid="${escapeHtml(t.id)}">
                         <div class="talent-card-header">
                             <div class="talent-avatar">${initials}</div>
                             <div>
                                 <div class="talent-name">${name}${verifiedBadge}</div>
                                 <div class="talent-title">${escapeHtml(t.title || 'Freelance Specialist')}</div>
-                                <span class="mt-rating" data-rating-uid="${t.id}"></span>
+                                <span class="mt-rating" data-rating-uid="${escapeHtml(t.id)}"></span>
                             </div>
                             <div class="talent-rate-badge">${escapeHtml(rate)}</div>
                         </div>
                         <p class="talent-bio">${escapeHtml(t.bio || 'Available for new projects. Ask for details and recent work samples.')}</p>
                         <div class="talent-skills">${skillsHtml}</div>
-                        <a href="contact.html?invite=${encodeURIComponent(t.id)}" class="btn-hire-talent">
-                            <i class="fa-solid fa-paper-plane"></i> Contact & Hire
-                        </a>
+                        <div class="talent-actions">
+                            ${resumeBtn}
+                            <a href="contact.html?invite=${encodeURIComponent(t.id)}" class="btn-hire-talent">
+                                <i class="fa-solid fa-paper-plane"></i> Contact & Hire
+                            </a>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -560,6 +694,91 @@
         document.getElementById('talentSearchInput').onkeyup = (e) => {
             if (e.key === 'Enter') loadTalent();
         };
+
+        // --- Resume viewer ---------------------------------------------------
+        // The resume id is read from a data attribute via delegation, so it
+        // never reaches an inline handler. Viewing requires a signed-in user:
+        // the Supabase bucket is private and the local engine enforces the
+        // same rule.
+        let _resumeRevoke = null;
+
+        function notify(message) {
+            if (window.GahonshAuthUI && window.GahonshAuthUI.showToast) {
+                window.GahonshAuthUI.showToast(message);
+            } else {
+                console.log(message);
+            }
+        }
+
+        function closeResumeModal() {
+            const modal = document.getElementById('resumeModal');
+            const frame = document.getElementById('resumeFrame');
+            if (frame) frame.removeAttribute('src');
+            if (modal) modal.classList.remove('active');
+            // The blob URL stays alive so a tab opened from the viewer keeps
+            // working. It is revoked when the next resume is opened.
+        }
+
+        async function openResume(userId) {
+            if (!userId) return;
+            if (!window.GahonshDB || !window.GahonshDB.Profiles || !window.GahonshDB.Profiles.getResume) {
+                notify('Marketplace service is not ready. Please try again shortly.');
+                return;
+            }
+            try {
+                const resume = await window.GahonshDB.Profiles.getResume(userId);
+                if (!resume || !resume.url) {
+                    notify('This freelancer has not uploaded a resume yet.');
+                    return;
+                }
+                if (_resumeRevoke) {
+                    try { _resumeRevoke(); } catch (e) { /* ignore */ }
+                }
+                _resumeRevoke = typeof resume.revoke === 'function' ? resume.revoke : null;
+
+                const modal = document.getElementById('resumeModal');
+                const frame = document.getElementById('resumeFrame');
+                const openLink = document.getElementById('resumeOpen');
+                const downloadLink = document.getElementById('resumeDownload');
+
+                if (frame) frame.src = resume.url;
+                if (openLink) openLink.href = resume.url;
+                if (downloadLink) {
+                    downloadLink.href = resume.url;
+                    downloadLink.setAttribute('download', resume.name || 'resume.pdf');
+                }
+                if (modal) modal.classList.add('active');
+            } catch (err) {
+                const message = String((err && err.message) || err);
+                if ((err && err.code === 'AUTH_REQUIRED') || /sign in/i.test(message)) {
+                    notify('Please sign in to view resumes.');
+                    if (window.GahonshAuthUI && window.GahonshAuthUI.openAuthModal) {
+                        window.GahonshAuthUI.openAuthModal('signin');
+                    }
+                } else {
+                    notify('Could not open the resume: ' + message);
+                }
+            }
+        }
+
+        document.getElementById('talentGrid').addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('[data-resume-uid]');
+            if (btn) openResume(btn.getAttribute('data-resume-uid'));
+        });
+
+        const resumeCloseBtn = document.getElementById('resumeModalClose');
+        if (resumeCloseBtn) resumeCloseBtn.addEventListener('click', closeResumeModal);
+
+        const resumeModal = document.getElementById('resumeModal');
+        if (resumeModal) {
+            resumeModal.addEventListener('click', (e) => {
+                if (e.target === resumeModal) closeResumeModal();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeResumeModal();
+        });
 
         // Mobile Nav Trigger
         document.getElementById('mobile-menu-open-btn').onclick = () => {

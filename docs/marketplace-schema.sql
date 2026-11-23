@@ -68,6 +68,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     title TEXT,
     hourly_rate NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (hourly_rate >= 0),
     skills TEXT[] NOT NULL DEFAULT '{}',
+    -- Resume metadata only. The PDF itself lives in the private `resumes`
+    -- storage bucket at `<user id>/resume.pdf`; the public view never exposes
+    -- the storage path.
+    resume_name TEXT,
+    resume_size_bytes BIGINT CHECK (resume_size_bytes IS NULL OR resume_size_bytes >= 0),
+    resume_updated_at TIMESTAMPTZ,
     is_verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
@@ -88,11 +94,21 @@ SELECT
     hourly_rate,
     skills,
     is_verified,
-    created_at
+    created_at,
+    resume_name,
+    resume_size_bytes,
+    resume_updated_at,
+    (resume_name IS NOT NULL) AS has_resume
 FROM public.profiles;
 
 -- Grant public read access to the safe directory view
 GRANT SELECT ON public.public_profiles TO anon, authenticated;
+
+-- The resume display name/size are part of the owner's editable profile.
+-- This grant keeps them readable after the column-privilege hardening
+-- migration revokes table-level SELECT on `profiles`.
+GRANT SELECT (resume_name, resume_size_bytes, resume_updated_at)
+ON public.profiles TO anon, authenticated;
 
 -- ----------------------------------------------------------------------------
 -- 3b. CONTACT MESSAGES TABLE (PUBLIC LEAD INTAKE - WRITE-ONLY FOR ANON)
@@ -859,5 +875,56 @@ TO authenticated
 USING (
     bucket_id = 'job-attachments'
     AND (owner = auth.uid() OR public.is_admin())
+);
+
+-- ----------------------------------------------------------------------------
+-- 13. STORAGE BUCKET FOR FREELANCER RESUMES
+-- ----------------------------------------------------------------------------
+-- Each freelancer owns one object at `<user id>/resume.pdf` (uploaded with
+-- upsert). The bucket is private: any authenticated user may read a resume
+-- (clients reviewing talent), while writes are limited to the owner's folder.
+-- The public_profiles view exposes only the display name and size.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('resumes', 'resumes', FALSE)
+ON CONFLICT (id) DO UPDATE SET public = FALSE;
+
+DROP POLICY IF EXISTS "Authenticated users can read resumes" ON storage.objects;
+CREATE POLICY "Authenticated users can read resumes"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (bucket_id = 'resumes');
+
+DROP POLICY IF EXISTS "Freelancers can upload their own resume" ON storage.objects;
+CREATE POLICY "Freelancers can upload their own resume"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+    bucket_id = 'resumes'
+    AND owner = auth.uid()
+    AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "Freelancers can replace their own resume" ON storage.objects;
+CREATE POLICY "Freelancers can replace their own resume"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+    bucket_id = 'resumes'
+    AND owner = auth.uid()
+    AND (storage.foldername(name))[1] = auth.uid()::text
+)
+WITH CHECK (
+    bucket_id = 'resumes'
+    AND owner = auth.uid()
+    AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "Freelancers can delete their own resume" ON storage.objects;
+CREATE POLICY "Freelancers can delete their own resume"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+    bucket_id = 'resumes'
+    AND owner = auth.uid()
 );
 

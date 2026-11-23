@@ -84,6 +84,19 @@
         return base.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'file';
     }
 
+    // Resumes are PDF-only. The cap mirrors the Supabase bucket policy so the
+    // offline engine rejects the same files the live backend would reject.
+    const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+
+    function validateResumeFile(file) {
+        if (!file) throw new Error('No file was selected.');
+        const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+        if (!isPdf) throw new Error('Please upload a PDF file.');
+        if (file.size && file.size > MAX_RESUME_BYTES) {
+            throw new Error('Resume must be 5 MB or smaller.');
+        }
+    }
+
     // ------------------------------------------------------------------
     // IndexedDB blob store — localStorage holds text only, so uploaded file
     // bytes live here while their metadata lives in the `file_transfers`
@@ -295,7 +308,11 @@
     function publicProfile(profile) {
         if (!profile) return null;
         const { _salt, _hash, ...safe } = profile;
-        return clone(safe);
+        const out = clone(safe);
+        // Mirrors the `has_resume` column in the public_profiles view. The
+        // file bytes stay in IndexedDB and are fetched on demand.
+        out.has_resume = !!profile.resume_name;
+        return out;
     }
 
     function clientSnippet(profile) {
@@ -316,7 +333,9 @@
             title: profile?.title || 'Freelance Specialist',
             hourly_rate: profile?.hourly_rate ?? null,
             skills: profile?.skills || [],
-            is_verified: profile?.is_verified !== false
+            is_verified: profile?.is_verified !== false,
+            resume_name: profile?.resume_name || null,
+            has_resume: !!profile?.resume_name
         };
     }
 
@@ -497,6 +516,61 @@
 
         async getPublicProfile(userId) {
             return publicProfile(findProfile(userId));
+        },
+
+        // --- Resume (PDF) -------------------------------------------------
+        // Bytes live in IndexedDB under `resume:<user id>`; only metadata is
+        // stored on the profile, so talent listings stay small. Viewing needs
+        // a signed-in user, matching the authenticated-only Supabase bucket.
+        async uploadResume(file) {
+            const profile = requireUser('Please sign in to upload your resume.');
+            if (profile.role !== 'freelancer') {
+                throw new Error('Only freelancer profiles can upload a resume.');
+            }
+            validateResumeFile(file);
+
+            await idbPut('resume:' + profile.id, file);
+            const profiles = readTable('profiles');
+            const index = profiles.findIndex((p) => p.id === profile.id);
+            profiles[index] = Object.assign({}, profiles[index], {
+                resume_name: safeFileName(file.name),
+                resume_size_bytes: file.size || 0,
+                resume_updated_at: nowIso(),
+                updated_at: nowIso()
+            });
+            writeTable('profiles', profiles);
+            return publicProfile(profiles[index]);
+        },
+
+        async getResume(userId) {
+            requireUser('Please sign in to view resumes.');
+            const profile = findProfile(userId);
+            if (!profile || !profile.resume_name) return null;
+
+            const blob = await idbGet('resume:' + userId);
+            if (!blob) throw new Error('This resume is no longer available in this browser.');
+            const url = URL.createObjectURL(blob);
+            return {
+                url,
+                name: profile.resume_name,
+                revoke: () => URL.revokeObjectURL(url)
+            };
+        },
+
+        async removeResume() {
+            const profile = requireUser('Please sign in to remove your resume.');
+            try { await idbDelete('resume:' + profile.id); } catch (e) { /* orphan blob is harmless */ }
+
+            const profiles = readTable('profiles');
+            const index = profiles.findIndex((p) => p.id === profile.id);
+            profiles[index] = Object.assign({}, profiles[index], {
+                resume_name: null,
+                resume_size_bytes: null,
+                resume_updated_at: null,
+                updated_at: nowIso()
+            });
+            writeTable('profiles', profiles);
+            return publicProfile(profiles[index]);
         }
     };
 

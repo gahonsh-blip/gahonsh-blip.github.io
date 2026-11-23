@@ -368,6 +368,25 @@
         }
         .btn-hire-outline:hover { background: rgba(16, 185, 129, 0.1); }
 
+        .btn-resume {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: border-color 0.2s;
+        }
+        .btn-resume:hover { border-color: var(--accent-cyan); }
+        .btn-resume i { color: #ef4444; }
+        @media (max-width: 768px) {
+            .btn-resume { min-height: 48px; }
+        }
+
         /* STATUS MESSAGE AREA */
         .proposal-info-box {
             background: rgba(0, 119, 255, 0.08);

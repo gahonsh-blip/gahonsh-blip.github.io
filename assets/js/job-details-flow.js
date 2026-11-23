@@ -218,6 +218,10 @@ function proposalCardHtml(p) {
                 ? `<button class="btn-hire" data-proposal-id="${escapeHtml(p.id)}">Accept &amp; Hire</button>`
                 : `<span style="color:var(--text-slate); font-weight:600;">${escapeHtml(statusBadge(p.status))}</span>`));
 
+    const resumeHtml = p.freelancer?.resume_name
+        ? `<button type="button" class="btn-resume" data-resume-uid="${escapeHtml(p.freelancer.id)}" aria-label="View ${escapeHtml(p.freelancer.full_name || 'freelancer')} resume"><i class="fa-solid fa-file-pdf"></i> Resume</button>`
+        : '';
+
     return `
         <div class="proposal-card" id="prop-${escapeHtml(p.id)}">
             <div class="proposal-card-header">
@@ -225,7 +229,7 @@ function proposalCardHtml(p) {
                     <strong>${escapeHtml(p.freelancer?.full_name) || 'Freelancer'}</strong>
                     <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${Number(p.bid_amount) || 0}</span> &bull; <span>${Number(p.delivery_time_days) || 0} days</span> &bull; <span>${new Date(p.created_at).toLocaleDateString()}</span>
                 </div>
-                <div>${actionHtml}</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">${resumeHtml}${actionHtml}</div>
             </div>
             <p style="font-size:0.9rem; color:var(--text-slate);">${escapeHtml(p.cover_letter)}</p>
         </div>
@@ -469,6 +473,52 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
 document.addEventListener('click', (e) => {
     const hireBtn = e.target.closest && e.target.closest('[data-proposal-id]');
     if (hireBtn) window.hireFreelancer(hireBtn.dataset.proposalId, hireBtn);
+});
+
+// Delegated resume button. The blank tab is opened synchronously so the async
+// signed-URL fetch is not blocked as a popup, and only signed-in users get one.
+async function openFreelancerResume(userId, popup) {
+    const toast = (msg) => {
+        if (window.GahonshAuthUI && window.GahonshAuthUI.showToast) window.GahonshAuthUI.showToast(msg);
+    };
+    try {
+        if (!window.GahonshDB?.Profiles?.getResume) {
+            throw new Error('Marketplace service is not ready. Please try again shortly.');
+        }
+        const resume = await window.GahonshDB.Profiles.getResume(userId);
+        if (!resume || !resume.url) {
+            if (popup) popup.close();
+            toast('This freelancer has not uploaded a resume yet.');
+            return;
+        }
+        if (popup) popup.location.href = resume.url;
+        else window.open(resume.url, '_blank', 'noopener');
+        if (typeof resume.revoke === 'function') setTimeout(resume.revoke, 60000);
+    } catch (err) {
+        if (popup) popup.close();
+        const message = String((err && err.message) || err);
+        if ((err && err.code === 'AUTH_REQUIRED') || /sign in/i.test(message)) {
+            toast('Please sign in to view resumes.');
+            if (window.GahonshAuthUI?.openAuthModal) window.GahonshAuthUI.openAuthModal('signin');
+        } else {
+            toast('Could not open the resume: ' + message);
+        }
+    }
+}
+
+document.addEventListener('click', (e) => {
+    const resumeBtn = e.target.closest && e.target.closest('[data-resume-uid]');
+    if (!resumeBtn) return;
+
+    const user = window.GahonshAuthUI?.getCurrentUser?.();
+    if (!user) {
+        if (window.GahonshAuthUI?.showToast) window.GahonshAuthUI.showToast('Please sign in to view resumes.');
+        if (window.GahonshAuthUI?.openAuthModal) window.GahonshAuthUI.openAuthModal('signin');
+        return;
+    }
+
+    const popup = window.open('', '_blank');
+    openFreelancerResume(resumeBtn.dataset.resumeUid, popup);
 });
 
 document.getElementById('mobile-menu-open-btn').onclick = () => {

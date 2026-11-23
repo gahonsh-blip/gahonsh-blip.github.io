@@ -7,6 +7,12 @@ All notable changes to the **Gahonsh Freelancing & Marketplace** repository. For
 ## [Unreleased]
 
 ### Added
+- **Freelancer resume / CV uploads (PDF):**
+  - `Profiles.uploadResume()`, `getResume()` and `removeResume()` in both `supabase-client.js` (private `resumes` Storage bucket plus short-lived signed URLs) and `marketplace-local.js` (IndexedDB blobs), so the feature works online and in the offline fallback.
+  - The profile editor (`auth.js`) now shows a freelancer-only "Resume / CV (PDF)" section with Upload, View and Remove, a 5 MB cap and PDF validation.
+  - `find-talent.html` shows a Resume button on profiles that have one and opens the PDF in an in-page viewer with download and new-tab fallbacks; `job-details.html` proposal cards expose the same button so a client can review a CV before hiring.
+  - Schema: `profiles.resume_name`, `resume_size_bytes`, `resume_updated_at`; `public_profiles.has_resume`; a private `resumes` bucket with owner-only writes and authenticated reads. Migration: `supabase/migrations/20261123000000_add_freelancer_resumes.sql`.
+  - `npm run test:local` now covers 8 resume authorization cases (anonymous view, client upload, non-PDF, upload, listing, client view, owner remove, removed resume).
 - **In-Site File Transfer (send / receive):**
   - `assets/js/file-transfer.js` — shared panel that lets a client and a freelancer exchange files on a project without leaving the website. Built with DOM APIs (`textContent`), so a crafted file name cannot become markup. Blocks OS-executable extensions and files over 25 MB, and caps a selection at 10 files.
   - `window.GahonshDB.Files` service in both `supabase-client.js` (Supabase Storage + the `file_transfers` table) and `marketplace-local.js` (IndexedDB blobs for offline mode), so upload, list, download and remove work in every mode.

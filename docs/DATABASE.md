@@ -18,7 +18,7 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 
 | Table | Primary Key | Foreign Keys | Purpose |
 | :--- | :--- | :--- | :--- |
-| `profiles` | `id` (`UUID` → `auth.users`) | `auth.users(id)` | User accounts, display names, roles (`client` or `freelancer`), titles, hourly rates, skills (`TEXT[]`), bio, ratings. |
+| `profiles` | `id` (`UUID` → `auth.users`) | `auth.users(id)` | User accounts, display names, roles (`client` or `freelancer`), titles, hourly rates, skills (`TEXT[]`), bio, ratings, and resume metadata (`resume_name`, `resume_size_bytes`, `resume_updated_at`). The PDF itself lives in the private `resumes` Storage bucket at `<user id>/resume.pdf`. |
 | `jobs` | `id` (`UUID`) | `client_id` → `profiles(id)` | Client job postings with category, budget type (`fixed`/`hourly`), budget min/max, duration, experience level, status (`open`, `in_progress`, `completed`, `cancelled`), proposal counters. |
 | `proposals` | `id` (`UUID`) | `job_id` → `jobs(id)`, `freelancer_id` → `profiles(id)` | Freelancer bids containing bid amount ($), estimated delivery days, cover letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`). |
 | `contracts` | `id` (`UUID`) | `job_id` → `jobs(id)`, `proposal_id` → `proposals(id)`, `client_id` → `profiles(id)`, `freelancer_id` → `profiles(id)` | Active working agreements with agreed amount, start date, completion date, and status (`active`, `completed`, `disputed`, `cancelled`). |
@@ -29,7 +29,7 @@ The production database schema is defined in `docs/marketplace-schema.sql`.
 
 ### Public Views
 
-- `public_profiles` — Exposes safe, non-sensitive profile information (`id`, `full_name`, `avatar_url`, `role`, `title`, `hourly_rate`, `skills`, `bio`, `rating`, `total_reviews`, `created_at`) for public marketplace talent discovery.
+- `public_profiles` — Exposes safe, non-sensitive profile information (`id`, `full_name`, `avatar_url`, `role`, `title`, `hourly_rate`, `skills`, `bio`, `rating`, `total_reviews`, `created_at`) for public marketplace talent discovery, plus resume metadata (`resume_name`, `resume_size_bytes`, `resume_updated_at`, `has_resume`). The storage path is never exposed.
 - `worker_ratings` — Aggregates `reviews` into `reviewee_id`, `avg_rating`, `review_count` for the talent directory. It runs with the view owner's privileges so anonymous visitors can read the aggregate while the base `reviews` rows stay participant-protected.
 
 ---
@@ -64,6 +64,11 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
   - `DELETE`: Owner only (`public.is_admin()`). Reviews are immutable once written.
 - **Messages**:
   - `SELECT` / `INSERT`: Only the sender or recipient of a message, or an admin, may read or send. A message attached to a contract must come from one of that contract's two parties, and `sender_id` must equal `auth.uid()`.
+- **Resumes** (`resumes` Storage objects):
+  - `SELECT`: Any authenticated user (clients reviewing talent) may read a resume; anonymous visitors cannot.
+  - `INSERT` / `UPDATE`: Only the owner, and only inside their own folder (`(storage.foldername(name))[1] = auth.uid()::text`), so one user cannot overwrite another's CV.
+  - `DELETE`: Only the owner.
+  - `public_profiles` exposes only the display name and size; the bytes are fetched through a short-lived signed URL created by `Profiles.getResume()`.
 
 ---
 
