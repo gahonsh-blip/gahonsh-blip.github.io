@@ -471,7 +471,7 @@
             header nav { display: none; }
         }
     </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=6">
 </head>
 <body>
 
@@ -613,9 +613,16 @@
                 <span id="clientMemberSince">Member of Gahonsh</span>
             </div>
             <div class="client-detail-item">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span id="clientRecordLine">Loading client record…</span>
+            </div>
+            <div class="client-detail-item">
                 <i class="fa-solid fa-briefcase"></i>
                 <span>Payment Verified Guarantee</span>
             </div>
+            <button type="button" class="btn-record" id="clientRecordBtn" data-record-client="" style="width:100%; margin-top:12px;">
+                <i class="fa-solid fa-clipboard-list"></i> View client record
+            </button>
         </aside>
     </main>
 
@@ -699,9 +706,10 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js"></script>
-    <script src="supabase-client.js"></script>
+    <script src="marketplace-local.js?v=6"></script>
+    <script src="supabase-client.js?v=6"></script>
     <script src="auth.js"></script>
+    <script src="records.js?v=6"></script>
 
     <!-- Role-aware client/freelancer logic lives in assets/js/job-details-flow.js -->
     <script src="assets/js/file-transfer.js"></script>

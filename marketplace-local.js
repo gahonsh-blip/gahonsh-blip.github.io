@@ -992,6 +992,181 @@
                 .filter((c) => c.client_id === profile.id || c.freelancer_id === profile.id)
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .map(decorateContract);
+        },
+
+        async completeContract(contractId) {
+            const profile = requireUser('Please sign in to complete this contract.');
+            const contracts = readTable('contracts');
+            const index = contracts.findIndex((c) => c.id === contractId);
+            if (index < 0) throw new Error('Contract not found.');
+            const contract = contracts[index];
+            // Mirrors complete_contract(): only the client (or an admin) signs off.
+            if (contract.client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the client can complete this contract.');
+            }
+            if (contract.status !== 'active') {
+                throw new Error('Only active contracts can be completed.');
+            }
+            const jobs = readTable('jobs');
+            const jobIndex = jobs.findIndex((j) => j.id === contract.job_id);
+            if (jobIndex < 0) throw new Error('Job not found.');
+            if (jobs[jobIndex].status !== 'in_progress') {
+                throw new Error('Job is not in progress.');
+            }
+
+            const now = nowIso();
+            contracts[index] = Object.assign({}, contract, { status: 'completed', updated_at: now });
+            jobs[jobIndex] = Object.assign({}, jobs[jobIndex], { status: 'completed', updated_at: now });
+            writeTable('contracts', contracts);
+            writeTable('jobs', jobs);
+            return decorateContract(contracts[index]);
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Records service (mirrors get_worker_record, get_client_record and
+    // get_my_record). Public records never expose money, email, phone or the
+    // other party's identity; only getMyRecord() returns the caller's own
+    // earnings and hire history.
+    // ------------------------------------------------------------------
+    function recordProfile(profile, includeRole) {
+        if (!profile) return null;
+        const safe = publicProfile(profile);
+        if (!safe) return null;
+        const out = {
+            id: safe.id,
+            full_name: safe.full_name,
+            avatar_url: safe.avatar_url,
+            title: safe.title,
+            skills: safe.skills,
+            is_verified: safe.is_verified,
+            member_since: safe.created_at
+        };
+        if (includeRole) out.role = safe.role;
+        return out;
+    }
+
+    function completedWorkerContracts(workerId) {
+        return readTable('contracts')
+            .filter((c) => c.freelancer_id === workerId)
+            .map((c) => {
+                const job = readTable('jobs').find((j) => j.id === c.job_id) || null;
+                return { contract: c, job, done: c.status === 'completed' || job?.status === 'completed' };
+            });
+    }
+
+    function workerRecord(workerId) {
+        const profile = findProfile(workerId);
+        if (!profile) return null;
+        const rows = completedWorkerContracts(workerId);
+        const completed = rows.filter((r) => r.done);
+        const active = rows.filter((r) => r.contract.status === 'active' && r.job?.status === 'in_progress');
+        const reviews = readTable('reviews').filter((r) => r.reviewee_id === workerId);
+        const ratings = reviews.map((r) => Number(r.rating)).filter((n) => Number.isFinite(n));
+        const completedAt = (r) => r.contract.updated_at || r.job?.updated_at || r.contract.created_at;
+        const sorted = completed.slice().sort((a, b) => new Date(completedAt(b)) - new Date(completedAt(a)));
+        return {
+            profile: recordProfile(profile),
+            summary: {
+                completed_jobs: completed.length,
+                active_jobs: active.length,
+                clients_served: new Set(completed.map((r) => r.contract.client_id)).size,
+                avg_rating: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 100) / 100 : 0,
+                review_count: ratings.length,
+                first_completed_at: sorted.length ? completedAt(sorted[sorted.length - 1]) : null,
+                last_completed_at: sorted.length ? completedAt(sorted[0]) : null
+            },
+            recent: sorted.slice(0, 10).map((r) => ({
+                job_id: r.job?.id || r.contract.job_id,
+                title: r.job?.title || 'Project',
+                category: r.job?.category || 'General',
+                completed_at: completedAt(r)
+            }))
+        };
+    }
+
+    function clientPublicRecord(clientId) {
+        const profile = findProfile(clientId);
+        if (!profile) return null;
+        const jobs = readTable('jobs').filter((j) => j.client_id === clientId);
+        const contracts = readTable('contracts').filter((c) => c.client_id === clientId);
+        return {
+            profile: recordProfile(profile),
+            summary: {
+                jobs_posted: jobs.filter((j) => j.status !== 'draft').length,
+                open_jobs: jobs.filter((j) => j.status === 'open').length,
+                in_progress_jobs: jobs.filter((j) => j.status === 'in_progress').length,
+                completed_jobs: jobs.filter((j) => j.status === 'completed').length,
+                cancelled_jobs: jobs.filter((j) => j.status === 'cancelled').length,
+                hires: contracts.length
+            }
+        };
+    }
+
+    function clientPrivateRecord(clientId) {
+        const publicRecord = clientPublicRecord(clientId);
+        if (!publicRecord) return null;
+        const jobs = readTable('jobs')
+            .filter((j) => j.client_id === clientId)
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const contracts = readTable('contracts').filter((c) => c.client_id === clientId);
+        const completed = contracts.filter((c) => c.status === 'completed');
+        return {
+            summary: Object.assign({}, publicRecord.summary, {
+                total_spent: completed.reduce((sum, c) => sum + (Number(c.agreed_amount) || 0), 0),
+                active_contracts: contracts.filter((c) => c.status === 'active').length
+            }),
+            recent_jobs: jobs.slice(0, 20).map((j) => {
+                const contract = contracts.find((c) => c.job_id === j.id) || null;
+                const freelancer = contract ? findProfile(contract.freelancer_id) : null;
+                return {
+                    job_id: j.id,
+                    title: j.title,
+                    status: j.status,
+                    created_at: j.created_at,
+                    budget_min: j.budget_min ?? null,
+                    budget_max: j.budget_max ?? null,
+                    contract_status: contract?.status || null,
+                    contract_amount: contract?.agreed_amount ?? null,
+                    hired_freelancer: freelancer ? { id: freelancer.id, full_name: freelancer.full_name } : null
+                };
+            })
+        };
+    }
+
+    const Records = {
+        async getWorkerRecord(workerId) {
+            return workerRecord(workerId);
+        },
+
+        async getClientRecord(clientId) {
+            return clientPublicRecord(clientId);
+        },
+
+        async getMyRecord() {
+            const profile = requireUser('Please sign in to view your record.');
+            const publicWorker = workerRecord(profile.id);
+            const rows = completedWorkerContracts(profile.id).filter((r) => r.done);
+            const completedAt = (r) => r.contract.updated_at || r.job?.updated_at || r.contract.created_at;
+            const worker = publicWorker ? Object.assign({}, publicWorker, {
+                earnings: rows.reduce((sum, r) => sum + (Number(r.contract.agreed_amount) || 0), 0),
+                recent: rows
+                    .slice()
+                    .sort((a, b) => new Date(completedAt(b)) - new Date(completedAt(a)))
+                    .slice(0, 10)
+                    .map((r) => ({
+                        job_id: r.job?.id || r.contract.job_id,
+                        title: r.job?.title || 'Project',
+                        category: r.job?.category || 'General',
+                        amount: Number(r.contract.agreed_amount) || 0,
+                        completed_at: completedAt(r)
+                    }))
+            }) : null;
+            return {
+                profile: recordProfile(profile, true),
+                worker,
+                client: clientPrivateRecord(profile.id)
+            };
         }
     };
 
@@ -1169,6 +1344,7 @@
         Jobs: readyAware(Jobs),
         Proposals: readyAware(Proposals),
         Contracts: readyAware(Contracts),
+        Records: readyAware(Records),
         Files: readyAware(Files),
         ready: () => _ready,
         // Test/demo helpers

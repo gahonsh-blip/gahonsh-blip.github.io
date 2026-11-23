@@ -810,6 +810,62 @@
 
             if (error) throw error;
             return data || [];
+        },
+
+        /**
+         * Client sign-off: closes the contract and the job atomically. Only the
+         * client (or an admin) may call it; the RPC enforces that rule.
+         */
+        async completeContract(contractId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to complete this contract.');
+
+            const { data, error } = await client.rpc('complete_contract', {
+                p_contract_id: contractId
+            });
+
+            if (error) throw error;
+            return data;
+        }
+    };
+
+    // ========================================================================
+    // 5b. RECORDS SERVICE (PUBLIC SUMMARIES + PRIVATE OWN RECORD)
+    // ========================================================================
+    // These are read-only RPCs. The public worker/client summaries never return
+    // earnings, budgets, email, phone or the other party's identity; only the
+    // signed-in owner receives their private earnings and hire history.
+    const Records = {
+        async getWorkerRecord(workerId) {
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client.rpc('get_worker_record', {
+                p_worker_id: workerId
+            });
+            if (error) throw error;
+            return data;
+        },
+
+        async getClientRecord(clientId) {
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client.rpc('get_client_record', {
+                p_client_id: clientId
+            });
+            if (error) throw error;
+            return data;
+        },
+
+        async getMyRecord() {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to view your record.');
+            const { data, error } = await client.rpc('get_my_record');
+            if (error) throw error;
+            return data;
         }
     };
 
@@ -1060,8 +1116,8 @@
         if (!err) return false;
         const code = String(err.code || err.statusCode || '');
         const msg = String(err.message || err);
-        return code === 'PGRST205' ||
-            /bucket not found|nosuchbucket|relation .* does not exist|could not find the table/i.test(msg);
+        return code === 'PGRST205' || code === 'PGRST202' ||
+            /bucket not found|nosuchbucket|relation .* does not exist|could not find the table|could not find the function|function .* does not exist/i.test(msg);
     }
 
     function withFallback(remoteService, localService, label) {
@@ -1094,6 +1150,7 @@
     const JobsProxy = withFallback(Jobs, _local && _local.Jobs, 'Jobs');
     const ProposalsProxy = withFallback(Proposals, _local && _local.Proposals, 'Proposals');
     const ContractsProxy = withFallback(Contracts, _local && _local.Contracts, 'Contracts');
+    const RecordsProxy = withFallback(Records, _local && _local.Records, 'Records');
     const FilesProxy = withFallback(Files, _local && _local.Files, 'Files');
 
     // Export services onto global GahonshDB namespace
@@ -1106,6 +1163,7 @@
         Jobs: JobsProxy,
         Proposals: ProposalsProxy,
         Contracts: ContractsProxy,
+        Records: RecordsProxy,
         Files: FilesProxy
     };
 })();

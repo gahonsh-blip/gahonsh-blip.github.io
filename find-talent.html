@@ -394,7 +394,7 @@
             .btn-resume, .btn-hire-talent { min-height: 48px; }
         }
     </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=6">
 </head>
 <body>
 
@@ -572,9 +572,10 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js"></script>
-    <script src="supabase-client.js"></script>
+    <script src="marketplace-local.js?v=6"></script>
+    <script src="supabase-client.js?v=6"></script>
     <script src="auth.js"></script>
+    <script src="records.js?v=6"></script>
 
     <script>
         const DEMO_TALENT = [
@@ -682,6 +683,9 @@
                         <p class="talent-bio">${escapeHtml(t.bio || 'Available for new projects. Ask for details and recent work samples.')}</p>
                         <div class="talent-skills">${skillsHtml}</div>
                         <div class="talent-actions">
+                            <button type="button" class="btn-record" data-record-worker="${escapeHtml(t.id)}" data-record-name="${name}">
+                                <i class="fa-solid fa-clipboard-list"></i> Record
+                            </button>
                             ${resumeBtn}
                             <a href="contact.html?invite=${encodeURIComponent(t.id)}" class="btn-hire-talent">
                                 <i class="fa-solid fa-paper-plane"></i> Contact & Hire
@@ -764,6 +768,11 @@
         }
 
         document.getElementById('talentGrid').addEventListener('click', (e) => {
+            const recordBtn = e.target.closest && e.target.closest('[data-record-worker]');
+            if (recordBtn && window.GahonshRecords) {
+                window.GahonshRecords.openWorkerRecord(recordBtn.dataset.recordWorker, recordBtn.dataset.recordName);
+                return;
+            }
             const btn = e.target.closest && e.target.closest('[data-resume-uid]');
             if (btn) openResume(btn.getAttribute('data-resume-uid'));
         });

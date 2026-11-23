@@ -55,6 +55,11 @@ The marketplace features client-side Supabase integration with Row Level Securit
 > columns, and creates the admin-only `admin_profiles` view used by
 > `admin.html` to show contact email. The admin page falls back to the safe
 > columns until the view exists, but the People list will not show email.
+>
+> Finally apply
+> `supabase/migrations/20261125000000_worker_client_records.sql` to add the
+> public worker/client record RPCs, the private own-record RPC, and the
+> `complete_contract` client sign-off. See [RECORDS.md](RECORDS.md).
 
 ### Step 2b: Create the Owner Account
 
@@ -138,6 +143,7 @@ Once Supabase is connected, verify the primary user flows:
 | **Cannot post job or submit proposal** | Ensure you are logged in. The authentication modal will open automatically when attempting an action as a guest. |
 | **Row Level Security (RLS) error** | Verify you have executed the complete `docs/marketplace-schema.sql` in your Supabase SQL editor. |
 | **"File transfer is not enabled on this deployment yet"** | The live Supabase project has not been migrated with the latest schema, so the `file_transfers` table and/or the private `job-attachments` Storage bucket are missing. Re-run the full `docs/marketplace-schema.sql` in the SQL editor. File transfer is intentionally not simulated in the browser against a live project, because a local-only copy could never reach the other party. |
+| **"Records need a database update"** | The live Supabase project does not have the record RPCs yet. Apply `supabase/migrations/20261125000000_worker_client_records.sql` in the SQL editor, then refresh. See [RECORDS.md](RECORDS.md). |
 | **Theme resets on refresh** | Ensure your browser allows `localStorage` access for persisting user preferences. |
 
 For technical inquiries or business consultation, contact `gahonsh@gmail.com` or connect via WhatsApp at `+91 88251 83628`.

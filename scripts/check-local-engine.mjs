@@ -317,6 +317,73 @@ async function refuse(fn) {
   check('rejects an unsafe avatar URL',
     await refuse(() => DB.Profiles.updateMyProfile({ avatar_url: 'javascript:alert(1)' })) !== null);
 
+  // --- worker and client records -----------------------------------------
+  // A completed contract must move both public summaries and the private
+  // dashboard record; earnings, spend and the other party stay private.
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const recordProposal = await DB.Proposals.submitProposal('demo-job-2', 'A detailed record test proposal for the client.', 640, 7);
+  const recordClient = read(ctx, 'profiles').find((p) => p.id === 'client-strata');
+  await DB.Auth.signIn(recordClient._email, password);
+  const recordContractId = await DB.Contracts.acceptProposalAndHire(recordProposal.id);
+
+  const workerBefore = await DB.Records.getWorkerRecord(freelancers[0].id);
+  check('a public worker record shows the active contract before sign-off',
+    !!workerBefore && workerBefore.summary.completed_jobs === 0 && workerBefore.summary.active_jobs === 1);
+  check('a public worker record never exposes earnings, email or client identity',
+    !!workerBefore && !('earnings' in workerBefore) &&
+    !('email' in workerBefore.profile) && !('phone_number' in workerBefore.profile) &&
+    workerBefore.recent.every((item) => !('amount' in item) && !('client_id' in item)));
+
+  const clientBefore = await DB.Records.getClientRecord(recordClient.id);
+  check('a public client record counts posted projects and hires',
+    !!clientBefore && clientBefore.summary.jobs_posted >= 1 && clientBefore.summary.hires >= 1);
+  check('a public client record never exposes spend or the private job list',
+    !!clientBefore && !('total_spent' in clientBefore.summary) && !('recent_jobs' in clientBefore));
+
+  await DB.Auth.signOut();
+  check('anonymous visitors cannot read the private own record',
+    await refuse(() => DB.Records.getMyRecord()) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('a freelancer cannot complete the client contract',
+    await refuse(() => DB.Contracts.completeContract(recordContractId)) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const completedContract = await DB.Contracts.completeContract(recordContractId);
+  check('the client can complete an active contract',
+    !!completedContract && completedContract.status === 'completed');
+  check('completing the contract also closes the job',
+    read(ctx, 'jobs').find((j) => j.id === 'demo-job-2').status === 'completed');
+  check('a completed contract cannot be completed twice',
+    await refuse(() => DB.Contracts.completeContract(recordContractId)) !== null);
+
+  const workerAfter = await DB.Records.getWorkerRecord(freelancers[0].id);
+  check('the public worker record moves the contract into completed work',
+    !!workerAfter && workerAfter.summary.completed_jobs === 1 &&
+    workerAfter.summary.active_jobs === 0 && workerAfter.recent.length === 1 &&
+    workerAfter.recent[0].job_id === 'demo-job-2');
+  check('the public worker record still hides the amount after completion',
+    !!workerAfter && !('amount' in workerAfter.recent[0]));
+
+  const clientAfter = await DB.Records.getClientRecord(recordClient.id);
+  check('the public client record counts the completed project',
+    !!clientAfter && clientAfter.summary.completed_jobs >= 1);
+
+  const myClientRecord = await DB.Records.getMyRecord();
+  check('the client private record includes spend and the hired freelancer',
+    !!myClientRecord && myClientRecord.client.summary.total_spent === 640 &&
+    myClientRecord.client.recent_jobs.some((job) => job.job_id === 'demo-job-2' &&
+      job.hired_freelancer && job.hired_freelancer.id === freelancers[0].id));
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const myWorkerRecord = await DB.Records.getMyRecord();
+  check('the worker private record includes earnings and the completed amount',
+    !!myWorkerRecord && myWorkerRecord.worker.earnings === 640 &&
+    myWorkerRecord.worker.recent.some((item) => item.job_id === 'demo-job-2' && item.amount === 640));
+
+  check('a missing worker id has no public record',
+    (await DB.Records.getWorkerRecord('missing-user')) === null);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

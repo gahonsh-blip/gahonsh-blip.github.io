@@ -142,6 +142,37 @@ async function loadJobDetails() {
         ? '<i class="fa-solid fa-shield-check"></i> Identity Verified'
         : '<i class="fa-regular fa-circle-question"></i> Account Holder';
 
+    const recordBtn = document.getElementById('clientRecordBtn');
+    const recordLine = document.getElementById('clientRecordLine');
+    if (recordBtn) {
+        if (currentJob.client_id) {
+            recordBtn.dataset.recordClient = currentJob.client_id;
+            recordBtn.dataset.recordClientName = clientName;
+            recordBtn.style.display = '';
+        } else {
+            recordBtn.style.display = 'none';
+        }
+    }
+    if (recordLine) {
+        recordLine.textContent = 'Loading client record…';
+        if (window.isMarketplaceReady() && currentJob.client_id && window.GahonshDB.Records) {
+            try {
+                const clientRecord = await window.GahonshDB.Records.getClientRecord(currentJob.client_id);
+                const summary = clientRecord && clientRecord.summary;
+                recordLine.textContent = summary
+                    ? `${Number(summary.jobs_posted) || 0} projects posted · ${Number(summary.hires) || 0} hires · ${Number(summary.completed_jobs) || 0} completed`
+                    : 'No client record yet';
+            } catch (err) {
+                console.warn('[job-details] client record', err);
+                recordLine.textContent = window.GahonshDB.isBackendNotProvisioned(err)
+                    ? 'Client record needs a database update'
+                    : 'Client record unavailable';
+            }
+        } else {
+            recordLine.textContent = 'Client record unavailable';
+        }
+    }
+
     const user = await ensureUser();
     const isOwner = !!(user && currentJob.client_id === user.id);
     if (isOwner) {
@@ -218,6 +249,10 @@ function proposalCardHtml(p) {
                 ? `<button class="btn-hire" data-proposal-id="${escapeHtml(p.id)}">Accept &amp; Hire</button>`
                 : `<span style="color:var(--text-slate); font-weight:600;">${escapeHtml(statusBadge(p.status))}</span>`));
 
+    const recordHtml = p.freelancer?.id
+        ? `<button type="button" class="btn-record" data-record-worker="${escapeHtml(p.freelancer.id)}" data-record-name="${escapeHtml(p.freelancer.full_name || 'Freelancer')}"><i class="fa-solid fa-clipboard-list"></i> Record</button>`
+        : '';
+
     const resumeHtml = p.freelancer?.resume_name
         ? `<button type="button" class="btn-resume" data-resume-uid="${escapeHtml(p.freelancer.id)}" aria-label="View ${escapeHtml(p.freelancer.full_name || 'freelancer')} resume"><i class="fa-solid fa-file-pdf"></i> Resume</button>`
         : '';
@@ -229,7 +264,7 @@ function proposalCardHtml(p) {
                     <strong>${escapeHtml(p.freelancer?.full_name) || 'Freelancer'}</strong>
                     <span style="color:var(--accent-cyan); margin-left:8px;">Bid: $${Number(p.bid_amount) || 0}</span> &bull; <span>${Number(p.delivery_time_days) || 0} days</span> &bull; <span>${new Date(p.created_at).toLocaleDateString()}</span>
                 </div>
-                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">${resumeHtml}${actionHtml}</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">${recordHtml}${resumeHtml}${actionHtml}</div>
             </div>
             <p style="font-size:0.9rem; color:var(--text-slate);">${escapeHtml(p.cover_letter)}</p>
         </div>
@@ -473,6 +508,20 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
 document.addEventListener('click', (e) => {
     const hireBtn = e.target.closest && e.target.closest('[data-proposal-id]');
     if (hireBtn) window.hireFreelancer(hireBtn.dataset.proposalId, hireBtn);
+});
+
+// Record buttons: public worker records on proposal cards and the client
+// summary in the sidebar. Values come from data attributes, never inline JS.
+document.addEventListener('click', (e) => {
+    const workerBtn = e.target.closest && e.target.closest('[data-record-worker]');
+    if (workerBtn && window.GahonshRecords) {
+        window.GahonshRecords.openWorkerRecord(workerBtn.dataset.recordWorker, workerBtn.dataset.recordName);
+        return;
+    }
+    const clientBtn = e.target.closest && e.target.closest('[data-record-client]');
+    if (clientBtn && clientBtn.dataset.recordClient && window.GahonshRecords) {
+        window.GahonshRecords.openClientRecord(clientBtn.dataset.recordClient, clientBtn.dataset.recordClientName);
+    }
 });
 
 // Delegated resume button. The blank tab is opened synchronously so the async
