@@ -338,9 +338,14 @@
         </div>
 
         <div id="portalTabContent">
-            <div id="tabListingsContainer">
-                <p style="color:var(--text-slate);">Loading activity records...</p>
+            <div id="tabListingsContainer" aria-live="polite" aria-busy="true">
+                <p style="color:var(--text-slate);">Loading your projects, proposals and contracts&hellip;</p>
             </div>
+            <noscript>
+                <div class="portal-card" style="text-align:center; padding:40px;">
+                    <p style="color:var(--text-slate); margin-bottom:14px;">The portal needs JavaScript to load your projects, proposals and contracts. Enable JavaScript, or sign in from the <a href="index.html" style="color:var(--accent-cyan);">home page</a>.</p>
+                </div>
+            </noscript>
         </div>
     </main>
 
@@ -385,7 +390,7 @@
         <p>Ready to begin? Start from the <a href="jobs.html">Find Work</a> feed, <a href="post-job.html">post a project</a> or <a href="find-talent.html">browse verified talent</a>.</p>
 
         <h3>Profile, verification and trust</h3>
-        <p>Trust on the marketplace comes from two places: a verified badge on the freelancer side, and a payment-verified guarantee on the client side. Together they mean the person you hire has had their work reviewed, and the client hiring you has committed to paying for delivered work.</p>
+        <p>Trust on the marketplace comes from two places: a verified badge on the freelancer side, and a written milestone agreement on the client side. A verified badge means a member's samples, references and claimed skills have been reviewed. A milestone agreement records the amount and the deliverables before work starts. Gahonsh does not hold funds: payments move directly between the client and the freelancer, so read the brief, agree the terms in writing, and check the client or freelancer record before you commit.</p>
         <p>Keep your profile current as your work changes. A specialist who updates their headline, skills and rate as they take on new disciplines receives more relevant invitations than one whose profile has not moved in a year. Clients should likewise keep briefs specific, because a clear brief attracts proposals from people who can actually do the job.</p>
         <p>Questions about a project or a proposal? Use the details on the <a href="contact.html">contact page</a>, or review <a href="about.html">how Gahonsh runs engagements</a> before you commit.</p>
     </section>
@@ -454,32 +459,58 @@
             }[m]));
         }
 
+        // The placeholder stays visible until the first render, so every exit
+        // path — including a script that failed to load — must replace it.
+        function renderPortalError(err, action) {
+            console.error('[marketplace-dashboard] ' + action + ' failed:', err);
+            const container = document.getElementById('tabListingsContainer');
+            container.innerHTML = window.GahonshDB?.isBackendNotProvisioned?.(err)
+                ? `<div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:14px;">The live database is not fully set up yet. Run <code>docs/marketplace-schema.sql</code> once in the Supabase SQL Editor, then refresh.</p>
+                        <button type="button" class="btn-outline" id="btnRetryPortal">Try again</button>
+                   </div>`
+                : `<div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:14px;">Your portal could not be loaded. Check your connection and refresh the page.</p>
+                        <button type="button" class="btn-outline" id="btnRetryPortal">Try again</button>
+                   </div>`;
+            document.getElementById('btnRetryPortal')?.addEventListener('click', () => initDashboard());
+        }
+
         async function initDashboard() {
-            currentUser = window.GahonshAuthUI.getCurrentUser();
-            if (!currentUser && window.isMarketplaceReady()) {
-                currentUser = await window.GahonshDB.Auth.getCurrentUser();
+            const listings = document.getElementById('tabListingsContainer');
+            try {
+                listings.setAttribute('aria-busy', 'true');
+                currentUser = window.GahonshAuthUI.getCurrentUser();
+                if (!currentUser && window.isMarketplaceReady()) {
+                    currentUser = await window.GahonshDB.Auth.getCurrentUser();
+                }
+
+                if (!currentUser) {
+                    document.getElementById('userFullName').innerText = 'Guest User';
+                    document.getElementById('userRoleTag').innerText = 'Not Signed In';
+                    listings.innerHTML = `
+                        <div style="text-align:center; padding:40px;">
+                            <p style="color:var(--text-slate); margin-bottom:16px;">Please sign in to view your posted projects, proposals, and contracts.</p>
+                            <button type="button" data-open-signin class="btn-outline" style="background:linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color:#070c19; font-weight:700;">Sign In / Join</button>
+                        </div>
+                    `;
+                    listings.querySelector('[data-open-signin]')?.addEventListener('click', () => window.GahonshAuthUI.openAuthModal('signin'));
+                    return;
+                }
+
+                const name = currentUser.profile?.full_name || 'Member';
+                const role = currentUser.profile?.role || 'freelancer';
+
+                document.getElementById('userFullName').innerText = name;
+                document.getElementById('userAvatarLarge').innerText = name.charAt(0).toUpperCase();
+                document.getElementById('userRoleTag').innerText = role.toUpperCase();
+
+                await loadUserActivity(role);
+            } catch (err) {
+                renderPortalError(err, 'initDashboard');
+            } finally {
+                listings.setAttribute('aria-busy', 'false');
             }
-
-            if (!currentUser) {
-                document.getElementById('userFullName').innerText = 'Guest User';
-                document.getElementById('userRoleTag').innerText = 'Not Signed In';
-                document.getElementById('tabListingsContainer').innerHTML = `
-                    <div style="text-align:center; padding:40px;">
-                        <p style="color:var(--text-slate); margin-bottom:16px;">Please sign in to view your posted projects, proposals, and contracts.</p>
-                        <button onclick="window.GahonshAuthUI.openAuthModal('signin')" class="btn-outline" style="background:linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color:#070c19; font-weight:700;">Sign In / Join</button>
-                    </div>
-                `;
-                return;
-            }
-
-            const name = currentUser.profile?.full_name || 'Member';
-            const role = currentUser.profile?.role || 'freelancer';
-
-            document.getElementById('userFullName').innerText = name;
-            document.getElementById('userAvatarLarge').innerText = name.charAt(0).toUpperCase();
-            document.getElementById('userRoleTag').innerText = role.toUpperCase();
-
-            loadUserActivity(role);
         }
 
         async function loadUserActivity(role) {
@@ -682,7 +713,7 @@
             document.getElementById('tabJobsOrProposals').classList.add('active');
             document.getElementById('tabContracts').classList.remove('active');
             document.getElementById('tabRecords').classList.remove('active');
-            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadUserActivity'));
         };
 
         document.getElementById('tabContracts').onclick = () => {
@@ -690,7 +721,7 @@
             document.getElementById('tabContracts').classList.add('active');
             document.getElementById('tabJobsOrProposals').classList.remove('active');
             document.getElementById('tabRecords').classList.remove('active');
-            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadUserActivity'));
         };
 
         document.getElementById('tabRecords').onclick = () => {
@@ -698,7 +729,7 @@
             document.getElementById('tabRecords').classList.add('active');
             document.getElementById('tabJobsOrProposals').classList.remove('active');
             document.getElementById('tabContracts').classList.remove('active');
-            if (currentUser) loadRecords();
+            if (currentUser) loadRecords().catch((err) => renderPortalError(err, 'loadRecords'));
         };
 
         // Record downloads and client sign-off use event delegation so no

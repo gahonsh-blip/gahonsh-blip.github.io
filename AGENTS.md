@@ -81,7 +81,7 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
-- **Automated checks:** `npm test` runs all four suites.
+- **Automated checks:** `npm test` runs all five suites.
   - `npm run test:a11y` — static accessibility contract across all pages.
   - `npm run test:security` — flags inline-handler interpolation, unescaped
     `innerHTML` sinks, and hardcoded studio passcodes. Run it after touching any
@@ -96,6 +96,12 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     status transitions are legal, plus the client → freelancer file transfer
     flow). Run it after editing the offline engine or the matching
     policies/RPCs in the schema.
+  - `npm run test:content` — guards the trust and legal contract: a stat
+    counter must print its real figure in the markup (a `0` there is what a
+    crawler reads), `target="_blank"` links need `rel="noopener noreferrer"`,
+    the Terms and Privacy clauses must stay present, no page may claim payment
+    protection the platform does not provide, and the portal keeps its
+    `aria-live` / error state. See `docs/SITE-AUDIT-2026-11.md`.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards), guided chat tasks (`chat-widget.js` — profile, job, proposal, resume handoff).
@@ -200,6 +206,26 @@ only, and `/api/upload-file` is limited to `images`, `assets/projects`,
 `assets/media` and `assets/files`. A save updates the local file the server is
 serving; it does **not** publish to GitHub Pages. To publish, commit and push
 `main`. The UI labels say this — do not restore the old "LIVE" wording.
+
+## Legal Pages & Public Claims
+
+`terms.html` and `privacy-policy.html` are the contract with clients and
+freelancers, so they change with the product, not after it.
+
+- **Do not claim a feature the code does not have.** There is no escrow, no
+  payment processing and no automated identity check. The platform records the
+  amount and milestones agreed; money moves directly between client and
+  freelancer. `npm run test:content` fails the build if a page says
+  "payment verified", "escrow", "payment protection" or "money-back guarantee".
+- **Name the processors.** The Privacy Policy lists GitHub Pages, Supabase,
+  Formspree, cdnjs (Cloudflare), Google Fonts and WhatsApp (Meta). Add a new
+  provider there in the same change that adds it to a page.
+- **Keep the two pages in step.** A new fee, refund rule, retention period or
+  dispute step belongs in the numbered clauses *and* in the `.page-info`
+  summary that crawlers read.
+- **Open items are tracked.** `docs/SITE-AUDIT-2026-11.md` records what is
+  fixed, what is still missing (escrow, KYC, reviews, notifications) and which
+  policy numbers the owner must confirm.
 
 ## Security Notes
 
