@@ -467,13 +467,13 @@
             container.innerHTML = window.GahonshDB?.isBackendNotProvisioned?.(err)
                 ? `<div class="portal-card" style="text-align:center; padding:40px;">
                         <p style="color:var(--text-slate); margin-bottom:14px;">The live database is not fully set up yet. Run <code>docs/marketplace-schema.sql</code> once in the Supabase SQL Editor, then refresh.</p>
-                        <button type="button" class="btn-outline" id="btnRetryPortal">Try again</button>
+                        <button type="button" class="btn-outline" data-retry-portal>Try again</button>
                    </div>`
                 : `<div class="portal-card" style="text-align:center; padding:40px;">
                         <p style="color:var(--text-slate); margin-bottom:14px;">Your portal could not be loaded. Check your connection and refresh the page.</p>
-                        <button type="button" class="btn-outline" id="btnRetryPortal">Try again</button>
+                        <button type="button" class="btn-outline" data-retry-portal>Try again</button>
                    </div>`;
-            document.getElementById('btnRetryPortal')?.addEventListener('click', () => initDashboard());
+            container.querySelector('[data-retry-portal]')?.addEventListener('click', () => initDashboard());
         }
 
         async function initDashboard() {

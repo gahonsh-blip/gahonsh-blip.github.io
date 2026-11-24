@@ -71,6 +71,25 @@ for (const page of pages) {
             fail(page, `select without aria-label or <label for>: ${m[0].slice(0, 80)}`);
         }
     }
+
+    // 5. Text fields need a name too. A placeholder disappears as soon as the
+    //    user types, so it is not a label (WCAG 2.1 SC 1.3.1 / 4.1.2).
+    for (const m of html.matchAll(/<(input|textarea)\b([^>]*)>/gi)) {
+        const tag = m[1].toLowerCase();
+        const attrs = m[2];
+        if (tag === 'input') {
+            const type = (attrs.match(/\btype\s*=\s*"([^"]+)"/i) || [])[1] || 'text';
+            if (!['text', 'email', 'search', 'password', 'url', 'tel', 'number'].includes(type.toLowerCase())) continue;
+        }
+        const named = /aria-label\s*=\s*"\s*[^"]/.test(attrs)
+            || /aria-labelledby\s*=\s*"\s*[^"]/.test(attrs)
+            || /\btitle\s*=\s*"\s*[^"]/.test(attrs);
+        const id = (attrs.match(/\bid\s*=\s*"([^"]+)"/) || [])[1];
+        const labelled = id && new RegExp(`<label[^>]*\\bfor\\s*=\\s*"${id}"`).test(html);
+        if (!named && !labelled) {
+            fail(page, `field without a label, aria-label or title: ${m[0].slice(0, 80)}`);
+        }
+    }
 }
 
 // 6. Theme toggle: the accessible name must contain the visible text.

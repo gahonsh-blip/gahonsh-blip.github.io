@@ -67,8 +67,13 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   so they stay out of the outline.
 - **Indexability contract.** Every URL in `sitemap.xml` must be indexable and
   must have at least one static inbound link from another page. Private pages
-  (`admin.html`, `dasbord.html`, `dashboard.html`, `home.html`, `thank-you.html`)
-  stay `noindex` and out of the sitemap.
+  (`admin.html`, `dasbord.html`, `dashboard.html`, `home.html`, `messages.html`,
+  `thank-you.html`) stay `noindex` and out of the sitemap. `messages.html` shows
+  one member's contract thread, so it must never be indexed or canonicalised.
+- **Field names.** A placeholder is not a label. Every text, email, search,
+  password, url, tel or number input and every `<textarea>` needs a `<label
+  for>`, `aria-label`, `aria-labelledby` or `title`; `npm run test:a11y`
+  enforces it.
 - **Meta.** Each indexable page needs a unique `<title>`, a unique
   `<meta name="description">` (roughly 70-160 characters) and a
   `<link rel="canonical">` pointing at its own URL.
@@ -98,9 +103,11 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     policies/RPCs in the schema.
   - `npm run test:content` — guards the trust and legal contract: a stat
     counter must print its real figure in the markup (a `0` there is what a
-    crawler reads), `target="_blank"` links need `rel="noopener noreferrer"`,
-    the Terms and Privacy clauses must stay present, no page may claim payment
-    protection the platform does not provide, and the portal keeps its
+    crawler reads), `target="_blank"` links need `rel="noopener noreferrer"`
+    (including the ones a script writes), the Terms and Privacy clauses must
+    stay present, no page may claim payment protection the platform does not
+    provide, private pages stay `noindex` and out of the sitemap, every page
+    keeps one `<h1>` with no skipped level, and the portal keeps its
     `aria-live` / error state. See `docs/SITE-AUDIT-2026-11.md`.
 - **Core Checks:**
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
@@ -200,6 +207,13 @@ otherwise the injected widget is captured by `cleanForSave()` and baked into
 the page. `cleanForSave()` also strips editor helpers, scroll-reveal classes
 and the `light-mode` class before serializing, and the preview iframe is
 recreated on each render so a re-render gets a fresh JS realm.
+
+**Card templates.** The *add card* action injects markup into the edited page,
+so each template must use that page's own classes. `services.html` styles
+`.flip-card` / `.flip-front` / `.flip-back` inside `.services-flip-grid`;
+`portfolio.html` styles `.project-card` and titles cards with
+`<p class="project-name">` (a heading there would skip a level in the outline).
+`pricing.html` uses `.pricing-card` with an `<h3>`.
 
 **Save vs publish.** `/api/save-page` writes `.html`/`.htm` to the repo root
 only, and `/api/upload-file` is limited to `images`, `assets/projects`,

@@ -39,7 +39,7 @@
     };
 
     function a(url, label) {
-        return '<a href="' + url + '" target="_blank" rel="noopener">' + label + '</a>';
+        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
     }
 
     /* ------------------------------------------------------------- knowledge */

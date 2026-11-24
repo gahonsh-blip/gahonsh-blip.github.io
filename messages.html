@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Contract messages · GAHONSH Freelancing</title>
 <meta name="description" content="Private contract messages between a client and a freelancer on the GAHONSH Freelancing marketplace.">
-<link rel="canonical" href="https://gahonsh-blip.github.io/messages.html">
+<meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <style>
 :root{--bg:#0b1117;--card:#12181f;--line:#26333f;--ink:#e6edf3;--mut:#9fb0bf;--teal:#12776A}
@@ -33,9 +33,9 @@ button:disabled{opacity:.6;cursor:not-allowed}
   <a class="back" href="marketplace-dashboard.html">Back to dashboard</a>
 </header>
 <main>
-  <div id="thread"><div class="empty">Loading…</div></div>
+  <div id="thread" aria-live="polite" aria-busy="true"><div class="empty">Loading…</div></div>
   <form id="sendForm">
-    <textarea id="bodyInput" placeholder="Write a message…" required></textarea>
+    <textarea id="bodyInput" placeholder="Write a message…" aria-label="Message" required></textarea>
     <button type="submit" id="sendBtn">Send</button>
   </form>
 </main>
@@ -55,15 +55,16 @@ button:disabled{opacity:.6;cursor:not-allowed}
       return '<div class="msg '+(mine?'mine':'')+'">'+esc(m.body)+
         '<div class="meta">'+(mine?'You':'Them')+' · '+new Date(m.created_at).toLocaleString()+'</div></div>';
     }).join('');
+    t.setAttribute('aria-busy','false');
     t.scrollTop=t.scrollHeight;
     window.scrollTo(0,document.body.scrollHeight);
   }
   async function load(){
     client=await window.GahonshDB.getClient();
-    if(!client){document.getElementById('thread').innerHTML='<div class="empty">Marketplace is not configured.</div>';return;}
+    if(!client){document.getElementById('thread').innerHTML='<div class="empty">Messages need the live database. This browser is on the offline demo, where messaging is not available.</div>';document.getElementById('sendForm').style.display='none';return;}
     var who=await client.auth.getUser();
     me=who&&who.data&&who.data.user&&who.data.user.id;
-    if(!me){document.getElementById('thread').innerHTML='<div class="empty">Please <a class="back" href="dashboard.html">sign in</a> to read your messages.</div>';document.getElementById('sendForm').style.display='none';return;}
+    if(!me){document.getElementById('thread').innerHTML='<div class="empty">Please <a class="back" href="marketplace-dashboard.html">sign in</a> to read your messages.</div>';document.getElementById('sendForm').style.display='none';return;}
     if(contractId){
       var c=await client.from('contracts').select('*').eq('id',contractId).maybeSingle();
       contract=c&&c.data;
@@ -88,7 +89,13 @@ button:disabled{opacity:.6;cursor:not-allowed}
     box.value='';
     load();
   });
-  load();
+  if(!contractId){
+    document.getElementById('thread').innerHTML='<div class="empty">Open this page from a contract card in your <a class="back" href="marketplace-dashboard.html">dashboard</a> to read that contract\'s messages.</div>';
+    document.getElementById('thread').setAttribute('aria-busy','false');
+    document.getElementById('sendForm').style.display='none';
+  } else {
+    load();
+  }
 })();
 </script>
 </body>

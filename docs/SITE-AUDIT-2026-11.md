@@ -46,6 +46,46 @@ and the schema checks rather than by a live sign-in.
   `_blank` link loses `noreferrer`, a legal clause disappears, a payment
   feature is claimed again, or the portal loses its error state.
 
+### Round 2 — second pass (same PR series)
+
+A static sweep of every page (links, ids, headings, field names, sitemap) found
+six further defects. None came from the research report; all were found by
+reading the code.
+
+- **`messages.html` was indexable.** The private contract-message thread
+  carried a canonical URL and no `robots` meta, so a search engine could index
+  a page that only ever renders one member's conversation. It is now
+  `noindex, nofollow` and stays out of `sitemap.xml`.
+- **`messages.html` sent signed-out visitors to the Owner Studio.**
+  `href="dashboard.html"` is the passcode-protected local editor, not a sign-in
+  page. It now points at `marketplace-dashboard.html`.
+- **`messages.html` loaded the whole message history with no `?contract=`**
+  and painted "Loading..." forever when it had nothing to show. It now asks
+  the reader to open the page from a contract card, and says that messaging
+  needs the live database when the offline engine is in use.
+- **Unnamed form fields.** The newsletter input on six pages, the jobs and
+  talent search boxes, the admin sign-in fields, the studio's form fields and
+  the message box relied on a placeholder, which is not a label (WCAG 2.1 SC
+  1.3.1 / 4.1.2). All now carry `aria-label`.
+- **Heading outline.** `dashboard.html` opened with an `h2` before its `h1` and
+  then jumped `h1 -> h3`; `admin.html` opened with the sign-in `h2` before the
+  dashboard `h1`. Both pages now have one `h1` and no skipped level.
+- **Studio "add card" wrote markup the target page does not style.** The
+  service template emitted `.service-card`, a class `services.html` never
+  defines, and fell back to appending it to `<main>`; the portfolio templates
+  emitted `<h3>` where `portfolio.html` uses `p.project-name`. Both now match
+  the page they are inserted into, and *clone last card* also recognises
+  `.flip-card`.
+
+Guards added in the same pass:
+
+- `check-a11y.mjs` — every text, email, search, password, url, tel or number
+  input and every `<textarea>` needs a label, `aria-label`, `aria-labelledby`
+  or `title`.
+- `check-content.mjs` — private pages must be `noindex` and absent from the
+  sitemap; scripts that write `target="_blank"` links need `noreferrer`; and
+  every page must keep exactly one `<h1>` with no skipped heading level.
+
 ## 3. What the audit changed in the product's own words
 
 The marketplace now says what it does:

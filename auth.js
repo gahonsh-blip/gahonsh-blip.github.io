@@ -324,7 +324,7 @@
                         <i class="fa-solid fa-database"></i> Connect Supabase Database
                     </h3>
                     <p style="font-size:0.88rem; color:#8a99ad; line-height:1.5;">
-                        To activate live Auth, Jobs, Bidding, and Contracts, enter your Supabase Project credentials. You can get these free at <a href="https://supabase.com" target="_blank" style="color:#00ffcc;">supabase.com</a>.
+                        To activate live Auth, Jobs, Bidding, and Contracts, enter your Supabase Project credentials. You can get these free at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" style="color:#00ffcc;">supabase.com</a>.
                     </p>
                     <form id="supabaseConfigForm">
                         <div class="gahonsh-input-group">
