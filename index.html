@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gahonsh Freelancing | Smart Digital Solutions Worldwide</title>
+    <title>Gahonsh Freelancing | Freelance Marketplace & Digital Solutions</title>
     
-    <meta name="description" content="Elite Excel automation, corporate brand assets, high-converting web apps and data automation workflows built to drive measurable business performance worldwide.">
+    <meta name="description" content="Hire freelancers for Excel automation, PDF design, web development and AI workflows, or buy the same services directly. Fixed-price quotes and verified talent.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gahonsh-blip.github.io/">
     <link rel="icon" type="image/png" href="assets/logo.png">
 
-    <meta property="og:title" content="Gahonsh Freelancing | Smart Digital Solutions">
-    <meta property="og:description" content="Professional Excel Automation, Premium PDF Design, Website Development & AI Solutions.">
+    <meta property="og:title" content="Gahonsh Freelancing | Freelance Marketplace & Digital Solutions">
+    <meta property="og:description" content="Hire freelancers or buy Excel automation, PDF design, web development and AI workflows at a fixed price.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://gahonsh-blip.github.io/">
     <meta property="og:image" content="https://gahonsh-blip.github.io/images/og-image.jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Gahonsh Freelancing | Smart Digital Solutions">
+    <meta name="twitter:title" content="Gahonsh Freelancing | Freelance Marketplace & Digital Solutions">
     <meta name="twitter:description" content="Professional Excel Automation, Premium PDF Design, Website Development & AI Solutions.">
     <meta name="twitter:image" content="https://gahonsh-blip.github.io/images/og-image.jpg">
     
@@ -893,11 +893,11 @@
 
         <div class="hero-stats">
             <div class="stat-item">
-                <p class="stat-number counter-num" data-target="4">0</p>
+                <p class="stat-number counter-num" data-target="4">4</p>
                 <p>Live Projects</p>
             </div>
             <div class="stat-item">
-                <p class="stat-number"><span class="counter-num" data-target="100">0</span>%</p>
+                <p class="stat-number"><span class="counter-num" data-target="100">100</span>%</p>
                 <p>Fixed-Price Quotes</p>
             </div>
             <div class="stat-item">
@@ -927,7 +927,7 @@
             <div class="why-card">
                 <i class="fa-solid fa-user-lock"></i>
                 <h3>Secure Data</h3>
-                <p>Complete execution protocols ensuring absolute data logging confidentiality and contractual privacy guarantees.</p>
+                <p>Documented handling rules and written confidentiality commitments protect the data you share.</p>
             </div>
             <div class="why-card">
                 <i class="fa-solid fa-brain"></i>
@@ -1111,7 +1111,7 @@
             <div class="social-icons">
                 <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
                 <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
                 <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
                 <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
@@ -1164,7 +1164,9 @@
                 }
             });
         }, {threshold: 0.6});
-        counters.forEach(c => countObserver.observe(c));
+        // The markup carries the real figure so crawlers and no-JS readers see
+        // it; zero each counter here so the count-up still starts from nothing.
+        counters.forEach(c => { c.textContent = '0'; countObserver.observe(c); });
 
         // FAQ accordion is handled centrally in script.js (.gs-open class)
         // so the panels can animate instead of snapping open and shut.

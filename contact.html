@@ -871,7 +871,7 @@
             <div class="social-icons">
                 <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="mailto:gahonsh@gmail.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
-                <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://github.com/gahonsh-blip" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
                 <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
                 <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
                 <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
@@ -924,7 +924,9 @@
                 }
             });
         }, {threshold: 0.6});
-        counters.forEach(c => countObserver.observe(c));
+        // The markup carries the real figure so crawlers and no-JS readers see
+        // it; zero each counter here so the count-up still starts from nothing.
+        counters.forEach(c => { c.textContent = '0'; countObserver.observe(c); });
 
         // BACK TO TOP MODULE
         const btnTop = document.getElementById('btn-top');
