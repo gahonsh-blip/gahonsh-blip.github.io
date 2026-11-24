@@ -245,12 +245,19 @@ async function renderClientProposalsView() {
 
 function proposalCardHtml(p) {
     const canHire = p.status === 'submitted' || p.status === 'shortlisted';
+    const jobOpen = !currentJob || !currentJob.status || currentJob.status === 'open';
+    // Shortlist and decline are the two decisions that come before hiring. The
+    // server refuses both once the job leaves `open`, so the buttons follow.
+    const reviewHtml = canHire && jobOpen
+        ? `<button class="btn-shortlist" data-proposal-action="shortlisted" data-proposal-id="${escapeHtml(p.id)}"${p.status === 'shortlisted' ? ' disabled' : ''}>Shortlist</button>` +
+          `<button class="btn-decline" data-proposal-action="rejected" data-proposal-id="${escapeHtml(p.id)}">Decline</button>`
+        : '';
     const actionHtml = p.status === 'accepted'
         ? '<span style="color:var(--accent-green); font-weight:700;">Hired \u2713</span>'
         : (p.status === 'rejected'
             ? '<span style="color:#f87171; font-weight:600;">Rejected</span>'
             : (canHire
-                ? `<button class="btn-hire" data-proposal-id="${escapeHtml(p.id)}">Accept &amp; Hire</button>`
+                ? reviewHtml + `<button class="btn-hire" data-proposal-id="${escapeHtml(p.id)}">Accept &amp; Hire</button>`
                 : `<span style="color:var(--text-slate); font-weight:600;">${escapeHtml(statusBadge(p.status))}</span>`));
 
     const recordHtml = p.freelancer?.id
@@ -397,6 +404,17 @@ async function renderFreelancerContractIfAny(contractCard) {
 function renderMyProposalStatus(proposal) {
     const box = document.getElementById('myProposalDetails');
     const statusStyles = { submitted: 'color:var(--accent-cyan);', shortlisted: 'color:#fbbf24;', accepted: 'color:var(--accent-green);', rejected: 'color:#f87171;', withdrawn: 'color:var(--text-slate);' };
+    const canWithdraw = ['submitted', 'shortlisted'].includes(proposal.status);
+    const withdrawHtml = canWithdraw
+        ? `<button type="button" class="btn-withdraw" data-withdraw-proposal="${escapeHtml(proposal.id)}">Withdraw proposal</button>`
+        : '';
+    const hint = proposal.status === 'shortlisted'
+        ? 'The client shortlisted your proposal. They have not hired yet.'
+        : (proposal.status === 'rejected'
+            ? 'The client declined this proposal. You can apply to other projects.'
+            : (proposal.status === 'accepted'
+                ? 'You were hired. The contract is in your portal.'
+                : ''));
     box.innerHTML = `
         <div class="my-proposal-status-card">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -404,9 +422,54 @@ function renderMyProposalStatus(proposal) {
                 <span style="color:var(--accent-cyan); font-weight:700;">Bid: $${Number(proposal.bid_amount) || 0}</span>
             </div>
             <p style="color:var(--text-slate); font-size:0.85rem; margin-top:6px;">Submitted on ${new Date(proposal.created_at).toLocaleDateString()} &bull; Estimated delivery: ${Number(proposal.delivery_time_days) || 0} days</p>
+            ${hint ? `<p style="color:var(--text-slate); font-size:0.85rem; margin-top:4px;">${escapeHtml(hint)}</p>` : ''}
+            ${withdrawHtml ? `<div style="margin-top:10px;">${withdrawHtml}</div>` : ''}
         </div>
     `;
 }
+
+// Client shortlist / decline. Delegated like hireFreelancer() so a proposal id
+// never enters an inline handler.
+window.reviewProposal = async function (proposalId, status, btn) {
+    if (!window.isMarketplaceReady()) {
+        window.GahonshAuthUI.showToast('The marketplace service is unavailable. Please try again shortly.');
+        return;
+    }
+    if (status === 'rejected' && !confirm('Decline this proposal? The freelancer will see it as rejected.')) return;
+
+    const buttons = btn ? Array.from(btn.parentElement.querySelectorAll('button')) : [];
+    buttons.forEach((b) => { b.disabled = true; });
+    try {
+        await window.GahonshDB.Proposals.setStatus(proposalId, status);
+        window.GahonshAuthUI.showToast(status === 'shortlisted'
+            ? 'Proposal shortlisted.'
+            : (status === 'rejected' ? 'Proposal declined.' : 'Proposal restored.'));
+        await renderClientProposalsView();
+    } catch (err) {
+        console.error('[reviewProposal]', err);
+        window.GahonshAuthUI.showToast('\u274C ' + (err.message || 'Could not update the proposal.'));
+        buttons.forEach((b) => { b.disabled = false; });
+    }
+};
+
+window.withdrawMyProposal = async function (proposalId, btn) {
+    if (!window.isMarketplaceReady()) {
+        window.GahonshAuthUI.showToast('The marketplace service is unavailable. Please try again shortly.');
+        return;
+    }
+    if (!confirm('Withdraw this proposal? The client will no longer see it as active.')) return;
+    if (btn) btn.disabled = true;
+    try {
+        await window.GahonshDB.Proposals.withdrawProposal(proposalId);
+        window.GahonshAuthUI.showToast('Proposal withdrawn.');
+        const user = window.GahonshAuthUI?.getCurrentUser?.();
+        await renderFreelancerOrGuestView(user);
+    } catch (err) {
+        console.error('[withdrawMyProposal]', err);
+        window.GahonshAuthUI.showToast('\u274C ' + (err.message || 'Could not withdraw the proposal.'));
+        if (btn) btn.disabled = false;
+    }
+};
 
 function renderContractCard(contract, isClientView) {
     const card = document.getElementById('contractCard');
@@ -510,6 +573,18 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
 // Delegated hire button. The proposal id is read from a data attribute so it
 // can never break out of an inline onclick attribute.
 document.addEventListener('click', (e) => {
+    // Shortlist / decline first: they share the data-proposal-id attribute with
+    // the hire button, so they must be matched before it.
+    const reviewBtn = e.target.closest && e.target.closest('[data-proposal-action]');
+    if (reviewBtn) {
+        window.reviewProposal(reviewBtn.dataset.proposalId, reviewBtn.dataset.proposalAction, reviewBtn);
+        return;
+    }
+    const withdrawBtn = e.target.closest && e.target.closest('[data-withdraw-proposal]');
+    if (withdrawBtn) {
+        window.withdrawMyProposal(withdrawBtn.dataset.withdrawProposal, withdrawBtn);
+        return;
+    }
     const hireBtn = e.target.closest && e.target.closest('[data-proposal-id]');
     if (hireBtn) window.hireFreelancer(hireBtn.dataset.proposalId, hireBtn);
 });

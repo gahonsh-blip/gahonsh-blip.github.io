@@ -229,6 +229,39 @@
 
         .status-open { background: rgba(0, 255, 204, 0.1); color: var(--accent-cyan); }
         .status-accepted { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .status-delivered { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .status-pending { background: rgba(148, 163, 184, 0.18); color: var(--text-slate); }
+
+        /* Contract milestones + review panel. Every surface uses theme
+           variables so light mode stays readable. */
+        .ms-panel { margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 14px; }
+        .ms-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .ms-head h3 { font-size: 0.95rem; margin: 0; color: var(--text-main); }
+        .ms-progress { font-size: 0.82rem; color: var(--text-slate); }
+        .ms-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px dashed var(--border-color); }
+        .ms-row:last-of-type { border-bottom: none; }
+        .ms-row-main { min-width: 180px; }
+        .ms-title { font-size: 0.9rem; color: var(--text-main); }
+        .ms-meta { font-size: 0.78rem; color: var(--text-slate); }
+        .ms-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .ms-actions button { font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: none; color: var(--text-main); cursor: pointer; min-height: 34px; }
+        .ms-actions button:hover { border-color: var(--accent-cyan); }
+        .ms-actions button[data-ms-status="accepted"] { border-color: var(--accent-green); color: var(--accent-green); }
+        .ms-actions button[data-ms-status="delivered"] { border-color: #fbbf24; color: #fbbf24; }
+        .ms-actions button[data-ms-remove] { border-color: rgba(248, 113, 113, 0.5); color: #f87171; }
+        .ms-form { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; margin-top: 12px; }
+        .ms-form input { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: var(--text-main); font-family: inherit; font-size: 0.85rem; min-height: 38px; }
+        .ms-form input:focus { outline: 2px solid var(--accent-cyan); outline-offset: 1px; }
+        .ms-form button { border: none; border-radius: 6px; padding: 8px 14px; background: var(--accent-cyan); color: #04121a; font-weight: 700; cursor: pointer; min-height: 38px; }
+        .ms-empty { font-size: 0.85rem; color: var(--text-slate); }
+        .ms-review { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .ms-review h3 { font-size: 0.95rem; margin: 0 0 8px; color: var(--text-main); }
+        .ms-review-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+        .ms-review select, .ms-review textarea { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: var(--text-main); font-family: inherit; font-size: 0.85rem; }
+        .ms-review textarea { flex: 1 1 220px; min-height: 38px; resize: vertical; }
+        .ms-review button { border: none; border-radius: 6px; padding: 9px 16px; background: var(--accent-green); color: #04121a; font-weight: 700; cursor: pointer; min-height: 38px; }
+        .ms-stars { color: #C9922E; letter-spacing: 0.08em; }
+        @media (max-width: 640px) { .ms-form { grid-template-columns: 1fr; } }
         .status-pending { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
         .status-in_progress, .status-active { background: rgba(0, 119, 255, 0.15); color: var(--accent-blue); }
         .status-completed { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
@@ -476,6 +509,21 @@
             container.querySelector('[data-retry-portal]')?.addEventListener('click', () => initDashboard());
         }
 
+        // A stalled request must not leave the portal on its loading
+        // placeholder forever: the race rejects and the caller renders the
+        // retry panel. The late response still lands if it ever arrives.
+        const PORTAL_LOAD_TIMEOUT_MS = 20000;
+        function withPortalTimeout(promise) {
+            promise.catch(() => {});
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(
+                    () => reject(new Error('The portal took too long to load.')),
+                    PORTAL_LOAD_TIMEOUT_MS
+                )),
+            ]);
+        }
+
         async function initDashboard() {
             const listings = document.getElementById('tabListingsContainer');
             try {
@@ -505,7 +553,7 @@
                 document.getElementById('userAvatarLarge').innerText = name.charAt(0).toUpperCase();
                 document.getElementById('userRoleTag').innerText = role.toUpperCase();
 
-                await loadUserActivity(role);
+                await withPortalTimeout(loadUserActivity(role));
             } catch (err) {
                 renderPortalError(err, 'initDashboard');
             } finally {
@@ -583,8 +631,16 @@
                             <div>
                                 <h2 style="font-size:1.15rem; margin-bottom:6px;"><a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(p.job?.title || 'Project')}</a></h2>
                                 <span class="status-badge status-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span> • <span style="color:var(--accent-cyan); font-size:0.9rem; font-weight:700;">Bid: $${Number(p.bid_amount) || 0}</span>
+                                ${['submitted', 'shortlisted'].includes(p.status)
+                                    ? `<p style="font-size:0.8rem; color:var(--text-slate); margin-top:6px;">${p.status === 'shortlisted' ? 'The client shortlisted this proposal.' : 'Waiting for the client to review your bid.'}</p>`
+                                    : ''}
                             </div>
-                            <a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" class="btn-outline">View Project</a>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <a href="job-details.html?id=${encodeURIComponent(p.job?.id || '')}" class="btn-outline">View Project</a>
+                                ${['submitted', 'shortlisted'].includes(p.status)
+                                    ? `<button type="button" class="btn-outline" data-withdraw-proposal="${escapeHtml(p.id)}">Withdraw</button>`
+                                    : ''}
+                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -640,11 +696,13 @@
                             <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
                         </div>
                     </div>
+                    <div class="ms-host" data-milestones-for="${escapeHtml(c.id)}"></div>
                     <div class="gft-host" data-job-id="${safeId}" data-can-upload="${(c.status === 'active' || isClient) ? '1' : '0'}"></div>
                 </div>
             `;
             }).join('');
             mountContractTransfers();
+            mountContractMilestones(contracts);
         }
 
         async function loadRecords() {
@@ -707,6 +765,140 @@
             });
         }
 
+        // ------------------------------------------------------------------
+        // Contract milestones (manual checklist) and reviews.
+        // Nothing here moves money: `delivered` is the freelancer's claim that
+        // the work is ready, `accepted` is the client's sign-off. The schema
+        // trigger enforces who may make each move; the buttons mirror it.
+        // ------------------------------------------------------------------
+        function starText(value) {
+            const n = Math.max(0, Math.min(5, Math.round(Number(value) || 0)));
+            return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+        }
+
+        function usd(value) {
+            const n = Number(value);
+            return Number.isFinite(n) ? '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '';
+        }
+
+        async function mountContractMilestones(contracts) {
+            if (!window.isMarketplaceReady()) return;
+            const hosts = document.querySelectorAll('[data-milestones-for]');
+            for (const host of hosts) {
+                const contract = (contracts || []).find((c) => c.id === host.dataset.milestonesFor);
+                if (!contract) { host.remove(); continue; }
+                try {
+                    await renderMilestonePanel(host, contract);
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] milestones failed:', err);
+                    host.innerHTML = '<p class="ms-empty">Milestones could not be loaded for this contract.</p>';
+                }
+            }
+        }
+
+        async function renderMilestonePanel(host, contract) {
+            const me = currentUser?.id || currentUser?.profile?.id || null;
+            const isClient = !!me && contract.client_id === me;
+            const active = contract.status === 'active';
+            const canReview = contract.status === 'completed';
+
+            let rows = [];
+            let reviews = [];
+            try {
+                rows = await window.GahonshDB.Milestones.list(contract.id);
+            } catch (err) {
+                if (window.GahonshDB.isBackendNotProvisioned?.(err)) {
+                    host.innerHTML = '<p class="ms-empty">Milestones are not set up on this deployment yet. Run <code>supabase/migrations/20261127000000_add_milestones_and_review_rules.sql</code> once in the Supabase SQL Editor, then refresh.</p>';
+                    return;
+                }
+                console.warn('[marketplace-dashboard] milestone list failed:', err);
+            }
+            if (canReview) {
+                try {
+                    reviews = await window.GahonshDB.Reviews.getForContract(contract.id);
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] review list failed:', err);
+                }
+            }
+
+            const accepted = rows.filter((m) => m.status === 'accepted').length;
+            const planned = rows.reduce((sum, m) => sum + (Number(m.amount) || 0), 0);
+            const agreed = Number(contract.agreed_amount) || 0;
+            const progress = rows.length
+                ? `${accepted} of ${rows.length} accepted${planned ? ' · planned ' + usd(planned) + ' of ' + usd(agreed) + ' agreed' : ''}`
+                : 'No milestones yet';
+
+            const rowHtml = rows.map((m) => {
+                const canDeliver = active && !isClient && m.status === 'pending';
+                const canReopen = active && !isClient && m.status === 'delivered';
+                const canAccept = active && isClient && m.status === 'delivered';
+                const canRemove = active && (isClient || m.status !== 'accepted');
+                const due = m.due_date ? ' · due ' + new Date(m.due_date + 'T00:00:00').toLocaleDateString() : '';
+                return `
+                    <div class="ms-row">
+                        <div class="ms-row-main">
+                            <div class="ms-title">${escapeHtml(m.title)}</div>
+                            <div class="ms-meta">
+                                <span class="status-badge status-${escapeHtml(m.status)}">${escapeHtml(m.status)}</span>
+                                ${m.amount !== null && m.amount !== undefined ? ' · ' + usd(m.amount) : ''}${escapeHtml(due)}
+                            </div>
+                        </div>
+                        <div class="ms-actions">
+                            ${canDeliver ? `<button type="button" data-ms-status="delivered" data-ms-id="${escapeHtml(m.id)}">Mark delivered</button>` : ''}
+                            ${canAccept ? `<button type="button" data-ms-status="accepted" data-ms-id="${escapeHtml(m.id)}">Accept</button>` : ''}
+                            ${canReopen ? `<button type="button" data-ms-status="pending" data-ms-id="${escapeHtml(m.id)}">Reopen</button>` : ''}
+                            ${canRemove ? `<button type="button" data-ms-remove="${escapeHtml(m.id)}">Remove</button>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+
+            const addForm = active ? `
+                <form class="ms-form" data-ms-form="${escapeHtml(contract.id)}">
+                    <input type="text" data-ms-title maxlength="140" placeholder="Deliverable (e.g. Cleaned data + dashboard v1)" aria-label="Milestone title" required>
+                    <input type="number" data-ms-amount min="0" step="0.01" placeholder="Amount (optional)" aria-label="Milestone amount, optional">
+                    <input type="date" data-ms-due aria-label="Milestone due date, optional">
+                    <button type="submit">Add milestone</button>
+                </form>` : '';
+
+            let reviewHtml = '';
+            if (canReview) {
+                const mine = reviews.find((r) => r.reviewer_id === me);
+                const theirs = reviews.find((r) => r.reviewer_id !== me);
+                const theirsHtml = theirs
+                    ? `<p class="ms-meta" style="margin-top:8px;">Their review: <span class="ms-stars">${starText(theirs.rating)}</span>${theirs.comment ? ' — ' + escapeHtml(theirs.comment) : ''}</p>`
+                    : '';
+                reviewHtml = `
+                    <div class="ms-review">
+                        <h3>Review</h3>
+                        ${mine
+                            ? `<p class="ms-meta">Your review: <span class="ms-stars">${starText(mine.rating)}</span>${mine.comment ? ' — ' + escapeHtml(mine.comment) : ''}</p>`
+                            : `<div class="ms-review-row">
+                                   <select data-review-rating aria-label="Star rating for this contract">
+                                       <option value="5">5 stars</option>
+                                       <option value="4">4 stars</option>
+                                       <option value="3">3 stars</option>
+                                       <option value="2">2 stars</option>
+                                       <option value="1">1 star</option>
+                                   </select>
+                                   <textarea data-review-comment maxlength="1000" placeholder="What went well? (optional)" aria-label="Review comment, optional"></textarea>
+                                   <button type="button" data-review-submit="${escapeHtml(contract.id)}">Submit review</button>
+                               </div>`}
+                        ${theirsHtml}
+                    </div>`;
+            }
+
+            host.innerHTML = `
+                <div class="ms-panel">
+                    <div class="ms-head">
+                        <h3>Milestones</h3>
+                        <span class="ms-progress">${escapeHtml(progress)}</span>
+                    </div>
+                    ${rowHtml || '<p class="ms-empty">No milestones yet. Agree the deliverables here before the work starts.</p>'}
+                    ${addForm}
+                    ${reviewHtml}
+                </div>`;
+        }
+
         // Tab Switching
         document.getElementById('tabJobsOrProposals').onclick = () => {
             currentTab = 'primary';
@@ -747,6 +939,78 @@
                 return;
             }
 
+            const withdrawBtn = e.target.closest('[data-withdraw-proposal]');
+            if (withdrawBtn) {
+                if (!confirm('Withdraw this proposal? The client will no longer see it as active.')) return;
+                withdrawBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Proposals.withdrawProposal(withdrawBtn.dataset.withdrawProposal);
+                    window.GahonshAuthUI.showToast('Proposal withdrawn.');
+                    await loadUserActivity(currentUser.profile?.role || 'freelancer');
+                } catch (err) {
+                    console.error('[marketplace-dashboard] withdrawProposal failed:', err);
+                    window.GahonshAuthUI.showToast('Could not withdraw the proposal: ' + (err.message || 'please try again.'));
+                    withdrawBtn.disabled = false;
+                }
+                return;
+            }
+
+            const msBtn = e.target.closest('[data-ms-status]');
+            if (msBtn) {
+                msBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Milestones.setStatus(msBtn.dataset.msId, msBtn.dataset.msStatus);
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] milestone status failed:', err);
+                    window.GahonshAuthUI.showToast('Could not update the milestone: ' + (err.message || 'please try again.'));
+                    msBtn.disabled = false;
+                }
+                return;
+            }
+
+            const msRemove = e.target.closest('[data-ms-remove]');
+            if (msRemove) {
+                if (!confirm('Remove this milestone from the checklist?')) return;
+                msRemove.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Milestones.remove(msRemove.dataset.msRemove);
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] milestone remove failed:', err);
+                    window.GahonshAuthUI.showToast('Could not remove the milestone: ' + (err.message || 'please try again.'));
+                    msRemove.disabled = false;
+                }
+                return;
+            }
+
+            const reviewBtn = e.target.closest('[data-review-submit]');
+            if (reviewBtn) {
+                const box = reviewBtn.closest('.ms-review');
+                const rating = box?.querySelector('[data-review-rating]')?.value;
+                const comment = box?.querySelector('[data-review-comment]')?.value || '';
+                reviewBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Reviews.create({
+                        contractId: reviewBtn.dataset.reviewSubmit,
+                        rating: Number(rating),
+                        comment
+                    });
+                    window.GahonshAuthUI.showToast('Review saved. Thank you.');
+                    await loadContracts();
+                    window.GahonshTrust?.paintRatings?.();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] review failed:', err);
+                    window.GahonshAuthUI.showToast('Could not save the review: ' + (err.message || 'please try again.'));
+                    reviewBtn.disabled = false;
+                }
+                return;
+            }
+
             const completeBtn = e.target.closest('[data-complete-contract]');
             if (!completeBtn) return;
             if (!confirm('Mark this contract complete? This closes the job and adds it to both records.')) return;
@@ -763,6 +1027,31 @@
                     : (err.message || 'please try again.');
                 window.GahonshAuthUI.showToast('Could not complete the contract: ' + message);
                 completeBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('tabListingsContainer').addEventListener('submit', async (e) => {
+            const form = e.target.closest('[data-ms-form]');
+            if (!form) return;
+            e.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            const title = form.querySelector('[data-ms-title]')?.value || '';
+            const amount = form.querySelector('[data-ms-amount]')?.value || '';
+            const due = form.querySelector('[data-ms-due]')?.value || '';
+            if (button) button.disabled = true;
+            try {
+                if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                await window.GahonshDB.Milestones.add({
+                    contractId: form.dataset.msForm,
+                    title,
+                    amount: amount === '' ? null : amount,
+                    dueDate: due || null
+                });
+                await loadContracts();
+            } catch (err) {
+                console.error('[marketplace-dashboard] add milestone failed:', err);
+                window.GahonshAuthUI.showToast('Could not add the milestone: ' + (err.message || 'please try again.'));
+                if (button) button.disabled = false;
             }
         });
 

@@ -591,3 +591,61 @@ Verified with a two-account local flow: client uploads a brief, hired
 freelancer downloads it and sends a reply, client downloads the reply, and the
 files remain readable after the contract is completed. `npm test` now covers
 the same authorization rules in the local engine.
+
+## 2026-11-24 — Counters, portal loading and the missing engagement steps
+
+| Severity | Area | Bug | Status |
+| --- | --- | --- | --- |
+| Medium | Homepage / About / Contact | The count-up script zeroed every `.counter-num` on load, so a crawler, a fetch tool or a screenshot read "0 Live Projects" while the markup said 4 | Fixed: no load-time zeroing; the animation starts from zero only when the counter enters the viewport |
+| Medium | Homepage / About / Contact | `new IntersectionObserver(...)` ran unguarded, so a browser without it threw and took the rest of the inline script (back-to-top, newsletter) down with it | Fixed: behind an `IntersectionObserver` feature check |
+| Medium | Marketplace portal | `try/catch` covered a failed request but not one that never settles, so a stalled PostgREST call left "Loading your projects, proposals and contracts…" on screen indefinitely | Fixed: `withPortalTimeout()` renders the retry card after 20 s |
+| Medium | Proposals | A client could only hire or reject, and a freelancer could only wait; there was no shortlist step and no way to withdraw a bid | Fixed: `set_proposal_status()` RPC plus **Shortlist**, **Decline** and **Withdraw** |
+| High | Contracts | Nothing recorded what was delivered, so "completed" meant only that someone pressed a button, and there was no way to review the other party | Fixed: `contract_milestones`, a delivery/accept state machine, and one review per party on a completed contract |
+
+### 1. Stat counters
+
+The markup carried `data-target="4"` with the real figure as its text, and the
+first audit pass fixed the `0` that used to sit in the HTML. The script still
+ran `counters.forEach(c => { c.textContent = '0'; ... })` on every load
+though, so anything that executed the script and then stopped — a JS-capable
+crawler, a fetch tool, a screenshot, a tab that never scrolled — read 0. The
+zeroing is gone: the figure stays in the DOM and the count-up starts from zero
+only once a counter is actually on screen. Verified in Chromium: the hero reads
+4 / 100% before, during and after the animation, and the animation still runs
+when the counter scrolls into view.
+
+`scripts/check-content.mjs` now fails the build if `counters.forEach(...)`
+writes `'0'` again, and it was checked against the previous revision of
+`index.html` to confirm it catches the old code.
+
+### 2. Portal loading state
+
+`initDashboard()` caught a rejected request but awaited it with no deadline. A
+request that never settles therefore left the placeholder in place with
+`aria-busy="true"`. `withPortalTimeout()` races the activity load against a
+20-second timer and renders the existing retry card on timeout; the late
+response still paints if it arrives. The guest sign-in prompt, the
+`isBackendNotProvisioned()` setup message, the empty states and the
+`<noscript>` fallback were already in place.
+
+### 3. Proposal review and milestones
+
+Walked end to end in Chromium against the offline engine as **Apex Global
+Logistics** (client) and **Aditya Sharma** (freelancer): submit a proposal on
+`demo-job-1`, shortlist it, hire, add a milestone, mark it delivered, accept
+it, complete the contract, submit a review. Each step re-rendered after a
+reload. The rules are enforced in SQL (`validate_milestone_mutation()`,
+`set_proposal_status()`, the reviews INSERT policy, the unique index on
+`(contract_id, reviewer_id)`) and mirrored in `marketplace-local.js`, which
+`npm run test:local` now covers with 94 cases.
+
+### Verification
+
+```
+npm test
+  a11y check passed: 20 pages verified.
+  security check passed: 110 files verified.
+  schema check passed: 64 client reference(s) resolved against 30 schema object(s).
+  local engine check passed: 94 authorization case(s) verified.
+  content check passed: 20 pages verified.
+```

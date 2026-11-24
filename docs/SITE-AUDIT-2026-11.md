@@ -25,9 +25,10 @@ and the schema checks rather than by a live sign-in.
 
 ## 2. Bugs fixed
 
-- **Stat counters** (`index.html`, `about.html`, `contact.html`). The static
-  figure now matches `data-target`; the animation zeroes the element at runtime
-  instead of relying on `0` in the HTML.
+- **Stat counters** (`index.html`, `about.html`, `contact.html`). The markup
+  carries the real figure and `data-target` matches it. See Round 3: the first
+  pass still zeroed every counter at load, which is what a JS-capable crawler
+  and a screenshot read.
 - **Portal loading state** (`marketplace-dashboard.html`). `initDashboard()` is
   wrapped in `try/catch/finally` with a visible error card and a **Try again**
   button, the listings container is an `aria-live` region with `aria-busy`
@@ -86,6 +87,53 @@ Guards added in the same pass:
   sitemap; scripts that write `target="_blank"` links need `noreferrer`; and
   every page must keep exactly one `<h1>` with no skipped heading level.
 
+### Round 3 — follow-up pass (same PR series)
+
+Three findings from the report were only half fixed by the first two passes, and
+the browser QA of the demo flow exposed a fourth gap. This pass closes them.
+
+- **The counters were still zeroed at load.** `index.html`, `about.html` and
+  `contact.html` ran `counters.forEach(c => { c.textContent = '0'; ... })` on
+  every page load. The markup said 4, and a reader without JavaScript saw 4,
+  but anything that executed the script and then stopped — a crawler, a fetch
+  tool, a screenshot, a tab that never scrolled the counter into view — read
+  **0 Live Projects**. The zeroing is gone: the real figure stays in the DOM
+  and the count-up starts from zero only when a counter actually scrolls into
+  view. The observer is also behind an `IntersectionObserver` feature check, so
+  a browser without it keeps the static number instead of throwing and taking
+  the rest of the inline script down with it.
+- **The portal could still sit on its placeholder.** `try/catch` covered a
+  *failed* request, not a request that never settles. `initDashboard()` now
+  runs the activity load through `withPortalTimeout()`, a 20-second race that
+  renders the existing retry card, so a stalled PostgREST call cannot leave
+  "Loading your projects, proposals and contracts…" on screen indefinitely. The
+  late response still paints if it ever arrives.
+- **Proposals had no review step.** A client could hire or reject, and a
+  freelancer could only wait. `Proposals.setStatus()` (backed by the
+  `set_proposal_status()` RPC) adds **Shortlist** and **Decline** on the client
+  side, and `Proposals.withdrawProposal()` adds **Withdraw** for the
+  freelancer. Hiring still goes through `accept_proposal_and_create_contract()`,
+  which is the only path that creates a contract.
+- **Contracts had no delivery record.** Milestones and post-completion reviews
+  now exist as a written plan both parties can see: the freelancer marks a
+  milestone delivered, the client accepts it or sends it back, the contract can
+  only be completed once something is accepted, and each party may leave one
+  review afterwards. `docs/marketplace-schema.sql` and
+  `supabase/migrations/20261127000000_add_milestones_and_review_rules.sql`
+  carry the tables, policies and triggers; `marketplace-local.js` mirrors them
+  so the offline demo behaves the same way.
+
+Verified end to end in a browser against the offline engine: sign in as
+**Apex Global Logistics** (client) and **Aditya Sharma** (freelancer), submit a
+proposal on `demo-job-1`, shortlist it, hire, add a milestone, mark it
+delivered as the freelancer, accept it as the client, complete the contract and
+submit a review. Every step persisted and re-rendered after a reload.
+
+Guards added in this pass:
+
+- `check-content.mjs` fails if any page zeroes its counters at load again
+  (`counters.forEach(... '0')`), or if the portal loses its load timeout.
+
 ## 3. What the audit changed in the product's own words
 
 The marketplace now says what it does:
@@ -105,10 +153,10 @@ If escrow, milestone holds or automated KYC are ever added, these pages and
 | Item | Why it is still open | What it needs |
 | --- | --- | --- |
 | Verified client/freelancer lists (100 each) | Only unverified public profiles were found; publishing them without consent would be wrong | Owner-approved sourcing, per-record source URL, consent status column |
-| Escrow / milestone payments | No payment provider is integrated | Provider decision, schema tables, RLS policies, Terms and Privacy updates |
+| Escrow / milestone payments | No payment provider is integrated. Milestones now exist as a **written record** (`contract_milestones`) with no money attached | Provider decision, schema tables, RLS policies, Terms and Privacy updates |
 | KYC / identity verification | Manual admin badge only | Document collection, storage bucket, retention rules, legal basis |
-| Reviews and ratings | Not built | `reviews` table with RLS, one review per completed contract, moderation |
-| Proposal tracking, saved jobs, availability, notifications | Not built | Client and schema work, then `npm run test:schema` |
+| Reviews and ratings | Shipped: one review per party per completed contract, aggregated by `worker_ratings`. Moderation is admin-only delete | A report/flag path and moderation queue |
+| Proposal tracking | Shipped: shortlist, decline and withdraw, with the state machine enforced by `set_proposal_status()` | Saved jobs, availability, notifications |
 | Admin fraud monitoring | Admin page lists profiles only | Reporting view over `profiles`, `jobs`, `proposals`, `contracts` |
 | Multi-currency | Prices are USD | Currency column, display formatting, Terms update |
 
@@ -135,15 +183,18 @@ protection that does not exist.
 npm test
   a11y check passed: 20 pages verified.
   security check passed: 110 files verified.
-  schema check passed: 56 client reference(s) resolved against 26 schema object(s).
-  local engine check passed: 57 authorization case(s) verified.
+  schema check passed: 64 client reference(s) resolved against 30 schema object(s).
+  local engine check passed: 94 authorization case(s) verified.
   content check passed: 20 pages verified.
 ```
 
-Browser checks: `index.html` renders 4 / 100% with the animation intact;
-`marketplace-dashboard.html` shows the sign-in prompt instead of a stuck
-placeholder; `terms.html` and `privacy-policy.html` render with one `<h1>` and
-their crawlable summary intact.
+Browser checks: `index.html` renders 4 / 100% in the markup, in the DOM after
+the script runs, and with the animation intact; `marketplace-dashboard.html`
+shows the sign-in prompt instead of a stuck placeholder and loads a signed-in
+member's projects; `terms.html` and `privacy-policy.html` render with one `<h1>`
+and their crawlable summary intact. The full demo flow (proposal → shortlist →
+hire → milestone delivered → accepted → contract completed → review) was walked
+end to end in Chromium against the offline engine.
 
 ## 7. Points for the owner to confirm
 

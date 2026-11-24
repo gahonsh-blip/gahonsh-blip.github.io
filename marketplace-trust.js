@@ -69,11 +69,15 @@
   }
 
   async function openReview(contractId, revieweeId, jobId) {
-    var c = await client();
-    if (!c) return;
-    var sess = await c.auth.getUser();
-    var uid = sess && sess.data && sess.data.user && sess.data.user.id;
-    if (!uid) { alert('Please sign in to leave a review.'); return; }
+    // Reviews go through the shared service so the same rules apply against
+    // Supabase and against the offline engine. The reviewee is derived from
+    // the contract server-side; the argument is kept for callers only.
+    if (!window.GahonshDB || !window.GahonshDB.Reviews) return;
+    var current = window.GahonshAuthUI && window.GahonshAuthUI.getCurrentUser
+      ? window.GahonshAuthUI.getCurrentUser() : null;
+    if (!current) { alert('Please sign in to leave a review.'); return; }
+    void revieweeId;
+    void jobId;
     var m = modal(
       '<div style="background:#12181f;border:1px solid #26333f;border-radius:14px;max-width:420px;width:100%;padding:20px;color:#e6edf3;font-family:inherit;">' +
       '<h3 style="margin:0 0 4px;font-size:1.05rem;">Leave a review</h3>' +
@@ -96,36 +100,35 @@
     m.querySelector('#mt-cancel').onclick = function () { m.remove(); };
     m.querySelector('#mt-save').onclick = async function () {
       if (!rating) { alert('Please pick a star rating.'); return; }
-      var body = {
-        contract_id: contractId || null,
-        job_id: jobId || null,
-        reviewer_id: uid,
-        reviewee_id: revieweeId,
-        rating: rating,
-        comment: (m.querySelector('#mt-comment').value || '').trim() || null
-      };
-      var res = await c.from('reviews').insert(body);
-      if (res.error) { alert('Could not save the review: ' + res.error.message); return; }
-      alert('Thank you, your review is live.');
-      m.remove();
-      cache = null;
-      paintRatings();
+      try {
+        await window.GahonshDB.Reviews.create({
+          contractId: contractId,
+          rating: rating,
+          comment: (m.querySelector('#mt-comment').value || '').trim()
+        });
+        alert('Thank you, your review is live.');
+        m.remove();
+        cache = null;
+        paintRatings();
+      } catch (err) {
+        alert('Could not save the review: ' + (err && err.message ? err.message : 'please try again.'));
+      }
     };
   }
 
+  // The portal owns the review form (it knows whether the contract is completed
+  // and whether this member has already reviewed), so this layer only adds the
+  // message shortcut. A second review button here would let a member review an
+  // active contract and hit the unique constraint with a raw error.
   function decorateContracts() {
     document.querySelectorAll('[data-contract-id]').forEach(function (card) {
       if (card.querySelector('.mt-actions')) return;
       var cid = card.getAttribute('data-contract-id');
-      var other = card.getAttribute('data-other-id') || '';
-      var jobId = card.getAttribute('data-job-id-raw') || '';
       var bar = document.createElement('div');
       bar.className = 'mt-actions';
       bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;';
       bar.innerHTML =
-        '<a href="messages.html?contract=' + encodeURIComponent(cid) + '" style="border:1px solid #26333f;border-radius:8px;padding:8px 14px;text-decoration:none;color:#7fd1c4;font-size:0.9rem;">Message</a>' +
-        '<button type="button" class="mt-review" style="background:#12776A;color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:600;">Leave a review</button>';
-      bar.querySelector('.mt-review').onclick = function () { openReview(cid, other, jobId); };
+        '<a href="messages.html?contract=' + encodeURIComponent(cid) + '" style="border:1px solid #26333f;border-radius:8px;padding:8px 14px;text-decoration:none;color:#7fd1c4;font-size:0.9rem;">Message</a>';
       card.appendChild(bar);
     });
   }

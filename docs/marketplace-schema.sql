@@ -53,6 +53,12 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
+DO $$ BEGIN
+    CREATE TYPE milestone_status AS ENUM ('pending', 'delivered', 'accepted');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
 -- ----------------------------------------------------------------------------
 -- 2. PROFILES TABLE (STRICTLY PRIVATE - STORES AUTH & PROFILE STATE)
 -- ----------------------------------------------------------------------------
@@ -296,6 +302,33 @@ CREATE INDEX IF NOT EXISTS messages_recipient_idx
     ON public.messages (recipient_id, created_at DESC);
 
 -- ----------------------------------------------------------------------------
+-- 7c. CONTRACT MILESTONES (MANUAL CHECKLIST)
+-- ----------------------------------------------------------------------------
+-- A written plan the client and the freelancer keep together: what will be
+-- delivered, in what order, for how much of the agreed price, and by when.
+-- It is a checklist, not an escrow: the platform never holds funds, so
+-- `accepted` means the client signed the deliverable off, not that money
+-- moved. The freelancer marks a milestone `delivered`; the client marks it
+-- `accepted`. Both rules live in validate_milestone_mutation() below.
+CREATE TABLE IF NOT EXISTS public.contract_milestones (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    contract_id UUID NOT NULL REFERENCES public.contracts(id) ON DELETE CASCADE,
+    title TEXT NOT NULL CHECK (char_length(TRIM(title)) BETWEEN 3 AND 140),
+    amount NUMERIC(10, 2) CHECK (amount IS NULL OR amount >= 0),
+    due_date DATE,
+    position INT NOT NULL DEFAULT 0 CHECK (position >= 0),
+    status milestone_status NOT NULL DEFAULT 'pending',
+    created_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    delivered_at TIMESTAMPTZ,
+    accepted_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS contract_milestones_contract_idx
+    ON public.contract_milestones (contract_id, position, created_at);
+
+-- ----------------------------------------------------------------------------
 -- 8. HELPER FUNCTIONS & TRIGGERS
 -- ----------------------------------------------------------------------------
 
@@ -495,6 +528,124 @@ CREATE TRIGGER trg_sync_job_proposals_count
     AFTER INSERT OR DELETE ON public.proposals
     FOR EACH ROW EXECUTE PROCEDURE public.sync_job_proposals_count();
 
+-- Milestone state machine. The RLS policies decide who may touch a milestone
+-- row at all; this trigger decides who may move it where:
+--   pending  -> delivered   (the freelancer, once the work is ready)
+--   delivered -> accepted   (the client, once they have checked it)
+--   delivered -> pending    (the freelancer, reopening before acceptance)
+-- Accepted milestones are final, and nothing may change on a closed contract.
+CREATE OR REPLACE FUNCTION public.validate_milestone_mutation()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_client UUID;
+    v_freelancer UUID;
+    v_status contract_status;
+    v_actor UUID := auth.uid();
+BEGIN
+    SELECT client_id, freelancer_id, status
+    INTO v_client, v_freelancer, v_status
+    FROM public.contracts
+    WHERE id = COALESCE(NEW.contract_id, OLD.contract_id);
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Contract not found.';
+    END IF;
+
+    IF v_status <> 'active' AND NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Milestones can only change while the contract is active.';
+    END IF;
+
+    IF TG_OP = 'INSERT' THEN
+        IF v_actor IS NOT NULL AND v_actor <> v_client AND v_actor <> v_freelancer
+           AND NOT public.is_admin() THEN
+            RAISE EXCEPTION 'Only the client or the freelancer can add milestones.';
+        END IF;
+        NEW.status := 'pending';
+        NEW.delivered_at := NULL;
+        NEW.accepted_at := NULL;
+        NEW.created_at := TIMEZONE('utc', NOW());
+        NEW.updated_at := NEW.created_at;
+        RETURN NEW;
+    END IF;
+
+    IF TG_OP = 'DELETE' THEN
+        -- An accepted milestone is the client's record of signed-off work, so
+        -- only the client (or an admin) may delete it.
+        IF OLD.status = 'accepted'
+           AND auth.uid() IS NOT NULL
+           AND auth.uid() <> v_client
+           AND NOT public.is_admin() THEN
+            RAISE EXCEPTION 'Only the client can remove an accepted milestone.';
+        END IF;
+        RETURN OLD;
+    END IF;
+
+    NEW.contract_id := OLD.contract_id;
+    NEW.created_by := OLD.created_by;
+    NEW.created_at := OLD.created_at;
+    NEW.updated_at := TIMEZONE('utc', NOW());
+
+    IF NEW.status IS DISTINCT FROM OLD.status THEN
+        IF NEW.status = 'delivered' THEN
+            IF v_actor IS NOT NULL AND v_actor <> v_freelancer AND NOT public.is_admin() THEN
+                RAISE EXCEPTION 'Only the freelancer can mark a milestone delivered.';
+            END IF;
+            IF OLD.status = 'accepted' THEN
+                RAISE EXCEPTION 'An accepted milestone cannot be delivered again.';
+            END IF;
+            NEW.delivered_at := TIMEZONE('utc', NOW());
+        ELSIF NEW.status = 'accepted' THEN
+            IF v_actor IS NOT NULL AND v_actor <> v_client AND NOT public.is_admin() THEN
+                RAISE EXCEPTION 'Only the client can accept a milestone.';
+            END IF;
+            IF OLD.status <> 'delivered' THEN
+                RAISE EXCEPTION 'A milestone must be delivered before it can be accepted.';
+            END IF;
+            NEW.accepted_at := TIMEZONE('utc', NOW());
+        ELSE
+            IF OLD.status = 'accepted' AND NOT public.is_admin() THEN
+                RAISE EXCEPTION 'An accepted milestone can no longer be reopened.';
+            END IF;
+            NEW.delivered_at := NULL;
+            NEW.accepted_at := NULL;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+DROP TRIGGER IF EXISTS trg_validate_milestone_mutation ON public.contract_milestones;
+CREATE TRIGGER trg_validate_milestone_mutation
+    BEFORE INSERT OR UPDATE OR DELETE ON public.contract_milestones
+    FOR EACH ROW EXECUTE PROCEDURE public.validate_milestone_mutation();
+
+-- A review always belongs to the contract it was written for, and the comment
+-- is trimmed and capped. Together with the INSERT policy below, that means a
+-- review can never point at a job or a member outside its own contract.
+CREATE OR REPLACE FUNCTION public.sync_review_contract()
+RETURNS TRIGGER AS $$
+BEGIN
+    SELECT job_id INTO NEW.job_id
+    FROM public.contracts
+    WHERE id = NEW.contract_id;
+
+    NEW.comment := NULLIF(LEFT(TRIM(COALESCE(NEW.comment, '')), 1000), '');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+DROP TRIGGER IF EXISTS trg_sync_review_contract ON public.reviews;
+CREATE TRIGGER trg_sync_review_contract
+    BEFORE INSERT ON public.reviews
+    FOR EACH ROW EXECUTE PROCEDURE public.sync_review_contract();
+
+-- One review per contract per reviewer. Without this a member could post the
+-- same five stars ten times and move the public average.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_review_per_contract_reviewer
+    ON public.reviews (contract_id, reviewer_id)
+    WHERE contract_id IS NOT NULL;
+
 -- ----------------------------------------------------------------------------
 -- 9. TRANSACTIONAL RPC: ATOMIC PROPOSAL ACCEPTANCE & CONTRACT CREATION
 -- ----------------------------------------------------------------------------
@@ -564,6 +715,68 @@ BEGIN
     RETURN v_contract_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- ----------------------------------------------------------------------------
+-- 9a. PROPOSAL REVIEW (SHORTLIST / DECLINE) — CLIENT ONLY
+-- ----------------------------------------------------------------------------
+-- Hiring goes through accept_proposal_and_create_contract() above, which is
+-- the only path that creates a contract. This function covers the two cheaper
+-- decisions a client makes while a job is still open: shortlist a bid so the
+-- freelancer knows it is in the running, or decline it so they can move on.
+CREATE OR REPLACE FUNCTION public.set_proposal_status(
+    target_proposal_id UUID,
+    new_status proposal_status
+)
+RETURNS UUID AS $$
+DECLARE
+    v_job_id UUID;
+    v_client_id UUID;
+    v_job_status job_status;
+    v_proposal_status proposal_status;
+BEGIN
+    IF new_status NOT IN ('submitted', 'shortlisted', 'rejected') THEN
+        RAISE EXCEPTION 'Only shortlisted, submitted or rejected can be set here. Accept the proposal to hire.';
+    END IF;
+
+    SELECT job_id, status INTO v_job_id, v_proposal_status
+    FROM public.proposals
+    WHERE id = target_proposal_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Proposal not found.';
+    END IF;
+
+    SELECT client_id, status INTO v_client_id, v_job_status
+    FROM public.jobs
+    WHERE id = v_job_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Job not found.';
+    END IF;
+
+    IF v_client_id <> auth.uid() AND NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Only the client who posted the job can review proposals.';
+    END IF;
+
+    IF v_job_status <> 'open' THEN
+        RAISE EXCEPTION 'Proposals can only be reviewed while the job is open.';
+    END IF;
+
+    IF v_proposal_status IN ('accepted', 'withdrawn') THEN
+        RAISE EXCEPTION 'This proposal can no longer be changed (%).', v_proposal_status;
+    END IF;
+
+    UPDATE public.proposals
+    SET status = new_status, updated_at = TIMEZONE('utc', NOW())
+    WHERE id = target_proposal_id;
+
+    RETURN target_proposal_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+GRANT EXECUTE ON FUNCTION public.set_proposal_status(UUID, proposal_status) TO authenticated;
 
 -- ----------------------------------------------------------------------------
 -- 9b. WORKER & CLIENT RECORDS
@@ -918,6 +1131,7 @@ ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contract_milestones ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: public directory read for non-sensitive data, owner/admin update.
 -- This row policy is paired with the column grants above: `email` and
@@ -1118,19 +1332,27 @@ ON public.reviews FOR SELECT
 TO anon, authenticated
 USING (TRUE);
 
+-- A review is only possible after a completed contract, only about the other
+-- party to that contract, and only once. The earlier policy accepted a review
+-- with no contract at all, for any member, which let anyone inflate or sink a
+-- rating that the talent directory publishes.
 DROP POLICY IF EXISTS "Participants can review a contract" ON public.reviews;
-CREATE POLICY "Participants can review a contract"
+DROP POLICY IF EXISTS "Participants can review a completed contract" ON public.reviews;
+CREATE POLICY "Participants can review a completed contract"
 ON public.reviews FOR INSERT
 TO authenticated
 WITH CHECK (
     reviewer_id = auth.uid()
+    AND contract_id IS NOT NULL
     AND reviewer_id <> reviewee_id
-    AND (
-        contract_id IS NULL
-        OR contract_id IN (
-            SELECT id FROM public.contracts
-            WHERE client_id = auth.uid() OR freelancer_id = auth.uid()
-        )
+    AND EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = reviews.contract_id
+          AND c.status = 'completed'
+          AND (
+              (c.client_id = auth.uid() AND c.freelancer_id = reviews.reviewee_id)
+              OR (c.freelancer_id = auth.uid() AND c.client_id = reviews.reviewee_id)
+          )
     )
 );
 
@@ -1139,6 +1361,69 @@ CREATE POLICY "Admins can delete reviews"
 ON public.reviews FOR DELETE
 TO authenticated
 USING (public.is_admin());
+
+-- Contract milestones: the client and the freelancer share one checklist.
+-- The policy decides who may touch a row; validate_milestone_mutation()
+-- decides which status moves each of them may make.
+DROP POLICY IF EXISTS "Contract parties can read milestones" ON public.contract_milestones;
+CREATE POLICY "Contract parties can read milestones"
+ON public.contract_milestones FOR SELECT
+TO authenticated
+USING (
+    public.is_admin()
+    OR EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = contract_milestones.contract_id
+          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+    )
+);
+
+DROP POLICY IF EXISTS "Contract parties can add milestones" ON public.contract_milestones;
+CREATE POLICY "Contract parties can add milestones"
+ON public.contract_milestones FOR INSERT
+TO authenticated
+WITH CHECK (
+    created_by = auth.uid()
+    AND EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = contract_milestones.contract_id
+          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+    )
+);
+
+DROP POLICY IF EXISTS "Contract parties can update milestones" ON public.contract_milestones;
+CREATE POLICY "Contract parties can update milestones"
+ON public.contract_milestones FOR UPDATE
+TO authenticated
+USING (
+    public.is_admin()
+    OR EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = contract_milestones.contract_id
+          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+    )
+)
+WITH CHECK (
+    public.is_admin()
+    OR EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = contract_milestones.contract_id
+          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+    )
+);
+
+DROP POLICY IF EXISTS "Contract parties can remove milestones" ON public.contract_milestones;
+CREATE POLICY "Contract parties can remove milestones"
+ON public.contract_milestones FOR DELETE
+TO authenticated
+USING (
+    public.is_admin()
+    OR EXISTS (
+        SELECT 1 FROM public.contracts c
+        WHERE c.id = contract_milestones.contract_id
+          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+    )
+);
 
 -- Contract messages: only the two parties (or an admin) may read or send.
 DROP POLICY IF EXISTS "Contract parties can read messages" ON public.messages;
