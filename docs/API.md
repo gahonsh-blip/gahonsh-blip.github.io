@@ -28,6 +28,8 @@ The application integrates with Supabase via the client-side JavaScript SDK (`@s
 | `getProposals(jobId)` | `SELECT *, profiles(...) FROM proposals` | Retrieves proposals submitted for a specific job (Client only) or by a freelancer. |
 | `submitProposal(data)` | `INSERT INTO proposals (...)` | Submits a proposal with bid amount, delivery days, and cover letter. |
 | `acceptProposal(proposalId, jobId)` | `rpc('accept_proposal_and_create_contract', ...)` | Executes atomic transaction to hire freelancer and generate an active contract. |
+| `setStatus(proposalId, status)` | `rpc('set_proposal_status', ...)` | The client's review of a live bid: `shortlisted`, `submitted` (back to the pile) or `rejected`. The RPC checks that the caller owns the job and that it is still `open`; hiring is not here, `acceptProposal()` is the only path that creates a contract. |
+| `withdrawProposal(proposalId)` | `UPDATE proposals SET status = 'withdrawn'` | The freelancer withdraws their own bid while it is `submitted` or `shortlisted`. |
 | `getContracts(userId)` | `SELECT * FROM contracts` | Fetches active and past contracts for the authenticated user. |
 | `getTalents(filters)` | `SELECT * FROM public_profiles` | Retrieves verified freelancer profiles with skill and rate filtering. |
 | `getPublicProfile(userId)` | `SELECT * FROM public_profiles WHERE id = ...` | Retrieves a public talent profile. Email, phone number and password material are never part of this view. |
@@ -35,6 +37,31 @@ The application integrates with Supabase via the client-side JavaScript SDK (`@s
 | `updateMyProfile(data)` | `UPDATE profiles SET ... WHERE id = auth.uid()` | Updates only the allow-listed profile fields: `full_name`, `avatar_url`, `location`, `bio`, `title`, `hourly_rate`, `skills`, `phone_number`. `id`, `email`, `role` and `is_verified` are ignored, so a crafted payload cannot edit another profile or escalate a role. |
 
 Public profile reads use `public_profiles`. The private `profiles` table grants only the safe directory columns to `anon`/`authenticated`; email and phone number are not granted. The admin page reads email through the `admin_profiles` view, which returns rows only when `public.is_admin()` is true.
+
+### Contract Milestone API (`window.GahonshDB.Milestones`)
+
+A written delivery plan the two parties keep on the contract. **Nothing here
+moves money.** `delivered` is the freelancer saying the work is ready and
+`accepted` is the client confirming they checked it; payment still happens
+directly between the two of them, as `terms.html` §6 states.
+
+| Function | Endpoint / Table | Description |
+| :--- | :--- | :--- |
+| `list(contractId)` | `SELECT * FROM contract_milestones WHERE contract_id = ...` | Returns the milestones in `position` order. Readable by both parties and admins. |
+| `add({ contractId, title, amount, dueDate })` | `INSERT INTO contract_milestones` | Adds a milestone with a 3–140 character title, an optional non-negative amount, an optional due date, and the next `position`. Both parties may add while the contract is active. |
+| `setStatus(milestoneId, status)` | `UPDATE contract_milestones SET status = ...` | One of `pending`, `delivered`, `accepted`. `validate_milestone_mutation()` decides who may make each move: the freelancer marks `delivered`, the client marks `accepted` (only from `delivered`) or sends a delivered milestone back to `pending`. |
+| `remove(milestoneId)` | `DELETE FROM contract_milestones` | Deletes a milestone. Both parties may remove their own plan items while the contract is active; only the client may delete an `accepted` one. |
+
+**Rules the database enforces.** A new milestone always starts `pending`; only
+the client or the freelancer on that contract may add one; nothing leaves
+`accepted`; milestones freeze once the contract is no longer `active`. Reviews
+work the same way: `sync_review_contract()` derives `job_id` from the contract
+and trims the comment, a unique index allows one review per reviewer per
+contract, and the INSERT policy requires a `completed` contract with the
+reviewee being the other party. The offline engine mirrors every rule and
+`npm run test:local` asserts them.
+
+---
 
 ### File Transfer API (`window.GahonshDB.Files`)
 

@@ -368,6 +368,27 @@
         }
         .btn-hire-outline:hover { background: rgba(16, 185, 129, 0.1); }
 
+        .btn-shortlist,
+        .btn-decline,
+        .btn-withdraw {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.86rem;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-shortlist { border-color: #fbbf24; color: #fbbf24; }
+        .btn-shortlist:hover { background: rgba(251, 191, 36, 0.12); }
+        .btn-decline:hover,
+        .btn-withdraw:hover { background: rgba(248, 113, 113, 0.12); border-color: #f87171; color: #f87171; }
+        .btn-shortlist:disabled,
+        .btn-decline:disabled,
+        .btn-withdraw:disabled { opacity: 0.55; cursor: not-allowed; }
+
         .btn-resume {
             background: none;
             border: 1px solid var(--border-color);

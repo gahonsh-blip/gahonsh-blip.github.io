@@ -79,6 +79,12 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   `<link rel="canonical">` pointing at its own URL.
 - **External links.** Any `target="_blank"` anchor must carry
   `rel="noopener noreferrer"`.
+- **Stat counters.** The markup carries the real figure and it matches
+  `data-target`; the script must never zero a counter at load, because a
+  crawler or a fetch tool that runs the script and stops then reads "0 Live
+  Projects". The count-up starts from zero only when the counter scrolls into
+  view, and the observer sits behind an `IntersectionObserver` feature check.
+  `npm run test:content` enforces both halves.
 - **Known limitation.** The `www.` host does not resolve (`www.gahonsh-blip.github.io`
   returns no response). A redirect cannot be added on GitHub Pages without a
   custom domain, so link only to the apex `https://gahonsh-blip.github.io/`.
@@ -97,9 +103,10 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     editing the schema. A missing object otherwise 404s only at runtime.
   - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
     it enforces the same access rules as the SQL policies (who may hire,
-    withdraw, list proposals, read a contract, change a job status, and which
-    status transitions are legal, plus the client → freelancer file transfer
-    flow). Run it after editing the offline engine or the matching
+    withdraw, shortlist, list proposals, read a contract, change a job status,
+    add / deliver / accept a milestone, complete a contract, write a review,
+    and which status transitions are legal, plus the client → freelancer file
+    transfer flow). Run it after editing the offline engine or the matching
     policies/RPCs in the schema.
   - `npm run test:content` — guards the trust and legal contract: a stat
     counter must print its real figure in the markup (a `0` there is what a
@@ -113,6 +120,35 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   - Agency pages: Service flip cards, portfolio filters, FAQ accordions, Formspree form submission, WhatsApp deep links.
   - Marketplace pages: Job search & filters (`jobs.html`), proposal submission & hiring (`job-details.html`), job creation (`post-job.html`), talent directory (`find-talent.html`), portal tabs (`marketplace-dashboard.html`), in-site file send/receive (`job-details.html`, `marketplace-dashboard.html` contract cards), resume upload/view (`auth.js` profile modal, `find-talent.html`, `job-details.html` proposal cards), guided chat tasks (`chat-widget.js` — profile, job, proposal, resume handoff).
   - Auth & Theme: Sign in/out modal, role switching, light/dark mode persistence in `localStorage`.
+
+## Contract Milestones, Proposal Review & Reviews
+
+The three steps between "hired" and "done". All of them are records, not money
+movement: there is still no escrow and no payment processing.
+
+- **Milestones** (`contract_milestones`, `window.GahonshDB.Milestones`). The
+  freelancer marks a milestone `delivered`; the client marks it `accepted` or
+  sends it back to `pending`. `accepted` is final, a new row is forced to
+  `pending`, and rows freeze once the contract is no longer `active`.
+  `validate_milestone_mutation()` owns those rules in SQL; the offline engine
+  must mirror them and `npm run test:local` asserts it.
+- **Contract completion.** `contracts.status` only moves `active` →
+  `completed`, and only once a milestone is accepted, so "completed" always
+  means the client checked something. Do not add a client-side shortcut.
+- **Proposal review.** Shortlist / decline go through the
+  `set_proposal_status()` RPC; withdraw is the freelancer's own update. Hiring
+  stays in `accept_proposal_and_create_contract()`, the only path that creates
+  a contract. Never let `set_proposal_status()` accept `accepted`.
+- **Reviews.** One per party per `completed` contract. The INSERT policy checks
+  the contract and derives the other party; `sync_review_contract()` derives
+  `job_id`; a unique index on `(contract_id, reviewer_id)` keeps the public
+  average honest. `worker_ratings` publishes the aggregate.
+- **Portal loading.** `initDashboard()` renders a guest sign-in prompt, an
+  error card with **Try again**, and runs the activity load through
+  `withPortalTimeout()`. Keep the timeout: a PostgREST call that never settles
+  must not leave the placeholder on screen. `npm run test:content` guards it.
+- Migration for existing projects:
+  `supabase/migrations/20261127000000_add_milestones_and_review_rules.sql`.
 
 ## Resume Uploads (PDF)
 
@@ -238,8 +274,8 @@ freelancers, so they change with the product, not after it.
   dispute step belongs in the numbered clauses *and* in the `.page-info`
   summary that crawlers read.
 - **Open items are tracked.** `docs/SITE-AUDIT-2026-11.md` records what is
-  fixed, what is still missing (escrow, KYC, reviews, notifications) and which
-  policy numbers the owner must confirm.
+  fixed, what is still missing (escrow, KYC, saved jobs, notifications,
+  multi-currency) and which policy numbers the owner must confirm.
 
 ## Security Notes
 

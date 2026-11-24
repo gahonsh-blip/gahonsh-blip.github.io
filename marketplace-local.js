@@ -296,6 +296,8 @@
         if (readTable('proposals').length === 0) writeTable('proposals', []);
         if (readTable('contracts').length === 0) writeTable('contracts', []);
         if (readTable('file_transfers').length === 0) writeTable('file_transfers', []);
+        if (readTable('contract_milestones').length === 0) writeTable('contract_milestones', []);
+        if (readTable('reviews').length === 0) writeTable('reviews', []);
     }
 
     // ------------------------------------------------------------------
@@ -898,6 +900,39 @@
             return decorateProposal(rows[index]);
         },
 
+        /**
+         * Mirrors set_proposal_status(): only the job owner (or an admin) may
+         * shortlist, restore or decline a bid, only while the job is open, and
+         * never once the bid has been accepted or withdrawn. Hiring itself is
+         * Contracts.acceptProposalAndHire().
+         */
+        async setStatus(proposalId, status) {
+            const profile = requireUser('Please sign in to review proposals.');
+            if (!['submitted', 'shortlisted', 'rejected'].includes(status)) {
+                throw new Error('A proposal can only be shortlisted, restored or declined here.');
+            }
+
+            const rows = readTable('proposals');
+            const index = rows.findIndex((p) => p.id === proposalId);
+            if (index < 0) throw new Error('Proposal not found.');
+
+            const job = readTable('jobs').find((j) => j.id === rows[index].job_id);
+            if (!job) throw new Error('Job not found.');
+            if (job.client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the client who posted the job can review proposals.');
+            }
+            if (job.status !== 'open') {
+                throw new Error('Proposals can only be reviewed while the job is open.');
+            }
+            if (['accepted', 'withdrawn'].includes(rows[index].status)) {
+                throw new Error('This proposal can no longer be changed (' + rows[index].status + ').');
+            }
+
+            rows[index] = Object.assign({}, rows[index], { status, updated_at: nowIso() });
+            writeTable('proposals', rows);
+            return decorateProposal(rows[index]);
+        },
+
         async getMyProposalForJob(jobId) {
             const profile = currentUserRecord();
             if (!profile) return null;
@@ -1020,6 +1055,220 @@
             writeTable('contracts', contracts);
             writeTable('jobs', jobs);
             return decorateContract(contracts[index]);
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Contract milestones (mirrors contract_milestones + the trigger
+    // validate_milestone_mutation). A manual checklist: no money moves.
+    // ------------------------------------------------------------------
+    function milestoneContract(contractId) {
+        return readTable('contracts').find((c) => c.id === contractId) || null;
+    }
+
+    function isContractParty(contract, profile) {
+        return !!contract && !!profile &&
+            (contract.client_id === profile.id || contract.freelancer_id === profile.id);
+    }
+
+    function sortMilestones(rows) {
+        return rows.slice().sort((a, b) => {
+            const pos = (Number(a.position) || 0) - (Number(b.position) || 0);
+            return pos !== 0 ? pos : new Date(a.created_at) - new Date(b.created_at);
+        });
+    }
+
+    const Milestones = {
+        async list(contractId) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const contract = milestoneContract(contractId);
+            // Mirrors the SELECT policy: only the two parties (or an admin).
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') return [];
+            return sortMilestones(
+                readTable('contract_milestones').filter((m) => m.contract_id === contractId)
+            ).map(clone);
+        },
+
+        async add({ contractId, title, amount = null, dueDate = null } = {}) {
+            const profile = requireUser('Please sign in to add a milestone.');
+            const contract = milestoneContract(contractId);
+            if (!contract) throw new Error('This contract could not be found.');
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') {
+                throw new Error('Only the client or the freelancer can add milestones.');
+            }
+            if (contract.status !== 'active' && profile.role !== 'admin') {
+                throw new Error('Milestones can only change while the contract is active.');
+            }
+
+            const clean = String(title || '').trim();
+            if (clean.length < 3) throw new Error('Give the milestone a title of at least 3 characters.');
+            if (clean.length > 140) throw new Error('Keep the milestone title under 140 characters.');
+
+            let value = null;
+            if (amount !== null && amount !== undefined && String(amount).trim() !== '') {
+                value = Number(amount);
+                if (!Number.isFinite(value) || value < 0) {
+                    throw new Error('A milestone amount must be zero or more.');
+                }
+            }
+
+            const rows = readTable('contract_milestones');
+            const milestone = {
+                id: newId('milestone'),
+                contract_id: contractId,
+                title: clean,
+                amount: value,
+                due_date: dueDate || null,
+                position: rows.filter((m) => m.contract_id === contractId).length,
+                status: 'pending',
+                created_by: profile.id,
+                delivered_at: null,
+                accepted_at: null,
+                created_at: nowIso(),
+                updated_at: nowIso()
+            };
+            rows.push(milestone);
+            writeTable('contract_milestones', rows);
+            return clone(milestone);
+        },
+
+        /**
+         * Mirrors the trigger: the freelancer marks work delivered, the client
+         * accepts it, an accepted milestone is final, and nothing moves on a
+         * contract that is no longer active.
+         */
+        async setStatus(milestoneId, status) {
+            const profile = requireUser('Please sign in to update a milestone.');
+            if (!['pending', 'delivered', 'accepted'].includes(status)) {
+                throw new Error('Unknown milestone status.');
+            }
+
+            const rows = readTable('contract_milestones');
+            const index = rows.findIndex((m) => m.id === milestoneId);
+            if (index < 0) throw new Error('Milestone not found.');
+
+            const current = rows[index];
+            const contract = milestoneContract(current.contract_id);
+            if (!contract) throw new Error('This contract could not be found.');
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') {
+                throw new Error('Only the client or the freelancer can update milestones.');
+            }
+            if (contract.status !== 'active' && profile.role !== 'admin') {
+                throw new Error('Milestones can only change while the contract is active.');
+            }
+
+            const isAdmin = profile.role === 'admin';
+            const next = Object.assign({}, current, { status, updated_at: nowIso() });
+
+            if (status !== current.status) {
+                if (status === 'delivered') {
+                    if (!isAdmin && profile.id !== contract.freelancer_id) {
+                        throw new Error('Only the freelancer can mark a milestone delivered.');
+                    }
+                    if (current.status === 'accepted') {
+                        throw new Error('An accepted milestone cannot be delivered again.');
+                    }
+                    next.delivered_at = nowIso();
+                } else if (status === 'accepted') {
+                    if (!isAdmin && profile.id !== contract.client_id) {
+                        throw new Error('Only the client can accept a milestone.');
+                    }
+                    if (current.status !== 'delivered') {
+                        throw new Error('A milestone must be delivered before it can be accepted.');
+                    }
+                    next.accepted_at = nowIso();
+                } else {
+                    if (current.status === 'accepted' && !isAdmin) {
+                        throw new Error('An accepted milestone can no longer be reopened.');
+                    }
+                    next.delivered_at = null;
+                    next.accepted_at = null;
+                }
+            }
+
+            rows[index] = next;
+            writeTable('contract_milestones', rows);
+            return clone(next);
+        },
+
+        async remove(milestoneId) {
+            const profile = requireUser('Please sign in to remove a milestone.');
+            const rows = readTable('contract_milestones');
+            const index = rows.findIndex((m) => m.id === milestoneId);
+            if (index < 0) throw new Error('Milestone not found.');
+
+            const contract = milestoneContract(rows[index].contract_id);
+            if (!contract) throw new Error('This contract could not be found.');
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') {
+                throw new Error('Only the client or the freelancer can remove milestones.');
+            }
+            if (contract.status !== 'active' && profile.role !== 'admin') {
+                throw new Error('Milestones can only change while the contract is active.');
+            }
+            // An accepted milestone is the client's record of signed-off work.
+            if (rows[index].status === 'accepted' && profile.role !== 'admin'
+                && contract.client_id !== profile.id) {
+                throw new Error('Only the client can remove an accepted milestone.');
+            }
+
+            rows.splice(index, 1);
+            writeTable('contract_milestones', rows);
+            return true;
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Reviews (mirrors the reviews INSERT policy: the other party of a
+    // completed contract, once per contract, 1-5 stars).
+    // ------------------------------------------------------------------
+    const Reviews = {
+        async getForContract(contractId) {
+            if (!contractId) return [];
+            return readTable('reviews')
+                .filter((r) => r.contract_id === contractId)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map(clone);
+        },
+
+        async create({ contractId, rating, comment = '' } = {}) {
+            const profile = requireUser('Please sign in to leave a review.');
+            if (!contractId) throw new Error('A completed contract is required.');
+
+            const value = Number(rating);
+            if (!Number.isInteger(value) || value < 1 || value > 5) {
+                throw new Error('Choose a star rating from 1 to 5.');
+            }
+
+            const contract = milestoneContract(contractId);
+            if (!contract) throw new Error('This contract could not be found.');
+            if (contract.status !== 'completed') {
+                throw new Error('You can review a contract once the client marks it complete.');
+            }
+
+            let revieweeId = null;
+            if (contract.client_id === profile.id) revieweeId = contract.freelancer_id;
+            else if (contract.freelancer_id === profile.id) revieweeId = contract.client_id;
+            if (!revieweeId) throw new Error('Only the two parties of this contract can review it.');
+
+            const rows = readTable('reviews');
+            if (rows.some((r) => r.contract_id === contractId && r.reviewer_id === profile.id)) {
+                throw new Error('You have already reviewed this contract.');
+            }
+
+            const review = {
+                id: newId('review'),
+                contract_id: contractId,
+                job_id: contract.job_id,
+                reviewer_id: profile.id,
+                reviewee_id: revieweeId,
+                rating: value,
+                comment: String(comment || '').trim().slice(0, 1000) || null,
+                created_at: nowIso()
+            };
+            rows.push(review);
+            writeTable('reviews', rows);
+            return clone(review);
         }
     };
 
@@ -1354,11 +1603,14 @@
         Contracts: readyAware(Contracts),
         Records: readyAware(Records),
         Files: readyAware(Files),
+        Milestones: readyAware(Milestones),
+        Reviews: readyAware(Reviews),
         ready: () => _ready,
         // Test/demo helpers
         _demoPassword: DEMO_PASSWORD,
         _reset: function () {
-            ['profiles', 'jobs', 'proposals', 'contracts', 'file_transfers'].forEach((t) => {
+            ['profiles', 'jobs', 'proposals', 'contracts', 'file_transfers',
+                'contract_milestones', 'reviews'].forEach((t) => {
                 try { localStorage.removeItem(PREFIX + t); } catch (e) { /* ignore */ }
             });
             writeSession(null);

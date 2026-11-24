@@ -454,6 +454,171 @@ async function refuse(fn) {
       file: namedText('Late file\n', 'late.txt')
     })) !== null);
 
+  // --- proposal tracking (set_proposal_status RPC) ------------------------
+  // The client reviews a live bid: shortlist it, decline it, restore it. The
+  // freelancer who owns the bid must not be able to do any of that, and the
+  // hire-only path stays acceptProposalAndHire().
+  await DB.Auth.signIn(recordClient._email, password);
+  const reviewJob = await DB.Jobs.createJob({
+    title: 'Proposal tracking end-to-end check',
+    description: 'A project used to verify shortlist, decline and restore of a bid.',
+    category: 'Web Engineering',
+    job_type: 'fixed',
+    budget_min: 500,
+    required_skills: ['Testing']
+  });
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  const trackedProposal = await DB.Proposals.submitProposal(
+    reviewJob.id, 'A proposal used to verify the shortlist and decline flow.', 500, 5);
+
+  check('the bidder cannot shortlist their own proposal',
+    await refuse(() => DB.Proposals.setStatus(trackedProposal.id, 'shortlisted')) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const shortlisted = await DB.Proposals.setStatus(trackedProposal.id, 'shortlisted');
+  check('the client can shortlist a submitted proposal', shortlisted.status === 'shortlisted');
+
+  const declined = await DB.Proposals.setStatus(trackedProposal.id, 'rejected');
+  check('the client can decline a shortlisted proposal', declined.status === 'rejected');
+
+  const restored = await DB.Proposals.setStatus(trackedProposal.id, 'submitted');
+  check('the client can restore a declined proposal', restored.status === 'submitted');
+
+  check('setStatus cannot hire (accept) a proposal',
+    await refuse(() => DB.Proposals.setStatus(trackedProposal.id, 'accepted')) !== null);
+
+  const trackingContractId = await DB.Contracts.acceptProposalAndHire(trackedProposal.id);
+  check('a restored proposal can still be hired', !!trackingContractId);
+  check('a proposal cannot be re-declined once accepted',
+    await refuse(() => DB.Proposals.setStatus(trackedProposal.id, 'rejected')) !== null);
+  check('a proposal cannot be reviewed once the job left open',
+    await refuse(() => DB.Proposals.setStatus(trackedProposal.id, 'shortlisted')) !== null);
+
+  // --- contract milestones (manual checklist) ----------------------------
+  // Neither party may write to a contract they are not on; only the
+  // freelancer may mark work delivered and only the client may accept it.
+  const firstMilestone = await DB.Milestones.add({
+    contractId: trackingContractId,
+    title: 'Discovery notes and data audit',
+    amount: 150
+  });
+  check('a contract party can add a milestone',
+    !!firstMilestone && firstMilestone.status === 'pending' &&
+    firstMilestone.amount === 150 && firstMilestone.created_by === recordClient.id);
+
+  check('a milestone rejects a negative amount',
+    await refuse(() => DB.Milestones.add({
+      contractId: trackingContractId, title: 'Bad amount', amount: -10
+    })) !== null);
+  check('a milestone rejects a too-short title',
+    await refuse(() => DB.Milestones.add({ contractId: trackingContractId, title: 'ab' })) !== null);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('the hired freelancer can see the milestone',
+    (await DB.Milestones.list(trackingContractId)).length === 1);
+  check('the freelancer cannot accept their own delivery',
+    await refuse(() => DB.Milestones.setStatus(firstMilestone.id, 'accepted')) !== null);
+  const delivered = await DB.Milestones.setStatus(firstMilestone.id, 'delivered');
+  check('the freelancer can mark a milestone delivered',
+    delivered.status === 'delivered' && !!delivered.delivered_at);
+  check('a delivered milestone can be reopened by the freelancer',
+    (await DB.Milestones.setStatus(firstMilestone.id, 'pending')).status === 'pending');
+  await DB.Milestones.setStatus(firstMilestone.id, 'delivered');
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  check('a freelancer outside the contract sees no milestones',
+    (await DB.Milestones.list(trackingContractId)).length === 0);
+  check('a freelancer outside the contract cannot add a milestone',
+    await refuse(() => DB.Milestones.add({
+      contractId: trackingContractId, title: 'Outside the contract'
+    })) !== null);
+  check('a freelancer outside the contract cannot change a milestone',
+    await refuse(() => DB.Milestones.setStatus(firstMilestone.id, 'accepted')) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  // The client may send a delivered milestone back for rework, but only the
+  // freelancer may claim delivery in the first place.
+  const reworkMilestone = await DB.Milestones.add({
+    contractId: trackingContractId, title: 'Rework round after client review'
+  });
+  check('the client cannot mark work delivered',
+    await refuse(() => DB.Milestones.setStatus(reworkMilestone.id, 'delivered')) !== null);
+  check('the client can send a delivered milestone back for rework',
+    (await DB.Milestones.setStatus(firstMilestone.id, 'pending')).status === 'pending');
+  check('the client can remove their own pending milestone',
+    (await DB.Milestones.remove(reworkMilestone.id)) === true);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  await DB.Milestones.setStatus(firstMilestone.id, 'delivered');
+  await DB.Auth.signIn(recordClient._email, password);
+  const accepted = await DB.Milestones.setStatus(firstMilestone.id, 'accepted');
+  check('the client can accept a delivered milestone',
+    accepted.status === 'accepted' && !!accepted.accepted_at);
+  check('an accepted milestone cannot be reopened',
+    await refuse(() => DB.Milestones.setStatus(firstMilestone.id, 'pending')) !== null);
+
+  const secondMilestone = await DB.Milestones.add({
+    contractId: trackingContractId, title: 'Dashboard build and handover', amount: 350
+  });
+  const ordered = await DB.Milestones.list(trackingContractId);
+  check('milestones keep their insertion order',
+    ordered.length === 2 && ordered[0].id === firstMilestone.id && ordered[1].id === secondMilestone.id);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('the freelancer cannot remove an accepted milestone',
+    await refuse(() => DB.Milestones.remove(firstMilestone.id)) !== null);
+  check('the freelancer can remove a milestone that is not accepted',
+    (await DB.Milestones.remove(secondMilestone.id)) === true);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  check('the client can complete a contract with an accepted milestone',
+    (await DB.Contracts.completeContract(trackingContractId)).status === 'completed');
+  check('a completed contract makes its milestones read-only',
+    await refuse(() => DB.Milestones.add({
+      contractId: trackingContractId, title: 'Added after completion'
+    })) !== null);
+  check('a completed contract keeps its milestones readable',
+    (await DB.Milestones.list(trackingContractId)).length === 1);
+
+  // --- reviews (one per party, after completion) -------------------------
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  const clientReview = await DB.Reviews.create({
+    contractId: trackingContractId, rating: 5, comment: 'Clear brief, paid on time.'
+  });
+  check('the freelancer can review the client after completion',
+    clientReview.rating === 5 && clientReview.reviewer_id === freelancers[1].id &&
+    clientReview.reviewee_id === recordClient.id);
+  check('a second review of the same contract is refused',
+    await refuse(() => DB.Reviews.create({ contractId: trackingContractId, rating: 4 })) !== null);
+  check('a rating outside 1-5 is refused',
+    await refuse(() => DB.Reviews.create({ contractId: trackingContractId, rating: 6 })) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const workerReview = await DB.Reviews.create({
+    contractId: trackingContractId, rating: 4, comment: 'Good work, minor delay.'
+  });
+  check('the client can review the freelancer on the same contract',
+    workerReview.reviewer_id === recordClient.id &&
+    workerReview.reviewee_id === freelancers[1].id);
+
+  const reviewedWorker = await DB.Records.getWorkerRecord(freelancers[1].id);
+  check('a review moves the public worker rating',
+    !!reviewedWorker && reviewedWorker.summary.review_count === 1 &&
+    reviewedWorker.summary.avg_rating === 4);
+
+  const contractReviews = await DB.Reviews.getForContract(trackingContractId);
+  check('a contract exposes both reviews',
+    contractReviews.length === 2 &&
+    contractReviews.some((r) => r.reviewer_id === recordClient.id) &&
+    contractReviews.some((r) => r.reviewer_id === freelancers[1].id));
+
+  check('a review needs a completed contract',
+    await refuse(() => DB.Reviews.create({ contractId: 'missing-contract', rating: 5 })) !== null);
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  check('a freelancer outside the contract cannot review it',
+    await refuse(() => DB.Reviews.create({ contractId: trackingContractId, rating: 1 })) !== null);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

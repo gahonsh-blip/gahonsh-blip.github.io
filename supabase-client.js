@@ -728,6 +728,29 @@
         },
 
         /**
+         * Client-side review of a live bid: shortlist it, put it back in the
+         * pile, or decline it. Hiring is not here — acceptProposalAndHire()
+         * is the only path that creates a contract. The RPC checks that the
+         * caller owns the job and that the job is still open.
+         */
+        async setStatus(proposalId, status) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const allowed = ['submitted', 'shortlisted', 'rejected'];
+            if (!allowed.includes(status)) {
+                throw new Error('A proposal can only be shortlisted, restored or declined here.');
+            }
+
+            const { data, error } = await client.rpc('set_proposal_status', {
+                target_proposal_id: proposalId,
+                new_status: status
+            });
+
+            if (error) throw error;
+            return { id: data || proposalId, status };
+        },
+
+        /**
          * Returns the current authenticated freelancer's proposal for a job,
          * or null when they have not applied yet. Uses auth.uid() server-side via RLS.
          */
@@ -827,6 +850,171 @@
             });
 
             if (error) throw error;
+            return data;
+        }
+    };
+
+    // ========================================================================
+    // 5a. CONTRACT MILESTONES (MANUAL CHECKLIST)
+    // ========================================================================
+    // A written plan the client and the freelancer keep together. Nothing here
+    // moves money: `delivered` means the freelancer says the work is ready and
+    // `accepted` means the client checked it. The trigger in the schema decides
+    // who may make which move; these helpers only shape the request.
+    const MILESTONE_STATUSES = ['pending', 'delivered', 'accepted'];
+
+    const Milestones = {
+        async list(contractId) {
+            const client = await getClient();
+            if (!client || !contractId) return [];
+            const { data, error } = await client
+                .from('contract_milestones')
+                .select('*')
+                .eq('contract_id', contractId)
+                .order('position', { ascending: true })
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            return data || [];
+        },
+
+        async add({ contractId, title, amount = null, dueDate = null }) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to add a milestone.');
+            if (!contractId) throw new Error('A contract is required.');
+
+            const clean = String(title || '').trim();
+            if (clean.length < 3) throw new Error('Give the milestone a title of at least 3 characters.');
+            if (clean.length > 140) throw new Error('Keep the milestone title under 140 characters.');
+
+            let value = null;
+            if (amount !== null && amount !== undefined && String(amount).trim() !== '') {
+                value = Number(amount);
+                if (!Number.isFinite(value) || value < 0) {
+                    throw new Error('A milestone amount must be zero or more.');
+                }
+            }
+
+            const { count } = await client
+                .from('contract_milestones')
+                .select('id', { count: 'exact', head: true })
+                .eq('contract_id', contractId);
+
+            const { data, error } = await client
+                .from('contract_milestones')
+                .insert({
+                    contract_id: contractId,
+                    title: clean,
+                    amount: value,
+                    due_date: dueDate || null,
+                    position: count || 0,
+                    created_by: user.id
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+
+        async setStatus(milestoneId, status) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            if (!MILESTONE_STATUSES.includes(status)) {
+                throw new Error('Unknown milestone status.');
+            }
+            const { data, error } = await client
+                .from('contract_milestones')
+                .update({ status })
+                .eq('id', milestoneId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+
+        async remove(milestoneId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { error } = await client
+                .from('contract_milestones')
+                .delete()
+                .eq('id', milestoneId);
+
+            if (error) throw error;
+            return true;
+        }
+    };
+
+    // ========================================================================
+    // 5aa. REVIEWS (ONE PER PARTY, AFTER THE CONTRACT IS COMPLETED)
+    // ========================================================================
+    // The reviewee is never taken from the caller: it is the other party of
+    // the contract, read from the contract row itself. The schema policy
+    // re-checks that, so a crafted request cannot rate a stranger.
+    const Reviews = {
+        async getForContract(contractId) {
+            const client = await getClient();
+            if (!client || !contractId) return [];
+            const { data, error } = await client
+                .from('reviews')
+                .select('*')
+                .eq('contract_id', contractId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data || [];
+        },
+
+        async create({ contractId, rating, comment = '' }) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to leave a review.');
+            if (!contractId) throw new Error('A completed contract is required.');
+
+            const value = Number(rating);
+            if (!Number.isInteger(value) || value < 1 || value > 5) {
+                throw new Error('Choose a star rating from 1 to 5.');
+            }
+
+            const { data: contract, error: contractError } = await client
+                .from('contracts')
+                .select('id, client_id, freelancer_id, job_id, status')
+                .eq('id', contractId)
+                .maybeSingle();
+
+            if (contractError) throw contractError;
+            if (!contract) throw new Error('This contract could not be found.');
+            if (contract.status !== 'completed') {
+                throw new Error('You can review a contract once the client marks it complete.');
+            }
+
+            let revieweeId = null;
+            if (contract.client_id === user.id) revieweeId = contract.freelancer_id;
+            else if (contract.freelancer_id === user.id) revieweeId = contract.client_id;
+            if (!revieweeId) throw new Error('Only the two parties of this contract can review it.');
+
+            const { data, error } = await client
+                .from('reviews')
+                .insert({
+                    contract_id: contractId,
+                    job_id: contract.job_id,
+                    reviewer_id: user.id,
+                    reviewee_id: revieweeId,
+                    rating: value,
+                    comment: String(comment || '').trim().slice(0, 1000) || null
+                })
+                .select()
+                .single();
+
+            if (error) {
+                if (error.code === '23505') throw new Error('You have already reviewed this contract.');
+                throw error;
+            }
             return data;
         }
     };
@@ -1175,6 +1363,8 @@
     const ContractsProxy = withFallback(Contracts, _local && _local.Contracts, 'Contracts');
     const RecordsProxy = withFallback(Records, _local && _local.Records, 'Records');
     const FilesProxy = withFallback(Files, _local && _local.Files, 'Files');
+    const MilestonesProxy = withFallback(Milestones, _local && _local.Milestones, 'Milestones');
+    const ReviewsProxy = withFallback(Reviews, _local && _local.Reviews, 'Reviews');
 
     // Export services onto global GahonshDB namespace
     window.GahonshDB = {
@@ -1187,6 +1377,8 @@
         Proposals: ProposalsProxy,
         Contracts: ContractsProxy,
         Records: RecordsProxy,
-        Files: FilesProxy
+        Files: FilesProxy,
+        Milestones: MilestonesProxy,
+        Reviews: ReviewsProxy
     };
 })();

@@ -13,6 +13,10 @@
 //      fallback, so a failed script cannot leave it on screen forever.
 //   6. Private pages must stay noindex and out of the sitemap.
 //   7. Links a script writes into the DOM need rel="noreferrer" as well.
+//   8. Heading outline: one h1 per page, no skipped levels.
+//   9. No page may zero its stat counters at load. Writing "0" before the
+//      count-up starts is what printed "0 Live Projects" in the audit.
+//  10. The portal load must time out instead of sitting on its placeholder.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,6 +51,11 @@ for (const page of pages) {
     // 4. Payment claims the platform cannot back up.
     for (const claim of [/payment[- ]verified/i, /escrow/i, /payment protection/i, /money[- ]back guarantee/i]) {
         if (claim.test(html)) fail(page, `claims an unbuilt payment feature: ${claim}`);
+    }
+
+    // 9. Counters must not be zeroed before the count-up runs.
+    if (/counters\.forEach\([^;]*\btextContent = '0'/.test(html)) {
+        fail(page, 'zeroes its stat counters at load, so the page reads "0 Live Projects" until the animation starts');
     }
 }
 
@@ -138,6 +147,9 @@ if (!/<noscript>[\s\S]*tabListingsContainer|<\/div>\s*<noscript>/.test(portal)) 
 }
 if (!/function renderPortalError/.test(portal)) {
     fail('marketplace-dashboard.html', 'portal has no error state for a failed load');
+}
+if (!/PORTAL_LOAD_TIMEOUT_MS|PORTAL_LOAD_TIMEOUT/.test(portal) && !/withPortalTimeout/.test(portal)) {
+    fail('marketplace-dashboard.html', 'portal load has no timeout guard, so a stalled request hangs on the placeholder');
 }
 
 if (failures.length) {

@@ -904,29 +904,33 @@
 
         // ANIMATED INTERSECTION OBSERVER FOR STATS COUNTERS
         const counters = document.querySelectorAll('.counter-num');
-        const countObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) {
-                    const target = +entry.target.getAttribute('data-target');
+        // The markup carries the real figure so crawlers, no-JS readers and a
+        // stalled observer all read the true number. Zeroing every counter at
+        // load printed "0 Live Projects" until the animation caught up, so the
+        // count-up now starts from zero only when a counter scrolls into view.
+        if ('IntersectionObserver' in window) {
+            const countObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if(!entry.isIntersecting) return;
+                    const el = entry.target;
+                    const target = +el.getAttribute('data-target') || 0;
                     let current = 0;
                     const increment = target / 50;
                     const update = () => {
                         current += increment;
                         if(current < target) {
-                            entry.target.innerText = Math.floor(current);
+                            el.innerText = Math.floor(current);
                             setTimeout(update, 20);
                         } else {
-                            entry.target.innerText = target;
+                            el.innerText = target;
                         }
                     };
                     update();
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {threshold: 0.6});
-        // The markup carries the real figure so crawlers and no-JS readers see
-        // it; zero each counter here so the count-up still starts from nothing.
-        counters.forEach(c => { c.textContent = '0'; countObserver.observe(c); });
+                    observer.unobserve(el);
+                });
+            }, {threshold: 0.6});
+            counters.forEach(c => countObserver.observe(c));
+        }
 
         // BACK TO TOP MODULE
         const btnTop = document.getElementById('btn-top');
