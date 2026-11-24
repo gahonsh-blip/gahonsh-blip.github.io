@@ -350,14 +350,14 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .modal-head h3 {
+        .modal-head h2 {
             font-size: 1.05rem;
             color: #fff;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .modal-head h3 i {
+        .modal-head h2 i {
             color: var(--accent-cyan);
         }
 
@@ -470,11 +470,11 @@
     <!-- 1. OWNER AUTH SCREEN -->
     <div id="authScreen">
         <div class="auth-card">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 6px;">GAHONSH <span style="color: var(--accent-cyan);">STUDIO</span></h2>
+            <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 6px;">GAHONSH <span style="color: var(--accent-cyan);">STUDIO</span></p>
             <p style="color: var(--text-slate); font-size: 0.9rem; margin-bottom: 20px;">
                 आसान वेबसाइट विज़ुअल एडिटर। ड्रॉपडाउन से पेज चुनें और सीधे क्लिक करके टेक्स्ट, फोटो, वीडियो और लिंक बदलें।
             </p>
-            <input type="password" id="passInput" class="auth-input" placeholder="पासकोड दर्ज करें (Enter passcode)" autocomplete="off">
+            <input type="password" id="passInput" class="auth-input" placeholder="पासकोड दर्ज करें (Enter passcode)" autocomplete="off" aria-label="Studio passcode">
             <button type="button" class="btn-main" id="btnUnlock">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i> एडिटर खोलें (Open Editor)
             </button>
@@ -577,7 +577,7 @@
     <div id="modalImage" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-image"></i> फोटो बदलें या फाइल अपलोड करें</h3>
+                <h2><i class="fa-solid fa-image"></i> फोटो बदलें या फाइल अपलोड करें</h2>
                 <button class="btn-ctrl" onclick="closeModal('modalImage')" style="padding: 2px 6px;" aria-label="Close image dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
@@ -597,7 +597,7 @@
             <!-- IMAGE URL INPUT -->
             <div class="form-group">
                 <label class="form-label"><i class="fa-solid fa-link"></i> 2. फोटो का URL या पाथ लिखें:</label>
-                <input type="text" id="imgSrcInput" class="form-input" placeholder="e.g. images/hero.jpg या https://...">
+                <input type="text" id="imgSrcInput" class="form-input" placeholder="e.g. images/hero.jpg या https://..." aria-label="Image URL or path">
                 <div class="preset-grid">
                     <span class="preset-badge" onclick="setPresetImg('images/hero.jpg')">Hero Photo</span>
                     <span class="preset-badge" onclick="setPresetImg('images/excel-dashboard.jpg')">Excel Project</span>
@@ -610,7 +610,7 @@
 
             <div class="form-group">
                 <label class="form-label">Alt विवरण (SEO):</label>
-                <input type="text" id="imgAltInput" class="form-input" placeholder="फोटो का नाम या विवरण">
+                <input type="text" id="imgAltInput" class="form-input" placeholder="फोटो का नाम या विवरण" aria-label="Image alt text">
             </div>
 
             <div class="modal-foot">
@@ -624,7 +624,7 @@
     <div id="modalLink" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-file-arrow-up"></i> फ़ाइल अपलोड या लिंक बदलें (Universal File Upload & Link)</h3>
+                <h2><i class="fa-solid fa-file-arrow-up"></i> फ़ाइल अपलोड या लिंक बदलें (Universal File Upload & Link)</h2>
                 <button class="btn-ctrl" onclick="closeModal('modalLink')" style="padding: 2px 6px;" aria-label="Close link dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
@@ -689,12 +689,12 @@
             <!-- 3. BUTTON TEXT & LINK HREF -->
             <div class="form-group">
                 <label class="form-label">बटन / लिंक का नाम (Display Text):</label>
-                <input type="text" id="linkTextInput" class="form-input" placeholder="e.g. Download Sample Sheet / View Project">
+                <input type="text" id="linkTextInput" class="form-input" placeholder="e.g. Download Sample Sheet / View Project" aria-label="Link text">
             </div>
 
             <div class="form-group">
                 <label class="form-label">फ़ाइल पाथ या लिंक URL (href):</label>
-                <input type="text" id="linkHrefInput" class="form-input" placeholder="e.g. assets/projects/sample.xlsx या contact.html">
+                <input type="text" id="linkHrefInput" class="form-input" placeholder="e.g. assets/projects/sample.xlsx या contact.html" aria-label="Link URL">
                 <div class="preset-grid" style="margin-top: 6px;">
                     <span class="preset-badge" onclick="setPresetLink('assets/projects/finance-dashboard-sample.xlsx')">Sample Excel</span>
                     <span class="preset-badge" onclick="setPresetLink('assets/projects/company-profile-sample.pdf')">Sample PDF</span>
@@ -735,7 +735,7 @@
     <div id="modalUniversalUpload" class="modal-overlay">
         <div class="modal-box" style="max-width: 560px;">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-cloud-arrow-up"></i> किसी भी प्रकार की फ़ाइल अपलोड करें (Universal Uploader)</h3>
+                <h2><i class="fa-solid fa-cloud-arrow-up"></i> किसी भी प्रकार की फ़ाइल अपलोड करें (Universal Uploader)</h2>
                 <button class="btn-ctrl" onclick="closeModal('modalUniversalUpload')" style="padding: 2px 6px;" aria-label="Close upload dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
@@ -774,13 +774,13 @@
     <div id="modalVideo" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-video"></i> वीडियो लिंक (YouTube / MP4) बदलें</h3>
+                <h2><i class="fa-solid fa-video"></i> वीडियो लिंक (YouTube / MP4) बदलें</h2>
                 <button class="btn-ctrl" onclick="closeModal('modalVideo')" style="padding: 2px 6px;" aria-label="Close video dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
             <div class="form-group">
                 <label class="form-label">YouTube वीडियो लिंक या वीडियो URL:</label>
-                <input type="text" id="videoUrlInput" class="form-input" placeholder="https://www.youtube.com/watch?v=... या youtu.be/...">
+                <input type="text" id="videoUrlInput" class="form-input" placeholder="https://www.youtube.com/watch?v=... या youtu.be/..." aria-label="Video URL">
                 <span style="font-size: 0.74rem; color: var(--text-slate);">YouTube लिंक डालने पर वह स्वतः HD प्लेयर में बदल जाएगा।</span>
             </div>
 
@@ -795,7 +795,7 @@
     <div id="modalAddSection" class="modal-overlay">
         <div class="modal-box" style="max-width: 580px;">
             <div class="modal-head">
-                <h3><i class="fa-solid fa-plus-circle"></i> नया सेक्शन या प्रोजेक्ट कार्ड जोड़ें</h3>
+                <h2><i class="fa-solid fa-plus-circle"></i> नया सेक्शन या प्रोजेक्ट कार्ड जोड़ें</h2>
                 <button class="btn-ctrl" onclick="closeModal('modalAddSection')" style="padding: 2px 6px;" aria-label="Close add section dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
 
@@ -1341,7 +1341,7 @@
             let newHTML = "";
 
             if (type === "clone_last") {
-                const existingCards = doc.querySelectorAll(".project-card, .service-card, .pricing-card, .feature-card");
+                const existingCards = doc.querySelectorAll(".project-card, .flip-card, .service-card, .pricing-card, .feature-card");
                 if (existingCards.length > 0) {
                     const lastCard = existingCards[existingCards.length - 1];
                     duplicateCard(lastCard, doc);
@@ -1352,7 +1352,7 @@
 
             // Check for portfolio grid
             const portfolioGrid = doc.querySelector(".portfolio-grid");
-            const servicesGrid = doc.querySelector(".services-grid") || doc.querySelector(".features-grid");
+            const servicesGrid = doc.querySelector(".services-flip-grid") || doc.querySelector(".services-grid") || doc.querySelector(".features-grid");
             const pricingGrid = doc.querySelector(".pricing-grid");
 
             if (type === "excel") {
@@ -1364,7 +1364,7 @@
                             <div class="project-tag">Excel Tracker</div>
                         </div>
                         <div class="project-body">
-                            <h3>New Excel Sheet Title</h3>
+                            <p class="project-name">New Excel Sheet Title</p>
                             <p>Advanced calculation sheets utilizing automated macros and dynamic visual matrix structures to reduce manual tracking lag.</p>
                             <a href="assets/projects/finance-dashboard-sample.xlsx" class="btn-download-sample" download>
                                 <i class="fa-solid fa-download"></i> Download Sample Sheet
@@ -1381,7 +1381,7 @@
                             <div class="project-tag">PDF Layout</div>
                         </div>
                         <div class="project-body">
-                            <h3>New PDF Document Layout</h3>
+                            <p class="project-name">New PDF Document Layout</p>
                             <p>Premium corporate brochure structure crafted with precise typographical grids and absolute corporate visual alignment.</p>
                             <a href="assets/projects/company-profile-sample.pdf" class="btn-download-sample" download>
                                 <i class="fa-solid fa-download"></i> Download Sample PDF
@@ -1398,7 +1398,7 @@
                             <div class="project-tag">Word Document</div>
                         </div>
                         <div class="project-body">
-                            <h3>New Word Document Template</h3>
+                            <p class="project-name">New Word Document Template</p>
                             <p>Structured business documentation and editorial templates prepared for instant enterprise formatting.</p>
                             <a href="assets/projects/sample-document.docx" class="btn-download-sample" download>
                                 <i class="fa-solid fa-file-word"></i> Download Document
@@ -1415,7 +1415,7 @@
                             <div class="project-tag">PPT Presentation</div>
                         </div>
                         <div class="project-body">
-                            <h3>New Business Pitch Deck</h3>
+                            <p class="project-name">New Business Pitch Deck</p>
                             <p>High-impact slide layouts crafted with balanced visual hierarchy and corporate data storytelling decks.</p>
                             <a href="assets/projects/sample-presentation.pptx" class="btn-download-sample" download>
                                 <i class="fa-solid fa-file-powerpoint"></i> Download Presentation
@@ -1432,7 +1432,7 @@
                             <div class="project-tag">ZIP Archive</div>
                         </div>
                         <div class="project-body">
-                            <h3>Complete Project Package (.ZIP)</h3>
+                            <p class="project-name">Complete Project Package (.ZIP)</p>
                             <p>All source files, templates, documentation, and assets packaged in an easily downloadable archive.</p>
                             <a href="assets/projects/project-bundle.zip" class="btn-download-sample" download>
                                 <i class="fa-solid fa-file-zipper"></i> Download ZIP Bundle
@@ -1449,7 +1449,7 @@
                             <div class="project-tag">Web Portal</div>
                         </div>
                         <div class="project-body">
-                            <h3>New Web Portal Project</h3>
+                            <p class="project-name">New Web Portal Project</p>
                             <p>Complete structural deployment models configuring clean navigation systems to align your corporate goals online.</p>
                             <a href="contact.html" class="btn-download-sample">
                                 <i class="fa-solid fa-eye"></i> View Project / Live Site
@@ -1460,11 +1460,24 @@
             } else if (type === "service") {
                 targetContainer = servicesGrid || doc.querySelector("main") || doc.body;
                 newHTML = `
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                        <h3>New Service Feature</h3>
-                        <p>Professional engineering and execution services tailored to maximize organizational speed and reliability.</p>
-                        <a href="contact.html" class="btn-ctrl" style="margin-top: 15px; display: inline-block;">Get Started</a>
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-front">
+                                <i class="fa-solid fa-laptop-code"></i>
+                                <h3>New Service Feature</h3>
+                                <p>Describe the service, who it is for and what the client receives.</p>
+                                <div class="card-price-tag">Starting From $—</div>
+                            </div>
+                            <div class="flip-back">
+                                <h3>Service Specs</h3>
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> First deliverable</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Second deliverable</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Revision policy</li>
+                                </ul>
+                                <a href="contact.html" class="btn-card-quote">Request Quote</a>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else if (type === "pricing") {

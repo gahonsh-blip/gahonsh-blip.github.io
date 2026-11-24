@@ -11,6 +11,8 @@
 //      not provide. Payments move directly between client and freelancer.
 //   5. The portal's loading placeholder needs a live region and a noscript
 //      fallback, so a failed script cannot leave it on screen forever.
+//   6. Private pages must stay noindex and out of the sitemap.
+//   7. Links a script writes into the DOM need rel="noreferrer" as well.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +47,55 @@ for (const page of pages) {
     // 4. Payment claims the platform cannot back up.
     for (const claim of [/payment[- ]verified/i, /escrow/i, /payment protection/i, /money[- ]back guarantee/i]) {
         if (claim.test(html)) fail(page, `claims an unbuilt payment feature: ${claim}`);
+    }
+}
+
+// 8. Heading outline: one h1 per page, no skipped levels. Card titles that a
+//    script injects are excluded, since they are content of the edited page.
+const NO_OUTLINE = new Set(['dasbord.html', 'googleb9deb43124fcee02.html', 'home.html']);
+for (const page of pages) {
+    if (NO_OUTLINE.has(page)) continue;
+    const body = read(page).split('<body')[1] || '';
+    const stripped = body
+        .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+        .replace(/<style\b[\s\S]*?<\/style>/gi, '');
+    const levels = [...stripped.matchAll(/<h([1-6])\b/gi)].map((m) => Number(m[1]));
+    if (levels.length === 0) continue;
+    const h1s = levels.filter((l) => l === 1).length;
+    if (h1s !== 1) fail(page, `expected exactly one <h1>, found ${h1s}`);
+    if (levels[0] !== 1) fail(page, `first heading is h${levels[0]}, not h1`);
+    for (let i = 1; i < levels.length; i += 1) {
+        if (levels[i] > levels[i - 1] + 1) {
+            fail(page, `heading level jumps h${levels[i - 1]} -> h${levels[i]}`);
+            break;
+        }
+    }
+}
+
+// 6. Private pages are reachable but must never be indexed. Contract messages
+//    and the owner studio hold another member's or the owner's data.
+const PRIVATE_PAGES = [
+    'admin.html', 'dasbord.html', 'dashboard.html', 'home.html',
+    'messages.html', 'thank-you.html',
+];
+for (const page of PRIVATE_PAGES) {
+    const html = read(page);
+    if (!/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html)) {
+        fail(page, 'private page is missing <meta name="robots" content="noindex">');
+    }
+}
+const sitemap = read('sitemap.xml');
+for (const page of PRIVATE_PAGES) {
+    if (sitemap.includes(`/${page}<`)) fail('sitemap.xml', `private page is listed: ${page}`);
+}
+
+// 7. The same link rule applies to markup a script writes into the page.
+for (const file of ['auth.js', 'chat-widget.js', 'marketplace-trust.js', 'records.js', 'supabase-client.js']) {
+    const js = read(file);
+    for (const m of js.matchAll(/<a\b[^>]*target=\\?"_blank[^>]*>/g)) {
+        if (!/noreferrer/.test(m[0])) {
+            fail(file, `script writes target="_blank" without noreferrer: ${m[0].slice(0, 90)}`);
+        }
     }
 }
 
