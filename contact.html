@@ -1006,6 +1006,8 @@
             const form = document.getElementById('project-contact-form');
             if (!form) return;
 
+            const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzdqnoez';
+
             const statusBox = document.createElement('div');
             statusBox.style.cssText = 'margin-top:14px;font-size:0.9rem;line-height:1.5;';
             form.appendChild(statusBox);
@@ -1035,29 +1037,43 @@
                 statusBox.textContent = '';
 
                 try {
-                    const res = await fetch(GAHONSH_PRODUCTION_URL + '/rest/v1/contact_messages', {
-                        method: 'POST',
-                        headers: {
-                            'apikey': GAHONSH_PUBLISHABLE_KEY,
-                            'Authorization': 'Bearer ' + GAHONSH_PUBLISHABLE_KEY,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'return=minimal'
-                        },
-                        body: JSON.stringify({
-                            name: name,
-                            email: email,
-                            service: service,
-                            budget: budget,
-                            message: message,
-                            source: 'contact-page'
-                        })
-                    });
+                    const payload = { name, email, service, budget, message };
 
-                    if (!res.ok) {
-                        const detail = await res.text();
-                        throw new Error(detail.slice(0, 200) || 'Request failed');
+                    // Primary: the owner dashboard reads contact_messages.
+                    let saved = false;
+                    try {
+                        const res = await fetch(GAHONSH_PRODUCTION_URL + '/rest/v1/contact_messages', {
+                            method: 'POST',
+                            headers: {
+                                'apikey': GAHONSH_PUBLISHABLE_KEY,
+                                'Authorization': 'Bearer ' + GAHONSH_PUBLISHABLE_KEY,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify(Object.assign({ source: 'contact-page' }, payload))
+                        });
+                        if (!res.ok) {
+                            const detail = await res.text();
+                            throw new Error(detail.slice(0, 200) || 'Request failed');
+                        }
+                        saved = true;
+                    } catch (dbErr) {
+                        console.warn('[contact] dashboard write failed, falling back to Formspree:', dbErr);
                     }
 
+                    // Fallback: an enquiry must still reach the owner when the
+                    // database is unreachable or not migrated yet.
+                    if (!saved) {
+                        const fsRes = await fetch(FORMSPREE_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                            body: JSON.stringify(Object.assign({ source: 'contact-page' }, payload))
+                        });
+                        if (!fsRes.ok) throw new Error('Formspree responded ' + fsRes.status);
+                        saved = true;
+                    }
+
+                    if (!saved) throw new Error('No delivery path succeeded');
                     window.location.href = 'thank-you.html';
                 } catch (err) {
                     showError('Could not send your message just now. Please email gahonsh@gmail.com or WhatsApp us instead.');
@@ -1073,6 +1089,6 @@
 <script src="marketplace-local.js"></script>
 <script src="supabase-client.js"></script>
 <script src="auth.js"></script>
-<script src="chat-widget.js?v=5" defer></script>
+<script src="chat-widget.js?v=6" defer></script>
 </body>
 </html>

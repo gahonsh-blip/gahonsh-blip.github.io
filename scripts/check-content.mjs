@@ -152,6 +152,22 @@ if (!/PORTAL_LOAD_TIMEOUT_MS|PORTAL_LOAD_TIMEOUT/.test(portal) && !/withPortalTi
     fail('marketplace-dashboard.html', 'portal load has no timeout guard, so a stalled request hangs on the placeholder');
 }
 
+// 11. Enquiry delivery needs a second path. The live project was missing
+//     contact_messages, so every contact-form and chat enquiry was lost.
+const contact = read('contact.html');
+if (!/contact_messages/.test(contact) || !/formspree\.io\/f\//.test(contact)) {
+    fail('contact.html', 'contact form needs the dashboard write plus a Formspree fallback');
+}
+const chat = read('chat-widget.js');
+if (!/saveLeadToSupabase/.test(chat) || !/saveLeadToFormspree/.test(chat)) {
+    fail('chat-widget.js', 'chat lead capture needs the dashboard write plus a Formspree fallback');
+}
+
+// 12. A completed contract must not leave a milestone open forever.
+if (!/milestone' \+ \(open\.length|still open/.test(portal)) {
+    fail('marketplace-dashboard.html', 'completion must be blocked while a milestone is open');
+}
+
 if (failures.length) {
     console.error(`content check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);

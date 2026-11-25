@@ -1934,11 +1934,10 @@
     };
 
     /* ---------------------------------------------------------- quote capture */
-    function submitLead() {
-        var cfg = window.GAHONSH_CONFIG || {};
-        var url = cfg.SUPABASE_URL || 'https://evdpmombgymthzqegqwr.supabase.co';
-        var key = cfg.SUPABASE_ANON_KEY || 'sb_publishable_Fe8rUHg-7tN3RpxhjPijw_fX4c786Z';
-        var payload = {
+    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzdqnoez';
+
+    function leadPayload() {
+        return {
             name: flow.name.slice(0, 120),
             email: flow.email.slice(0, 160),
             service: 'Website chat enquiry',
@@ -1946,6 +1945,13 @@
             message: ('Website chat: ' + flow.project).slice(0, 2000),
             source: 'website-chat'
         };
+    }
+
+    function saveLeadToSupabase() {
+        var cfg = window.GAHONSH_CONFIG || {};
+        var url = cfg.SUPABASE_URL;
+        var key = cfg.SUPABASE_ANON_KEY;
+        if (!url || !key) return Promise.reject(new Error('supabase is not configured'));
         return fetch(url + '/rest/v1/contact_messages', {
             method: 'POST',
             headers: {
@@ -1954,23 +1960,54 @@
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(leadPayload())
         }).then(function (r) {
             if (!r.ok) throw new Error('http ' + r.status);
             return true;
         });
     }
 
+    function saveLeadToFormspree() {
+        return fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(leadPayload())
+        }).then(function (r) {
+            if (!r.ok) throw new Error('http ' + r.status);
+            return true;
+        });
+    }
+
+    // An enquiry must still reach the owner when the database is unreachable
+    // or has not been migrated yet, so the email fallback runs second. The
+    // resolved value tells finishQuote() where the enquiry actually landed.
+    function submitLead() {
+        return saveLeadToSupabase().then(function () {
+            return 'dashboard';
+        }).catch(function (err) {
+            console.warn('[chat] dashboard save failed, using Formspree:', err && err.message);
+            return saveLeadToFormspree().then(function () {
+                return 'email';
+            });
+        });
+    }
+
     function finishQuote() {
         flow.step = 'done';
         addTyping();
-        submitLead().then(function () {
+        submitLead().then(function (via) {
             killTyping();
             leadSaved = true;
             store('gc_lead_saved', '1');
+            var whereEn = via === 'dashboard'
+                ? 'The team has your details and the enquiry is in the dashboard, so you will hear back'
+                : 'The team has your details, so you will hear back';
+            var whereHi = via === 'dashboard'
+                ? 'Team के पास आपकी details पहुँच गई हैं और enquiry dashboard में है, जवाब'
+                : 'Team के पास आपकी details पहुँच गई हैं, जवाब';
             addMsg('bot', t(
-                'Saved. The team has your details and the enquiry is in the dashboard, so you will hear back at <b>' + escapeHtml(flow.email) + '</b> normally within 1-3 hours.<br><br>Want to attach files or write more? ' + a(L.contact, 'Contact page') + ' &middot; ' + a(L.whatsapp, 'WhatsApp') + '<br><br>Meanwhile, the real samples are here: ' + a(L.bundle, 'download all 10 files'),
-                'सेव हो गया. Team के पास आपकी details पहुँच गई हैं और enquiry dashboard में है, जवाब <b>' + escapeHtml(flow.email) + '</b> पर आम तौर पर 1-3 घंटे में आएगा.<br><br>File भेजनी हो या कुछ और लिखना हो: ' + a(L.contact, 'Contact page') + ' &middot; ' + a(L.whatsapp, 'WhatsApp') + '<br><br>तब तक असली sample देखिए: ' + a(L.bundle, 'दसों file download')
+                'Saved. ' + whereEn + ' at <b>' + escapeHtml(flow.email) + '</b> normally within 1-3 hours.<br><br>Want to attach files or write more? ' + a(L.contact, 'Contact page') + ' &middot; ' + a(L.whatsapp, 'WhatsApp') + '<br><br>Meanwhile, the real samples are here: ' + a(L.bundle, 'download all 10 files'),
+                'सेव हो गया. ' + whereHi + ' <b>' + escapeHtml(flow.email) + '</b> पर आम तौर पर 1-3 घंटे में आएगा.<br><br>File भेजनी हो या कुछ और लिखना हो: ' + a(L.contact, 'Contact page') + ' &middot; ' + a(L.whatsapp, 'WhatsApp') + '<br><br>तब तक असली sample देखिए: ' + a(L.bundle, 'दसों file download')
             ));
             setChips(['portfolio', 'pricing', 'human']);
         }).catch(function () {

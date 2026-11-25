@@ -1017,6 +1017,22 @@
             completeBtn.disabled = true;
             try {
                 if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                // A completed contract can no longer change its milestones, so
+                // an open one would stay pending forever. Older deployments
+                // without the table return [] and are not blocked.
+                const open = (await window.GahonshDB.Milestones
+                    .list(completeBtn.dataset.completeContract)
+                    .catch(() => []))
+                    .filter((m) => m.status !== 'accepted');
+                if (open.length) {
+                    window.GahonshAuthUI.showToast(
+                        open.length + ' milestone' + (open.length > 1 ? 's are' : ' is') +
+                        ' still open. Accept or remove ' + (open.length > 1 ? 'them' : 'it') +
+                        ' before completing the contract.'
+                    );
+                    completeBtn.disabled = false;
+                    return;
+                }
                 await window.GahonshDB.Contracts.completeContract(completeBtn.dataset.completeContract);
                 window.GahonshAuthUI.showToast('Contract completed. It now appears in both records.');
                 await loadContracts();
@@ -1084,7 +1100,7 @@
             setTimeout(initDashboard, 300);
         });
     </script>
-<script src="chat-widget.js?v=5" defer></script>
+<script src="chat-widget.js?v=6" defer></script>
 <script src="marketplace-trust.js" defer></script>
 </body>
 </html>

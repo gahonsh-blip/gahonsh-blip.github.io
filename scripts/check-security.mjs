@@ -137,6 +137,21 @@ for (const file of ['supabase-client.js', 'marketplace-local.js']) {
     }
 }
 
+// The Supabase project URL and publishable key live in supabase-config.js
+// only. A second copy drifts — chat-widget.js shipped a stale key that the
+// project answered with 401, so lead capture failed silently.
+for (const file of files) {
+    const rel = file.slice(root.length + 1);
+    if (rel === 'supabase-config.js' || rel.startsWith('docs/')) continue;
+    const src = readFileSync(file, 'utf8');
+    if (/sb_publishable_[A-Za-z0-9_-]{10,}/.test(src)) {
+        fail(rel, 'hardcoded Supabase publishable key — read window.GAHONSH_CONFIG instead');
+    }
+    if (/https:\/\/[a-z]{20}\.supabase\.co/.test(src)) {
+        fail(rel, 'hardcoded Supabase project URL — read window.GAHONSH_CONFIG instead');
+    }
+}
+
 if (failures.length) {
     console.error(`security check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);

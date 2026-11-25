@@ -649,3 +649,102 @@ npm test
   local engine check passed: 94 authorization case(s) verified.
   content check passed: 20 pages verified.
 ```
+
+---
+
+## 2026-11-24 (second pass) — live deployment gap, lost enquiries, milestone freeze
+
+Scope: the deployed Supabase project (`evdpmombgymthzqegqwr`) behind
+`gahonsh-blip.github.io`, the contact and chat enquiry paths, and the
+milestone → completion → review lifecycle. Method: probe every PostgREST
+object the client uses against the live project, then walk the marketplace
+flows in headless Chromium against the offline engine with the live project
+blocked at the network layer.
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | Critical | Leads | The live project has no `contact_messages` table, so every contact-form enquiry failed and was lost | Fixed (Formspree fallback) |
+| 2 | High | Security | `chat-widget.js` hardcoded a stale publishable key that the project rejects with `401 Invalid API key` | Fixed |
+| 3 | High | State | A contract could be completed with a milestone still open; milestones freeze on completion, so the row could never be resolved | Fixed |
+| 4 | High | Deployment | Nine objects the client calls were missing from the live project and no check could see it | Fixed (`npm run check:live`) |
+| 5 | Low | Copy | The chat said "the enquiry is in the dashboard" even when only the email fallback ran | Fixed |
+
+### 1. Enquiries were lost on the live site (Critical)
+
+`contact.html` posted to `{project}/rest/v1/contact_messages`. The live project
+answers that path with `PGRST205 — Could not find the table`, so the form
+showed "Could not send your message just now. Please email … or WhatsApp us
+instead." and the enquiry never reached the owner. The chat assistant's quote
+flow failed the same way (it shows a graceful message, but the lead was still
+lost).
+
+The form now writes to the dashboard first and posts the same JSON to the
+documented Formspree endpoint (`https://formspree.io/f/xzdqnoez`) second. It
+redirects to `thank-you.html` when either path succeeds and only shows the
+error when both fail. `chat-widget.js` follows the same order and reports which
+path was used. Verified in Chromium with `window.fetch` stubbed to reproduce
+each of the three outcomes: dashboard only, dashboard → email, both failing.
+
+### 2. Stale publishable key in the chat widget (High)
+
+`submitLead()` fell back to
+`sb_publishable_Fe8rUHg-7tN3RpxhjPijw_fX4c786Z` when
+`window.GAHONSH_CONFIG.SUPABASE_ANON_KEY` was unset. The project answers that
+key with `401 {"message":"Invalid API key"}`, and the correct key is
+`sb_publishable_2r2qEViIYoChRsXGFvpGqg__PeH8GFy` in `supabase-config.js`. The
+fallback is removed — the widget reads the config only — and
+`npm run test:security` now fails when any file other than
+`supabase-config.js` contains a publishable key or a project URL.
+
+### 3. Completing a contract froze an open milestone (High)
+
+Milestone rows are only writable while the contract is `active`
+(`validate_milestone_mutation()`), and the offline engine mirrors that. The
+client could still press **Mark complete** with a `pending` row, and the card
+then read "COMPLETED · 1 of 2 accepted" with no way to accept or remove the
+remaining row. **Mark complete** now lists the open milestones and refuses;
+accepting or removing them first completes normally. A deployment without the
+`contract_milestones` table returns `[]` and is not blocked.
+
+### 4. The deployed project was behind the committed schema (High)
+
+`npm run test:schema` compares the client with `docs/marketplace-schema.sql`,
+so every test passed while the live project was missing:
+
+| Object | Live response | Effect |
+|---|---|---|
+| `contact_messages` | `PGRST205` | Contact form and chat leads lost |
+| `contract_milestones` | `PGRST205` | Milestone panel shows the setup message |
+| `admin_profiles` | `PGRST205` | Owner console cannot read contact email |
+| `admin_overview` | `PGRST202` | Owner KPIs empty |
+| `set_proposal_status` | `PGRST202` | Shortlist / decline unavailable |
+| `get_my_record`, `get_worker_record`, `get_client_record` | `PGRST202` | Records tab unavailable |
+| `complete_contract` | `PGRST202` | Client sign-off unavailable |
+
+`proposals` and `contracts` answer `401` because RLS blocks the anonymous
+role, which is correct. The new `npm run check:live` probes each object and
+lists what is missing; `docs/SETUP.md` documents re-running the idempotent
+schema script and verifying with that command.
+
+### 5. Chat success copy claimed the wrong destination (Low)
+
+`finishQuote()` always said "the enquiry is in the dashboard". With the email
+fallback the row is not in the dashboard, so the copy now depends on the path
+that succeeded.
+
+### Verification
+
+```
+npm test
+  a11y check passed: 20 pages verified.
+  security check passed: 111 files verified.
+  schema check passed: 64 client reference(s) resolved against 30 schema object(s).
+  local engine check passed: 94 authorization case(s) verified.
+  content check passed: 20 pages verified.
+```
+
+Browser flows (headless Chromium, offline engine, `*supabase.co*` blocked):
+contact form all three delivery paths; chat quote flow with the dashboard
+write failing; milestone add → deliver → accept → complete → review as both
+parties; completion refused with an open milestone and allowed after removing
+it.

@@ -105,5 +105,5 @@ The front-end integrates with Supabase using standard ES6 / CDN client initializ
 
 | Destination | Purpose | Storage / Retention |
 | :--- | :--- | :--- |
-| **Formspree** (`https://formspree.io/f/xzdqnoez`) | Agency inquiries (`contact.html`) | Managed in Formspree account; redirected to `thank-you.html`. |
+| **Formspree** (`https://formspree.io/f/xzdqnoez`) | Fallback delivery for contact-form and chat enquiries when `contact_messages` cannot be written | Managed in Formspree account. |
 | **WhatsApp Deep Links** (`wa.me/918825183628`) | Quotes, consultations, newsletter subscribe | Transient (opens in WhatsApp client). |
