@@ -99,15 +99,23 @@ in `marketplace-dashboard.html`.
 
 ---
 
-## 2. Contact Form → Formspree
+## 2. Contact Form → Supabase `contact_messages`, Formspree fallback
 
 | Attribute | Specification |
 | :--- | :--- |
-| **Endpoint** | `https://formspree.io/f/xzdqnoez` |
-| **Method** | `POST` |
-| **Encoding** | `application/x-www-form-urlencoded` |
+| **Primary endpoint** | `POST {SUPABASE_URL}/rest/v1/contact_messages` with the publishable key (RLS: insert-only for `anon`) |
+| **Fallback endpoint** | `POST https://formspree.io/f/xzdqnoez` |
+| **Encoding** | `application/json` |
 | **Handler** | `contact.html` → `<form id="project-contact-form">` |
-| **Redirect Target** | `thank-you.html` (via hidden `<input name="_next" value="thank-you.html">`) |
+| **Redirect Target** | `thank-you.html`, after the primary or the fallback write succeeds |
+| **On both failing** | stays on the page and shows the email / WhatsApp message |
+
+The dashboard row is the primary record. The Formspree call exists because a
+project can be reachable yet not migrated: the live project answered
+`contact_messages` with `PGRST205` (table missing) while every other table
+worked, and each enquiry was lost. `npm run check:live` reports that gap.
+`chat-widget.js` follows the same two-step order and tells the visitor which
+path the enquiry took.
 
 ### Submitted Payload Fields
 

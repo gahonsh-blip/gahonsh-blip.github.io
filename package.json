@@ -13,7 +13,8 @@
     "test": "npm run test:a11y && npm run test:security && npm run test:schema && npm run test:local && npm run test:content",
     "test:schema": "node scripts/check-schema.mjs",
     "test:local": "node scripts/check-local-engine.mjs",
-    "test:content": "node scripts/check-content.mjs"
+    "test:content": "node scripts/check-content.mjs",
+    "check:live": "node scripts/check-live-backend.mjs"
   },
   "dependencies": {
     "express": "^4.19.2"

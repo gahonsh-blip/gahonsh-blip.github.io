@@ -66,6 +66,10 @@ The marketplace features client-side Supabase integration with Row Level Securit
 > project files readable to a freelancer after a contract is completed, limits
 > uploads to active work, and adds the 25 MB / MIME allow-list to the private
 > `job-attachments` bucket. See [FILE-SAFETY.md](FILE-SAFETY.md).
+>
+> Then apply
+> `supabase/migrations/20261127000000_add_milestones_and_review_rules.sql` for
+> contract milestones and post-completion reviews.
 
 ### Step 2b: Create the Owner Account
 
@@ -86,6 +90,29 @@ one before you need the dashboard:
    alone, which is what allows the first owner to be created while no admin
    exists yet.
 3. Open `admin.html` and sign in with that email and password.
+
+### Step 2c: Verify the deployed project
+
+A reachable project can still be behind the client. The live site answered
+`contact_messages`, `contract_milestones` and `admin_overview` with
+`PGRST205` / `PGRST202` while every committed file was correct, so contact
+enquiries, milestones and the owner KPIs failed at runtime.
+
+```bash
+npm run check:live
+```
+
+The script reads the URL and publishable key from `supabase-config.js`
+(override with `SUPABASE_URL` / `SUPABASE_ANON_KEY`) and probes every table,
+view and function the client reaches through PostgREST. It exits non-zero and
+lists the missing objects. `HTTP 401` on a table means the object exists and
+RLS blocks the anonymous role, which is expected for `proposals` and
+`contracts`.
+
+If anything is missing, re-run `docs/marketplace-schema.sql` in the SQL
+Editor: it is idempotent (guarded enums, `IF NOT EXISTS` tables and indexes,
+`DROP POLICY IF EXISTS` before every `CREATE POLICY`). Then re-run
+`npm run check:live` until it passes.
 
 ### Step 3: Configure Frontend Credentials
 1. In the Supabase Dashboard, go to **Project Settings → API**.

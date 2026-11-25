@@ -101,6 +101,16 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     reaches through PostgREST exists in `docs/marketplace-schema.sql`. Run it
     after adding a `.from(...)`, `.rpc(...)` or `/rest/v1/...` call, or after
     editing the schema. A missing object otherwise 404s only at runtime.
+  - `npm run check:live` — not part of `npm test` (it needs the network). Probes
+    the **deployed** project, using the URL and publishable key from
+    `supabase-config.js` (or `SUPABASE_URL` / `SUPABASE_ANON_KEY`), for every
+    object the client calls, and exits non-zero listing what is missing. Run it
+    after deploying a schema change, and whenever a live page reports a missing
+    table or function. `test:schema` only compares the client with the committed
+    SQL: the live project was once missing `contact_messages`,
+    `contract_milestones`, `admin_overview` and five RPCs while every test
+    passed. `HTTP 401` on a table means it exists and RLS blocks `anon`, which
+    is expected for `proposals` and `contracts`.
   - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
     it enforces the same access rules as the SQL policies (who may hire,
     withdraw, shortlist, list proposals, read a contract, change a job status,
@@ -303,10 +313,22 @@ freelancers, so they change with the product, not after it.
   to `anon` or `authenticated`, and never accept an `id` in a profile update.
 
 
+## Enquiry Delivery
+
+`contact.html` and the chat assistant's quote flow deliver an enquiry twice:
+first to `contact_messages` (the owner dashboard), then to the Formspree
+endpoint. The second call is not decoration — the live project was missing the
+table, so every enquiry was lost while the form showed a polite error. Keep
+both paths: the dashboard write is the record, the email is the safety net.
+The success copy must match the path that succeeded (the chat reports which
+one). Never hardcode the Supabase URL or publishable key outside
+`supabase-config.js`; `npm run test:security` fails the build if one appears
+elsewhere (a stale key in `chat-widget.js` was answering 401).
+
 ## External Services & Endpoints
 
 - **Supabase Cloud:** Client-side integration via `supabase-client.js` & `auth.js`
-- **Formspree Endpoint:** `https://formspree.io/f/xzdqnoez`
+- **Formspree Endpoint:** `https://formspree.io/f/xzdqnoez` (enquiry fallback)
 - **WhatsApp Support:** `+91 88251 83628` (`wa.me/918825183628`)
 - **Official Email:** `gahonsh@gmail.com`
 - **Google Maps Embed:** `https://maps.app.goo.gl/bPxXtFfKWn3NzwhJ7`
