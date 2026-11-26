@@ -287,6 +287,13 @@
             align-items: start;
         }
 
+        /* Grid items default to min-width:auto, so one unbreakable row inside a
+           job card (title + nowrap budget badge) would widen the whole column
+           past a 320px phone. */
+        .marketplace-container > * {
+            min-width: 0;
+        }
+
         /* FILTERS SIDEBAR */
         .filters-sidebar {
             background: var(--bg-card);
@@ -514,13 +521,20 @@
 
         @media (max-width: 900px) {
             .marketplace-container {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
             }
             .filters-sidebar {
                 position: static;
             }
             nav { display: none; }
             .menu-toggle { display: block; }
+        }
+
+        @media (max-width: 600px) {
+            .job-card { padding: 18px; }
+            .job-card-header { flex-wrap: wrap; }
+            .job-budget-badge { white-space: normal; }
+            .job-card-footer { flex-wrap: wrap; gap: 12px; }
         }
     </style>
 <link rel="stylesheet" href="theme.css?v=7">

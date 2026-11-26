@@ -180,6 +180,22 @@ if (!talentButton || !/flex-shrink\s*:\s*0/.test(talentButton[1])) {
     fail('find-talent.html', 'search button must not shrink out of the bar');
 }
 
+// A nowrap badge next to a long title inside a padded card used to widen the
+// whole grid column past a 320 px phone.
+if (!/\.marketplace-container\s*>\s*\*\s*\{[^}]*min-width\s*:\s*0/.test(jobsHtml)) {
+    fail('jobs.html', 'marketplace grid children must allow min-width: 0');
+}
+const jobCardMobile = jobsHtml.match(/@media\s*\(max-width:\s*600px\)\s*\{([\s\S]*?)\n        \}/);
+if (!jobCardMobile || !/\.job-card-header\s*\{[^}]*flex-wrap\s*:\s*wrap/.test(jobCardMobile[1])) {
+    fail('jobs.html', 'job card header must wrap on narrow screens');
+}
+
+const dashboardHtml = readFileSync(join(root, 'marketplace-dashboard.html'), 'utf8');
+const portalTabs = dashboardHtml.match(/\.portal-tabs\s*\{([^}]*)\}/);
+if (!portalTabs || !/flex-wrap\s*:\s*wrap/.test(portalTabs[1])) {
+    fail('marketplace-dashboard.html', 'portal tab strip must wrap on narrow screens');
+}
+
 if (failures.length) {
     console.error(`a11y check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);

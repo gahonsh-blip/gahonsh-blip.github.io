@@ -748,3 +748,96 @@ contact form all three delivery paths; chat quote flow with the dashboard
 write failing; milestone add → deliver → accept → complete → review as both
 parties; completion refused with an open milestone and allowed after removing
 it.
+
+---
+
+## 2026-11-24 (third pass) — phone layout, probe storm, sign-up validation
+
+Scope: every public page rendered in headless Chromium at 390×844 and 320×568
+with the live project blocked, plus the auth and proposal flows. Method: a CDP
+harness that loads each page, measures `document.documentElement.scrollWidth`
+against the viewport, walks the DOM for elements that widen it, audits text
+contrast in both themes, and drives the marketplace forms; `npm test` for the
+static contract.
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | High | Mobile layout | `jobs.html` scrolled 45 px sideways at 320 px: a grid child's `min-width: auto` let a job card widen the single column to 347 px | Fixed |
+| 2 | Medium | Mobile layout | `marketplace-dashboard.html` tab strip was 404 px wide at 390 px, cutting off `My Record` | Fixed |
+| 3 | Medium | Performance / console | An unreachable project was probed five times per page load and logged five identical warnings | Fixed |
+| 4 | Medium | Auth | The offline engine accepted a 3-character password and a malformed email that Supabase Auth refuses | Fixed |
+| 5 | Info | A11y | Light-mode text contrast, jobs/talent search, proposal submit and duplicate guard, chat launcher | Verified, no defect |
+
+### 1. The jobs page scrolled sideways on a phone (High)
+
+`jobs.html` is a two-column grid. Below 900 px it collapses to one column, but a
+grid item's automatic minimum is `min-content`, not zero, so the column was
+sized by its widest child. `.job-card-header` is a flex row holding the title
+and a `white-space: nowrap` budget badge; together they could not shrink below
+293 px, and the card's 26 px padding made the card 347 px inside a 320 px
+viewport. The filter sidebar then inherited that width and the page gained
+45 px of horizontal scroll — the one thing the repository rules say must not
+happen at 320 px.
+
+Fixed with `minmax(0, 1fr)` for the collapsed column, `min-width: 0` on the
+grid children, and a 600 px block that wraps the card header and footer and
+lets the budget badge break. Measured: `scrollWidth` 365 → 312 at 320 px.
+
+### 2. The portal tab strip pushed the last tab off-screen (Medium)
+
+`.portal-tabs` was `display: flex` with no `flex-wrap`, so the three buttons
+kept their intrinsic width and the row measured 404 px inside 390 px and 400 px
+inside 320 px. `My Record` sat outside the viewport on both sizes. The strip now
+wraps, the buttons carry `min-width: 0`, and below 480 px they use tighter
+padding. Measured: 404 → 382 at 390 px, 400 → 312 at 320 px.
+
+Both layout fixes are guarded by `npm run test:a11y`, which fails if the
+`min-width: 0` rule, the 600 px card rules or the tab wrap go missing.
+
+### 3. One unreachable database was probed five times (Medium)
+
+`remoteReachable()` cached its answer for 30 s but not the request that produced
+it. A page load starts several services at once, so each caller entered the
+function before the first `fetch` resolved, opened its own
+`/auth/v1/health` request, and logged its own "Supabase project unreachable"
+warning — four or five per page. The in-flight promise is now shared, so the
+probe runs once and the warning is logged once. Measured: 5 warnings per page →
+1 on every page tested.
+
+### 4. The offline engine accepted credentials Supabase would refuse (Medium)
+
+`marketplace-local.js` `Auth.signUp()` checked only that the password was
+non-empty and never validated the email, so `signUp('qa@example.com', '123')`
+created an account. Supabase Auth rejects that password before the account
+exists, so the demo would work offline and fail the moment a project was
+configured — and a weak password would be in the user's head by then. The
+engine now requires a plausible email and at least six characters, matching the
+`minlength="6"` already on the sign-up input. `npm run test:local` covers the
+short password, the malformed email and the accepted case (94 → 97 cases).
+
+### 5. Checked and found correct (Info)
+
+- **Light mode.** Text contrast was audited on 13 pages in both themes, skipping
+  gradient surfaces (a gradient reports a transparent `background-color`, which
+  made bright gradient buttons look like dark-on-dark). No text fell below 3:1.
+- **Job search and filters.** `jobs.html` filters by keyword and category
+  correctly, and shows the empty state for a keyword that matches nothing.
+- **Proposal flow.** A bid submits, survives a reload, and the page then hides
+  the form, shows *Your Proposal* and refuses a second bid with a clear message.
+- **Talent search, chat launcher, auth modal.** Search filters, the widget
+  opens, a wrong password is refused with "Incorrect password".
+
+### Verification
+
+```
+npm test
+  a11y check passed: 20 pages verified.
+  security check passed: 111 files verified.
+  schema check passed: 64 client reference(s) resolved against 30 schema object(s).
+  local engine check passed: 97 authorization case(s) verified.
+  content check passed: 20 pages verified.
+```
+
+Browser sweep (headless Chromium, `*supabase.co*` blocked): 19 pages at
+390×844 and 320×568 — every page now reports `scrollWidth` equal to the
+viewport, and exactly one fallback warning per page.

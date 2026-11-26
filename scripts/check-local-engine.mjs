@@ -128,6 +128,19 @@ async function refuse(fn) {
   const freelancers = read(ctx, 'profiles').filter((p) => p.role === 'freelancer');
   const password = DB._demoPassword;
 
+  // --- sign-up validation mirrors Supabase Auth ---------------------------
+  // The accepted sign-up writes a profile and a session, so the table is
+  // restored afterwards to keep the seeded fixtures below intact.
+  const profilesBeforeSignUp = read(ctx, 'profiles');
+  check('refuses a sign-up with a short password',
+    await refuse(() => DB.Auth.signUp('short.pass@example.com', '123', 'Short Pass')) !== null);
+  check('refuses a sign-up with a malformed email',
+    await refuse(() => DB.Auth.signUp('not-an-email', 'demo1234', 'No At Sign')) !== null);
+  check('accepts a sign-up with a valid email and password',
+    await refuse(() => DB.Auth.signUp('valid.new@example.com', 'demo1234', 'Valid New')) === null);
+  write(ctx, 'profiles', profilesBeforeSignUp);
+  await DB.Auth.signOut();
+
   // --- hiring a withdrawn proposal (SQL RPC refuses it) -------------------
   await DB.Auth.signIn(freelancers[0]._email, password);
   const withdrawn = await DB.Proposals.submitProposal('demo-job-1', 'brief', 300, 5);

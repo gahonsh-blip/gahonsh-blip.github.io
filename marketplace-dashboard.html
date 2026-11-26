@@ -188,6 +188,7 @@
 
         .portal-tabs {
             display: flex;
+            flex-wrap: wrap;
             gap: 12px;
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 30px;
@@ -203,6 +204,14 @@
             cursor: pointer;
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
+            min-width: 0;
+        }
+
+        @media (max-width: 480px) {
+            .portal-tab-btn {
+                padding: 10px 14px;
+                font-size: 0.92rem;
+            }
         }
 
         .portal-tab-btn.active {

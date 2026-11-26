@@ -33,6 +33,7 @@ Repository guide for AI agents and human contributors working on the
 - **JS:** Plain ES6 functions, modules, and clear comments.
   - A `MutationObserver` must never observe mutations its own callback produces. `textContent` assignment always replaces the text node, so a painter that rewrites text inside an observed subtree re-triggers itself forever and hangs the tab. Guard by writing only when the value changed, and scope selectors to the specific placeholder (e.g. `.mt-rating[data-rating-uid]`, not every `[data-rating-uid]`).
 - **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls. Long CTA and search rows must wrap or shrink instead of forcing a horizontal scroll at 390px or 320px; `npm run test:a11y` guards the home hero CTA and the jobs/talent search rows.
+  - A grid or flex child keeps `min-width: auto`, so one unbreakable row inside a card (a long title next to a `nowrap` badge) widens the whole column past the viewport. Give the column `minmax(0, 1fr)` and the children `min-width: 0`, then wrap the inner row below 600px. Check with `document.documentElement.scrollWidth` against `window.innerWidth` in the browser; `test:a11y` guards the jobs card and the portal tab strip.
 
 ## Main Menu Contract
 
