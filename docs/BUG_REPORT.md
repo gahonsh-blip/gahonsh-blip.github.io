@@ -1086,3 +1086,20 @@ Component probes for the pills, badges, feedback boxes and buttons: all
 Browser, local preview: `job-details.html` without an id now shows only
 "Project unavailable" and its explanation; the assistant opens from `?chat=1`
 and answers the "What I can do" prompt with the task list.
+
+## 25. Deploys stayed invisible for the cache window (Low)
+
+GitHub Pages answers with `cache-control: max-age=600`, and the `?v=` token on
+every stylesheet and script is the only thing that invalidates that cache. The
+token had not moved since the previous release, so after this merge the site
+served the fixed `theme.css` and `job-details-flow.js` from the origin while a
+browser that had already visited kept running the old copy for up to ten
+minutes: the "Project unavailable" page still claimed a verified client on a
+deploy that had removed that claim.
+
+The deployed files were correct — a cold-cache load measured
+`display: none` on the badge row, client card and skills block — so this is a
+delivery problem, not a code problem. `theme.css` and
+`assets/js/job-details-flow.js` now carry `?v=9`, and `npm run test:content`
+gained a thirteenth rule that fails when two pages disagree on an asset
+version. Negative-tested: pinning `about.html` to `v=8` fails 14 pages.

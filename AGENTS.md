@@ -33,6 +33,12 @@ Repository guide for AI agents and human contributors working on the
   - The accent palette has the mirror problem: `#34d399`, `#fbbf24` and `#a7f3d0` read on an ink card but measure 1.2-1.9:1 on a white one. Any literal accent used as `color:` needs a `body.light-mode` override (in `theme.css` or the page's own style block) that darkens the same hue, e.g. `#047857` for green and `#b91c1c` for red. `npm run test:a11y` enforces this for the palette accents.
 - **JS:** Plain ES6 functions, modules, and clear comments.
   - A `MutationObserver` must never observe mutations its own callback produces. `textContent` assignment always replaces the text node, so a painter that rewrites text inside an observed subtree re-triggers itself forever and hangs the tab. Guard by writing only when the value changed, and scope selectors to the specific placeholder (e.g. `.mt-rating[data-rating-uid]`, not every `[data-rating-uid]`).
+- **Cache-busting:** GitHub Pages serves every asset with
+  `cache-control: max-age=600`, and the `?v=N` token is the only thing that
+  makes a returning visitor pick up a change. Bump the token on any CSS or JS
+  you edit, in every page that loads it — a page left on the old token keeps
+  running stale code after the deploy. `npm run test:content` fails when pages
+  disagree on an asset version.
 - **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls. Long CTA and search rows must wrap or shrink instead of forcing a horizontal scroll at 390px or 320px; `npm run test:a11y` guards the home hero CTA and the jobs/talent search rows.
   - A grid or flex child keeps `min-width: auto`, so one unbreakable row inside a card (a long title next to a `nowrap` badge) widens the whole column past the viewport. Give the column `minmax(0, 1fr)` and the children `min-width: 0`, then wrap the inner row below 600px. Check with `document.documentElement.scrollWidth` against `window.innerWidth` in the browser; `test:a11y` guards the jobs card and the portal tab strip.
 

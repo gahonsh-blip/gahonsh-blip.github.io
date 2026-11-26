@@ -168,6 +168,27 @@ if (!/milestone' \+ \(open\.length|still open/.test(portal)) {
     fail('marketplace-dashboard.html', 'completion must be blocked while a milestone is open');
 }
 
+// 13. GitHub Pages serves assets with cache-control: max-age=600 and the
+// `?v=` token is the only thing that invalidates that cache. A page that pins
+// an older token than its siblings keeps running stale JS after a deploy, and
+// the fix that shipped stays invisible for the length of the cache.
+const VERSIONED = [/theme\.css\?v=(\d+)/g, /(?:assets\/js\/)?([a-z-]+\.js)\?v=(\d+)/g];
+const versions = new Map();
+for (const page of pages) {
+    const html = read(page);
+    for (const re of VERSIONED) {
+        for (const m of html.matchAll(re)) {
+            const name = re.source.includes('theme') ? 'theme.css' : m[1];
+            const version = Number(m[re.source.includes('theme') ? 1 : 2]);
+            const seen = versions.get(name);
+            if (!seen) versions.set(name, { version, page });
+            else if (seen.version !== version) {
+                fail(page, `${name}?v=${version} but ${seen.page} loads v=${seen.version}`);
+            }
+        }
+    }
+}
+
 if (failures.length) {
     console.error(`content check failed (${failures.length}):`);
     for (const f of failures) console.error('  - ' + f);
