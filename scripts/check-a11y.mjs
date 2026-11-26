@@ -190,6 +190,47 @@ if (!jobCardMobile || !/\.job-card-header\s*\{[^}]*flex-wrap\s*:\s*wrap/.test(jo
     fail('jobs.html', 'job card header must wrap on narrow screens');
 }
 
+// ---------------------------------------------------------------------------
+// 5. Light mode contrast for bright accent text.
+//
+// theme.css lightens every surface, so a colour chosen against an ink card
+// (a status pill, a bid error, an availability badge) keeps its hue but loses
+// its contrast. Measured on the live pages: #34d399 on a white card is 1.9:1,
+// #fbbf24 is 1.7:1, #a7f3d0 is 1.2:1 — a success message nobody can read.
+// Any of these accents used as `color:` needs a `body.light-mode` override,
+// either in theme.css or in the page's own style block.
+// ---------------------------------------------------------------------------
+const ACCENT_COLORS = ['34d399', '4ade80', '22c55e', '10b981', 'a7f3d0', '6ee7b7',
+    'fbbf24', 'facc15', 'fca5a5', 'f87171', '38bdf8', '7dd3fc'];
+const NO_LIGHT_MODE = new Set(['dashboard.html', 'admin.html', 'home.html', 'dasbord.html',
+    'thank-you.html', 'googleb9deb43124fcee02.html']);
+
+const lightSelectors = (css) => [...css.matchAll(/(body\.light-mode[^{}]*)\{/g)]
+    .flatMap((m) => m[1].split(',').map((part) => part.trim().replace(/\s+/g, ' ')))
+    .filter(Boolean);
+
+const globalLight = lightSelectors(themeCss);
+
+for (const page of pages) {
+    if (NO_LIGHT_MODE.has(page)) continue;
+    const html = readFileSync(join(root, page), 'utf8');
+    const ownCss = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
+    const light = [...globalLight, ...lightSelectors(ownCss)];
+
+    for (const style of html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) {
+        for (const rule of style[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+            const selector = rule[1].trim().replace(/\s+/g, ' ');
+            const colors = [...rule[2].matchAll(/(?:^|;)\s*color\s*:\s*#([0-9a-f]{6})\b/gi)].map((m) => m[1].toLowerCase());
+            if (!colors.some((c) => ACCENT_COLORS.includes(c))) continue;
+            const parts = selector.split(',').map((part) => part.trim());
+            const covered = parts.every((part) => light.some((l) => l.includes(part)));
+            if (!covered) {
+                fail(page, `bright accent text needs a light-mode override: ${selector}`);
+            }
+        }
+    }
+}
+
 const dashboardHtml = readFileSync(join(root, 'marketplace-dashboard.html'), 'utf8');
 const portalTabs = dashboardHtml.match(/\.portal-tabs\s*\{([^}]*)\}/);
 if (!portalTabs || !/flex-wrap\s*:\s*wrap/.test(portalTabs[1])) {

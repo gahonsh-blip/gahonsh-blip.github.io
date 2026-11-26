@@ -123,7 +123,19 @@ async function loadJobDetails() {
         document.getElementById('jobTitle').innerText = 'Project unavailable';
         document.getElementById('jobDescription').innerText = 'This project could not be found or you do not have permission to view it. It may have been removed or is no longer open.';
         showProposalMessage('<i class="fa-solid fa-circle-info"></i><span>This project could not be found or you do not have permission to view it.</span>', 'error');
-        document.getElementById('clientName').innerText = 'Unknown';
+        // Everything else on the page is only true of a real listing: the
+        // badges still read "Budget: Loading..." and the client card claimed
+        // "Identity Verified" for an account that does not exist.
+        const hide = (el) => { if (el) el.style.display = 'none'; };
+        const hideWithHeading = (el) => {
+            if (!el) return;
+            const heading = el.previousElementSibling;
+            if (heading && heading.classList.contains('section-header-title')) hide(heading);
+            hide(el);
+        };
+        hide(document.querySelector('.meta-badges-row'));
+        hide(document.querySelector('.side-card'));
+        hideWithHeading(document.getElementById('skillsCloud'));
         return;
     }
 
