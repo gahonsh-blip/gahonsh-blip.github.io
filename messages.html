@@ -22,9 +22,17 @@ main{max-width:760px;margin:0 auto;padding:18px}
 .empty{color:var(--mut);text-align:center;padding:30px 0}
 form{display:flex;gap:8px}
 textarea{flex:1;background:#0b1117;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;resize:vertical;min-height:54px}
-button{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer}
+button{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer;min-height:48px}
 button:disabled{opacity:.6;cursor:not-allowed}
 @media(max-width:520px){.msg{max-width:92%}}
+
+/* Follow the site theme so portal members in light mode do not get a dark
+   page. The class is set before paint by the script below. */
+body.light-mode{--bg:#f5f8fa;--card:#ffffff;--line:rgba(15,23,42,.12);--ink:#0f172a;--mut:#475569;--teal:#0f766e}
+body.light-mode header{background:#ffffff}
+body.light-mode a.back{color:#0f766e}
+body.light-mode .msg.mine{background:#e6f6f3;border-color:#b7e3da}
+body.light-mode textarea{background:#ffffff;color:#0f172a}
 </style>
 </head>
 <body>
@@ -35,64 +43,104 @@ button:disabled{opacity:.6;cursor:not-allowed}
 <main>
   <div id="thread" aria-live="polite" aria-busy="true"><div class="empty">Loading…</div></div>
   <form id="sendForm">
-    <textarea id="bodyInput" placeholder="Write a message…" aria-label="Message" required></textarea>
+    <textarea id="bodyInput" maxlength="2000" placeholder="Write a message…" aria-label="Message" required></textarea>
     <button type="submit" id="sendBtn">Send</button>
   </form>
 </main>
-<script src="supabase-config.js"></script>
-<script src="supabase-client.js"></script>
+<script>
+  try {
+    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+  } catch (e) { /* storage blocked */ }
+</script>
+<script src="supabase-config.js?v=8"></script>
+<script src="marketplace-local.js?v=8"></script>
+<script src="supabase-client.js?v=8"></script>
 <script>
 (function(){
-  var params=new URLSearchParams(location.search);
-  var contractId=params.get('contract')||'';
-  var client=null, me=null, contract=null, rows=[];
-  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function render(){
-    var t=document.getElementById('thread');
-    if(!rows.length){t.innerHTML='<div class="empty">No messages yet. Say hello and share your requirements.</div>';return;}
-    t.innerHTML=rows.map(function(m){
-      var mine=m.sender_id===me;
-      return '<div class="msg '+(mine?'mine':'')+'">'+esc(m.body)+
-        '<div class="meta">'+(mine?'You':'Them')+' · '+new Date(m.created_at).toLocaleString()+'</div></div>';
-    }).join('');
-    t.setAttribute('aria-busy','false');
-    t.scrollTop=t.scrollHeight;
-    window.scrollTo(0,document.body.scrollHeight);
+  var params = new URLSearchParams(location.search);
+  var contractId = params.get('contract') || '';
+  var thread = document.getElementById('thread');
+  var form = document.getElementById('sendForm');
+  var box = document.getElementById('bodyInput');
+  var btn = document.getElementById('sendBtn');
+  var me = null;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
   }
-  async function load(){
-    client=await window.GahonshDB.getClient();
-    if(!client){document.getElementById('thread').innerHTML='<div class="empty">Messages need the live database. This browser is on the offline demo, where messaging is not available.</div>';document.getElementById('sendForm').style.display='none';return;}
-    var who=await client.auth.getUser();
-    me=who&&who.data&&who.data.user&&who.data.user.id;
-    if(!me){document.getElementById('thread').innerHTML='<div class="empty">Please <a class="back" href="marketplace-dashboard.html">sign in</a> to read your messages.</div>';document.getElementById('sendForm').style.display='none';return;}
-    if(contractId){
-      var c=await client.from('contracts').select('*').eq('id',contractId).maybeSingle();
-      contract=c&&c.data;
+
+  // Built with DOM calls, not innerHTML: the copy is static and the optional
+  // link is a real anchor, so nothing user-supplied is parsed as markup.
+  function showMessage(text, link){
+    thread.textContent = '';
+    thread.setAttribute('aria-busy', 'false');
+    var wrap = document.createElement('div');
+    wrap.className = 'empty';
+    wrap.appendChild(document.createTextNode(text + ' '));
+    if (link){
+      var a = document.createElement('a');
+      a.className = 'back';
+      a.href = link.href;
+      a.textContent = link.label;
+      wrap.appendChild(a);
     }
-    var q=client.from('messages').select('*').order('created_at',{ascending:true}).limit(200);
-    if(contractId) q=q.eq('contract_id',contractId);
-    var res=await q;
-    rows=(res&&res.data)||[];
-    render();
+    thread.appendChild(wrap);
+    form.style.display = link || text.indexOf('No messages') === 0 ? '' : 'none';
   }
-  document.getElementById('sendForm').addEventListener('submit',async function(e){
+
+  function render(rows){
+    if (!rows.length){
+      showMessage('No messages yet. Say hello and share your requirements.');
+      return;
+    }
+    thread.innerHTML = rows.map(function(m){
+      var mine = m.sender_id === me;
+      return '<div class="msg ' + (mine ? 'mine' : '') + '">' + esc(m.body) +
+        '<div class="meta">' + (mine ? 'You' : 'Them') + ' · ' + new Date(m.created_at).toLocaleString() + '</div></div>';
+    }).join('');
+    thread.setAttribute('aria-busy', 'false');
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  async function load(){
+    if (!window.isMarketplaceReady || !window.isMarketplaceReady()){
+      showMessage('The marketplace is still starting up. Please try again in a moment.');
+      return;
+    }
+    var user = await window.GahonshDB.Auth.getCurrentUser();
+    me = user && user.id;
+    if (!me){
+      showMessage('Please sign in to read your messages.', { href: 'marketplace-dashboard.html', label: 'Open the portal' });
+      return;
+    }
+    try {
+      render(await window.GahonshDB.Messages.list(contractId));
+    } catch (err) {
+      showMessage(err && err.message ? err.message : 'Could not load this conversation.');
+    }
+  }
+
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
-    var btn=document.getElementById('sendBtn'), box=document.getElementById('bodyInput');
-    var text=(box.value||'').trim(); if(!text) return;
-    var recipient=null;
-    if(contract){recipient=(contract.client_id===me)?contract.freelancer_id:contract.client_id;}
-    if(!recipient){alert('This contract has no other party recorded.');return;}
-    btn.disabled=true;
-    var res=await client.from('messages').insert({contract_id:contractId||null,sender_id:me,recipient_id:recipient,body:text});
-    btn.disabled=false;
-    if(res.error){alert('Could not send: '+res.error.message);return;}
-    box.value='';
-    load();
+    var text = (box.value || '').trim();
+    if (!text) return;
+    btn.disabled = true;
+    try {
+      await window.GahonshDB.Messages.send(contractId, text);
+      box.value = '';
+      await load();
+    } catch (err) {
+      alert('Could not send: ' + (err && err.message ? err.message : 'please try again.'));
+    } finally {
+      btn.disabled = false;
+    }
   });
-  if(!contractId){
-    document.getElementById('thread').innerHTML='<div class="empty">Open this page from a contract card in your <a class="back" href="marketplace-dashboard.html">dashboard</a> to read that contract\'s messages.</div>';
-    document.getElementById('thread').setAttribute('aria-busy','false');
-    document.getElementById('sendForm').style.display='none';
+
+  if (!contractId){
+    showMessage('Open this page from a contract card in your dashboard to read that conversation.',
+      { href: 'marketplace-dashboard.html', label: 'Go to the portal' });
   } else {
     load();
   }

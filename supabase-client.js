@@ -199,8 +199,10 @@
     // so a crafted payload cannot edit another row or escalate the caller.
     const PROFILE_EDITABLE_FIELDS = [
         'full_name', 'avatar_url', 'location', 'bio', 'title',
-        'hourly_rate', 'skills', 'phone_number'
+        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note'
     ];
+
+    const AVAILABILITY_VALUES = ['available', 'busy', 'unavailable'];
 
     function sanitizeProfileUpdates(updates) {
         const source = updates && typeof updates === 'object' ? updates : {};
@@ -243,6 +245,16 @@
                 .map((s) => String(s || '').trim().slice(0, 40))
                 .filter(Boolean)
                 .slice(0, 30);
+        }
+        if ('availability' in safe) {
+            const value = String(safe.availability || 'available').trim().toLowerCase();
+            if (!AVAILABILITY_VALUES.includes(value)) {
+                throw new Error('Availability must be available, busy or unavailable.');
+            }
+            safe.availability = value;
+        }
+        if ('availability_note' in safe) {
+            safe.availability_note = String(safe.availability_note || '').trim().slice(0, 120) || null;
         }
         return safe;
     }
@@ -327,7 +339,22 @@
                 query = query.contains('skills', [filters.skill]);
             }
 
-            const { data, error } = await query.order('created_at', { ascending: false });
+            if (filters.availability && filters.availability !== 'all') {
+                query = query.eq('availability', filters.availability);
+            }
+
+            if (filters.verifiedOnly) {
+                query = query.eq('is_verified', true);
+            }
+
+            const talentSort = {
+                rating: { column: 'created_at', ascending: false },
+                rate_low: { column: 'hourly_rate', ascending: true },
+                rate_high: { column: 'hourly_rate', ascending: false },
+                newest: { column: 'created_at', ascending: false }
+            }[filters.sort] || { column: 'created_at', ascending: false };
+
+            const { data, error } = await query.order(talentSort.column, { ascending: talentSort.ascending });
             if (error) throw error;
             return data || [];
         },
@@ -491,7 +518,22 @@
                 query = query.gte('budget_min', parseFloat(filters.minBudget));
             }
 
-            const { data, error } = await query.order('created_at', { ascending: false });
+            if (filters.maxBudget) {
+                query = query.lte('budget_min', parseFloat(filters.maxBudget));
+            }
+
+            if (filters.skill) {
+                query = query.contains('required_skills', [filters.skill]);
+            }
+
+            const jobSort = {
+                newest: { column: 'created_at', ascending: false },
+                budget_high: { column: 'budget_min', ascending: false },
+                budget_low: { column: 'budget_min', ascending: true },
+                proposals_few: { column: 'proposals_count', ascending: true }
+            }[filters.sort] || { column: 'created_at', ascending: false };
+
+            const { data, error } = await query.order(jobSort.column, { ascending: jobSort.ascending });
             if (error) throw error;
             return data || [];
         },
@@ -950,6 +992,603 @@
     };
 
     // ========================================================================
+    // 4b. DISCOVERY — SAVED JOBS, SAVED TALENT, INVITATIONS
+    // ========================================================================
+    // Shortlists are private: every query is scoped to the signed-in member,
+    // and the RLS policies repeat that rule so a crafted request cannot read
+    // another member's list.
+    async function currentUserId(client) {
+        const user = (await client.auth.getUser())?.data?.user;
+        return user ? user.id : null;
+    }
+
+    const SavedJobs = {
+        async ids() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('saved_jobs')
+                .select('job_id')
+                .eq('freelancer_id', userId);
+            if (error) throw error;
+            return (data || []).map((row) => row.job_id);
+        },
+
+        async list() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('saved_jobs')
+                .select(`
+                    created_at,
+                    job:jobs (
+                        id, title, description, category, job_type, required_skills,
+                        budget_min, budget_max, hourly_rate_min, hourly_rate_max,
+                        experience_level, estimated_duration, status, proposals_count,
+                        created_at,
+                        client:profiles ( id, full_name, avatar_url, location, is_verified )
+                    )
+                `)
+                .eq('freelancer_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return (data || []).filter((row) => row.job).map((row) => Object.assign({}, row.job, { saved_at: row.created_at }));
+        },
+
+        async save(jobId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to save a job.');
+            const { error } = await client
+                .from('saved_jobs')
+                .upsert({ freelancer_id: userId, job_id: jobId }, { onConflict: 'freelancer_id,job_id' });
+            if (error) throw error;
+            return true;
+        },
+
+        async remove(jobId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to change your saved jobs.');
+            const { error } = await client
+                .from('saved_jobs')
+                .delete()
+                .eq('freelancer_id', userId)
+                .eq('job_id', jobId);
+            if (error) throw error;
+            return false;
+        },
+
+        async toggle(jobId) {
+            const ids = await SavedJobs.ids();
+            return ids.includes(jobId) ? SavedJobs.remove(jobId) : SavedJobs.save(jobId);
+        }
+    };
+
+    const SavedTalent = {
+        async ids() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('saved_talent')
+                .select('freelancer_id')
+                .eq('client_id', userId);
+            if (error) throw error;
+            return (data || []).map((row) => row.freelancer_id);
+        },
+
+        async list() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('saved_talent')
+                .select('freelancer_id, created_at')
+                .eq('client_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+
+            const rows = data || [];
+            if (!rows.length) return [];
+            const ids = rows.map((row) => row.freelancer_id);
+            const { data: profiles, error: profileError } = await client
+                .from('public_profiles')
+                .select('*')
+                .in('id', ids);
+            if (profileError) throw profileError;
+
+            const byId = new Map((profiles || []).map((p) => [p.id, p]));
+            return rows.map((row) => byId.get(row.freelancer_id)).filter(Boolean);
+        },
+
+        async save(freelancerId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to save talent.');
+            if (userId === freelancerId) throw new Error('You cannot save your own profile.');
+            const { error } = await client
+                .from('saved_talent')
+                .upsert({ client_id: userId, freelancer_id: freelancerId }, { onConflict: 'client_id,freelancer_id' });
+            if (error) throw error;
+            return true;
+        },
+
+        async remove(freelancerId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to change your saved talent.');
+            const { error } = await client
+                .from('saved_talent')
+                .delete()
+                .eq('client_id', userId)
+                .eq('freelancer_id', freelancerId);
+            if (error) throw error;
+            return false;
+        },
+
+        async toggle(freelancerId) {
+            const ids = await SavedTalent.ids();
+            return ids.includes(freelancerId) ? SavedTalent.remove(freelancerId) : SavedTalent.save(freelancerId);
+        }
+    };
+
+    const Invitations = {
+        async send(jobId, freelancerId, message = '') {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in as a client to invite a freelancer.');
+            if (userId === freelancerId) throw new Error('You cannot invite yourself.');
+
+            const { data, error } = await client
+                .from('invitations')
+                .insert({
+                    job_id: jobId,
+                    client_id: userId,
+                    freelancer_id: freelancerId,
+                    message: String(message || '').trim().slice(0, 1000) || null
+                })
+                .select()
+                .single();
+
+            if (error) {
+                if (error.code === '23505') throw new Error('You have already invited this freelancer to that project.');
+                throw error;
+            }
+            return data;
+        },
+
+        async listReceived() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('invitations')
+                .select(`
+                    id, job_id, client_id, message, status, responded_at, created_at,
+                    job:jobs ( id, title, category, job_type, budget_min, budget_max, status ),
+                    client:profiles ( id, full_name, avatar_url, is_verified )
+                `)
+                .eq('freelancer_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async listSent() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('invitations')
+                .select(`
+                    id, job_id, freelancer_id, message, status, responded_at, created_at,
+                    job:jobs ( id, title, category, status ),
+                    freelancer:profiles ( id, full_name, avatar_url, title, is_verified )
+                `)
+                .eq('client_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async listForJob(jobId) {
+            const client = await getClient();
+            if (!client) return [];
+            const { data, error } = await client
+                .from('invitations')
+                .select('id, freelancer_id, status, created_at, freelancer:profiles ( id, full_name, avatar_url, title )')
+                .eq('job_id', jobId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async respond(invitationId, status) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to answer an invitation.');
+            if (!['accepted', 'declined'].includes(status)) {
+                throw new Error('An invitation can only be accepted or declined.');
+            }
+            const { data, error } = await client
+                .from('invitations')
+                .update({ status })
+                .eq('id', invitationId)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async withdraw(invitationId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to withdraw an invitation.');
+            const { data, error } = await client
+                .from('invitations')
+                .update({ status: 'withdrawn' })
+                .eq('id', invitationId)
+                .eq('client_id', userId)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        }
+    };
+
+    // ========================================================================
+    // 4c. PROJECT CATALOG — FIXED-PRICE SERVICE PACKAGES
+    // ========================================================================
+    // Prices are the freelancer's own quote. The platform charges no commission
+    // and holds no funds, so ordering a package opens a normal job brief.
+    const CATALOG_TIERS = ['basic', 'standard', 'premium'];
+
+    function sanitizePackage(pkg) {
+        const source = pkg && typeof pkg === 'object' ? pkg : {};
+        const title = String(source.title || '').trim();
+        const description = String(source.description || '').trim();
+        const category = String(source.category || '').trim();
+        const tier = String(source.tier || 'basic').trim().toLowerCase();
+        const price = Number(source.price);
+        const deliveryDays = Number(source.delivery_days);
+        const revisions = source.revisions === undefined || source.revisions === '' ? 1 : Number(source.revisions);
+
+        if (title.length < 5 || title.length > 120) {
+            throw new Error('Give the package a title of 5 to 120 characters.');
+        }
+        if (description.length < 20) {
+            throw new Error('Describe the package in at least 20 characters.');
+        }
+        if (!category) throw new Error('Choose a category for the package.');
+        if (!CATALOG_TIERS.includes(tier)) {
+            throw new Error('Tier must be basic, standard or premium.');
+        }
+        if (!Number.isFinite(price) || price <= 0) {
+            throw new Error('Price must be greater than zero.');
+        }
+        if (!Number.isFinite(deliveryDays) || deliveryDays < 1 || deliveryDays > 180) {
+            throw new Error('Delivery time must be between 1 and 180 days.');
+        }
+        if (!Number.isFinite(revisions) || revisions < 0 || revisions > 50) {
+            throw new Error('Revisions must be between 0 and 50.');
+        }
+
+        return {
+            title: title.slice(0, 120),
+            description: description.slice(0, 4000),
+            category: category.slice(0, 60),
+            tier,
+            price: Math.round(price * 100) / 100,
+            delivery_days: Math.round(deliveryDays),
+            revisions: Math.round(revisions),
+            skills: Array.isArray(source.skills)
+                ? source.skills.map((s) => String(s || '').trim().slice(0, 40)).filter(Boolean).slice(0, 20)
+                : []
+        };
+    }
+
+    async function attachPackageOwners(client, packages) {
+        const ids = Array.from(new Set((packages || []).map((p) => p.freelancer_id)));
+        if (!ids.length) return packages || [];
+        const { data: profiles, error } = await client
+            .from('public_profiles')
+            .select('id, full_name, avatar_url, title, location, hourly_rate, is_verified, availability, skills')
+            .in('id', ids);
+        if (error) throw error;
+        const byId = new Map((profiles || []).map((p) => [p.id, p]));
+        return packages.map((pkg) => Object.assign({}, pkg, { freelancer: byId.get(pkg.freelancer_id) || null }));
+    }
+
+    const Catalog = {
+        async list(filters = {}) {
+            const client = await getClient();
+            if (!client) return [];
+
+            let query = client
+                .from('service_packages')
+                .select('*')
+                .eq('is_active', true);
+
+            if (filters.category && filters.category !== 'all') {
+                query = query.eq('category', filters.category);
+            }
+            if (filters.tier && filters.tier !== 'all') {
+                query = query.eq('tier', filters.tier);
+            }
+            if (filters.maxPrice) {
+                query = query.lte('price', Number(filters.maxPrice));
+            }
+            const search = sanitizeSearchTerm(filters.search);
+            if (search) {
+                query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+            }
+
+            const sort = {
+                price_low: { column: 'price', ascending: true },
+                price_high: { column: 'price', ascending: false },
+                newest: { column: 'created_at', ascending: false }
+            }[filters.sort] || { column: 'created_at', ascending: false };
+
+            const { data, error } = await query.order(sort.column, { ascending: sort.ascending });
+            if (error) throw error;
+            return attachPackageOwners(client, data || []);
+        },
+
+        async getById(packageId) {
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client
+                .from('service_packages')
+                .select('*')
+                .eq('id', packageId)
+                .maybeSingle();
+            if (error) throw error;
+            if (!data) return null;
+            const [withOwner] = await attachPackageOwners(client, [data]);
+            return withOwner;
+        },
+
+        async listMine() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('service_packages')
+                .select('*')
+                .eq('freelancer_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async create(pkg) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to publish a package.');
+
+            const me = await Profiles.getMyProfile();
+            if (!me || (me.role !== 'freelancer' && me.role !== 'admin')) {
+                throw new Error('Only a freelancer can publish a catalog package.');
+            }
+
+            const payload = Object.assign({ freelancer_id: userId }, sanitizePackage(pkg));
+            const { data, error } = await client
+                .from('service_packages')
+                .insert(payload)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async update(packageId, patch) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to edit a package.');
+
+            const payload = {};
+            if (patch && typeof patch === 'object') {
+                if ('is_active' in patch) payload.is_active = !!patch.is_active;
+                const editable = ['title', 'description', 'category', 'tier', 'price', 'delivery_days', 'revisions', 'skills'];
+                if (editable.some((key) => key in patch)) {
+                    const merged = sanitizePackage(Object.assign({}, patch));
+                    for (const key of editable) payload[key] = merged[key];
+                }
+            }
+            if (!Object.keys(payload).length) throw new Error('Nothing to update.');
+
+            const { data, error } = await client
+                .from('service_packages')
+                .update(payload)
+                .eq('id', packageId)
+                .eq('freelancer_id', userId)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async remove(packageId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to remove a package.');
+            const { error } = await client
+                .from('service_packages')
+                .delete()
+                .eq('id', packageId)
+                .eq('freelancer_id', userId);
+            if (error) throw error;
+            return true;
+        }
+    };
+
+    // ========================================================================
+    // 4d. NOTIFICATIONS (IN-APP ONLY)
+    // ========================================================================
+    // Rows are written by database triggers; the browser only reads them and
+    // marks its own as read, so there is no client-side insert path at all.
+    const Notifications = {
+        async list(limit = 40) {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('notifications')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(Math.max(1, Math.min(200, Number(limit) || 40)));
+            if (error) throw error;
+            return data || [];
+        },
+
+        async unreadCount() {
+            const client = await getClient();
+            if (!client) return 0;
+            const userId = await currentUserId(client);
+            if (!userId) return 0;
+            const { count, error } = await client
+                .from('notifications')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .eq('is_read', false);
+            if (error) throw error;
+            return count || 0;
+        },
+
+        async markRead(notificationId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in.');
+            const { error } = await client
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('id', notificationId)
+                .eq('user_id', userId);
+            if (error) throw error;
+            return true;
+        },
+
+        async markAllRead() {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in.');
+            const { error } = await client
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', userId)
+                .eq('is_read', false);
+            if (error) throw error;
+            return true;
+        },
+
+        async remove(notificationId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in.');
+            const { error } = await client
+                .from('notifications')
+                .delete()
+                .eq('id', notificationId)
+                .eq('user_id', userId);
+            if (error) throw error;
+            return true;
+        },
+
+        async clear() {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in.');
+            const { error } = await client
+                .from('notifications')
+                .delete()
+                .eq('user_id', userId);
+            if (error) throw error;
+            return true;
+        }
+    };
+
+    // ========================================================================
+    // 5ab. CONTRACT MESSAGES
+    // ========================================================================
+    // The recipient is derived from the contract, never taken from the caller,
+    // so a message cannot be addressed to a stranger. The schema policy
+    // re-checks that the sender is one of the two contract parties.
+    const Messages = {
+        async list(contractId) {
+            const client = await getClient();
+            if (!client || !contractId) return [];
+            const { data, error } = await client
+                .from('messages')
+                .select('*')
+                .eq('contract_id', contractId)
+                .order('created_at', { ascending: true })
+                .limit(200);
+            if (error) throw error;
+            return data || [];
+        },
+
+        async send(contractId, body) {
+            const client = await getClient();
+            if (!client) throw new Error('The marketplace is not configured yet.');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to send a message.');
+            if (!contractId) throw new Error('This contract could not be found.');
+
+            const text = String(body || '').trim();
+            if (!text) throw new Error('Write a message first.');
+            if (text.length > 2000) throw new Error('Keep the message under 2000 characters.');
+
+            const { data: contract, error: contractError } = await client
+                .from('contracts')
+                .select('id, client_id, freelancer_id')
+                .eq('id', contractId)
+                .maybeSingle();
+            if (contractError) throw contractError;
+            if (!contract) throw new Error('This contract could not be found.');
+
+            const recipientId = contract.client_id === userId ? contract.freelancer_id : contract.client_id;
+            const { data, error } = await client
+                .from('messages')
+                .insert({
+                    contract_id: contractId,
+                    sender_id: userId,
+                    recipient_id: recipientId,
+                    body: text
+                })
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        }
+    };
+
+    // ========================================================================
     // 5aa. REVIEWS (ONE PER PARTY, AFTER THE CONTRACT IS COMPLETED)
     // ========================================================================
     // The reviewee is never taken from the caller: it is the other party of
@@ -1373,7 +2012,13 @@
     const RecordsProxy = withFallback(Records, _local && _local.Records, 'Records');
     const FilesProxy = withFallback(Files, _local && _local.Files, 'Files');
     const MilestonesProxy = withFallback(Milestones, _local && _local.Milestones, 'Milestones');
+    const MessagesProxy = withFallback(Messages, _local && _local.Messages, 'Messages');
     const ReviewsProxy = withFallback(Reviews, _local && _local.Reviews, 'Reviews');
+    const SavedJobsProxy = withFallback(SavedJobs, _local && _local.SavedJobs, 'SavedJobs');
+    const SavedTalentProxy = withFallback(SavedTalent, _local && _local.SavedTalent, 'SavedTalent');
+    const InvitationsProxy = withFallback(Invitations, _local && _local.Invitations, 'Invitations');
+    const CatalogProxy = withFallback(Catalog, _local && _local.Catalog, 'Catalog');
+    const NotificationsProxy = withFallback(Notifications, _local && _local.Notifications, 'Notifications');
 
     // Export services onto global GahonshDB namespace
     window.GahonshDB = {
@@ -1388,6 +2033,12 @@
         Records: RecordsProxy,
         Files: FilesProxy,
         Milestones: MilestonesProxy,
-        Reviews: ReviewsProxy
+        Messages: MessagesProxy,
+        Reviews: ReviewsProxy,
+        SavedJobs: SavedJobsProxy,
+        SavedTalent: SavedTalentProxy,
+        Invitations: InvitationsProxy,
+        Catalog: CatalogProxy,
+        Notifications: NotificationsProxy
     };
 })();

@@ -937,6 +937,47 @@ body.light-mode .mt-rating {
     color: #8a5a00 !important;
 }
 
+/* Contract "Message" shortcut. Styled here rather than inline so the link
+   follows the page theme instead of staying dark-on-light. */
+.mt-msg-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--border-color, #26333f);
+    border-radius: 8px;
+    color: var(--accent-cyan, #7fd1c4);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mt-msg-link:hover,
+.mt-msg-link:focus-visible {
+    border-color: var(--accent-cyan, #7fd1c4);
+}
+
+body.light-mode .mt-msg-link {
+    color: #0f766e;
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Amber "delivered" chips and red "remove" actions are too faint on white. */
+body.light-mode .status-delivered,
+body.light-mode .ms-actions button[data-ms-status="delivered"] {
+    color: #8a5a00 !important;
+    border-color: #b7791f !important;
+}
+
+body.light-mode .ms-actions button[data-ms-remove] {
+    color: #b91c1c !important;
+    border-color: rgba(185, 28, 28, 0.45) !important;
+}
+
+body.light-mode .invite-hint a {
+    color: #0f766e !important;
+}
+
 /* "Custom solution" / "Not sure which plan" conversion banners */
 body.light-mode .custom-solution-banner {
     background: #f8fafc !important;
@@ -1302,5 +1343,25 @@ body.light-mode .record-panel-head h3 { color: #0f172a !important; }
 body.light-mode .btn-record {
     background: #f8fafc !important;
     border-color: rgba(15, 23, 42, 0.12) !important;
+    color: #0f172a !important;
+}
+
+/* Invite dialog on find-talent.html: the panel is an opaque dark surface in
+   dark mode, so light mode needs its own light surface and dark text. */
+body.light-mode .invite-panel {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
+}
+
+body.light-mode .invite-panel select,
+body.light-mode .invite-panel textarea {
+    background: #f8fafc !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .invite-panel select option {
+    background: #ffffff !important;
     color: #0f172a !important;
 }

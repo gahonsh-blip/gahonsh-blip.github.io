@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Catalog — Fixed-Price Freelance Packages | Gahonsh</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <meta name="description" content="Browse fixed-price freelance packages for Excel automation, web development, PDF design and AI workflows. Clear scope, clear price, no platform commission.">
+    <link rel="canonical" href="https://gahonsh-blip.github.io/catalog.html">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Project Catalog — Fixed-Price Freelance Packages | Gahonsh">
+    <meta property="og:description" content="Fixed-price packages from independent specialists. Clear scope, clear price, no platform commission.">
+    <meta property="og:url" content="https://gahonsh-blip.github.io/catalog.html">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(0, 255, 204, 0.4);
+            --accent-cyan: #00ffcc;
+            --accent-blue: #0077ff;
+            --text-main: #f8fafc;
+            --text-slate: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+        header {
+            position: sticky; top: 0; width: 100%;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; border-bottom: 1px solid var(--border-color);
+            padding: 18px 6%; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.35rem; font-weight: 800; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--accent-cyan); }
+        nav { display: flex; align-items: center; gap: 20px; }
+        nav a { color: var(--text-slate); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.25s; }
+        nav a:hover, nav a.active { color: var(--accent-cyan); }
+
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
+
+        .mobile-nav-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(8px);
+            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.4s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .mobile-nav-menu {
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+            background: #0b1120; border-left: 1px solid var(--border-color);
+            z-index: 2001; padding: 90px 28px 30px; display: flex; flex-direction: column; gap: 6px;
+            transition: right 0.35s ease;
+        }
+        .mobile-nav-menu.active { right: 0; }
+        .mobile-nav-menu a {
+            color: var(--text-main); text-decoration: none; font-size: 1.02rem; font-weight: 600;
+            padding: 12px 0; border-bottom: 1px solid var(--border-color); min-height: 48px;
+            display: flex; align-items: center;
+        }
+        .mobile-nav-menu a.active { color: var(--accent-cyan); }
+        .mobile-nav-close {
+            position: absolute; top: 26px; right: 26px; font-size: 1.4rem; color: var(--text-main);
+            cursor: pointer; min-width: 48px; min-height: 48px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .catalog-hero { padding: 64px 6% 30px; text-align: center; }
+        .catalog-hero h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 800; margin-bottom: 12px; }
+        .catalog-hero h1 span { color: var(--accent-cyan); }
+        .catalog-hero p { color: var(--text-slate); max-width: 640px; margin: 0 auto; font-size: 1rem; }
+
+        .catalog-toolbar {
+            max-width: 1000px; margin: 26px auto 0; padding: 0 6%;
+            display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;
+        }
+        .catalog-toolbar input,
+        .catalog-toolbar select {
+            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 10px; padding: 11px 14px;
+            font-family: inherit; font-size: 0.9rem; min-height: 48px;
+        }
+        .catalog-toolbar input[type="search"] { flex: 1 1 260px; min-width: 0; }
+        .catalog-toolbar select { flex: 0 1 190px; }
+
+        .catalog-shell { max-width: 1200px; margin: 34px auto 70px; padding: 0 6%; }
+
+        .catalog-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px;
+        }
+        .catalog-grid > * { min-width: 0; }
+
+        .package-card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 24px; display: flex; flex-direction: column; transition: all 0.25s ease;
+        }
+        .package-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+
+        .package-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+        .package-title { font-size: 1.06rem; font-weight: 700; line-height: 1.4; }
+        .package-price { font-size: 1.15rem; font-weight: 800; color: var(--accent-cyan); white-space: nowrap; }
+
+        .tier-pill {
+            display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.6px;
+            text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
+            border: 1px solid var(--border-color); color: var(--text-slate); margin-bottom: 10px;
+        }
+        .tier-pill.tier-standard { color: var(--accent-cyan); border-color: rgba(0, 255, 204, 0.45); }
+        .tier-pill.tier-premium { color: #fbbf24; border-color: rgba(251, 191, 36, 0.45); }
+
+        .package-meta {
+            display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem;
+            color: var(--text-slate); margin-bottom: 12px;
+        }
+        .package-desc { color: var(--text-slate); font-size: 0.92rem; margin-bottom: 16px; flex: 1; }
+        .package-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+        .package-skill {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
+            color: var(--text-slate); padding: 4px 10px; border-radius: 6px; font-size: 0.76rem;
+        }
+
+        .package-owner {
+            display: flex; align-items: center; gap: 10px; padding-top: 14px;
+            border-top: 1px solid var(--border-color); margin-bottom: 14px;
+        }
+        .package-owner .avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #00ffcc, #0077ff); color: #070c19;
+            font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+        }
+        .package-owner .owner-name { font-size: 0.88rem; font-weight: 700; }
+        .package-owner .owner-meta { font-size: 0.76rem; color: var(--text-slate); }
+
+        .package-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn-primary, .btn-ghost {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            border-radius: 10px; padding: 11px 16px; font-size: 0.86rem; font-weight: 700;
+            text-decoration: none; cursor: pointer; font-family: inherit; min-height: 46px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%); color: #070c19; border: none; }
+        .btn-ghost { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-ghost:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        .catalog-empty {
+            grid-column: 1 / -1; text-align: center; padding: 48px 24px;
+            background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-color); border-radius: 16px;
+        }
+        .catalog-empty i { font-size: 2rem; color: var(--accent-cyan); margin-bottom: 12px; }
+        .catalog-empty p { color: var(--text-slate); font-size: 0.94rem; max-width: 520px; margin: 8px auto 0; }
+
+        /* SELLER PANEL */
+        .seller-panel {
+            margin-top: 48px; background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 26px;
+        }
+        .seller-panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+        .seller-panel > p { color: var(--text-slate); font-size: 0.9rem; margin-bottom: 20px; }
+        .seller-panel[hidden] { display: none; }
+
+        .seller-form { display: grid; gap: 14px; }
+        .seller-form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+        .seller-form label { display: block; font-size: 0.8rem; color: var(--text-slate); margin-bottom: 6px; }
+        .seller-form input, .seller-form select, .seller-form textarea {
+            width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 10px; padding: 11px 13px;
+            font-family: inherit; font-size: 0.9rem; min-height: 46px;
+        }
+        .seller-form textarea { min-height: 110px; resize: vertical; }
+        .seller-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .my-packages { margin-top: 26px; display: grid; gap: 10px; }
+        .my-package-row {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+            border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px;
+        }
+        .my-package-row .row-title { font-size: 0.9rem; font-weight: 600; }
+        .my-package-row .row-meta { font-size: 0.78rem; color: var(--text-slate); }
+        .my-package-row .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .row-actions button {
+            font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-main);
+            border-radius: 8px; padding: 8px 12px; min-height: 40px;
+        }
+        .row-actions button:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        footer.site-footer { background: #02040a; padding: 60px 8% 30px; border-top: 1px solid var(--border-color); margin-top: 60px; }
+        footer.site-footer .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 35px; margin-bottom: 40px; }
+        footer.site-footer .footer-heading { color: var(--text-main); margin-bottom: 18px; font-size: 1rem; letter-spacing: 0.5px; }
+        footer.site-footer ul { list-style: none; }
+        footer.site-footer li { margin-bottom: 10px; }
+        footer.site-footer li a { color: var(--text-slate); text-decoration: none; font-size: 0.88rem; }
+        footer.site-footer li a:hover { color: var(--accent-cyan); }
+        footer.site-footer .footer-bottom {
+            padding-top: 25px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+            gap: 15px; color: var(--text-slate); font-size: 0.85rem;
+        }
+        footer.site-footer .footer-social { display: flex; gap: 15px; font-size: 1.1rem; }
+        footer.site-footer .footer-social a { color: var(--text-slate); }
+
+        @media (max-width: 1100px) {
+            nav { display: none; }
+            .menu-toggle { display: block; }
+        }
+        @media (max-width: 600px) {
+            .catalog-toolbar select, .catalog-toolbar input { flex: 1 1 100%; }
+            .package-card { padding: 20px; }
+            .package-top { flex-wrap: wrap; }
+        }
+    </style>
+<link rel="stylesheet" href="theme.css?v=8">
+</head>
+<body>
+
+    <a href="https://wa.me/918825183628" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed; bottom:35px; right:35px; width:55px; height:55px; background:#25d366; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.8rem; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:999; text-decoration:none; transition:transform 0.3s;" rel="noopener noreferrer">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <a href="#" class="back-to-top" id="btn-top" aria-label="Back to top" style="position:fixed; bottom:35px; left:35px; width:45px; height:45px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-main); border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1rem; z-index:999; text-decoration:none; opacity:0; transition:opacity 0.3s, background 0.3s;">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <div class="mobile-nav-overlay" id="menu-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-menu-container">
+        <i class="fa-solid fa-xmark mobile-nav-close" id="menu-close-btn"></i>
+        <a href="index.html">Home</a>
+        <a href="jobs.html">Find Work</a>
+        <a href="find-talent.html" class="active">Find Talent</a>
+        <a href="post-job.html">Post a Job</a>
+        <a href="marketplace-dashboard.html">Portal</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <header>
+        <a href="index.html" class="logo">GAHONSH <span>FREELANCING</span></a>
+        <i class="fa-solid fa-bars menu-toggle" id="mobile-menu-open-btn"></i>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Find Work</a>
+            <a href="find-talent.html" class="active">Find Talent</a>
+            <a href="post-job.html">Post a Job</a>
+            <a href="marketplace-dashboard.html">Portal</a>
+            <a href="about.html">About</a>
+            <div class="dropdown">
+                <a href="services.html">Services <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:3px;"></i></a>
+                <div class="dropdown-content">
+                    <a href="services.html#excel">Excel Automation</a>
+                    <a href="services.html#pdf">PDF Layouts</a>
+                    <a href="services.html#web">Web Engineering</a>
+                </div>
+            </div>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <section class="catalog-hero">
+        <h1>Project <span>Catalog</span></h1>
+        <p>Fixed-price packages published by independent specialists. You see the scope, the delivery time and the price before you contact anyone &mdash; and Gahonsh takes no commission on the work.</p>
+
+        <div class="catalog-toolbar">
+            <input type="search" id="catalogSearch" placeholder="Search packages (Excel dashboard, brochure, website)..." aria-label="Search catalog packages">
+            <select id="catalogCategory" aria-label="Filter packages by category">
+                <option value="all">All categories</option>
+                <option value="Excel Automation">Excel Automation</option>
+                <option value="Web Engineering">Web Engineering</option>
+                <option value="Web Development">Web Development</option>
+                <option value="PDF & Design">PDF &amp; Design</option>
+                <option value="Python & AI">Python &amp; AI</option>
+                <option value="Data & Analytics">Data &amp; Analytics</option>
+            </select>
+            <select id="catalogTier" aria-label="Filter packages by tier">
+                <option value="all">Any tier</option>
+                <option value="basic">Basic</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+            </select>
+            <select id="catalogSort" aria-label="Sort packages">
+                <option value="newest">Newest</option>
+                <option value="price_low">Price: low to high</option>
+                <option value="price_high">Price: high to low</option>
+            </select>
+        </div>
+    </section>
+
+    <main class="catalog-shell">
+        <div class="catalog-grid" id="catalogGrid" aria-live="polite">
+            <div class="catalog-empty">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading catalog packages...</p>
+            </div>
+        </div>
+
+        <section class="seller-panel" id="sellerPanel" hidden aria-labelledby="sellerPanelTitle">
+            <h2 id="sellerPanelTitle"><i class="fa-solid fa-store"></i> Your catalog packages</h2>
+            <p>Publish what you deliver as a fixed-price package. Clients can request it, which opens a normal project brief you both agree on in writing. The platform takes no commission and moves no money.</p>
+
+            <form class="seller-form" id="packageForm">
+                <input type="hidden" id="packageId" value="">
+                <div>
+                    <label for="packageTitle">Package title</label>
+                    <input type="text" id="packageTitle" minlength="5" maxlength="120" required placeholder="e.g. Excel Reporting Dashboard with Live Charts">
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="packageCategory">Category</label>
+                        <select id="packageCategory" required aria-label="Package category">
+                            <option value="Excel Automation">Excel Automation</option>
+                            <option value="Web Engineering">Web Engineering</option>
+                            <option value="PDF & Design">PDF &amp; Design</option>
+                            <option value="Python & AI">Python &amp; AI</option>
+                            <option value="Data & Analytics">Data &amp; Analytics</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="packageTier">Tier</label>
+                        <select id="packageTier" required aria-label="Package tier">
+                            <option value="basic">Basic</option>
+                            <option value="standard">Standard</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="packagePrice">Price (USD)</label>
+                        <input type="number" id="packagePrice" min="1" step="1" required placeholder="e.g. 320">
+                    </div>
+                    <div>
+                        <label for="packageDelivery">Delivery (days)</label>
+                        <input type="number" id="packageDelivery" min="1" max="180" step="1" required placeholder="e.g. 7">
+                    </div>
+                    <div>
+                        <label for="packageRevisions">Revisions included</label>
+                        <input type="number" id="packageRevisions" min="0" max="50" step="1" value="1">
+                    </div>
+                </div>
+                <div>
+                    <label for="packageSkills">Skills (comma separated)</label>
+                    <input type="text" id="packageSkills" placeholder="Excel VBA, Power Query, Dashboards">
+                </div>
+                <div>
+                    <label for="packageDescription">What the client receives</label>
+                    <textarea id="packageDescription" minlength="20" maxlength="4000" required placeholder="Describe the deliverable, the file formats and what is included."></textarea>
+                </div>
+                <div class="seller-form-actions">
+                    <button type="submit" class="btn-primary" id="packageSubmit"><i class="fa-solid fa-plus"></i> Publish package</button>
+                    <button type="button" class="btn-ghost" id="packageReset">Clear form</button>
+                </div>
+            </form>
+
+            <div class="my-packages" id="myPackages"></div>
+        </section>
+    </main>
+
+    <!-- STATIC SEO CONTENT (crawlable without JavaScript) -->
+    <section class="page-info" aria-labelledby="catalog-info">
+        <h2 id="catalog-info">Fixed-Price Freelance Packages with a Clear Scope</h2>
+        <p>The Gahonsh Project Catalog lists services that independent specialists have already priced and scoped. Instead of writing a brief and waiting for bids, you can read exactly what a package includes, how many days delivery takes, how many revisions are included and what it costs. If the package matches what you need, request it and the conversation starts from an agreed scope rather than a blank page.</p>
+        <p>Every package is published by the freelancer who delivers it. There is no account manager between you and the person doing the work, so a question about the deliverable reaches the specialist directly. Prices are the freelancer's own quote. Gahonsh does not add a commission on top of the agreed amount, and the platform does not hold or move funds &mdash; you agree payment terms with the freelancer and settle them directly.</p>
+
+        <h3>How the catalog works</h3>
+        <ul>
+            <li><strong>Browse or search</strong> by skill, category, tier and price to find a package that matches the outcome you need.</li>
+            <li><strong>Read the scope</strong> &mdash; the description, delivery window and revision count are part of the listing, not a separate negotiation.</li>
+            <li><strong>Request the package</strong> and the project form opens with the package title, budget and scope already filled in, so the brief you publish matches what you saw.</li>
+            <li><strong>Agree the details</strong> in writing, then track the work in the portal with milestones and messages.</li>
+        </ul>
+
+        <h3>Tiers, revisions and delivery</h3>
+        <p>Freelancers commonly publish the same service at three levels. A basic tier covers the smallest usable version of the deliverable, a standard tier adds scope such as extra sheets, pages or integrations, and a premium tier covers the full job with the most revisions. Revisions are counted in the listing so both sides know how many rounds are included before work begins. Delivery days are working days from the point the freelancer has everything they need, which is why the package description lists the inputs the client must supply.</p>
+
+        <h3>Why a catalog helps both sides</h3>
+        <p>For a client, a catalog shortens the path from requirement to quote. You compare published scopes rather than interpreting several proposals, and the budget is visible before you spend time on a call. For a freelancer, publishing a package turns repeatable work into a listing that answers the same questions every time: what is included, how long it takes, what it costs and what the client needs to provide.</p>
+        <p>Packages are also a fair comparison point. Two listings for an Excel dashboard can be read side by side: one may include data cleaning and a printable summary, another may only cover chart building. That difference is exactly the kind of detail that is easy to miss in a short proposal and hard to miss in a structured listing.</p>
+
+        <h3>Working alongside the jobs feed</h3>
+        <p>The catalog suits defined work with a known outcome. If your requirement is exploratory, unusually large, or needs a specialist to propose an approach, <a href="post-job.html">post a project</a> instead and let freelancers bid. You can also <a href="find-talent.html">search the talent directory</a> and invite a specific specialist to an open project. All three routes end in the same place: an agreed brief, tracked milestones and a review when the work is complete.</p>
+        <p>Freelancers who want to publish a package can do it from this page once signed in &mdash; there is no listing fee. Read <a href="pricing.html">pricing</a> for how Gahonsh charges for agency work, and <a href="terms.html">terms and conditions</a> for the rules that apply to marketplace engagements.</p>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div>
+                <p class="footer-heading">Gahonsh</p>
+                <p style="color:var(--text-slate); font-size:0.88rem; line-height:1.6;">Hire reviewed specialists directly, without agency mark-ups or long procurement cycles.</p>
+            </div>
+            <div>
+                <p class="footer-heading">Marketplace</p>
+                <ul>
+                    <li><a href="jobs.html">Find Work</a></li>
+                    <li><a href="find-talent.html">Find Talent</a></li>
+                    <li><a href="catalog.html">Project Catalog</a></li>
+                    <li><a href="post-job.html">Post a Job</a></li>
+                    <li><a href="marketplace-dashboard.html">User Portal</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="footer-heading">Services</p>
+                <ul>
+                    <li><a href="services.html#excel">Excel Intelligence</a></li>
+                    <li><a href="services.html#pdf">PDF Engineering</a></li>
+                    <li><a href="services.html#web">Web Architecture</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="footer-heading">Legal</p>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms Structure</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GAHONSH FREELANCING. All Rights Reserved.</p>
+            <div class="footer-social">
+                <a href="https://wa.me/918825183628" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:gahonsh@gmail.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://www.linkedin.com/in/gahonsh-company-b05528311/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/gahonsh/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@GAHONSH" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+    <script src="supabase-config.js?v=8"></script>
+    <script src="marketplace-local.js?v=8"></script>
+    <script src="supabase-client.js?v=8"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function money(value) {
+            const amount = Number(value);
+            if (!Number.isFinite(amount)) return '$0';
+            return '$' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        }
+
+        function initialsOf(name) {
+            return String(name || 'F').trim().split(/\s+/).map((part) => part[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function notify(message, kind) {
+            if (window.GahonshAuthUI && window.GahonshAuthUI.showToast) {
+                window.GahonshAuthUI.showToast(message, kind);
+            } else {
+                console.log(message);
+            }
+        }
+
+        function currentUser() {
+            return (window.GahonshAuthUI && window.GahonshAuthUI.getCurrentUser)
+                ? window.GahonshAuthUI.getCurrentUser()
+                : null;
+        }
+
+        async function loadCatalog() {
+            const grid = document.getElementById('catalogGrid');
+            const filters = {
+                search: document.getElementById('catalogSearch').value.trim(),
+                category: document.getElementById('catalogCategory').value,
+                tier: document.getElementById('catalogTier').value,
+                sort: document.getElementById('catalogSort').value
+            };
+
+            let packages = [];
+            let loadError = null;
+            if (window.isMarketplaceReady()) {
+                try {
+                    packages = await window.GahonshDB.Catalog.list(filters);
+                } catch (err) {
+                    console.warn('[Catalog] load failed:', err);
+                    loadError = err;
+                }
+            }
+
+            // A reachable project without the table is a deployment gap. Showing
+            // "no packages" there would read as an empty catalog instead.
+            if (loadError && window.GahonshDB.isBackendNotProvisioned?.(loadError)) {
+                grid.innerHTML = `
+                    <div class="catalog-empty">
+                        <i class="fa-solid fa-database"></i>
+                        <h2 style="font-size:1.1rem; margin-bottom:6px;">The catalog table is not installed yet</h2>
+                        <p>This Supabase project does not have <code>service_packages</code>. Run <code>docs/marketplace-schema.sql</code>, or the matching migration, once in the Supabase SQL Editor, then reload this page.</p>
+                    </div>`;
+                return;
+            }
+
+            if (!packages || packages.length === 0) {
+                grid.innerHTML = `
+                    <div class="catalog-empty">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <h2 style="font-size:1.1rem; margin-bottom:6px;">No package matches those filters</h2>
+                        <p>Try clearing the search, or <a href="post-job.html" style="color:var(--accent-cyan);">post a project</a> and let specialists quote for exactly what you need.</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = packages.map((pkg) => {
+                const owner = pkg.freelancer || {};
+                const tier = escapeHtml(pkg.tier || 'basic');
+                const skills = (pkg.skills || []).map((skill) => `<span class="package-skill">${escapeHtml(skill)}</span>`).join('');
+                const availability = owner.availability || 'available';
+                const ownerMeta = availability === 'available'
+                    ? 'Available now'
+                    : availability === 'busy' ? 'Currently busy' : 'Not taking work';
+                const requestHref = `post-job.html?package=${encodeURIComponent(pkg.id)}`;
+
+                return `
+                    <article class="package-card">
+                        <span class="tier-pill tier-${tier}">${tier}</span>
+                        <div class="package-top">
+                            <h2 class="package-title">${escapeHtml(pkg.title)}</h2>
+                            <span class="package-price">${money(pkg.price)}</span>
+                        </div>
+                        <div class="package-meta">
+                            <span><i class="fa-regular fa-clock"></i> ${Number(pkg.delivery_days) || 0} day delivery</span>
+                            <span><i class="fa-solid fa-rotate"></i> ${Number(pkg.revisions) || 0} revision(s)</span>
+                            <span><i class="fa-solid fa-layer-group"></i> ${escapeHtml(pkg.category || 'General')}</span>
+                        </div>
+                        <p class="package-desc">${escapeHtml(pkg.description)}</p>
+                        <div class="package-skills">${skills}</div>
+                        <div class="package-owner">
+                            <div class="avatar">${escapeHtml(initialsOf(owner.full_name))}</div>
+                            <div>
+                                <div class="owner-name">${escapeHtml(owner.full_name || 'Gahonsh specialist')}${owner.is_verified ? ' <i class="fa-solid fa-circle-check" title="Verified" style="color:var(--accent-cyan); font-size:0.8rem;"></i>' : ''}</div>
+                                <div class="owner-meta">${escapeHtml(ownerMeta)}${owner.location ? ' &middot; ' + escapeHtml(owner.location) : ''}</div>
+                            </div>
+                        </div>
+                        <div class="package-actions">
+                            <a class="btn-primary" href="${requestHref}"><i class="fa-solid fa-bolt"></i> Request this package</a>
+                            <a class="btn-ghost" href="find-talent.html"><i class="fa-solid fa-user-group"></i> See talent</a>
+                        </div>
+                    </article>`;
+            }).join('');
+        }
+
+        // --- Seller panel ---------------------------------------------------
+        function fillPackageForm(pkg) {
+            document.getElementById('packageId').value = pkg ? pkg.id : '';
+            document.getElementById('packageTitle').value = pkg ? pkg.title : '';
+            document.getElementById('packageCategory').value = pkg ? pkg.category : 'Excel Automation';
+            document.getElementById('packageTier').value = pkg ? pkg.tier : 'basic';
+            document.getElementById('packagePrice').value = pkg ? pkg.price : '';
+            document.getElementById('packageDelivery').value = pkg ? pkg.delivery_days : 7;
+            document.getElementById('packageRevisions').value = pkg ? pkg.revisions : 1;
+            document.getElementById('packageSkills').value = pkg ? (pkg.skills || []).join(', ') : '';
+            document.getElementById('packageDescription').value = pkg ? pkg.description : '';
+            document.getElementById('packageSubmit').innerHTML = pkg
+                ? '<i class="fa-solid fa-floppy-disk"></i> Save changes'
+                : '<i class="fa-solid fa-plus"></i> Publish package';
+        }
+
+        function readPackageForm() {
+            return {
+                title: document.getElementById('packageTitle').value,
+                category: document.getElementById('packageCategory').value,
+                tier: document.getElementById('packageTier').value,
+                price: document.getElementById('packagePrice').value,
+                delivery_days: document.getElementById('packageDelivery').value,
+                revisions: document.getElementById('packageRevisions').value,
+                skills: document.getElementById('packageSkills').value.split(',').map((s) => s.trim()).filter(Boolean),
+                description: document.getElementById('packageDescription').value
+            };
+        }
+
+        async function loadMyPackages() {
+            const list = document.getElementById('myPackages');
+            const panel = document.getElementById('sellerPanel');
+            const user = currentUser();
+
+            if (!user || !window.isMarketplaceReady() || (user.profile && user.profile.role !== 'freelancer' && user.profile.role !== 'admin')) {
+                panel.hidden = true;
+                return;
+            }
+
+            panel.hidden = false;
+            let mine = [];
+            try {
+                mine = await window.GahonshDB.Catalog.listMine();
+            } catch (err) {
+                console.warn('[Catalog] my packages failed:', err);
+            }
+
+            if (!mine.length) {
+                list.innerHTML = '<p style="color:var(--text-slate); font-size:0.88rem;">You have not published a package yet. Use the form above to add your first one.</p>';
+                return;
+            }
+
+            list.innerHTML = mine.map((pkg) => `
+                <div class="my-package-row">
+                    <div>
+                        <div class="row-title">${escapeHtml(pkg.title)}</div>
+                        <div class="row-meta">${money(pkg.price)} &middot; ${escapeHtml(pkg.tier)} &middot; ${pkg.is_active ? 'Live' : 'Paused'}</div>
+                    </div>
+                    <div class="row-actions">
+                        <button type="button" data-edit-package="${escapeHtml(pkg.id)}">Edit</button>
+                        <button type="button" data-toggle-package="${escapeHtml(pkg.id)}" data-active="${pkg.is_active ? 'true' : 'false'}">${pkg.is_active ? 'Pause' : 'Activate'}</button>
+                        <button type="button" data-delete-package="${escapeHtml(pkg.id)}">Delete</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        document.getElementById('catalogSearch').addEventListener('input', loadCatalog);
+        ['catalogCategory', 'catalogTier', 'catalogSort'].forEach((id) => {
+            document.getElementById(id).addEventListener('change', loadCatalog);
+        });
+
+        document.getElementById('packageReset').onclick = () => fillPackageForm(null);
+
+        document.getElementById('packageForm').onsubmit = async (event) => {
+            event.preventDefault();
+            if (!currentUser()) {
+                notify('Sign in as a freelancer to publish a package.');
+                if (window.GahonshAuthUI) window.GahonshAuthUI.openAuthModal('signin');
+                return;
+            }
+
+            const submitBtn = document.getElementById('packageSubmit');
+            const editingId = document.getElementById('packageId').value;
+            submitBtn.disabled = true;
+            try {
+                if (editingId) {
+                    await window.GahonshDB.Catalog.update(editingId, readPackageForm());
+                    notify('Package updated.');
+                } else {
+                    await window.GahonshDB.Catalog.create(readPackageForm());
+                    notify('Package published.');
+                }
+                fillPackageForm(null);
+                await loadMyPackages();
+                await loadCatalog();
+            } catch (err) {
+                notify(err.message || 'Could not save the package.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+
+        document.getElementById('myPackages').addEventListener('click', async (event) => {
+            const editBtn = event.target.closest('[data-edit-package]');
+            const toggleBtn = event.target.closest('[data-toggle-package]');
+            const deleteBtn = event.target.closest('[data-delete-package]');
+
+            try {
+                if (editBtn) {
+                    const pkg = await window.GahonshDB.Catalog.getById(editBtn.getAttribute('data-edit-package'));
+                    if (pkg) {
+                        fillPackageForm(pkg);
+                        document.getElementById('sellerPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    return;
+                }
+                if (toggleBtn) {
+                    const makeActive = toggleBtn.getAttribute('data-active') !== 'true';
+                    await window.GahonshDB.Catalog.update(toggleBtn.getAttribute('data-toggle-package'), { is_active: makeActive });
+                    await loadMyPackages();
+                    await loadCatalog();
+                    return;
+                }
+                if (deleteBtn) {
+                    await window.GahonshDB.Catalog.remove(deleteBtn.getAttribute('data-delete-package'));
+                    notify('Package removed.');
+                    await loadMyPackages();
+                    await loadCatalog();
+                }
+            } catch (err) {
+                notify(err.message || 'Could not update the package.');
+            }
+        });
+
+        // Mobile Nav Trigger
+        document.getElementById('mobile-menu-open-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.add('active');
+            document.getElementById('mobile-menu-container').classList.add('active');
+        };
+        document.getElementById('menu-close-btn').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+        document.getElementById('menu-overlay').onclick = () => {
+            document.getElementById('menu-overlay').classList.remove('active');
+            document.getElementById('mobile-menu-container').classList.remove('active');
+        };
+
+        async function init() {
+            await loadCatalog();
+            await loadMyPackages();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script src="chat-widget.js?v=6" defer></script>
+</body>
+</html>

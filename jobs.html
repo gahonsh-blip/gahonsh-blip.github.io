@@ -519,6 +519,58 @@
             margin-bottom: 15px;
         }
 
+        /* SHORTLIST CONTROLS */
+        .filter-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            min-height: 48px;
+        }
+
+        .sidebar-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            color: var(--accent-cyan);
+            font-size: 0.88rem;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .btn-save-job {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            cursor: pointer;
+            min-height: 40px;
+        }
+
+        .btn-save-job:hover,
+        .btn-save-job.is-saved {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .job-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 900px) {
             .marketplace-container {
                 grid-template-columns: minmax(0, 1fr);
@@ -537,7 +589,7 @@
             .job-card-footer { flex-wrap: wrap; gap: 12px; }
         }
     </style>
-<link rel="stylesheet" href="theme.css?v=7">
+<link rel="stylesheet" href="theme.css?v=8">
 </head>
 <body>
 
@@ -634,6 +686,22 @@
                 <label class="filter-option"><input type="radio" name="filterExperience" value="intermediate"> Intermediate</label>
                 <label class="filter-option"><input type="radio" name="filterExperience" value="expert"> Expert</label>
             </div>
+
+            <div class="filter-section">
+                <p class="filter-label">Sort By</p>
+                <select id="jobSortSelect" class="filter-select" aria-label="Sort projects">
+                    <option value="newest">Newest first</option>
+                    <option value="budget_high">Budget: high to low</option>
+                    <option value="budget_low">Budget: low to high</option>
+                    <option value="proposals_few">Fewest proposals</option>
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <p class="filter-label">My Shortlist</p>
+                <label class="filter-option"><input type="checkbox" id="savedOnlyToggle"> Saved jobs only (<span id="savedCountDisplay">0</span>)</label>
+                <a href="catalog.html" class="sidebar-link"><i class="fa-solid fa-store"></i> Browse the Project Catalog</a>
+            </div>
         </aside>
 
         <!-- JOBS FEED -->
@@ -701,6 +769,7 @@
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
+                    <li style="margin-bottom:10px;"><a href="catalog.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Project Catalog</a></li>
                     <li style="margin-bottom:10px;"><a href="post-job.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Post a Job</a></li>
                     <li style="margin-bottom:10px;"><a href="marketplace-dashboard.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">User Portal</a></li>
                 </ul>
@@ -737,9 +806,9 @@
     <!-- SCRIPTS -->
     <script src="script.js"></script>
     <script src="theme.js"></script>
-    <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js"></script>
-    <script src="supabase-client.js"></script>
+    <script src="supabase-config.js?v=8"></script>
+    <script src="marketplace-local.js?v=8"></script>
+    <script src="supabase-client.js?v=8"></script>
     <script src="auth.js"></script>
 
     <script>
@@ -800,10 +869,25 @@
             const container = document.getElementById('jobsListContainer');
             const countDisplay = document.getElementById('jobsCountDisplay');
 
+            // The shortlist is private to the signed-in member. A signed-out
+            // visitor simply sees no saved state, never an error.
+            let savedIds = [];
+            if (window.isMarketplaceReady()) {
+                try {
+                    savedIds = await window.GahonshDB.SavedJobs.ids();
+                } catch (err) {
+                    console.warn('[Jobs Feed] saved jobs unavailable:', err);
+                }
+            }
+            const savedCountDisplay = document.getElementById('savedCountDisplay');
+            if (savedCountDisplay) savedCountDisplay.innerText = savedIds.length;
+
             const searchVal = document.getElementById('jobSearchInput').value.trim();
             const categoryVal = document.querySelector('input[name="filterCategory"]:checked')?.value || 'all';
             const typeVal = document.querySelector('input[name="filterType"]:checked')?.value || 'all';
             const expVal = document.querySelector('input[name="filterExperience"]:checked')?.value || 'all';
+            const sortVal = document.getElementById('jobSortSelect')?.value || 'newest';
+            const savedOnly = !!document.getElementById('savedOnlyToggle')?.checked;
 
             let jobs = [];
 
@@ -813,7 +897,8 @@
                         search: searchVal,
                         category: categoryVal,
                         job_type: typeVal,
-                        experience_level: expVal
+                        experience_level: expVal,
+                        sort: sortVal
                     });
                 }
             } catch (err) {
@@ -837,9 +922,23 @@
                 });
             }
 
+            if (savedOnly) {
+                jobs = jobs.filter((job) => savedIds.includes(job.id));
+            }
+
             countDisplay.innerText = jobs.length;
 
             if (jobs.length === 0) {
+                if (savedOnly) {
+                    container.innerHTML = `
+                        <div class="empty-jobs-state">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <h3>Your shortlist is empty</h3>
+                            <p style="color:var(--text-slate); margin-top:8px;">Tap Save on any project to keep it here. Your shortlist is private to your account.</p>
+                        </div>
+                    `;
+                    return;
+                }
                 container.innerHTML = `
                     <div class="empty-jobs-state">
                         <i class="fa-regular fa-folder-open"></i>
@@ -885,7 +984,13 @@
                                 <i class="fa-solid fa-shield-check" style="color:var(--accent-cyan);"></i>
                                 <strong>${clientName}</strong> • ${clientLocation}
                             </div>
-                            <a href="job-details.html?id=${jobId}" class="btn-view-job">View & Apply</a>
+                            <div class="job-card-actions">
+                                <button type="button" class="btn-save-job${savedIds.includes(job.id) ? ' is-saved' : ''}" data-save-job="${escapeHtml(job.id)}" aria-pressed="${savedIds.includes(job.id) ? 'true' : 'false'}">
+                                    <i class="fa-${savedIds.includes(job.id) ? 'solid' : 'regular'} fa-bookmark"></i>
+                                    <span>${savedIds.includes(job.id) ? 'Saved' : 'Save'}</span>
+                                </button>
+                                <a href="job-details.html?id=${jobId}" class="btn-view-job">View & Apply</a>
+                            </div>
                         </div>
                     </article>
                 `;
@@ -900,6 +1005,34 @@
 
         document.querySelectorAll('.filters-sidebar input').forEach(input => {
             input.onchange = loadJobs;
+        });
+        document.getElementById('jobSortSelect').onchange = loadJobs;
+
+        // Delegated so a re-render never needs the handler re-attached, and the
+        // job id travels in a data attribute instead of an inline handler.
+        document.getElementById('jobsListContainer').addEventListener('click', async (event) => {
+            const button = event.target.closest('[data-save-job]');
+            if (!button) return;
+
+            const jobId = button.getAttribute('data-save-job');
+            const ui = window.GahonshAuthUI;
+
+            if (!window.GahonshAuthUI || !ui.getCurrentUser || !ui.getCurrentUser()) {
+                if (ui && ui.showToast) ui.showToast('Sign in to save jobs to your shortlist.', 'info');
+                if (ui && ui.openAuthModal) ui.openAuthModal('signin');
+                return;
+            }
+
+            button.disabled = true;
+            try {
+                const saved = await window.GahonshDB.SavedJobs.toggle(jobId);
+                if (ui.showToast) ui.showToast(saved ? 'Saved to your shortlist.' : 'Removed from your shortlist.', 'success');
+            } catch (err) {
+                if (ui.showToast) ui.showToast(err.message || 'Could not update your shortlist.', 'error');
+            } finally {
+                button.disabled = false;
+                loadJobs();
+            }
         });
 
         // Mobile Nav Trigger
