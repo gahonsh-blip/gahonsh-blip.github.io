@@ -841,3 +841,155 @@ npm test
 Browser sweep (headless Chromium, `*supabase.co*` blocked): 19 pages at
 390×844 and 320×568 — every page now reports `scrollWidth` equal to the
 viewport, and exactly one fallback warning per page.
+
+---
+
+# Live Project Audit
+
+Date: 2026-11-24
+Scope: the **deployed** project (`https://evdpmombgymthzqegqwr.supabase.co`)
+and the live site behaviour against it, rather than the committed files.
+
+Method: `npm run check:live`, an authenticated probe of the deployed REST API
+as a disposable client account (now `npm run check:live-security`), a real
+sign-in and job-post through the browser UI against the live project, and a
+request-by-request comparison of every embedded PostgREST select.
+
+Two of these bugs could not be seen from the repository: every committed file
+and every static suite was correct, and the site was still broken.
+
+## Summary
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 1 | Critical | Production config | `GAHONSH_PRODUCTION_URL` was a reserved placeholder (`https://offline-probe.invalid`), so the deployed site never talked to the real project | Fixed |
+| 2 | Critical | Database (live) | A signed-in client could set `role: "admin"` and `is_verified: true` on their own profile — the immutability trigger was not attached in the live project | Fix shipped, needs one SQL run |
+| 3 | High | PostgREST embeds | `client:profiles(...)` was ambiguous, so the jobs feed, the job details page and saved jobs all failed with PGRST201 | Fixed |
+| 4 | High | PostgREST embeds | The invitation queries embedded `profiles` twice with no FK hint, so both invitation tabs failed with PGRST201 | Fixed |
+| 5 | High | Database (live) | `admin_profiles`, `admin_overview()` and `contact_messages` missing, and `profiles.email` / `phone_number` dropped, which is why the view and RPC could not be created | Fix shipped, needs one SQL run |
+| 6 | Medium | Owner dashboard | The KPI row showed eight zeros when `admin_overview()` was missing, reading as "no activity" instead of "not migrated" | Fixed |
+
+## 1. The deployed site pointed at a placeholder project (Critical)
+
+`supabase-config.js` carried
+
+```js
+var GAHONSH_PRODUCTION_URL = "https://offline-probe.invalid";
+```
+
+`isSupabaseConfigured()` compares the stored URL with that constant, and `.invalid`
+is reserved and never resolves. On the live site every request failed at the
+network layer, so `withFallback()` served the marketplace from
+`marketplace-local.js`: the site looked like it worked, on a per-browser store.
+Two consequences:
+
+- Any account created on the live site existed only in that browser's
+  `localStorage`; signing in from another device or browser failed, and the
+  production project appeared to have no users.
+- The real project was never exercised, which is how bugs 2, 3, 4 and 5
+  survived several releases.
+
+Fixed by pointing the constant at the real project. The offline engine is
+still reachable: it stays in the fallback path for genuine network failures,
+which is what it was written for.
+
+## 2. A client could promote themselves to admin (Critical)
+
+RLS lets a member update their own profile row, so the column rules live in
+`trg_protect_profile_fields`. On the live project:
+
+```
+PATCH /rest/v1/profiles?id=eq.<me>   {"role":"admin"}     -> 200
+PATCH /rest/v1/profiles?id=neq.<me>  {"is_verified":true}  -> 403
+```
+
+The second request shows RLS itself is correct. The first shows the trigger
+was missing: the write was accepted and the row came back with `role: admin`.
+`npm run test:local` covered this case in the offline engine and
+`npm run test:security` asserted the SQL text, but nothing checked the
+deployed database.
+
+`supabase/migrations/20261129000000_restore_profile_pii_columns.sql` attaches
+the trigger and restores the columns; `npm run check:live-security` now fails
+the build when a project accepts the promotion. The trigger function also reads
+the row through `to_jsonb(OLD/NEW)` instead of `NEW.email`, because the live
+project has no `email` column yet and `NEW.email` would have raised
+`record "new" has no field "email"` on every profile update — a trigger that
+blocks all writes is not a safe fallback.
+
+## 3–4. Ambiguous embedded relations broke the core pages (High)
+
+`jobs` reaches `profiles` twice: directly through `jobs.client_id`, and through
+`saved_jobs`, which PostgREST treats as a junction table. `client:profiles(...)`
+therefore returned
+
+```
+300 PGRST201  Could not embed because more than one relationship was found
+```
+
+`getJobById()` wraps that as a thrown error, so `job-details.html` rendered
+*Project unavailable* for a job that had just been created by the same user and
+was readable at `/rest/v1/jobs?id=eq.<id>` (200). `getOpenJobs()` failed the
+same way, so a posted job never appeared in the feed either.
+
+`invitations` reaches `profiles` through both `client_id` and `freelancer_id`,
+so `client:profiles` and `freelancer:profiles` were ambiguous too, breaking
+both invitation lists. `contracts` had already been written with the hint
+(`!contracts_client_id_fkey`), which is what made the omission visible.
+
+Fixed with explicit hints on every embed of `profiles`
+(`!jobs_client_id_fkey`, `!invitations_client_id_fkey`,
+`!invitations_freelancer_id_fkey`, `!proposals_freelancer_id_fkey`).
+`npm run test:schema` now walks the schema's foreign keys, treats a table with
+two FKs to the same target — or a junction table linking the pair — as an
+ambiguous embed, and fails when the select has no hint. It reproduces the
+original bug when the hint is removed.
+
+## 5. Live objects missing (High)
+
+```
+MISSING table admin_profiles      PGRST205
+MISSING table contact_messages    PGRST205
+MISSING rpc   admin_overview      PGRST202
+MISSING column profiles.email / profiles.phone_number
+```
+
+`docs/marketplace-schema.sql` never adds a column to an existing table, and the
+live project had lost `email` and `phone_number` from `profiles`. The
+`admin_profiles` view and `admin_overview()` are built on `profiles.email`, so
+re-running the schema failed at the view — and the Supabase SQL editor runs the
+script as one transaction, so the whole repair would have rolled back. The
+schema now restores both columns with `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`,
+backfills email from `auth.users`, and adds the unique index.
+
+The contact form degrades gracefully: the missing table makes the write fail and
+the enquiry goes to the Formspree fallback, so leads still arrive.
+
+## Verification
+
+```
+npm test
+  a11y check passed: 21 pages verified.
+  security check passed: 113 files verified.
+  schema check passed: 92 client reference(s) resolved against 40 schema object(s).
+  local engine check passed: 142 authorization case(s) verified.
+  content check passed: 21 pages verified.
+
+npm run check:live
+  MISSING table admin_profiles / contact_messages, rpc admin_overview   (needs the SQL run)
+
+npm run check:live-security   (before the SQL run)
+  FAIL  a client cannot promote themselves to admin — role change was accepted
+  FAIL  a member cannot verify themselves — is_verified change was accepted
+  PASS  a client can post a job / delete their own job
+  PASS  a client cannot post a job for someone else
+  PASS  a member cannot post into their own notification list
+  PASS  a member cannot save themselves as talent
+  WARN  admin_profiles, admin_overview(), contact_messages, profiles.email
+```
+
+Browser, signed in to the live project from the local preview: sign-in,
+session persistence across pages, posting a job (`post-job.html` →
+`job-details.html`), the feed listing it, the details page, the client record
+panel, the invitation tab and the project files panel all work. The temporary
+job was deleted afterwards (`204`).
