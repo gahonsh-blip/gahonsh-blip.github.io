@@ -485,6 +485,15 @@
             await delay(120);
             const normalized = String(email || '').trim().toLowerCase();
             if (!normalized || !password) throw new Error('Email and password are required.');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalized)) {
+                throw new Error('Enter a valid email address.');
+            }
+            // Supabase Auth rejects short passwords before the account exists, so
+            // the offline engine has to refuse them too — otherwise a demo
+            // account works here and fails the moment a live project is wired up.
+            if (String(password).length < 6) {
+                throw new Error('Password must be at least 6 characters.');
+            }
 
             const profiles = readTable('profiles');
             if (profiles.some((p) => (p._email || '').toLowerCase() === normalized)) {

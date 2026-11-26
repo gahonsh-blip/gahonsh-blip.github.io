@@ -1249,6 +1249,7 @@
     // ========================================================================
     const REACH_TTL_MS = 30000;
     let _reach = { value: null, at: 0 };
+    let _reachProbe = null;
 
     function localEngine() {
         return window.GahonshLocal || null;
@@ -1261,37 +1262,45 @@
         if (_reach.value !== null && (now - _reach.at) < REACH_TTL_MS) {
             return _reach.value;
         }
+        // A page load asks several services at once, so without sharing the
+        // in-flight probe each caller fired its own request and logged its own
+        // "unreachable" warning.
+        if (_reachProbe) return _reachProbe;
 
-        const base = String(window.GAHONSH_CONFIG.SUPABASE_URL || '').replace(/\/+$/, '');
-        let reachable = false;
+        _reachProbe = (async () => {
+            const base = String(window.GAHONSH_CONFIG.SUPABASE_URL || '').replace(/\/+$/, '');
+            let reachable = false;
 
-        if (base) {
-            try {
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 4000);
-                // Probe the auth health endpoint with the public publishable key.
-                // It is CORS-enabled and answers 200, so the check stays silent in
-                // the console. A keyless request to /rest/v1/ returns 401, which
-                // the browser logs as a console error and fails the Lighthouse
-                // "no browser errors" audit even though the project is healthy.
-                const res = await fetch(base + '/auth/v1/health', {
-                    method: 'GET',
-                    cache: 'no-store',
-                    headers: { apikey: String(window.GAHONSH_CONFIG.SUPABASE_ANON_KEY || '') },
-                    signal: controller.signal
-                });
-                reachable = res.ok;
-                clearTimeout(timer);
-            } catch (err) {
-                reachable = false;
+            if (base) {
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 4000);
+                    // Probe the auth health endpoint with the public publishable key.
+                    // It is CORS-enabled and answers 200, so the check stays silent in
+                    // the console. A keyless request to /rest/v1/ returns 401, which
+                    // the browser logs as a console error and fails the Lighthouse
+                    // "no browser errors" audit even though the project is healthy.
+                    const res = await fetch(base + '/auth/v1/health', {
+                        method: 'GET',
+                        cache: 'no-store',
+                        headers: { apikey: String(window.GAHONSH_CONFIG.SUPABASE_ANON_KEY || '') },
+                        signal: controller.signal
+                    });
+                    reachable = res.ok;
+                    clearTimeout(timer);
+                } catch (err) {
+                    reachable = false;
+                }
             }
-        }
 
-        _reach = { value: reachable, at: Date.now() };
-        if (!reachable) {
-            console.warn('[GahonshDB] Supabase project unreachable — using the local marketplace engine.');
-        }
-        return reachable;
+            _reach = { value: reachable, at: Date.now() };
+            if (!reachable) {
+                console.warn('[GahonshDB] Supabase project unreachable — using the local marketplace engine.');
+            }
+            return reachable;
+        })().finally(() => { _reachProbe = null; });
+
+        return _reachProbe;
     }
 
     /**
