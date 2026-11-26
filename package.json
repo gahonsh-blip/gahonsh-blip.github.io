@@ -14,7 +14,8 @@
     "test:schema": "node scripts/check-schema.mjs",
     "test:local": "node scripts/check-local-engine.mjs",
     "test:content": "node scripts/check-content.mjs",
-    "check:live": "node scripts/check-live-backend.mjs"
+    "check:live": "node scripts/check-live-backend.mjs",
+    "check:live-security": "node scripts/check-live-security.mjs"
   },
   "dependencies": {
     "express": "^4.19.2"

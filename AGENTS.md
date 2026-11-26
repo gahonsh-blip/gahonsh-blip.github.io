@@ -155,6 +155,19 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     `contract_milestones`, `admin_overview` and five RPCs while every test
     passed. `HTTP 401` on a table means it exists and RLS blocks `anon`, which
     is expected for `proposals` and `contracts`.
+  - `npm run check:live-security` — opts in with `AUDIT_EMAIL` / `AUDIT_PASSWORD`
+    and signs in to the deployed project as a disposable account to assert the
+    rules only a signed-in member can violate: a client cannot set `role` to
+    `admin` or flip `is_verified` on their own row, cannot post a notification
+    into their own list, cannot save themselves as talent, cannot post a job in
+    someone else's name, and can still create and delete their own job. PGRST
+    gaps in `admin_profiles`, `admin_overview()` and `profiles.email` come back
+    as warnings, because they degrade the owner dashboard rather than break a
+    rule. This check found a live privilege escalation that every committed file
+    and every static suite said was prevented — RLS allows a member to update
+    their own profile row, so `role`, `email` and `is_verified` are guarded by
+    `trg_protect_profile_fields`, and a project missing that trigger lets any
+    client become an admin.
   - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
     it enforces the same access rules as the SQL policies (who may hire,
     withdraw, shortlist, list proposals, read a contract, change a job status,
@@ -330,6 +343,29 @@ freelancers, so they change with the product, not after it.
 - **Open items are tracked.** `docs/SITE-AUDIT-2026-11.md` records what is
   fixed, what is still missing (escrow, KYC, saved jobs, notifications,
   multi-currency) and which policy numbers the owner must confirm.
+
+## Deployed Project vs Committed Schema
+
+`supabase-config.js` points at the production project
+`https://evdpmombgymthzqegqwr.supabase.co`. Never point `GAHONSH_PRODUCTION_URL`
+at a placeholder such as `*.invalid`, even for local demos: `isSupabaseConfigured()`
+compares the value with the constant, so the whole live site silently runs on
+the per-browser engine and every real account becomes invisible. To exercise
+the offline engine locally, keep the real URL and let the existing
+network-failure fallback do the work.
+
+A reachable project can drift from the committed SQL. Re-running
+`docs/marketplace-schema.sql` is the repair path, but `CREATE TABLE IF NOT
+EXISTS` never adds a column to an existing table, so a table that lost columns
+needs the `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` block near the top of the
+profiles section (that is how `email`, `phone_number` and the availability
+columns come back). Everything in that file must stay idempotent and rerunnable:
+guarded enums, `IF NOT EXISTS` tables and indexes, `DROP POLICY IF EXISTS`
+before each `CREATE POLICY`, `CREATE OR REPLACE FUNCTION`. The Supabase SQL
+editor runs the script as one transaction, so one failing statement rolls the
+whole repair back — a missing column in a view definition breaks the entire
+file. Check with `npm run check:live` and `npm run check:live-security` after
+applying it.
 
 ## Security Notes
 

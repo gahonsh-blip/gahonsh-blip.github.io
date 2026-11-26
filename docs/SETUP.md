@@ -114,6 +114,47 @@ Editor: it is idempotent (guarded enums, `IF NOT EXISTS` tables and indexes,
 `DROP POLICY IF EXISTS` before every `CREATE POLICY`). Then re-run
 `npm run check:live` until it passes.
 
+### Step 2d: Repair a project that drifted (profile columns + immutability)
+
+`npm run check:live` cannot see the rules that only apply to a signed-in
+member. On 2026-11-24 the project answered `PATCH /rest/v1/profiles` with
+`{"role":"admin"}` for an ordinary client: the profile-immutability trigger
+was not attached, and `profiles` had lost its `email` and `phone_number`
+columns, which is also why `admin_profiles` and `admin_overview()` could not
+be created.
+
+Run these two files in the SQL Editor, in this order:
+
+1. `supabase/migrations/20261129000000_restore_profile_pii_columns.sql`
+   — restores `profiles.email` and `profiles.phone_number`, backfills email
+   from `auth.users`, and re-attaches `trg_protect_profile_fields`. It is
+   safe to run on its own, so the escalation closes even if the schema file is
+   applied later.
+2. `docs/marketplace-schema.sql`
+   — creates what is still missing (`admin_profiles`, `admin_overview()`,
+   `contact_messages`), re-applies the safe column grants that keep
+   `email` / `phone_number` private, and re-creates `handle_new_user` so new
+   sign-ups store their email.
+
+Then verify both layers:
+
+```bash
+npm run check:live
+AUDIT_EMAIL=audit@yourdomain.com AUDIT_PASSWORD='…' npm run check:live-security
+```
+
+`check:live-security` signs in as a disposable test account and asserts the
+rules the schema claims: a client cannot promote themselves to admin, cannot
+verify themselves, cannot post a notification into their own list, cannot
+save themselves as talent, cannot post a job for someone else, and can still
+create and delete their own job. It writes one temporary job and deletes it
+before exiting. Use a **non-admin** account, otherwise the escalation probes
+pass trivially.
+
+> If `check:live` reports `profiles.email` as missing, the drift repair has not
+> been applied yet. Do not "fix" it by granting `email` to `anon` or
+> `authenticated`: the admin page and `admin_profiles` are the supported path.
+
 ### Step 3: Configure Frontend Credentials
 1. In the Supabase Dashboard, go to **Project Settings → API**.
 2. Copy your **Project URL** and **anon (public)** key.

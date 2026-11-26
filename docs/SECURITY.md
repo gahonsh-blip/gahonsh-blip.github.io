@@ -104,8 +104,34 @@ store is per-browser and is not a trust boundary: a user with developer tools
 can change their own browser's data, but cannot reach another person's browser.
 Supabase RLS is the boundary that protects real accounts.
 
+### The immutability trigger is the escalation guard
+
+`trg_protect_profile_fields` (function `protect_profile_immutable_fields`) is
+what stops a member writing `role`, `email` or `is_verified` on their own row.
+RLS alone does not stop it: the UPDATE policy allows a member to update their
+own profile, so the column rules have to live in the trigger.
+
+It is attached in `docs/marketplace-schema.sql` and repaired by
+`supabase/migrations/20261129000000_restore_profile_pii_columns.sql`. The
+function reads the row through `to_jsonb(OLD/NEW)` rather than `NEW.email`, so
+it keeps working on a project that has not restored the `email` column yet —
+`NEW.email` would raise "record NEW has no field email" and break every
+profile update instead of protecting it.
+
+Check it against the deployed project, not just the file:
+
+```bash
+AUDIT_EMAIL=audit@yourdomain.com AUDIT_PASSWORD='…' npm run check:live-security
+```
+
+`FAIL a client cannot promote themselves to admin` means the trigger is not
+attached in that project, whatever the committed SQL says.
+
 ## Regression tests
 
+- `npm run check:live-security` — signs in to the deployed project as a
+  disposable test account and asserts the rules above. It is opt-in because it
+  needs a confirmed account.
 - `npm run test:local` — 28 cases, including cross-profile update attempts,
   privilege escalation, private-field leaks, and invalid profile values.
 - `npm run test:security` — asserts the schema revokes table-level `SELECT`,

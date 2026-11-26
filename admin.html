@@ -60,6 +60,7 @@
     .gate input{width:100%;margin-bottom:10px;background:#0b1524;border:1px solid var(--line);color:var(--text);padding:11px 13px;border-radius:9px;font-size:.9rem}
     .gate button{width:100%;margin-top:6px;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#04121c;font-weight:800;cursor:pointer}
     .msg{font-size:.83rem;margin-top:12px;color:#fca5a5}
+    .deploy-warn{margin:0 0 18px;padding:12px 14px;border-radius:10px;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.12);color:#fbbf24;font-size:.85rem;line-height:1.5}
     .muted{color:var(--slate)}
     .trunc{max-width:420px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
     .hidden{display:none!important}
@@ -93,6 +94,8 @@
 <div id="app" class="wrap hidden">
     <h2>Owner dashboard</h2>
     <div class="sub">Everything happening on the marketplace, in one place.</div>
+
+    <p class="deploy-warn hidden" id="deployWarn" role="status"></p>
 
     <div class="kpis" id="kpis"></div>
 
@@ -194,14 +197,32 @@ async function signOut(){
 async function loadAll(){
     const q = async (fn) => { try { const r = await fn(); if(r.error) throw r.error; return r.data || []; } catch(e){ console.warn(e.message); return []; } };
 
+    const gaps = [];
+    const overviewTask = (async () => {
+        try {
+            const r = await client.rpc('admin_overview');
+            if (r.error) throw r.error;
+            return r.data || {};
+        } catch (e) {
+            if (/PGRST202|could not find the function/i.test(String(e.message || e))) {
+                gaps.push('the overview metrics');
+            }
+            console.warn(e.message);
+            return {};
+        }
+    })();
+
     const [overview, people, jobs, proposals, contracts, enquiries] = await Promise.all([
-        q(() => client.rpc('admin_overview')),
+        overviewTask,
         q(async () => {
             const full = await client.from('admin_profiles')
                 .select('id, full_name, email, role, is_verified, location, title, hourly_rate, created_at')
                 .order('created_at', {ascending:false}).limit(500);
             if(!full.error) return full;
             console.warn('admin_profiles is not available; apply the profile privacy migration.', full.error.message);
+            if (/PGRST205|could not find the table/i.test(String(full.error.message || ''))) {
+                gaps.push('member email addresses');
+            }
             return client.from('profiles')
                 .select('id, full_name, role, is_verified, location, title, hourly_rate, created_at')
                 .order('created_at', {ascending:false}).limit(500);
@@ -213,8 +234,18 @@ async function loadAll(){
     ]);
 
     cache = { people, jobs, proposals, contracts, enquiries };
+    showDeployWarning(gaps);
     renderKpis(overview || {});
     renderTable();
+}
+
+function showDeployWarning(gaps){
+    const box = document.getElementById('deployWarn');
+    if(!box) return;
+    if(!gaps.length){ box.classList.add('hidden'); box.textContent=''; return; }
+    box.textContent = 'This project is behind the committed schema: ' +
+        gaps.join(' and ') + ' cannot be read yet. Apply docs/marketplace-schema.sql in the Supabase SQL editor, then reload. The tables below still work.';
+    box.classList.remove('hidden');
 }
 
 function renderKpis(o){

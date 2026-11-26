@@ -487,7 +487,7 @@
                 .from('jobs')
                 .select(`
                     *,
-                    client:profiles (
+                    client:profiles!jobs_client_id_fkey (
                         id,
                         full_name,
                         avatar_url,
@@ -546,7 +546,7 @@
                 .from('jobs')
                 .select(`
                     *,
-                    client:profiles (
+                    client:profiles!jobs_client_id_fkey (
                         id,
                         full_name,
                         avatar_url,
@@ -738,7 +738,7 @@
             if (!client) return [];
 
             const baseFreelancer = 'id, full_name, avatar_url, title, hourly_rate, skills, is_verified';
-            const selectFor = (columns) => `*, freelancer:profiles ( ${columns} )`;
+            const selectFor = (columns) => `*, freelancer:profiles!proposals_freelancer_id_fkey ( ${columns} )`;
             const query = (select) => client
                 .from('proposals')
                 .select(select)
@@ -1030,7 +1030,7 @@
                         budget_min, budget_max, hourly_rate_min, hourly_rate_max,
                         experience_level, estimated_duration, status, proposals_count,
                         created_at,
-                        client:profiles ( id, full_name, avatar_url, location, is_verified )
+                        client:profiles!jobs_client_id_fkey ( id, full_name, avatar_url, location, is_verified )
                     )
                 `)
                 .eq('freelancer_id', userId)
@@ -1179,7 +1179,7 @@
                 .select(`
                     id, job_id, client_id, message, status, responded_at, created_at,
                     job:jobs ( id, title, category, job_type, budget_min, budget_max, status ),
-                    client:profiles ( id, full_name, avatar_url, is_verified )
+                    client:profiles!invitations_client_id_fkey ( id, full_name, avatar_url, is_verified )
                 `)
                 .eq('freelancer_id', userId)
                 .order('created_at', { ascending: false });
@@ -1197,7 +1197,7 @@
                 .select(`
                     id, job_id, freelancer_id, message, status, responded_at, created_at,
                     job:jobs ( id, title, category, status ),
-                    freelancer:profiles ( id, full_name, avatar_url, title, is_verified )
+                    freelancer:profiles!invitations_freelancer_id_fkey ( id, full_name, avatar_url, title, is_verified )
                 `)
                 .eq('client_id', userId)
                 .order('created_at', { ascending: false });
@@ -1210,7 +1210,7 @@
             if (!client) return [];
             const { data, error } = await client
                 .from('invitations')
-                .select('id, freelancer_id, status, created_at, freelancer:profiles ( id, full_name, avatar_url, title )')
+                .select('id, freelancer_id, status, created_at, freelancer:profiles!invitations_freelancer_id_fkey ( id, full_name, avatar_url, title )')
                 .eq('job_id', jobId)
                 .order('created_at', { ascending: false });
             if (error) throw error;

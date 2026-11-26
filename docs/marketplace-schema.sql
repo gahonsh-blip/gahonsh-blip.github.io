@@ -101,6 +101,22 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS availability TEXT NOT NULL DEFAULT 'available';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS availability_note TEXT;
 
+-- Repair a project whose `profiles` lost the private contact columns. Both
+-- `admin_profiles` and `admin_overview()` read `profiles.email`, so their
+-- creation below would fail and roll the whole script back without this.
+-- On a fresh install these statements are no-ops.
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
+
+UPDATE public.profiles p
+SET email = u.email
+FROM auth.users u
+WHERE u.id = p.id
+  AND p.email IS NULL
+  AND u.email IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_key ON public.profiles (email);
+
 -- ----------------------------------------------------------------------------
 -- 3. PUBLIC PROFILES VIEW (SAFE PUBLIC DIRECTORY - EXCLUDES EMAIL & PHONE)
 -- ----------------------------------------------------------------------------
@@ -564,13 +580,19 @@ CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- Protect profile immutables (prevents self privilege escalation)
+-- Protect profile immutables (prevents self privilege escalation).
+-- The row is read through `to_jsonb` so the trigger still works on a
+-- project that has not restored the `email` column yet: `NEW.email` would
+-- raise "record NEW has no field email" and break every profile update.
 CREATE OR REPLACE FUNCTION public.protect_profile_immutable_fields()
 RETURNS TRIGGER AS $$
+DECLARE
+    old_row JSONB := to_jsonb(OLD);
+    new_row JSONB := to_jsonb(NEW);
 BEGIN
-    IF (NEW.role IS DISTINCT FROM OLD.role OR 
-        NEW.is_verified IS DISTINCT FROM OLD.is_verified OR 
-        NEW.email IS DISTINCT FROM OLD.email) THEN
+    IF (new_row->>'role' IS DISTINCT FROM old_row->>'role' OR
+        new_row->>'is_verified' IS DISTINCT FROM old_row->>'is_verified' OR
+        new_row->>'email' IS DISTINCT FROM old_row->>'email') THEN
         -- Only the owner, or trusted server-side code, may touch these fields.
         -- is_admin() covers a signed-in owner. current_user cannot be used
         -- here because a SECURITY DEFINER function runs as its owner, so the
