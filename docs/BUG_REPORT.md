@@ -993,3 +993,96 @@ session persistence across pages, posting a job (`post-job.html` →
 `job-details.html`), the feed listing it, the details page, the client record
 panel, the invitation tab and the project files panel all work. The temporary
 job was deleted afterwards (`204`).
+
+---
+
+# Light-mode contrast and dead-end states — 2026-11-24
+
+Scope: the deployed `main` after PR #20 (site pointed at the live Supabase
+project). Focus: what a real visitor sees that the static checks cannot — text
+that disappears when the light theme is on, and pages that keep showing
+placeholders after their data lookup fails.
+
+Method: a dependency-free CDP driver over headless Chromium
+(`chromium --headless --remote-debugging-port`), no added npm dependencies.
+Each page was loaded at 390×844 and 1280×900 in both themes while collecting
+console errors, uncaught exceptions, 4xx/5xx responses, broken images, the
+document `scrollWidth` against the viewport, and a WCAG contrast pass over
+every visible text node. A second pass injected the components that only
+render when the database has rows (status pills, tier badges, proposal
+feedback) and measured their computed colours, because an empty marketplace
+never renders them.
+
+## Findings
+
+| # | Severity | Area | Bug | Fixed value |
+|---|----------|------|-----|-------------|
+| 18 | Medium | Light-mode contrast | `find-talent.html` availability pill: `#34d399` "Available now" at **1.92:1**, `#fbbf24` "Busy" at **1.67:1** on a white card | 5.48:1 / 7.09:1 |
+| 19 | Medium | Light-mode contrast | `job-details.html` proposal feedback: the success box (`#a7f3d0`) at **1.23:1** and the error box (`#fca5a5`) at **1.81:1** — a freelancer cannot tell an accepted bid from a rejected one | 5.24:1 / 6.18:1 |
+| 20 | Medium | Light-mode contrast | `catalog.html` premium tier pill and `job-details.html` Shortlist button, both `#fbbf24` at **1.60:1** | 6.78:1 |
+| 21 | Low | Light-mode contrast | `find-talent.html` decline/withdraw hover turns the label `#f87171` (2.8:1) on a light surface | `#b91c1c` |
+| 22 | Low | Light-mode contrast | `marketplace-dashboard.html` Accepted/Completed chips at 3.6:1, under the 4.5:1 needed for small text | 5.24:1 |
+| 23 | High | Dead-end state | `job-details.html` with no id left "Budget: Loading…", "Category", "0 Proposals" in the badge row, a client card claiming **"Identity Verified"** for an account that does not exist, "Loading client record…" and an empty "Skills & Expertise Needed" section | Only the real explanation remains |
+| 24 | Info | Deep link | `#chat` only opens the assistant on a full page load; a same-document hash change does not re-run the widget. Expected browser behaviour, not a bug | Documented |
+
+## 18-22. Accent colours that vanish in light mode (Medium)
+
+The site has two themes and one accent palette. `theme.css` lightens the
+surfaces, so a hue picked against an ink card keeps its value but loses its
+contrast: `#34d399` on white is 1.92:1, `#fbbf24` is 1.67:1, `#a7f3d0` is
+1.23:1. None of these components appeared in the first sweep because they only
+render once the database has rows, which is exactly the state a new
+marketplace is in: the bug waits for the first real customer.
+
+Every accent now has a `body.light-mode` override in `theme.css` that darkens
+the same hue instead of dropping the colour, so the state is still obvious:
+
+```css
+body.light-mode .availability-pill.is-available { color: #047857; }
+body.light-mode .proposal-success-box { color: #047857; }
+body.light-mode .proposal-error-box { color: #b91c1c; }
+```
+
+Measured after the change: 5.24-7.09:1 in light mode, unchanged in dark mode.
+
+## 23. "Project unavailable" still claimed a verified client (High)
+
+`assets/js/job-details-flow.js` hid the proposal section on a failed lookup and
+returned, leaving everything else as authored: the badge row still read
+"Budget: Loading…" and "0 Proposals", and the sidebar rendered a client named
+"Unknown" with an "Identity Verified" shield, "Member of Gahonsh", a spinning
+"Loading client record…" line and a "View client record" button.
+
+The verification badge is a trust claim, so showing it for a nonexistent
+account is worse than a cosmetic defect. The failure path now hides the badge
+row, the client card and the empty skills block, so the page states one fact
+and stops.
+
+## Regression guard
+
+`npm run test:a11y` gained a fifth section: any of the palette accents used as
+a literal `color:` in a page stylesheet must have a `body.light-mode` override,
+in `theme.css` or in the page's own style block. It flagged the
+decline/withdraw hover that the manual sweep had missed, and it fails if any of
+these overrides is removed.
+
+## Verification
+
+```
+npm test
+  a11y check passed: 21 pages verified.        (now includes the light-mode accent rule)
+  security check passed: 113 files verified.
+  schema check passed: 92 client reference(s) resolved against 40 schema object(s).
+  local engine check passed: 142 authorization case(s) verified.
+  content check passed: 21 pages verified.
+```
+
+Headless Chromium, 15 pages at 390×844 dark, 390×844 light and 1280×900 dark:
+no console errors, no uncaught exceptions, no failed requests, no broken
+images, `scrollWidth` never exceeds the viewport, and no text below 3:1.
+Component probes for the pills, badges, feedback boxes and buttons: all
+≥5.2:1 in light mode and ≥7.3:1 in dark mode.
+
+Browser, local preview: `job-details.html` without an id now shows only
+"Project unavailable" and its explanation; the assistant opens from `?chat=1`
+and answers the "What I can do" prompt with the task list.

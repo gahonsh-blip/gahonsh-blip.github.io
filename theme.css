@@ -281,7 +281,7 @@ body.light-mode .status-open {
 body.light-mode .status-accepted,
 body.light-mode .status-completed {
     background: rgba(16, 185, 129, 0.12) !important;
-    color: #059669 !important;
+    color: #047857 !important;
 }
 
 body.light-mode .status-in_progress,
@@ -976,6 +976,55 @@ body.light-mode .ms-actions button[data-ms-remove] {
 
 body.light-mode .invite-hint a {
     color: #0f766e !important;
+}
+
+/* Availability, tier and shortlist accents. Bright greens and ambers read on
+   the dark cards but sit at 1.6-1.9:1 on a white card, so light mode darkens
+   the same hue instead of dropping the accent. */
+body.light-mode .availability-pill.is-available {
+    color: #047857 !important;
+    border-color: rgba(4, 120, 87, 0.45) !important;
+}
+
+body.light-mode .availability-pill.is-busy {
+    color: #92400e !important;
+    border-color: rgba(146, 64, 14, 0.45) !important;
+}
+
+body.light-mode .tier-pill.tier-premium {
+    color: #92400e !important;
+    border-color: rgba(146, 64, 14, 0.45) !important;
+}
+
+body.light-mode .btn-shortlist {
+    color: #92400e !important;
+    border-color: #b7791f !important;
+}
+
+body.light-mode .btn-shortlist:hover {
+    background: rgba(146, 64, 14, 0.08) !important;
+}
+
+/* Proposal form feedback. The pale red and mint read on ink-coloured cards
+   but drop to 1.8:1 and 1.2:1 on a white one, where a freelancer cannot tell
+   a rejected bid from an accepted one. */
+body.light-mode .proposal-error-box {
+    background: rgba(185, 28, 28, 0.07) !important;
+    border-color: rgba(185, 28, 28, 0.4) !important;
+    color: #b91c1c !important;
+}
+
+body.light-mode .proposal-success-box {
+    background: rgba(4, 120, 87, 0.08) !important;
+    border-color: rgba(4, 120, 87, 0.4) !important;
+    color: #047857 !important;
+}
+
+body.light-mode .btn-decline:hover,
+body.light-mode .btn-withdraw:hover {
+    background: rgba(185, 28, 28, 0.08) !important;
+    border-color: #b91c1c !important;
+    color: #b91c1c !important;
 }
 
 /* "Custom solution" / "Not sure which plan" conversion banners */
