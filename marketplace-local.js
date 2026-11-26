@@ -194,6 +194,7 @@
                 id: 'talent-1', _email: 'aditya@freelancer.demo', full_name: 'Aditya Sharma', role: 'freelancer',
                 location: 'India', is_verified: true, avatar_url: null,
                 title: 'Senior Excel Automation & VBA Architect', hourly_rate: 45,
+                availability: 'available', availability_note: 'Taking new work this week',
                 bio: '10+ years specializing in automated macro dashboards, multi-sheet consolidation, dynamic forecasting models, and high-security Excel architectures.',
                 skills: ['Excel VBA', 'Financial Modeling', 'Pivot Tables', 'Macro Security', 'Power Query'],
                 created_at: nowIso(), updated_at: nowIso()
@@ -202,6 +203,7 @@
                 id: 'talent-2', _email: 'elena@freelancer.demo', full_name: 'Elena Rostova', role: 'freelancer',
                 location: 'Estonia', is_verified: true, avatar_url: null,
                 title: 'Full-Stack JavaScript & PostgreSQL Engineer', hourly_rate: 65,
+                availability: 'busy', availability_note: 'Two projects in flight, free next month',
                 bio: 'Passionate about building fast, responsive web portals with secure authentication, cloud APIs, and responsive mobile interfaces.',
                 skills: ['React', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'Supabase'],
                 created_at: nowIso(), updated_at: nowIso()
@@ -210,6 +212,7 @@
                 id: 'talent-3', _email: 'marcus@freelancer.demo', full_name: 'Marcus Vance', role: 'freelancer',
                 location: 'United States', is_verified: true, avatar_url: null,
                 title: 'PDF Layout & Typography Specialist', hourly_rate: 40,
+                availability: 'available', availability_note: null,
                 bio: 'Delivering pixel-perfect vector PDF documents, interactive fillable forms, corporate pitch decks, and brand identity manuals.',
                 skills: ['PDF Design', 'Interactive Forms', 'Typography', 'Brand Identity', 'InDesign'],
                 created_at: nowIso(), updated_at: nowIso()
@@ -274,6 +277,58 @@
         ];
     }
 
+    // Three demo catalog packages, one per seeded freelancer, so the Project
+    // Catalog has something real to render before anyone publishes their own.
+    function seedPackages() {
+        return [
+            {
+                id: 'package-1',
+                freelancer_id: 'talent-1',
+                title: 'Excel Reporting Dashboard (Basic to Premium)',
+                description: 'An automated Excel workbook that consolidates your monthly files into one dashboard with live charts, validation and a printable summary sheet.',
+                category: 'Excel Automation',
+                tier: 'standard',
+                price: 320,
+                delivery_days: 7,
+                revisions: 2,
+                skills: ['Excel VBA', 'Power Query', 'Dashboards'],
+                is_active: true,
+                created_at: nowIso(),
+                updated_at: nowIso()
+            },
+            {
+                id: 'package-2',
+                freelancer_id: 'talent-2',
+                title: 'Five-Page Business Website Build',
+                description: 'A responsive five-page marketing site with a contact form, basic SEO metadata and deployment to your host of choice.',
+                category: 'Web Development',
+                tier: 'premium',
+                price: 850,
+                delivery_days: 14,
+                revisions: 3,
+                skills: ['JavaScript', 'HTML5/CSS3', 'SEO'],
+                is_active: true,
+                created_at: nowIso(),
+                updated_at: nowIso()
+            },
+            {
+                id: 'package-3',
+                freelancer_id: 'talent-3',
+                title: 'Print-Ready PDF Brochure Design',
+                description: 'A print-ready brochure or company profile laid out in vector PDF, with bleed, crop marks and an editable source file handed over.',
+                category: 'PDF & Design',
+                tier: 'basic',
+                price: 180,
+                delivery_days: 5,
+                revisions: 1,
+                skills: ['PDF Design', 'Typography', 'Branding'],
+                is_active: true,
+                created_at: nowIso(),
+                updated_at: nowIso()
+            }
+        ];
+    }
+
     async function seedIfEmpty() {
         const jobs = readTable('jobs');
         const profiles = readTable('profiles');
@@ -298,6 +353,11 @@
         if (readTable('file_transfers').length === 0) writeTable('file_transfers', []);
         if (readTable('contract_milestones').length === 0) writeTable('contract_milestones', []);
         if (readTable('reviews').length === 0) writeTable('reviews', []);
+        if (readTable('saved_jobs').length === 0) writeTable('saved_jobs', []);
+        if (readTable('saved_talent').length === 0) writeTable('saved_talent', []);
+        if (readTable('invitations').length === 0) writeTable('invitations', []);
+        if (readTable('notifications').length === 0) writeTable('notifications', []);
+        if (readTable('service_packages').length === 0) writeTable('service_packages', seedPackages());
     }
 
     // ------------------------------------------------------------------
@@ -327,7 +387,9 @@
             resume_name: profile.resume_name || null,
             resume_size_bytes: profile.resume_size_bytes ?? null,
             resume_updated_at: profile.resume_updated_at || null,
-            has_resume: !!profile.resume_name
+            has_resume: !!profile.resume_name,
+            availability: profile.availability || 'available',
+            availability_note: profile.availability_note || null
         };
     }
 
@@ -337,8 +399,10 @@
     // payload can never promote the caller or touch another profile.
     const PROFILE_EDITABLE_FIELDS = [
         'full_name', 'avatar_url', 'location', 'bio', 'title',
-        'hourly_rate', 'skills', 'phone_number'
+        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note'
     ];
+
+    const AVAILABILITY_VALUES = ['available', 'busy', 'unavailable'];
 
     function sanitizeProfileUpdates(updates) {
         const source = updates && typeof updates === 'object' ? updates : {};
@@ -382,7 +446,41 @@
                 .filter(Boolean)
                 .slice(0, 30);
         }
+        if ('availability' in safe) {
+            const value = String(safe.availability || 'available').trim().toLowerCase();
+            if (!AVAILABILITY_VALUES.includes(value)) {
+                throw new Error('Availability must be available, busy or unavailable.');
+            }
+            safe.availability = value;
+        }
+        if ('availability_note' in safe) {
+            safe.availability_note = String(safe.availability_note || '').trim().slice(0, 120) || null;
+        }
         return safe;
+    }
+
+    // ------------------------------------------------------------------
+    // Notifications (offline mirror of the database triggers)
+    // ------------------------------------------------------------------
+    // The live schema writes these from SECURITY DEFINER triggers, so a
+    // browser can never post one. The engine keeps the same rule by only
+    // calling this from the service that performed the action.
+    function pushNotification(userId, type, title, body, link) {
+        if (!userId) return null;
+        const rows = readTable('notifications');
+        const row = {
+            id: newId('notification'),
+            user_id: userId,
+            type: type || 'info',
+            title: String(title || 'Marketplace update').slice(0, 140),
+            body: body ? String(body).slice(0, 1000) : null,
+            link: link || null,
+            is_read: false,
+            created_at: nowIso()
+        };
+        rows.push(row);
+        writeTable('notifications', rows);
+        return row;
     }
 
     function clientSnippet(profile) {
@@ -590,7 +688,20 @@
             if (filters.skill) {
                 rows = rows.filter((p) => (p.skills || []).includes(filters.skill));
             }
-            return rows.map(publicProfile);
+            if (filters.availability && filters.availability !== 'all') {
+                rows = rows.filter((p) => (p.availability || 'available') === filters.availability);
+            }
+            if (filters.verifiedOnly) {
+                rows = rows.filter((p) => !!p.is_verified);
+            }
+
+            const talentSort = {
+                rate_low: (a, b) => Number(a.hourly_rate || 0) - Number(b.hourly_rate || 0),
+                rate_high: (a, b) => Number(b.hourly_rate || 0) - Number(a.hourly_rate || 0),
+                newest: (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            }[filters.sort] || ((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            return rows.sort(talentSort).map(publicProfile);
         },
 
         async getPublicProfile(userId) {
@@ -672,6 +783,12 @@
             if (filters.minBudget) {
                 rows = rows.filter((j) => Number(j.budget_min || 0) >= parseFloat(filters.minBudget));
             }
+            if (filters.maxBudget) {
+                rows = rows.filter((j) => Number(j.budget_min || 0) <= parseFloat(filters.maxBudget));
+            }
+            if (filters.skill) {
+                rows = rows.filter((j) => (j.required_skills || []).includes(filters.skill));
+            }
             const search = String(filters.search || '').trim().toLowerCase();
             if (search) {
                 rows = rows.filter((j) =>
@@ -681,7 +798,14 @@
                 );
             }
 
-            rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const jobSort = {
+                newest: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+                budget_high: (a, b) => Number(b.budget_min || 0) - Number(a.budget_min || 0),
+                budget_low: (a, b) => Number(a.budget_min || 0) - Number(b.budget_min || 0),
+                proposals_few: (a, b) => Number(a.proposals_count || 0) - Number(b.proposals_count || 0)
+            }[filters.sort] || ((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            rows.sort(jobSort);
             return rows.map(decorateJob);
         },
 
@@ -865,6 +989,13 @@
             };
             rows.push(proposal);
             writeTable('proposals', rows);
+            pushNotification(
+                job.client_id,
+                'proposal',
+                'New proposal on "' + job.title + '"',
+                'A freelancer submitted a bid. Review it in your portal.',
+                'marketplace-dashboard.html#primary'
+            );
             return decorateProposal(proposal, { withFreelancer: true, withJob: true });
         },
 
@@ -939,6 +1070,13 @@
 
             rows[index] = Object.assign({}, rows[index], { status, updated_at: nowIso() });
             writeTable('proposals', rows);
+            pushNotification(
+                rows[index].freelancer_id,
+                'proposal-status',
+                'Your proposal is now ' + status,
+                'The client updated your bid on "' + job.title + '".',
+                'marketplace-dashboard.html#primary'
+            );
             return decorateProposal(rows[index]);
         },
 
@@ -1228,9 +1366,487 @@
     };
 
     // ------------------------------------------------------------------
-    // Reviews (mirrors the reviews INSERT policy: the other party of a
-    // completed contract, once per contract, 1-5 stars).
+    // Discovery: saved jobs, saved talent, invitations
     // ------------------------------------------------------------------
+    const SavedJobs = {
+        async ids() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('saved_jobs')
+                .filter((row) => row.freelancer_id === profile.id)
+                .map((row) => row.job_id);
+        },
+
+        async list() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const jobs = readTable('jobs');
+            return readTable('saved_jobs')
+                .filter((row) => row.freelancer_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((row) => {
+                    const job = jobs.find((j) => j.id === row.job_id);
+                    return job ? Object.assign(decorateJob(job), { saved_at: row.created_at }) : null;
+                })
+                .filter(Boolean);
+        },
+
+        async save(jobId) {
+            const profile = requireUser('Please sign in to save a job.');
+            if (!readTable('jobs').some((j) => j.id === jobId)) {
+                throw new Error('This project could not be found.');
+            }
+            const rows = readTable('saved_jobs');
+            if (!rows.some((row) => row.freelancer_id === profile.id && row.job_id === jobId)) {
+                rows.push({ freelancer_id: profile.id, job_id: jobId, created_at: nowIso() });
+                writeTable('saved_jobs', rows);
+            }
+            return true;
+        },
+
+        async remove(jobId) {
+            const profile = requireUser('Please sign in to change your saved jobs.');
+            writeTable('saved_jobs', readTable('saved_jobs')
+                .filter((row) => !(row.freelancer_id === profile.id && row.job_id === jobId)));
+            return false;
+        },
+
+        async toggle(jobId) {
+            const ids = await SavedJobs.ids();
+            return ids.includes(jobId) ? SavedJobs.remove(jobId) : SavedJobs.save(jobId);
+        }
+    };
+
+    const SavedTalent = {
+        async ids() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('saved_talent')
+                .filter((row) => row.client_id === profile.id)
+                .map((row) => row.freelancer_id);
+        },
+
+        async list() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const profiles = readTable('profiles');
+            return readTable('saved_talent')
+                .filter((row) => row.client_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((row) => publicProfile(profiles.find((p) => p.id === row.freelancer_id)))
+                .filter(Boolean);
+        },
+
+        async save(freelancerId) {
+            const profile = requireUser('Please sign in to save talent.');
+            if (profile.id === freelancerId) throw new Error('You cannot save your own profile.');
+            const target = findProfile(freelancerId);
+            if (!target) throw new Error('This freelancer could not be found.');
+            const rows = readTable('saved_talent');
+            if (!rows.some((row) => row.client_id === profile.id && row.freelancer_id === freelancerId)) {
+                rows.push({ client_id: profile.id, freelancer_id: freelancerId, created_at: nowIso() });
+                writeTable('saved_talent', rows);
+            }
+            return true;
+        },
+
+        async remove(freelancerId) {
+            const profile = requireUser('Please sign in to change your saved talent.');
+            writeTable('saved_talent', readTable('saved_talent')
+                .filter((row) => !(row.client_id === profile.id && row.freelancer_id === freelancerId)));
+            return false;
+        },
+
+        async toggle(freelancerId) {
+            const ids = await SavedTalent.ids();
+            return ids.includes(freelancerId) ? SavedTalent.remove(freelancerId) : SavedTalent.save(freelancerId);
+        }
+    };
+
+    function decorateInvitation(row, { withJob = false, withFreelancer = false, withClient = false } = {}) {
+        const out = clone(row);
+        if (withJob) out.job = readTable('jobs').find((j) => j.id === row.job_id) || null;
+        if (withFreelancer) out.freelancer = publicProfile(findProfile(row.freelancer_id));
+        if (withClient) out.client = clientSnippet(findProfile(row.client_id));
+        return out;
+    }
+
+    const Invitations = {
+        async send(jobId, freelancerId, message = '') {
+            const profile = requireUser('Please sign in as a client to invite a freelancer.');
+            const job = readTable('jobs').find((j) => j.id === jobId);
+            if (!job) throw new Error('This project could not be found.');
+            if (job.client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the client who owns this project can send an invitation.');
+            }
+            if (job.status !== 'open') throw new Error('Invitations can only be sent for an open project.');
+            if (profile.id === freelancerId) throw new Error('You cannot invite yourself.');
+
+            const target = findProfile(freelancerId);
+            if (!target) throw new Error('Freelancer not found.');
+            if (target.role !== 'freelancer' && target.role !== 'admin') {
+                throw new Error('Invitations can only be sent to a freelancer.');
+            }
+
+            const rows = readTable('invitations');
+            if (rows.some((row) => row.job_id === jobId && row.freelancer_id === freelancerId)) {
+                throw new Error('You have already invited this freelancer to that project.');
+            }
+
+            const invitation = {
+                id: newId('invitation'),
+                job_id: jobId,
+                client_id: job.client_id,
+                freelancer_id: freelancerId,
+                message: String(message || '').trim().slice(0, 1000) || null,
+                status: 'invited',
+                responded_at: null,
+                created_at: nowIso()
+            };
+            rows.push(invitation);
+            writeTable('invitations', rows);
+
+            pushNotification(
+                freelancerId,
+                'invitation',
+                'You were invited to "' + job.title + '"',
+                'A client would like you to look at their project and send a proposal.',
+                'marketplace-dashboard.html#invitations'
+            );
+            return decorateInvitation(invitation, { withJob: true, withClient: true });
+        },
+
+        async listReceived() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('invitations')
+                .filter((row) => row.freelancer_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((row) => decorateInvitation(row, { withJob: true, withClient: true }));
+        },
+
+        async listSent() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('invitations')
+                .filter((row) => row.client_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((row) => decorateInvitation(row, { withJob: true, withFreelancer: true }));
+        },
+
+        async listForJob(jobId) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const job = readTable('jobs').find((j) => j.id === jobId);
+            if (!job) return [];
+            if (job.client_id !== profile.id && profile.role !== 'admin') return [];
+            return readTable('invitations')
+                .filter((row) => row.job_id === jobId)
+                .map((row) => decorateInvitation(row, { withFreelancer: true }));
+        },
+
+        async respond(invitationId, status) {
+            const profile = requireUser('Please sign in to answer an invitation.');
+            if (!['accepted', 'declined'].includes(status)) {
+                throw new Error('An invitation can only be accepted or declined.');
+            }
+            const rows = readTable('invitations');
+            const index = rows.findIndex((row) => row.id === invitationId);
+            if (index < 0) throw new Error('Invitation not found.');
+            if (rows[index].freelancer_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the invited freelancer can answer this invitation.');
+            }
+            if (rows[index].status !== 'invited') {
+                throw new Error('This invitation has already been answered.');
+            }
+
+            rows[index] = Object.assign({}, rows[index], { status, responded_at: nowIso() });
+            writeTable('invitations', rows);
+
+            const job = readTable('jobs').find((j) => j.id === rows[index].job_id);
+            pushNotification(
+                rows[index].client_id,
+                'invitation-reply',
+                'Invitation ' + status,
+                'A freelancer ' + status + ' your invitation for "' + (job ? job.title : 'a project') + '".',
+                'marketplace-dashboard.html#invitations'
+            );
+            return decorateInvitation(rows[index], { withJob: true });
+        },
+
+        async withdraw(invitationId) {
+            const profile = requireUser('Please sign in to withdraw an invitation.');
+            const rows = readTable('invitations');
+            const index = rows.findIndex((row) => row.id === invitationId);
+            if (index < 0) throw new Error('Invitation not found.');
+            if (rows[index].client_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the client can withdraw this invitation.');
+            }
+            if (rows[index].status !== 'invited') {
+                throw new Error('This invitation has already been answered.');
+            }
+            rows[index] = Object.assign({}, rows[index], { status: 'withdrawn', responded_at: nowIso() });
+            writeTable('invitations', rows);
+            return decorateInvitation(rows[index], { withJob: true });
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Project Catalog
+    // ------------------------------------------------------------------
+    const CATALOG_TIERS = ['basic', 'standard', 'premium'];
+
+    function sanitizePackage(pkg) {
+        const source = pkg && typeof pkg === 'object' ? pkg : {};
+        const title = String(source.title || '').trim();
+        const description = String(source.description || '').trim();
+        const category = String(source.category || '').trim();
+        const tier = String(source.tier || 'basic').trim().toLowerCase();
+        const price = Number(source.price);
+        const deliveryDays = Number(source.delivery_days);
+        const revisions = source.revisions === undefined || source.revisions === '' ? 1 : Number(source.revisions);
+
+        if (title.length < 5 || title.length > 120) {
+            throw new Error('Give the package a title of 5 to 120 characters.');
+        }
+        if (description.length < 20) {
+            throw new Error('Describe the package in at least 20 characters.');
+        }
+        if (!category) throw new Error('Choose a category for the package.');
+        if (!CATALOG_TIERS.includes(tier)) {
+            throw new Error('Tier must be basic, standard or premium.');
+        }
+        if (!Number.isFinite(price) || price <= 0) {
+            throw new Error('Price must be greater than zero.');
+        }
+        if (!Number.isFinite(deliveryDays) || deliveryDays < 1 || deliveryDays > 180) {
+            throw new Error('Delivery time must be between 1 and 180 days.');
+        }
+        if (!Number.isFinite(revisions) || revisions < 0 || revisions > 50) {
+            throw new Error('Revisions must be between 0 and 50.');
+        }
+
+        return {
+            title: title.slice(0, 120),
+            description: description.slice(0, 4000),
+            category: category.slice(0, 60),
+            tier,
+            price: Math.round(price * 100) / 100,
+            delivery_days: Math.round(deliveryDays),
+            revisions: Math.round(revisions),
+            skills: Array.isArray(source.skills)
+                ? source.skills.map((s) => String(s || '').trim().slice(0, 40)).filter(Boolean).slice(0, 20)
+                : []
+        };
+    }
+
+    function decoratePackage(row) {
+        return Object.assign(clone(row), { freelancer: publicProfile(findProfile(row.freelancer_id)) });
+    }
+
+    const Catalog = {
+        async list(filters = {}) {
+            let rows = readTable('service_packages').filter((p) => p.is_active !== false);
+
+            if (filters.category && filters.category !== 'all') {
+                rows = rows.filter((p) => p.category === filters.category);
+            }
+            if (filters.tier && filters.tier !== 'all') {
+                rows = rows.filter((p) => p.tier === filters.tier);
+            }
+            if (filters.maxPrice) {
+                rows = rows.filter((p) => Number(p.price) <= Number(filters.maxPrice));
+            }
+            const search = String(filters.search || '').trim().toLowerCase();
+            if (search) {
+                rows = rows.filter((p) =>
+                    (p.title || '').toLowerCase().includes(search) ||
+                    (p.description || '').toLowerCase().includes(search) ||
+                    (p.skills || []).some((s) => String(s).toLowerCase().includes(search))
+                );
+            }
+
+            const catalogSort = {
+                price_low: (a, b) => Number(a.price) - Number(b.price),
+                price_high: (a, b) => Number(b.price) - Number(a.price),
+                newest: (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            }[filters.sort] || ((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            return rows.sort(catalogSort).map(decoratePackage);
+        },
+
+        async getById(packageId) {
+            const row = readTable('service_packages').find((p) => p.id === packageId);
+            return row ? decoratePackage(row) : null;
+        },
+
+        async listMine() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('service_packages')
+                .filter((p) => p.freelancer_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map(clone);
+        },
+
+        async create(pkg) {
+            const profile = requireUser('Please sign in to publish a package.');
+            if (profile.role !== 'freelancer' && profile.role !== 'admin') {
+                throw new Error('Only a freelancer can publish a catalog package.');
+            }
+            const row = Object.assign(
+                { id: newId('package'), freelancer_id: profile.id, is_active: true, created_at: nowIso(), updated_at: nowIso() },
+                sanitizePackage(pkg)
+            );
+            const rows = readTable('service_packages');
+            rows.push(row);
+            writeTable('service_packages', rows);
+            return clone(row);
+        },
+
+        async update(packageId, patch) {
+            const profile = requireUser('Please sign in to edit a package.');
+            const rows = readTable('service_packages');
+            const index = rows.findIndex((p) => p.id === packageId);
+            if (index < 0) throw new Error('Package not found.');
+            if (rows[index].freelancer_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('You can only edit your own packages.');
+            }
+
+            const payload = {};
+            if (patch && typeof patch === 'object') {
+                if ('is_active' in patch) payload.is_active = !!patch.is_active;
+                const editable = ['title', 'description', 'category', 'tier', 'price', 'delivery_days', 'revisions', 'skills'];
+                if (editable.some((key) => key in patch)) {
+                    const merged = sanitizePackage(Object.assign({}, rows[index], patch));
+                    for (const key of editable) payload[key] = merged[key];
+                }
+            }
+            if (!Object.keys(payload).length) throw new Error('Nothing to update.');
+
+            rows[index] = Object.assign({}, rows[index], payload, { updated_at: nowIso() });
+            writeTable('service_packages', rows);
+            return clone(rows[index]);
+        },
+
+        async remove(packageId) {
+            const profile = requireUser('Please sign in to remove a package.');
+            const rows = readTable('service_packages');
+            const target = rows.find((p) => p.id === packageId);
+            if (!target) throw new Error('Package not found.');
+            if (target.freelancer_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('You can only remove your own packages.');
+            }
+            writeTable('service_packages', rows.filter((p) => p.id !== packageId));
+            return true;
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Notifications (read / mark / dismiss your own)
+    // ------------------------------------------------------------------
+    const Notifications = {
+        async list(limit = 40) {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            const max = Math.max(1, Math.min(200, Number(limit) || 40));
+            return readTable('notifications')
+                .filter((row) => row.user_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, max)
+                .map(clone);
+        },
+
+        async unreadCount() {
+            const profile = currentUserRecord();
+            if (!profile) return 0;
+            return readTable('notifications')
+                .filter((row) => row.user_id === profile.id && !row.is_read).length;
+        },
+
+        async markRead(notificationId) {
+            const profile = requireUser('Please sign in.');
+            const rows = readTable('notifications');
+            const index = rows.findIndex((row) => row.id === notificationId);
+            if (index < 0) throw new Error('Notification not found.');
+            if (rows[index].user_id !== profile.id) {
+                throw new Error('You can only change your own notifications.');
+            }
+            rows[index] = Object.assign({}, rows[index], { is_read: true });
+            writeTable('notifications', rows);
+            return true;
+        },
+
+        async markAllRead() {
+            const profile = requireUser('Please sign in.');
+            writeTable('notifications', readTable('notifications').map((row) =>
+                row.user_id === profile.id ? Object.assign({}, row, { is_read: true }) : row));
+            return true;
+        },
+
+        async remove(notificationId) {
+            const profile = requireUser('Please sign in.');
+            const rows = readTable('notifications');
+            const target = rows.find((row) => row.id === notificationId);
+            if (!target) throw new Error('Notification not found.');
+            if (target.user_id !== profile.id) {
+                throw new Error('You can only change your own notifications.');
+            }
+            writeTable('notifications', rows.filter((row) => row.id !== notificationId));
+            return true;
+        },
+
+        async clear() {
+            const profile = requireUser('Please sign in.');
+            writeTable('notifications', readTable('notifications').filter((row) => row.user_id !== profile.id));
+            return true;
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Contract messages (mirrors public.messages + its RLS policies): only
+    // the client and the freelancer on a contract can read or post.
+    // ------------------------------------------------------------------
+    const Messages = {
+        async list(contractId) {
+            const profile = currentUserRecord();
+            if (!profile || !contractId) return [];
+            const contract = milestoneContract(contractId);
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') return [];
+            return readTable('messages')
+                .filter((m) => m.contract_id === contractId &&
+                    (m.sender_id === profile.id || m.recipient_id === profile.id || profile.role === 'admin'))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+                .map(clone);
+        },
+
+        async send(contractId, body) {
+            const profile = requireUser('Please sign in to send a message.');
+            const contract = milestoneContract(contractId);
+            if (!contract) throw new Error('This contract could not be found.');
+            if (!isContractParty(contract, profile)) {
+                throw new Error('Only the client or the freelancer can message on this contract.');
+            }
+            const text = String(body || '').trim();
+            if (!text) throw new Error('Write a message first.');
+            if (text.length > 2000) throw new Error('Keep the message under 2000 characters.');
+
+            const recipient = contract.client_id === profile.id ? contract.freelancer_id : contract.client_id;
+            const rows = readTable('messages');
+            const message = {
+                id: newId('message'),
+                contract_id: contractId,
+                sender_id: profile.id,
+                recipient_id: recipient,
+                body: text,
+                created_at: nowIso()
+            };
+            rows.push(message);
+            writeTable('messages', rows);
+            return clone(message);
+        }
+    };
+
     const Reviews = {
         async getForContract(contractId) {
             if (!contractId) return [];
@@ -1613,13 +2229,20 @@
         Records: readyAware(Records),
         Files: readyAware(Files),
         Milestones: readyAware(Milestones),
+        Messages: readyAware(Messages),
         Reviews: readyAware(Reviews),
+        SavedJobs: readyAware(SavedJobs),
+        SavedTalent: readyAware(SavedTalent),
+        Invitations: readyAware(Invitations),
+        Catalog: readyAware(Catalog),
+        Notifications: readyAware(Notifications),
         ready: () => _ready,
         // Test/demo helpers
         _demoPassword: DEMO_PASSWORD,
         _reset: function () {
             ['profiles', 'jobs', 'proposals', 'contracts', 'file_transfers',
-                'contract_milestones', 'reviews'].forEach((t) => {
+                'contract_milestones', 'reviews', 'saved_jobs', 'saved_talent',
+                'invitations', 'service_packages', 'notifications', 'messages'].forEach((t) => {
                 try { localStorage.removeItem(PREFIX + t); } catch (e) { /* ignore */ }
             });
             writeSession(null);

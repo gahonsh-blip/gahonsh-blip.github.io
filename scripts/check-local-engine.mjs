@@ -632,6 +632,206 @@ async function refuse(fn) {
   check('a freelancer outside the contract cannot review it',
     await refuse(() => DB.Reviews.create({ contractId: trackingContractId, rating: 1 })) !== null);
 
+  // --- shortlist: saved jobs and saved talent ----------------------------
+  // Each shortlist is private to its owner, mirroring the per-user RLS
+  // policies on `saved_jobs` and `saved_talent`.
+  await DB.Auth.signIn(client._email, password);
+  const inviteJob = await DB.Jobs.createJob({
+    title: 'Catalog and invitation fixture project',
+    description: 'A project used to verify invitations and the catalog flow end to end.',
+    category: 'Excel Automation',
+    job_type: 'fixed',
+    budget_min: 400,
+    budget_max: 600,
+    estimated_duration: 'Less than 1 month',
+    required_skills: ['Excel VBA']
+  });
+
+  await DB.Auth.signOut();
+  check('a signed-out visitor cannot save a job',
+    await refuse(() => DB.SavedJobs.toggle('demo-job-2')) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('saving a job reports the saved state',
+    (await DB.SavedJobs.toggle('demo-job-2')) === true);
+  check('the saved job appears in the shortlist',
+    (await DB.SavedJobs.list()).some((job) => job.id === 'demo-job-2'));
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('another freelancer sees an empty job shortlist',
+    (await DB.SavedJobs.ids()).length === 0);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('saving the same job twice removes it',
+    (await DB.SavedJobs.toggle('demo-job-2')) === false);
+
+  await DB.Auth.signIn(client._email, password);
+  check('a client cannot save their own profile as talent',
+    await refuse(() => DB.SavedTalent.save(client.id)) !== null);
+  check('saving a freelancer reports the saved state',
+    (await DB.SavedTalent.toggle(freelancers[2].id)) === true);
+  const savedTalent = await DB.SavedTalent.list();
+  check('the saved freelancer appears with a public profile',
+    savedTalent.length === 1 && savedTalent[0].id === freelancers[2].id &&
+    typeof savedTalent[0].full_name === 'string');
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('another user sees an empty talent shortlist',
+    (await DB.SavedTalent.ids()).length === 0);
+
+  // --- invitations (client -> freelancer, one per job) -------------------
+  await DB.Auth.signIn(client._email, password);
+  const invitation = await DB.Invitations.send(inviteJob.id, freelancers[2].id, 'You look like a strong fit.');
+  check('a client can invite a freelancer to an open project',
+    invitation.status === 'invited' && invitation.freelancer_id === freelancers[2].id);
+  check('the same freelancer cannot be invited twice',
+    await refuse(() => DB.Invitations.send(inviteJob.id, freelancers[2].id, 'Again')) !== null);
+  check('a client cannot invite a client',
+    await refuse(() => DB.Invitations.send(inviteJob.id, client.id, 'Self')) !== null);
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  const received = await DB.Invitations.listReceived();
+  check('the invited freelancer sees the invitation',
+    received.length === 1 && received[0].id === invitation.id &&
+    received[0].job && received[0].job.id === inviteJob.id);
+  check('the invited freelancer cannot invite anyone',
+    await refuse(() => DB.Invitations.send(inviteJob.id, freelancers[1].id, 'Nope')) !== null);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('a freelancer who was not invited sees nothing',
+    (await DB.Invitations.listReceived()).length === 0);
+  check('a freelancer cannot answer another freelancer\'s invitation',
+    await refuse(() => DB.Invitations.respond(invitation.id, 'accepted')) !== null);
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  check('the invited freelancer can accept',
+    (await DB.Invitations.respond(invitation.id, 'accepted')).status === 'accepted');
+  check('an answered invitation cannot be answered again',
+    await refuse(() => DB.Invitations.respond(invitation.id, 'declined')) !== null);
+  check('an invitation can only be accepted or declined',
+    await refuse(() => DB.Invitations.respond(invitation.id, 'hired')) !== null);
+
+  await DB.Auth.signIn(client._email, password);
+  const sentInvitations = await DB.Invitations.listSent();
+  check('the client sees the invitation they sent with its answer',
+    sentInvitations.length === 1 && sentInvitations[0].status === 'accepted' &&
+    sentInvitations[0].freelancer && sentInvitations[0].freelancer.id === freelancers[2].id);
+
+  // --- project catalog (freelancer-owned fixed-price packages) -----------
+  check('a client cannot publish a catalog package',
+    await refuse(() => DB.Catalog.create({
+      title: 'Client package attempt', description: 'Clients cannot sell on the marketplace.',
+      category: 'Excel Automation', tier: 'basic', price: 100, delivery_days: 5
+    })) !== null);
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  check('a package needs a real price',
+    await refuse(() => DB.Catalog.create({
+      title: 'Free dashboard', description: 'A package with no price at all.',
+      category: 'Excel Automation', tier: 'basic', price: 0, delivery_days: 5
+    })) !== null);
+  check('a package needs a description of some substance',
+    await refuse(() => DB.Catalog.create({
+      title: 'Tiny description', description: 'Too short',
+      category: 'Excel Automation', tier: 'basic', price: 100, delivery_days: 5
+    })) !== null);
+  check('a package tier must be basic, standard or premium',
+    await refuse(() => DB.Catalog.create({
+      title: 'Platinum package', description: 'A package with an unsupported tier value.',
+      category: 'Excel Automation', tier: 'platinum', price: 100, delivery_days: 5
+    })) !== null);
+
+  const packageRow = await DB.Catalog.create({
+    title: 'Excel KPI dashboard with monthly refresh',
+    description: 'A single-file workbook with KPI cards, monthly refresh and a printable summary sheet.',
+    category: 'Excel Automation',
+    tier: 'standard',
+    price: 320,
+    delivery_days: 7,
+    revisions: 2,
+    skills: ['Excel VBA', 'Power Query']
+  });
+  check('a freelancer can publish a catalog package',
+    packageRow.is_active === true && Number(packageRow.price) === 320 && packageRow.tier === 'standard');
+
+  await DB.Auth.signOut();
+  const publicCatalog = await DB.Catalog.list({ tier: 'standard' });
+  check('the catalog lists an active package with its owner',
+    publicCatalog.some((pkg) => pkg.id === packageRow.id && pkg.freelancer &&
+      pkg.freelancer.id === freelancers[2].id));
+  check('the catalog filters by tier',
+    (await DB.Catalog.list({ tier: 'premium' })).every((pkg) => pkg.tier === 'premium'));
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('another freelancer cannot edit a package they do not own',
+    await refuse(() => DB.Catalog.update(packageRow.id, { price: 1 })) !== null);
+  check('another freelancer cannot remove a package they do not own',
+    await refuse(() => DB.Catalog.remove(packageRow.id)) !== null);
+
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  await DB.Catalog.update(packageRow.id, { is_active: false });
+  check('a paused package leaves the public catalog',
+    (await DB.Catalog.list({})).every((pkg) => pkg.id !== packageRow.id));
+  check('a paused package stays in the owner list',
+    (await DB.Catalog.listMine()).some((pkg) => pkg.id === packageRow.id && pkg.is_active === false));
+
+  // --- in-app notifications ---------------------------------------------
+  // Rows are written by the engine on the other party's behalf; a member may
+  // only read and change their own.
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  await DB.Proposals.submitProposal(inviteJob.id, 'Proposal that should notify the client.', 450, 6);
+
+  await DB.Auth.signIn(client._email, password);
+  const clientNotifications = await DB.Notifications.list(50);
+  const proposalNote = clientNotifications.find((note) => note.type === 'proposal');
+  check('a new proposal notifies the client',
+    !!proposalNote && proposalNote.is_read === false && /proposal/i.test(proposalNote.title));
+  check('the unread badge counts the new notification',
+    (await DB.Notifications.unreadCount()) >= 1);
+  check('the client can mark their own notification read',
+    (await DB.Notifications.markRead(proposalNote.id)) === true);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('a stranger cannot read another member\'s notifications',
+    (await DB.Notifications.list(50)).every((note) => note.user_id === freelancers[1].id));
+  check('a stranger cannot mark another member\'s notification read',
+    await refuse(() => DB.Notifications.markRead(proposalNote.id)) !== null);
+  check('a stranger cannot dismiss another member\'s notification',
+    await refuse(() => DB.Notifications.remove(proposalNote.id)) !== null);
+
+  await DB.Auth.signIn(client._email, password);
+  await DB.Notifications.markAllRead();
+  check('mark all read clears the unread count',
+    (await DB.Notifications.unreadCount()) === 0);
+  await DB.Notifications.remove(proposalNote.id);
+  check('a dismissed notification is gone',
+    (await DB.Notifications.list(50)).every((note) => note.id !== proposalNote.id));
+
+  // --- contract messages -------------------------------------------------
+  // Mirrors the public.messages RLS policies: only the two contract parties
+  // may read or post, and the recipient is taken from the contract.
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  await DB.Messages.send(trackingContractId, 'Here is the first draft of the workbook.');
+  const partyMessages = await DB.Messages.list(trackingContractId);
+  check('a contract party can post and read a message',
+    partyMessages.length === 1 && partyMessages[0].sender_id === freelancers[1].id);
+  check('the recipient is the other contract party',
+    partyMessages[0].recipient_id === recordClient.id);
+  check('an empty message is rejected',
+    await refuse(() => DB.Messages.send(trackingContractId, '   ')) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('a stranger sees no messages on a contract they are not on',
+    (await DB.Messages.list(trackingContractId)).length === 0);
+  check('a stranger cannot post to another contract',
+    await refuse(() => DB.Messages.send(trackingContractId, 'I should not be here.')) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  await DB.Messages.send(trackingContractId, 'Thanks, reviewing it now.');
+  const clientView = await DB.Messages.list(trackingContractId);
+  check('both parties see the full thread',
+    clientView.length === 2 && clientView[1].sender_id === recordClient.id);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

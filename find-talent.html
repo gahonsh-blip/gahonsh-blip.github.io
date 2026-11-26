@@ -178,6 +178,184 @@
             flex-shrink: 0;
         }
 
+        /* FILTER ROW */
+        .talent-filter-row {
+            max-width: 780px;
+            margin: 18px auto 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .talent-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-slate);
+        }
+
+        .talent-filter select {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            min-height: 44px;
+        }
+
+        .talent-filter-check {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            min-height: 44px;
+            cursor: pointer;
+        }
+
+        .availability-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            margin-top: 4px;
+        }
+
+        .availability-pill.is-available { color: #34d399; border-color: rgba(52, 211, 153, 0.5); }
+        .availability-pill.is-busy { color: #fbbf24; border-color: rgba(251, 191, 36, 0.5); }
+        .availability-pill.is-unavailable { color: var(--text-slate); }
+
+        .btn-save-talent,
+        .btn-invite-talent {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-slate);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .btn-save-talent:hover,
+        .btn-save-talent.is-saved {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-invite-talent:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* INVITE MODAL */
+        .invite-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(3, 8, 20, 0.78);
+            z-index: 99990;
+        }
+
+        .invite-modal.active { display: flex; }
+
+        .invite-panel {
+            width: 100%;
+            max-width: 460px;
+            /* Opaque on purpose: --bg-card is translucent, which let the page
+               show through the dialog. theme.css lightens it in light mode. */
+            background: #111a2e;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            color: var(--text-main);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .invite-panel h2 {
+            font-size: 1.15rem;
+            margin-bottom: 6px;
+        }
+
+        .invite-panel p.invite-hint {
+            color: var(--text-slate);
+            font-size: 0.86rem;
+            margin-bottom: 16px;
+        }
+
+        .invite-panel label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--text-slate);
+            margin-bottom: 6px;
+        }
+
+        .invite-panel select,
+        .invite-panel textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 11px 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            min-height: 46px;
+        }
+
+        .invite-panel textarea { min-height: 96px; resize: vertical; }
+
+        .invite-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .invite-actions button {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 11px 18px;
+            min-height: 46px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .invite-actions .invite-send {
+            background: linear-gradient(135deg, #00ffcc 0%, #0077ff 100%);
+            color: #070c19;
+            border: none;
+        }
+
+        .invite-actions .invite-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .invite-hint a { color: var(--accent-cyan); font-weight: 700; }
+
         .talent-container {
             max-width: 1200px;
             margin: 40px auto 80px;
@@ -394,7 +572,7 @@
             .btn-resume, .btn-hire-talent { min-height: 48px; }
         }
     </style>
-<link rel="stylesheet" href="theme.css?v=7">
+<link rel="stylesheet" href="theme.css?v=8">
 </head>
 <body>
 
@@ -455,6 +633,34 @@
             <button class="btn-search" id="btnSearchTalent">
                 <i class="fa-solid fa-magnifying-glass"></i> Search
             </button>
+        </div>
+
+        <div class="talent-filter-row" data-gs-reveal>
+            <label class="talent-filter">
+                <span>Availability</span>
+                <select id="talentAvailabilityFilter" aria-label="Filter freelancers by availability">
+                    <option value="all">Anyone</option>
+                    <option value="available">Available now</option>
+                    <option value="busy">Busy</option>
+                    <option value="unavailable">Not available</option>
+                </select>
+            </label>
+            <label class="talent-filter">
+                <span>Sort</span>
+                <select id="talentSortFilter" aria-label="Sort freelancers">
+                    <option value="newest">Newest</option>
+                    <option value="rate_low">Rate: low to high</option>
+                    <option value="rate_high">Rate: high to low</option>
+                </select>
+            </label>
+            <label class="talent-filter talent-filter-check">
+                <input type="checkbox" id="talentVerifiedFilter">
+                <span>Verified only</span>
+            </label>
+            <label class="talent-filter talent-filter-check">
+                <input type="checkbox" id="talentSavedFilter">
+                <span>Saved only (<span id="savedTalentCount">0</span>)</span>
+            </label>
         </div>
     </section>
 
@@ -517,6 +723,7 @@
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
+                    <li style="margin-bottom:10px;"><a href="catalog.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Project Catalog</a></li>
                     <li style="margin-bottom:10px;"><a href="post-job.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Post a Job</a></li>
                     <li style="margin-bottom:10px;"><a href="marketplace-dashboard.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">User Portal</a></li>
                 </ul>
@@ -569,11 +776,30 @@
         </div>
     </div>
 
+    <!-- INVITE FREELANCER MODAL -->
+    <div class="invite-modal" id="inviteModal" role="dialog" aria-modal="true" aria-labelledby="inviteModalTitle">
+        <div class="invite-panel">
+            <h2 id="inviteModalTitle"><i class="fa-solid fa-paper-plane"></i> Invite a freelancer</h2>
+            <p class="invite-hint" id="inviteHint">Pick one of your open projects. The freelancer gets an in-app invitation and can accept or decline.</p>
+
+            <label for="inviteJobSelect">Project</label>
+            <select id="inviteJobSelect" aria-label="Choose an open project"></select>
+
+            <label for="inviteMessage">Message (optional)</label>
+            <textarea id="inviteMessage" maxlength="1000" placeholder="Tell them why you think they are a fit for this project."></textarea>
+
+            <div class="invite-actions">
+                <button type="button" id="inviteCancel">Cancel</button>
+                <button type="button" class="invite-send" id="inviteSend">Send invitation</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script src="theme.js"></script>
-    <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js?v=7"></script>
-    <script src="supabase-client.js?v=7"></script>
+    <script src="supabase-config.js?v=8"></script>
+    <script src="marketplace-local.js?v=8"></script>
+    <script src="supabase-client.js?v=8"></script>
     <script src="auth.js"></script>
     <script src="records.js?v=6"></script>
 
@@ -620,11 +846,33 @@
         async function loadTalent() {
             const grid = document.getElementById('talentGrid');
             const searchVal = document.getElementById('talentSearchInput').value.trim().toLowerCase();
+            const availabilityVal = document.getElementById('talentAvailabilityFilter').value;
+            const sortVal = document.getElementById('talentSortFilter').value;
+            const verifiedOnly = document.getElementById('talentVerifiedFilter').checked;
+            const savedOnly = document.getElementById('talentSavedFilter').checked;
+
+            // The shortlist belongs to the signed-in client; a visitor simply
+            // sees no saved state instead of an error.
+            let savedIds = [];
+            if (window.isMarketplaceReady()) {
+                try {
+                    savedIds = await window.GahonshDB.SavedTalent.ids();
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+            const savedCount = document.getElementById('savedTalentCount');
+            if (savedCount) savedCount.innerText = savedIds.length;
 
             let talentList = [];
             if (window.isMarketplaceReady()) {
                 try {
-                    talentList = await window.GahonshDB.Profiles.getPublicFreelancers({ search: searchVal });
+                    talentList = await window.GahonshDB.Profiles.getPublicFreelancers({
+                        search: searchVal,
+                        availability: availabilityVal,
+                        sort: sortVal,
+                        verifiedOnly
+                    });
                 } catch (e) {
                     console.warn(e);
                 }
@@ -634,11 +882,17 @@
             // When configured, the real (possibly empty) profiles table is the source of truth.
             if ((!talentList || talentList.length === 0) && !window.isMarketplaceReady()) {
                 talentList = DEMO_TALENT.filter(t => {
+                    if (availabilityVal !== 'all' && (t.availability || 'available') !== availabilityVal) return false;
+                    if (verifiedOnly && !t.is_verified) return false;
                     if (!searchVal) return true;
                     return (t.full_name || '').toLowerCase().includes(searchVal) ||
                            (t.title || '').toLowerCase().includes(searchVal) ||
                            (t.skills || []).some(s => String(s || '').toLowerCase().includes(searchVal));
                 });
+            }
+
+            if (savedOnly) {
+                talentList = (talentList || []).filter((t) => savedIds.includes(t.id));
             }
 
             if (!talentList || talentList.length === 0) {
@@ -669,6 +923,15 @@
                        </button>`
                     : '';
 
+                const availability = t.availability || 'available';
+                const availabilityLabel = availability === 'available'
+                    ? 'Available now'
+                    : availability === 'busy' ? 'Busy' : 'Not available';
+                const availabilityPill = `<span class="availability-pill is-${escapeHtml(availability)}" title="${escapeHtml(t.availability_note || availabilityLabel)}">
+                        <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> ${escapeHtml(availabilityLabel)}
+                    </span>`;
+                const isSaved = savedIds.includes(t.id);
+
                 return `
                     <div class="talent-card" data-rating-uid="${escapeHtml(t.id)}">
                         <div class="talent-card-header">
@@ -676,6 +939,7 @@
                             <div>
                                 <div class="talent-name">${name}${verifiedBadge}</div>
                                 <div class="talent-title">${escapeHtml(t.title || 'Freelance Specialist')}</div>
+                                ${availabilityPill}
                                 <span class="mt-rating" data-rating-uid="${escapeHtml(t.id)}"></span>
                             </div>
                             <div class="talent-rate-badge">${escapeHtml(rate)}</div>
@@ -685,6 +949,12 @@
                         <div class="talent-actions">
                             <button type="button" class="btn-record" data-record-worker="${escapeHtml(t.id)}" data-record-name="${name}">
                                 <i class="fa-solid fa-clipboard-list"></i> Record
+                            </button>
+                            <button type="button" class="btn-save-talent${isSaved ? ' is-saved' : ''}" data-save-talent="${escapeHtml(t.id)}" aria-pressed="${isSaved ? 'true' : 'false'}">
+                                <i class="fa-${isSaved ? 'solid' : 'regular'} fa-bookmark"></i> ${isSaved ? 'Saved' : 'Save'}
+                            </button>
+                            <button type="button" class="btn-invite-talent" data-invite-talent="${escapeHtml(t.id)}" data-invite-name="${name}">
+                                <i class="fa-solid fa-envelope-open-text"></i> Invite
                             </button>
                             ${resumeBtn}
                             <a href="contact.html?invite=${encodeURIComponent(t.id)}" class="btn-hire-talent">
@@ -699,6 +969,124 @@
         document.getElementById('btnSearchTalent').onclick = loadTalent;
         document.getElementById('talentSearchInput').onkeyup = (e) => {
             if (e.key === 'Enter') loadTalent();
+        };
+
+        ['talentAvailabilityFilter', 'talentSortFilter', 'talentVerifiedFilter', 'talentSavedFilter'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', loadTalent);
+        });
+
+        // --- Shortlist and invitations ---------------------------------------
+        // Both actions read their target from a data attribute through one
+        // delegated listener, so a re-render never leaves a stale inline handler.
+        const inviteModal = document.getElementById('inviteModal');
+        let inviteTargetId = null;
+
+        function closeInviteModal() {
+            inviteTargetId = null;
+            document.getElementById('inviteMessage').value = '';
+            if (inviteModal) inviteModal.classList.remove('active');
+        }
+
+        function requireSignedIn(message) {
+            const ui = window.GahonshAuthUI;
+            if (ui && ui.getCurrentUser && ui.getCurrentUser()) return true;
+            notify(message);
+            if (ui && ui.openAuthModal) ui.openAuthModal('signin');
+            return false;
+        }
+
+        async function openInviteModal(freelancerId, name) {
+            if (!requireSignedIn('Sign in as a client to invite a freelancer.')) return;
+            if (!window.isMarketplaceReady()) {
+                notify('The marketplace is still starting up. Please try again in a moment.');
+                return;
+            }
+
+            let jobs = [];
+            try {
+                const me = await window.GahonshDB.Profiles.getMyProfile();
+                if (!me || me.role !== 'client') {
+                    notify('Only a client account can invite a freelancer. Switch to a client account first.');
+                    return;
+                }
+                jobs = await window.GahonshDB.Jobs.getMyJobs();
+            } catch (err) {
+                notify(err.message || 'Could not load your projects.');
+                return;
+            }
+
+            const openJobs = (jobs || []).filter((job) => job.status === 'open');
+            const select = document.getElementById('inviteJobSelect');
+            select.innerHTML = openJobs.length
+                ? openJobs.map((job) => `<option value="${escapeHtml(job.id)}">${escapeHtml(job.title)}</option>`).join('')
+                : '<option value="">No open projects yet</option>';
+
+            const hint = document.getElementById('inviteHint');
+            const sendBtn = document.getElementById('inviteSend');
+            if (openJobs.length) {
+                hint.textContent = `Invite ${name} to one of your open projects. They can accept or decline.`;
+            } else {
+                hint.innerHTML = `You have no open project to invite ${escapeHtml(name)} to. `
+                    + '<a href="post-job.html">Post a job</a> first.';
+            }
+            sendBtn.disabled = openJobs.length === 0;
+
+            inviteTargetId = freelancerId;
+            inviteModal.classList.add('active');
+        }
+
+        document.getElementById('talentGrid').addEventListener('click', async (event) => {
+            const saveBtn = event.target.closest('[data-save-talent]');
+            if (saveBtn) {
+                if (!requireSignedIn('Sign in to save freelancers to your shortlist.')) return;
+                saveBtn.disabled = true;
+                try {
+                    const saved = await window.GahonshDB.SavedTalent.toggle(saveBtn.getAttribute('data-save-talent'));
+                    notify(saved ? 'Freelancer saved to your shortlist.' : 'Removed from your shortlist.');
+                } catch (err) {
+                    notify(err.message || 'Could not update your shortlist.');
+                } finally {
+                    saveBtn.disabled = false;
+                    loadTalent();
+                }
+                return;
+            }
+
+            const inviteBtn = event.target.closest('[data-invite-talent]');
+            if (inviteBtn) {
+                openInviteModal(
+                    inviteBtn.getAttribute('data-invite-talent'),
+                    inviteBtn.getAttribute('data-invite-name') || 'this freelancer'
+                );
+            }
+        });
+
+        document.getElementById('inviteCancel').onclick = closeInviteModal;
+        inviteModal.addEventListener('click', (event) => {
+            if (event.target === inviteModal) closeInviteModal();
+        });
+
+        document.getElementById('inviteSend').onclick = async () => {
+            const jobId = document.getElementById('inviteJobSelect').value;
+            const message = document.getElementById('inviteMessage').value;
+            if (!inviteTargetId) return;
+            if (!jobId) {
+                notify('Post a job first, then invite freelancers to it.');
+                return;
+            }
+
+            const sendBtn = document.getElementById('inviteSend');
+            sendBtn.disabled = true;
+            try {
+                await window.GahonshDB.Invitations.send(jobId, inviteTargetId, message);
+                notify('Invitation sent. You will see their answer in your portal.');
+                closeInviteModal();
+            } catch (err) {
+                notify(err.message || 'Could not send the invitation.');
+            } finally {
+                sendBtn.disabled = false;
+            }
         };
 
         // --- Resume viewer ---------------------------------------------------

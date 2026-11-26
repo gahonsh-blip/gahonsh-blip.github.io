@@ -132,7 +132,10 @@ async function loadJobDetails() {
     document.getElementById('jobCategoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${escapeHtml(currentJob.category || 'General')}`;
     document.getElementById('jobExpBadge').innerHTML = `<i class="fa-solid fa-gauge-high"></i> ${escapeHtml(currentJob.experience_level || 'intermediate')}`;
     document.getElementById('jobDurationBadge').innerHTML = `<i class="fa-regular fa-clock"></i> ${escapeHtml(currentJob.estimated_duration || '1 to 3 months')}`;
-    document.getElementById('jobProposalsBadge').innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentJob.proposals_count || 0} Proposals`;
+    const proposalCount = Number(currentJob.proposals_count) || 0;
+    const proposalsBadge = document.getElementById('jobProposalsBadge');
+    proposalsBadge.innerHTML = '<i class="fa-solid fa-paperclip"></i> ';
+    proposalsBadge.append(document.createTextNode(`${proposalCount} Proposal${proposalCount === 1 ? '' : 's'}`));
     document.getElementById('jobDescription').innerText = currentJob.description;
 
     const skillsCloud = document.getElementById('skillsCloud');
@@ -163,8 +166,9 @@ async function loadJobDetails() {
             try {
                 const clientRecord = await window.GahonshDB.Records.getClientRecord(currentJob.client_id);
                 const summary = clientRecord && clientRecord.summary;
+                const count = (value, noun) => `${Number(value) || 0} ${noun}${Number(value) === 1 ? '' : 's'}`;
                 recordLine.textContent = summary
-                    ? `${Number(summary.jobs_posted) || 0} projects posted · ${Number(summary.hires) || 0} hires · ${Number(summary.completed_jobs) || 0} completed`
+                    ? `${count(summary.jobs_posted, 'project')} posted · ${count(summary.hires, 'hire')} · ${count(summary.completed_jobs, 'project')} completed`
                     : 'No client record yet';
             } catch (err) {
                 console.warn('[job-details] client record', err);
@@ -663,3 +667,17 @@ document.getElementById('menu-overlay').onclick = () => {
 };
 
 document.addEventListener('DOMContentLoaded', loadJobDetails);
+
+// Signing in or out changes who may bid, so re-render the proposal panel
+// instead of leaving the previous account's proposal on screen.
+document.addEventListener('DOMContentLoaded', () => {
+    const auth = window.GahonshDB?.Auth;
+    if (!auth || typeof auth.onAuthStateChange !== 'function') return;
+    let lastUserId = (window.GahonshAuthUI?.getCurrentUser?.() || {}).id || null;
+    auth.onAuthStateChange((event, session, user) => {
+        const nextUserId = (user && user.id) || null;
+        if (nextUserId === lastUserId) return;
+        lastUserId = nextUserId;
+        loadJobDetails();
+    });
+});

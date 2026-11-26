@@ -35,6 +35,49 @@ Repository guide for AI agents and human contributors working on the
 - **Mobile Usability:** Maintain at least 48px minimum touch targets for all interactive mobile buttons, links, and drawer close controls. Long CTA and search rows must wrap or shrink instead of forcing a horizontal scroll at 390px or 320px; `npm run test:a11y` guards the home hero CTA and the jobs/talent search rows.
   - A grid or flex child keeps `min-width: auto`, so one unbreakable row inside a card (a long title next to a `nowrap` badge) widens the whole column past the viewport. Give the column `minmax(0, 1fr)` and the children `min-width: 0`, then wrap the inner row below 600px. Check with `document.documentElement.scrollWidth` against `window.innerWidth` in the browser; `test:a11y` guards the jobs card and the portal tab strip.
 
+## Marketplace Discovery Surfaces
+
+The marketplace is more than a job board: clients find talent, freelancers find
+work, both keep shortlists, and every contract has a private thread.
+
+- **`find-talent.html`** — talent directory with search, availability, rate
+  sort, verified-only and saved-only filters. Each card saves the freelancer
+  (`SavedTalent`), records a public view, and opens the invite modal.
+- **`catalog.html`** — Project Catalog of fixed-price `service_packages` tiers.
+  `Request this package` deep-links to `post-job.html?package=<id>`, which
+  pre-fills the brief. Packages are the freelancer's own quote; no money moves.
+- **`jobs.html`** — save/unsave jobs (`SavedJobs`) and filter to saved only.
+- **`marketplace-dashboard.html`** — tabs are My Posted Projects, Active
+  Contracts, Shortlist, Invitations, Notifications and My Record. Tabs are
+  hash-addressable (`#primary`, `#contracts`, `#shortlist`, `#invitations`,
+  `#notifications`, `#record`), which is what notification deep links use.
+- **`messages.html`** — one contract thread, reached from a contract card.
+  It is `noindex`, follows the stored theme, and reads/writes through
+  `GahonshDB.Messages`, so it works on the offline engine too.
+
+Notifications are written by the engine/trigger only, never by the page: a
+member cannot post one into another member's list. Every producer passes a
+deep link (`#primary`, `#invitations`, …) so the bell leads somewhere useful.
+
+### Invitations
+
+A client invites one freelancer to one **open** job; the freelancer accepts or
+declines and the client may withdraw. Accepting records interest — it does not
+create a proposal, so the freelancer still submits a bid. `Invitations.send()`
+refuses a closed job and a non-client caller, and the invite modal disables
+`Send invitation` when the client has no open project (it offers `Post a job`
+instead). Keep that guard: an enabled button that cannot succeed reads as a
+broken feature.
+
+### Contract messages
+
+`public.messages` is the private thread for one contract. Only the two parties
+(and an admin) may read or post; the recipient is derived from the contract on
+the server, never taken from the caller. `GahonshDB.Messages.list/send` are
+implemented in both `supabase-client.js` and `marketplace-local.js` — change
+them together and run `npm run test:local`, which asserts the party and
+stranger rules.
+
 ## Main Menu Contract
 
 The header nav is duplicated in every page's inline markup, so the main menu

@@ -219,6 +219,96 @@
             border-bottom-color: var(--accent-cyan);
         }
 
+        .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            margin-left: 7px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: var(--accent-cyan);
+            color: #070c19;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .tab-badge[hidden] { display: none; }
+
+        /* SHORTLIST / INVITATION / NOTIFICATION ROWS */
+        .mini-list { display: grid; gap: 12px; margin-top: 16px; }
+        .mini-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        .mini-row h3 { font-size: 0.98rem; margin-bottom: 4px; }
+        .mini-row p { font-size: 0.8rem; color: var(--text-slate); }
+        .mini-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        /* Not scoped to .mini-row: the notifications header uses .mini-actions
+           outside a row, and those buttons rendered as raw browser buttons. */
+        .mini-actions button,
+        .mini-actions a {
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-height: 40px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .mini-actions button:hover,
+        .mini-actions a:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        .notif-unread { border-color: rgba(0, 255, 204, 0.45); }
+        .notif-unread h3::after {
+            content: '';
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-left: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            vertical-align: middle;
+        }
+
+        /* `display: flex` would otherwise override the `hidden` attribute, which
+           is how the control is removed for client accounts. */
+        .availability-control[hidden] { display: none; }
+        .availability-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--text-slate);
+        }
+        .availability-control select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            min-height: 40px;
+        }
+
         .portal-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -271,7 +361,6 @@
         .ms-review button { border: none; border-radius: 6px; padding: 9px 16px; background: var(--accent-green); color: #04121a; font-weight: 700; cursor: pointer; min-height: 38px; }
         .ms-stars { color: #C9922E; letter-spacing: 0.08em; }
         @media (max-width: 640px) { .ms-form { grid-template-columns: 1fr; } }
-        .status-pending { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
         .status-in_progress, .status-active { background: rgba(0, 119, 255, 0.15); color: var(--accent-blue); }
         .status-completed { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
 
@@ -302,7 +391,7 @@
             .user-profile-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
-<link rel="stylesheet" href="theme.css?v=7">
+<link rel="stylesheet" href="theme.css?v=8">
 </head>
 <body>
 
@@ -371,11 +460,22 @@
                     <i class="fa-solid fa-user-pen"></i> Edit Profile
                 </button>
             </div>
+            <div class="availability-control" id="availabilityControl" hidden>
+                <label for="availabilitySelect">My availability</label>
+                <select id="availabilitySelect" aria-label="Set your availability for clients">
+                    <option value="available">Available now</option>
+                    <option value="busy">Busy</option>
+                    <option value="unavailable">Not available</option>
+                </select>
+            </div>
         </div>
 
         <div class="portal-tabs" id="portalTabsNav">
             <button class="portal-tab-btn active" id="tabJobsOrProposals">My Projects / Proposals</button>
             <button class="portal-tab-btn" id="tabContracts">Active Contracts</button>
+            <button class="portal-tab-btn" id="tabShortlist">Shortlist</button>
+            <button class="portal-tab-btn" id="tabInvitations">Invitations</button>
+            <button class="portal-tab-btn" id="tabNotifications">Notifications<span class="tab-badge" id="notifBadge" hidden>0</span></button>
             <button class="portal-tab-btn" id="tabRecords">My Record</button>
         </div>
 
@@ -449,6 +549,7 @@
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="jobs.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Work</a></li>
                     <li style="margin-bottom:10px;"><a href="find-talent.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Find Talent</a></li>
+                    <li style="margin-bottom:10px;"><a href="catalog.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Project Catalog</a></li>
                     <li style="margin-bottom:10px;"><a href="post-job.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Post a Job</a></li>
                     <li style="margin-bottom:10px;"><a href="marketplace-dashboard.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">User Portal</a></li>
                 </ul>
@@ -484,9 +585,9 @@
 
     <script src="script.js"></script>
     <script src="theme.js"></script>
-    <script src="supabase-config.js"></script>
-    <script src="marketplace-local.js?v=7"></script>
-    <script src="supabase-client.js?v=7"></script>
+    <script src="supabase-config.js?v=8"></script>
+    <script src="marketplace-local.js?v=8"></script>
+    <script src="supabase-client.js?v=8"></script>
     <script src="auth.js"></script>
     <script src="records.js?v=6"></script>
     <script src="assets/js/file-transfer.js?v=7"></script>
@@ -562,7 +663,11 @@
                 document.getElementById('userAvatarLarge').innerText = name.charAt(0).toUpperCase();
                 document.getElementById('userRoleTag').innerText = role.toUpperCase();
 
+                mountAvailabilityControl(role);
+                refreshNotificationBadge();
+
                 await withPortalTimeout(loadUserActivity(role));
+                applyTabFromHash();
             } catch (err) {
                 renderPortalError(err, 'initDashboard');
             } finally {
@@ -578,6 +683,18 @@
             }
             if (currentTab === 'records') {
                 await loadRecords();
+                return;
+            }
+            if (currentTab === 'shortlist') {
+                await loadShortlist();
+                return;
+            }
+            if (currentTab === 'invitations') {
+                await loadInvitations();
+                return;
+            }
+            if (currentTab === 'notifications') {
+                await loadNotifications();
                 return;
             }
 
@@ -653,6 +770,249 @@
                         </div>
                     </div>
                 `).join('');
+            }
+        }
+
+        // A reachable project that is missing the tables for these tabs is a
+        // deployment gap, not an empty list. Say so instead of showing "nothing
+        // here", which reads as "you have no data".
+        function notProvisionedCard(label) {
+            return `<div class="portal-card" style="text-align:center; padding:40px;">
+                        <p style="color:var(--text-slate); margin-bottom:14px;">${label} needs database tables that this project does not have yet. Run <code>docs/marketplace-schema.sql</code> (or the matching migration) once in the Supabase SQL Editor, then refresh.</p>
+                        <button type="button" class="btn-outline" data-retry-portal>Try again</button>
+                    </div>`;
+        }
+
+        // Freelancers publish their own availability, which the talent
+        // directory shows and filters on. Clients never see the control.
+        async function mountAvailabilityControl(role) {
+            const control = document.getElementById('availabilityControl');
+            const select = document.getElementById('availabilitySelect');
+            if (!control || !select) return;
+
+            if (role !== 'freelancer') {
+                control.hidden = true;
+                return;
+            }
+
+            control.hidden = false;
+            select.value = currentUser?.profile?.availability || 'available';
+
+            select.onchange = async () => {
+                select.disabled = true;
+                try {
+                    const updated = await window.GahonshDB.Profiles.updateMyProfile({ availability: select.value });
+                    if (currentUser && currentUser.profile) currentUser.profile.availability = updated?.availability || select.value;
+                    window.GahonshAuthUI.showToast('Availability updated.');
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not update availability: ' + (err.message || 'please try again.'));
+                } finally {
+                    select.disabled = false;
+                }
+            };
+        }
+
+        // ------------------------------------------------------------------
+        // Shortlist, invitations and notifications
+        // ------------------------------------------------------------------
+        async function loadShortlist() {
+            const container = document.getElementById('tabListingsContainer');
+            let jobs = [];
+            let talent = [];
+            let gapError = null;
+            if (window.isMarketplaceReady()) {
+                try {
+                    jobs = await window.GahonshDB.SavedJobs.list();
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] saved jobs failed:', err);
+                    if (window.GahonshDB.isBackendNotProvisioned?.(err)) gapError = err;
+                }
+                try {
+                    talent = await window.GahonshDB.SavedTalent.list();
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] saved talent failed:', err);
+                    if (window.GahonshDB.isBackendNotProvisioned?.(err)) gapError = err;
+                }
+            }
+            if (gapError) {
+                container.innerHTML = notProvisionedCard('The shortlist');
+                container.querySelector('[data-retry-portal]')?.addEventListener('click', () => loadShortlist());
+                return;
+            }
+
+            const jobsHtml = jobs.length
+                ? jobs.map((job) => `
+                    <div class="mini-row">
+                        <div>
+                            <h3><a href="job-details.html?id=${encodeURIComponent(job.id)}" style="color:var(--text-main); text-decoration:none;">${escapeHtml(job.title)}</a></h3>
+                            <p>${escapeHtml(job.category || 'General')} &middot; ${job.job_type === 'hourly' ? 'Hourly' : 'Fixed price'} &middot; ${Number(job.proposals_count) || 0} proposal(s)</p>
+                        </div>
+                        <div class="mini-actions">
+                            <a href="job-details.html?id=${encodeURIComponent(job.id)}">Open</a>
+                            <button type="button" data-unsave-job="${escapeHtml(job.id)}">Remove</button>
+                        </div>
+                    </div>`).join('')
+                : '<p style="color:var(--text-slate); font-size:0.88rem;">No saved projects yet. Tap Save on any project in the <a href="jobs.html" style="color:var(--accent-cyan);">jobs feed</a>.</p>';
+
+            const talentHtml = talent.length
+                ? talent.map((person) => `
+                    <div class="mini-row">
+                        <div>
+                            <h3>${escapeHtml(person.full_name || 'Freelancer')}${person.is_verified ? ' <i class="fa-solid fa-circle-check" title="Verified" style="color:var(--accent-cyan); font-size:0.8rem;"></i>' : ''}</h3>
+                            <p>${escapeHtml(person.title || 'Specialist')} &middot; ${escapeHtml(person.availability || 'available')}</p>
+                        </div>
+                        <div class="mini-actions">
+                            <a href="find-talent.html">Open directory</a>
+                            <button type="button" data-unsave-talent="${escapeHtml(person.id)}">Remove</button>
+                        </div>
+                    </div>`).join('')
+                : '<p style="color:var(--text-slate); font-size:0.88rem;">No saved freelancers yet. Use Save on a profile in <a href="find-talent.html" style="color:var(--accent-cyan);">find talent</a>.</p>';
+
+            container.innerHTML = `
+                <div class="portal-card">
+                    <h2 style="font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-bookmark"></i> Saved projects</h2>
+                    <p style="color:var(--text-slate); font-size:0.85rem;">Only you can see this list.</p>
+                    <div class="mini-list">${jobsHtml}</div>
+                </div>
+                <div class="portal-card" style="margin-top:18px;">
+                    <h2 style="font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-user-group"></i> Saved freelancers</h2>
+                    <p style="color:var(--text-slate); font-size:0.85rem;">Your private shortlist for hiring.</p>
+                    <div class="mini-list">${talentHtml}</div>
+                </div>`;
+        }
+
+        async function loadInvitations() {
+            const container = document.getElementById('tabListingsContainer');
+            let received = [];
+            let sent = [];
+            let gapError = null;
+            if (window.isMarketplaceReady()) {
+                try {
+                    received = await window.GahonshDB.Invitations.listReceived();
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] received invitations failed:', err);
+                    if (window.GahonshDB.isBackendNotProvisioned?.(err)) gapError = err;
+                }
+                try {
+                    sent = await window.GahonshDB.Invitations.listSent();
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] sent invitations failed:', err);
+                    if (window.GahonshDB.isBackendNotProvisioned?.(err)) gapError = err;
+                }
+            }
+            if (gapError) {
+                container.innerHTML = notProvisionedCard('Invitations');
+                container.querySelector('[data-retry-portal]')?.addEventListener('click', () => loadInvitations());
+                return;
+            }
+
+            const receivedHtml = received.length
+                ? received.map((inv) => {
+                    const pending = inv.status === 'invited';
+                    return `
+                    <div class="mini-row">
+                        <div>
+                            <h3>${escapeHtml(inv.job?.title || 'Project')}</h3>
+                            <p>From ${escapeHtml(inv.client?.full_name || 'a client')} &middot; <span class="status-badge status-${escapeHtml(inv.status)}">${escapeHtml(inv.status)}</span></p>
+                            ${inv.message ? `<p style="margin-top:6px;">&ldquo;${escapeHtml(inv.message)}&rdquo;</p>` : ''}
+                        </div>
+                        <div class="mini-actions">
+                            ${inv.job?.id ? `<a href="job-details.html?id=${encodeURIComponent(inv.job.id)}">View project</a>` : ''}
+                            ${pending ? `<button type="button" data-invitation-accept="${escapeHtml(inv.id)}">Accept</button>
+                                         <button type="button" data-invitation-decline="${escapeHtml(inv.id)}">Decline</button>` : ''}
+                        </div>
+                    </div>`;
+                }).join('')
+                : '<p style="color:var(--text-slate); font-size:0.88rem;">No invitations yet. Clients who want your specific skills will appear here.</p>';
+
+            const sentHtml = sent.length
+                ? sent.map((inv) => {
+                    const pending = inv.status === 'invited';
+                    return `
+                    <div class="mini-row">
+                        <div>
+                            <h3>${escapeHtml(inv.freelancer?.full_name || 'Freelancer')}</h3>
+                            <p>${escapeHtml(inv.job?.title || 'Project')} &middot; <span class="status-badge status-${escapeHtml(inv.status)}">${escapeHtml(inv.status)}</span></p>
+                        </div>
+                        <div class="mini-actions">
+                            ${pending ? `<button type="button" data-invitation-withdraw="${escapeHtml(inv.id)}">Withdraw</button>` : ''}
+                        </div>
+                    </div>`;
+                }).join('')
+                : '<p style="color:var(--text-slate); font-size:0.88rem;">You have not invited anyone yet. Open <a href="find-talent.html" style="color:var(--accent-cyan);">find talent</a> and use Invite.</p>';
+
+            container.innerHTML = `
+                <div class="portal-card">
+                    <h2 style="font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-envelope-open-text"></i> Invitations you received</h2>
+                    <p style="color:var(--text-slate); font-size:0.85rem;">Accepting records your interest. You still send your own proposal with your own price.</p>
+                    <div class="mini-list">${receivedHtml}</div>
+                </div>
+                <div class="portal-card" style="margin-top:18px;">
+                    <h2 style="font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-paper-plane"></i> Invitations you sent</h2>
+                    <div class="mini-list">${sentHtml}</div>
+                </div>`;
+        }
+
+        async function loadNotifications() {
+            const container = document.getElementById('tabListingsContainer');
+            let items = [];
+            let gapError = null;
+            if (window.isMarketplaceReady()) {
+                try {
+                    items = await window.GahonshDB.Notifications.list(60);
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] notifications failed:', err);
+                    if (window.GahonshDB.isBackendNotProvisioned?.(err)) gapError = err;
+                }
+            }
+            if (gapError) {
+                container.innerHTML = notProvisionedCard('Notifications');
+                container.querySelector('[data-retry-portal]')?.addEventListener('click', () => loadNotifications());
+                return;
+            }
+
+            const listHtml = items.length
+                ? items.map((note) => `
+                    <div class="mini-row${note.is_read ? '' : ' notif-unread'}">
+                        <div>
+                            <h3>${escapeHtml(note.title)}</h3>
+                            <p>${escapeHtml(note.body || '')}</p>
+                            <p style="margin-top:4px;">${new Date(note.created_at).toLocaleString()}</p>
+                        </div>
+                        <div class="mini-actions">
+                            ${note.link ? `<a href="${escapeHtml(note.link)}">Open</a>` : ''}
+                            ${note.is_read ? '' : `<button type="button" data-notif-read="${escapeHtml(note.id)}">Mark read</button>`}
+                            <button type="button" data-notif-remove="${escapeHtml(note.id)}">Dismiss</button>
+                        </div>
+                    </div>`).join('')
+                : '<p style="color:var(--text-slate); font-size:0.88rem;">Nothing here yet. New proposals, invitations and answers will appear in this list.</p>';
+
+            container.innerHTML = `
+                <div class="portal-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h2 style="font-size:1.1rem; margin-bottom:4px;"><i class="fa-solid fa-bell"></i> Notifications</h2>
+                            <p style="color:var(--text-slate); font-size:0.85rem;">In-app only. Nothing is sent by email or SMS.</p>
+                        </div>
+                        <div class="mini-actions">
+                            <button type="button" data-notif-all-read>Mark all read</button>
+                            <button type="button" data-notif-clear>Clear all</button>
+                        </div>
+                    </div>
+                    <div class="mini-list">${listHtml}</div>
+                </div>`;
+            refreshNotificationBadge();
+        }
+
+        async function refreshNotificationBadge() {
+            const badge = document.getElementById('notifBadge');
+            if (!badge || !window.isMarketplaceReady()) return;
+            try {
+                const count = await window.GahonshDB.Notifications.unreadCount();
+                badge.innerText = String(count);
+                badge.hidden = !count;
+            } catch (err) {
+                badge.hidden = true;
             }
         }
 
@@ -909,27 +1269,65 @@
         }
 
         // Tab Switching
+        const PORTAL_TABS = {
+            tabJobsOrProposals: 'primary',
+            tabContracts: 'contracts',
+            tabShortlist: 'shortlist',
+            tabInvitations: 'invitations',
+            tabNotifications: 'notifications',
+            tabRecords: 'records'
+        };
+
+        function activateTab(tabId) {
+            currentTab = PORTAL_TABS[tabId] || 'primary';
+            Object.keys(PORTAL_TABS).forEach((id) => {
+                const button = document.getElementById(id);
+                if (button) button.classList.toggle('active', id === tabId);
+            });
+        }
+
+        const PORTAL_TAB_BY_SLUG = Object.entries(PORTAL_TABS)
+            .reduce((map, [id, slug]) => Object.assign(map, { [slug]: id }), {});
+
+        // Notifications link back here with a tab slug (#invitations). Clicking
+        // the tab button reuses its loader, so the panel is fetched as well as
+        // selected.
+        function applyTabFromHash() {
+            const slug = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+            const tabId = PORTAL_TAB_BY_SLUG[slug];
+            const button = tabId ? document.getElementById(tabId) : null;
+            if (button) button.click();
+        }
+
+        window.addEventListener('hashchange', applyTabFromHash);
+
         document.getElementById('tabJobsOrProposals').onclick = () => {
-            currentTab = 'primary';
-            document.getElementById('tabJobsOrProposals').classList.add('active');
-            document.getElementById('tabContracts').classList.remove('active');
-            document.getElementById('tabRecords').classList.remove('active');
+            activateTab('tabJobsOrProposals');
             if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadUserActivity'));
         };
 
         document.getElementById('tabContracts').onclick = () => {
-            currentTab = 'contracts';
-            document.getElementById('tabContracts').classList.add('active');
-            document.getElementById('tabJobsOrProposals').classList.remove('active');
-            document.getElementById('tabRecords').classList.remove('active');
+            activateTab('tabContracts');
             if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadUserActivity'));
         };
 
+        document.getElementById('tabShortlist').onclick = () => {
+            activateTab('tabShortlist');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadShortlist'));
+        };
+
+        document.getElementById('tabInvitations').onclick = () => {
+            activateTab('tabInvitations');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadInvitations'));
+        };
+
+        document.getElementById('tabNotifications').onclick = () => {
+            activateTab('tabNotifications');
+            if (currentUser) loadUserActivity(currentUser.profile?.role || 'freelancer').catch((err) => renderPortalError(err, 'loadNotifications'));
+        };
+
         document.getElementById('tabRecords').onclick = () => {
-            currentTab = 'records';
-            document.getElementById('tabRecords').classList.add('active');
-            document.getElementById('tabJobsOrProposals').classList.remove('active');
-            document.getElementById('tabContracts').classList.remove('active');
+            activateTab('tabRecords');
             if (currentUser) loadRecords().catch((err) => renderPortalError(err, 'loadRecords'));
         };
 
@@ -992,6 +1390,109 @@
                     console.error('[marketplace-dashboard] milestone remove failed:', err);
                     window.GahonshAuthUI.showToast('Could not remove the milestone: ' + (err.message || 'please try again.'));
                     msRemove.disabled = false;
+                }
+                return;
+            }
+
+            const unsaveJobBtn = e.target.closest('[data-unsave-job]');
+            if (unsaveJobBtn) {
+                unsaveJobBtn.disabled = true;
+                try {
+                    await window.GahonshDB.SavedJobs.remove(unsaveJobBtn.dataset.unsaveJob);
+                    await loadShortlist();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not update your shortlist: ' + (err.message || 'please try again.'));
+                    unsaveJobBtn.disabled = false;
+                }
+                return;
+            }
+
+            const unsaveTalentBtn = e.target.closest('[data-unsave-talent]');
+            if (unsaveTalentBtn) {
+                unsaveTalentBtn.disabled = true;
+                try {
+                    await window.GahonshDB.SavedTalent.remove(unsaveTalentBtn.dataset.unsaveTalent);
+                    await loadShortlist();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not update your shortlist: ' + (err.message || 'please try again.'));
+                    unsaveTalentBtn.disabled = false;
+                }
+                return;
+            }
+
+            const acceptBtn = e.target.closest('[data-invitation-accept]');
+            const declineBtn = e.target.closest('[data-invitation-decline]');
+            if (acceptBtn || declineBtn) {
+                const button = acceptBtn || declineBtn;
+                const status = acceptBtn ? 'accepted' : 'declined';
+                button.disabled = true;
+                try {
+                    await window.GahonshDB.Invitations.respond(button.dataset.invitationAccept || button.dataset.invitationDecline, status);
+                    window.GahonshAuthUI.showToast('Invitation ' + status + '.');
+                    await loadInvitations();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not answer the invitation: ' + (err.message || 'please try again.'));
+                    button.disabled = false;
+                }
+                return;
+            }
+
+            const withdrawInviteBtn = e.target.closest('[data-invitation-withdraw]');
+            if (withdrawInviteBtn) {
+                withdrawInviteBtn.disabled = true;
+                try {
+                    await window.GahonshDB.Invitations.withdraw(withdrawInviteBtn.dataset.invitationWithdraw);
+                    await loadInvitations();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not withdraw the invitation: ' + (err.message || 'please try again.'));
+                    withdrawInviteBtn.disabled = false;
+                }
+                return;
+            }
+
+            const notifReadBtn = e.target.closest('[data-notif-read]');
+            if (notifReadBtn) {
+                notifReadBtn.disabled = true;
+                try {
+                    await window.GahonshDB.Notifications.markRead(notifReadBtn.dataset.notifRead);
+                    await loadNotifications();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not update the notification: ' + (err.message || 'please try again.'));
+                    notifReadBtn.disabled = false;
+                }
+                return;
+            }
+
+            const notifRemoveBtn = e.target.closest('[data-notif-remove]');
+            if (notifRemoveBtn) {
+                notifRemoveBtn.disabled = true;
+                try {
+                    await window.GahonshDB.Notifications.remove(notifRemoveBtn.dataset.notifRemove);
+                    await loadNotifications();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not dismiss the notification: ' + (err.message || 'please try again.'));
+                    notifRemoveBtn.disabled = false;
+                }
+                return;
+            }
+
+            if (e.target.closest('[data-notif-all-read]')) {
+                try {
+                    await window.GahonshDB.Notifications.markAllRead();
+                    await loadNotifications();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not update notifications: ' + (err.message || 'please try again.'));
+                }
+                return;
+            }
+
+            if (e.target.closest('[data-notif-clear]')) {
+                if (!confirm('Clear every notification? This cannot be undone.')) return;
+                try {
+                    await window.GahonshDB.Notifications.clear();
+                    await loadNotifications();
+                } catch (err) {
+                    window.GahonshAuthUI.showToast('Could not clear notifications: ' + (err.message || 'please try again.'));
                 }
                 return;
             }

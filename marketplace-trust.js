@@ -128,7 +128,7 @@
       bar.className = 'mt-actions';
       bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;';
       bar.innerHTML =
-        '<a href="messages.html?contract=' + encodeURIComponent(cid) + '" style="border:1px solid #26333f;border-radius:8px;padding:8px 14px;text-decoration:none;color:#7fd1c4;font-size:0.9rem;">Message</a>';
+        '<a class="mt-msg-link" href="messages.html?contract=' + encodeURIComponent(cid) + '">Message</a>';
       card.appendChild(bar);
     });
   }
