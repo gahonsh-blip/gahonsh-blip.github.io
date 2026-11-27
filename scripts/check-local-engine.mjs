@@ -143,7 +143,8 @@ async function refuse(fn) {
 
   // --- hiring a withdrawn proposal (SQL RPC refuses it) -------------------
   await DB.Auth.signIn(freelancers[0]._email, password);
-  const withdrawn = await DB.Proposals.submitProposal('demo-job-1', 'brief', 300, 5);
+  const withdrawn = await DB.Proposals.submitProposal(
+    'demo-job-1', 'A short proposal that will be withdrawn before hiring.', 300, 5);
   await DB.Proposals.withdrawProposal(withdrawn.id);
   await DB.Auth.signIn(client._email, password);
   check('refuses to hire a withdrawn proposal',
@@ -151,7 +152,8 @@ async function refuse(fn) {
 
   // --- withdrawing someone else's proposal (UPDATE policy) ---------------
   await DB.Auth.signIn(freelancers[0]._email, password);
-  const mine = await DB.Proposals.submitProposal('demo-job-1', 'mine', 320, 6);
+  const mine = await DB.Proposals.submitProposal(
+    'demo-job-1', 'A proposal owned by the first freelancer, for the policy test.', 320, 6);
   await DB.Auth.signIn(freelancers[1]._email, password);
   check("refuses to withdraw another user's proposal",
     await refuse(() => DB.Proposals.withdrawProposal(mine.id)) !== null);
@@ -525,6 +527,69 @@ async function refuse(fn) {
     })) !== null);
   check('a milestone rejects a too-short title',
     await refuse(() => DB.Milestones.add({ contractId: trackingContractId, title: 'ab' })) !== null);
+
+  // --- the CHECK constraints the offline engine used to skip --------------
+  // public.jobs and public.proposals both carry CHECKs. A value the database
+  // rejects must be rejected here too, otherwise the same action succeeds
+  // offline and fails online with a raw Postgres error.
+  const validationJob = await DB.Jobs.createJob({
+    title: 'A job created to prove the CHECK constraints hold',
+    description: 'A description that is comfortably longer than twenty characters.',
+    category: 'Excel Automation',
+    budget_min: 100,
+    budget_max: 400
+  });
+  check('a job accepts a well-formed brief', !!validationJob.id);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  check('a proposal rejects a cover letter under 20 characters',
+    await refuse(() => DB.Proposals.submitProposal(validationJob.id, 'too short', 200, 5)) !== null);
+  check('a proposal rejects a zero bid',
+    await refuse(() => DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', 0, 5)) !== null);
+  check('a proposal rejects a negative bid',
+    await refuse(() => DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', -50, 5)) !== null);
+  check('a proposal rejects a non-numeric bid',
+    await refuse(() => DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', 'about 300', 5)) !== null);
+  check('a proposal rejects a zero-day delivery',
+    await refuse(() => DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', 200, 0)) !== null);
+  check('a proposal rejects a fractional delivery time',
+    await refuse(() => DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', 200, 2.5)) !== null);
+  check('a proposal accepts a well-formed bid',
+    (await DB.Proposals.submitProposal(
+      validationJob.id, 'A perfectly reasonable cover letter for this job.', 200, 5)).bid_amount === 200);
+
+  await DB.Auth.signIn(client._email, password);
+  check('a job rejects a title under 5 characters',
+    await refuse(() => DB.Jobs.createJob({
+      title: 'Fix', description: 'A description that is comfortably long enough.',
+      category: 'Excel Automation', budget_min: 100
+    })) !== null);
+  check('a job rejects a description under 20 characters',
+    await refuse(() => DB.Jobs.createJob({
+      title: 'A perfectly fine job title', description: 'too short',
+      category: 'Excel Automation', budget_min: 100
+    })) !== null);
+  check('a job rejects a non-numeric budget',
+    await refuse(() => DB.Jobs.createJob({
+      title: 'A perfectly fine job title',
+      description: 'A description that is comfortably long enough.',
+      category: 'Excel Automation', budget_min: 'about 500'
+    })) !== null);
+  check('a job rejects a maximum budget below the minimum',
+    await refuse(() => DB.Jobs.createJob({
+      title: 'A perfectly fine job title',
+      description: 'A description that is comfortably long enough.',
+      category: 'Excel Automation', budget_min: 500, budget_max: 200
+    })) !== null);
+  check('a job edit rejects a non-numeric budget',
+    await refuse(() => DB.Jobs.updateJob(validationJob.id, { budget_min: 'plenty' })) !== null);
+  check('a job edit rejects a missing minimum budget',
+    await refuse(() => DB.Jobs.updateJob(validationJob.id, { budget_min: null })) !== null);
 
   await DB.Auth.signIn(freelancers[1]._email, password);
   check('the hired freelancer can see the milestone',

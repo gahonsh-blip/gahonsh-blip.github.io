@@ -534,6 +534,60 @@
         return out;
     }
 
+    // Amounts arrive from form fields as strings. PostgREST would answer a
+    // non-numeric value with a cast error, so refuse it here rather than let
+    // parseFloat quietly store 0 for a typo.
+    function coerceAmount(value, label) {
+        if (value === null || value === undefined || String(value).trim() === '') return null;
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) throw new Error(label + ' must be a number.');
+        return amount;
+    }
+
+    // Mirrors the CHECK constraints on public.jobs so a job the offline engine
+    // accepts is a job the database would also accept.
+    function validateJobRow(job) {
+        if (job.title.length < 5 || job.title.length > 150) {
+            throw new Error('Job title must be 5-150 characters.');
+        }
+        if (job.description.length < 20) {
+            throw new Error('Job description must be at least 20 characters.');
+        }
+        if (!job.category) throw new Error('Job category is required.');
+        if (job.job_type !== 'fixed' && job.job_type !== 'hourly') {
+            throw new Error('Invalid job type.');
+        }
+        if (!['entry', 'intermediate', 'expert'].includes(job.experience_level)) {
+            throw new Error('Invalid experience level.');
+        }
+        if (job.budget_min === null || !(job.budget_min >= 0)) {
+            throw new Error('A minimum budget of zero or more is required.');
+        }
+        if (job.budget_max !== null && job.budget_max < job.budget_min) {
+            throw new Error('Maximum budget must be at least the minimum.');
+        }
+        if (job.hourly_rate_min !== null && job.hourly_rate_min < 0) {
+            throw new Error('Hourly rate cannot be negative.');
+        }
+        if (job.hourly_rate_min !== null && job.hourly_rate_max !== null &&
+            job.hourly_rate_max < job.hourly_rate_min) {
+            throw new Error('Maximum hourly rate must be at least the minimum.');
+        }
+    }
+
+    // Mirrors the CHECK constraints on public.proposals.
+    function validateProposalRow(proposal) {
+        if (proposal.cover_letter.length < 20) {
+            throw new Error('Your proposal needs at least 20 characters.');
+        }
+        if (!(proposal.bid_amount > 0)) {
+            throw new Error('Your bid must be greater than zero.');
+        }
+        if (!Number.isInteger(proposal.delivery_time_days) || proposal.delivery_time_days < 1) {
+            throw new Error('Delivery time must be a whole number of days, at least one.');
+        }
+    }
+
     function currentUserRecord() {
         const session = readSession();
         if (!session || !session.userId) return null;
@@ -831,15 +885,16 @@
                 category: jobData.category,
                 required_skills: Array.isArray(jobData.required_skills) ? jobData.required_skills : [],
                 job_type: jobData.job_type || 'fixed',
-                budget_min: parseFloat(jobData.budget_min) || 0,
-                budget_max: jobData.budget_max ? parseFloat(jobData.budget_max) : null,
-                hourly_rate_min: jobData.hourly_rate_min ? parseFloat(jobData.hourly_rate_min) : null,
-                hourly_rate_max: jobData.hourly_rate_max ? parseFloat(jobData.hourly_rate_max) : null,
+                budget_min: coerceAmount(jobData.budget_min, 'Minimum budget') || 0,
+                budget_max: coerceAmount(jobData.budget_max, 'Maximum budget'),
+                hourly_rate_min: coerceAmount(jobData.hourly_rate_min, 'Minimum hourly rate'),
+                hourly_rate_max: coerceAmount(jobData.hourly_rate_max, 'Maximum hourly rate'),
                 experience_level: jobData.experience_level || 'intermediate',
                 estimated_duration: jobData.estimated_duration || '1 to 3 months',
                 status: 'open',
                 created_at: nowIso()
             };
+            validateJobRow(job);
 
             const rows = readTable('jobs');
             rows.push(job);
@@ -889,35 +944,11 @@
             if (updates.job_type !== undefined) next.job_type = updates.job_type;
             ['budget_min', 'budget_max', 'hourly_rate_min', 'hourly_rate_max'].forEach((key) => {
                 if (updates[key] !== undefined) {
-                    next[key] = updates[key] === null ? null : (parseFloat(updates[key]) || 0);
+                    next[key] = coerceAmount(updates[key], key.replace(/_/g, ' '));
                 }
             });
 
-            // Mirror the CHECK constraints the database enforces.
-            if (next.title.length < 5 || next.title.length > 150) {
-                throw new Error('Job title must be 5-150 characters.');
-            }
-            if (next.description.length < 20) {
-                throw new Error('Job description must be at least 20 characters.');
-            }
-            if (!next.category) throw new Error('Job category is required.');
-            if (next.job_type !== 'fixed' && next.job_type !== 'hourly') {
-                throw new Error('Invalid job type.');
-            }
-            if (!['entry', 'intermediate', 'expert'].includes(next.experience_level)) {
-                throw new Error('Invalid experience level.');
-            }
-            if (next.budget_min < 0) throw new Error('Budget cannot be negative.');
-            if (next.budget_max !== null && next.budget_max < next.budget_min) {
-                throw new Error('Maximum budget must be at least the minimum.');
-            }
-            if (next.hourly_rate_min !== null && next.hourly_rate_min < 0) {
-                throw new Error('Hourly rate cannot be negative.');
-            }
-            if (next.hourly_rate_min !== null && next.hourly_rate_max !== null &&
-                next.hourly_rate_max < next.hourly_rate_min) {
-                throw new Error('Maximum hourly rate must be at least the minimum.');
-            }
+            validateJobRow(next);
 
             next.updated_at = nowIso();
             rows[index] = next;
@@ -981,12 +1012,13 @@
                 job_id: jobId,
                 freelancer_id: profile.id,
                 cover_letter: String(coverLetter || '').trim(),
-                bid_amount: parseFloat(bidAmount),
-                delivery_time_days: parseInt(deliveryDays, 10),
+                bid_amount: coerceAmount(bidAmount, 'Your bid'),
+                delivery_time_days: coerceAmount(deliveryDays, 'Delivery time'),
                 attachment_urls: attachmentUrls,
                 status: 'submitted',
                 created_at: nowIso()
             };
+            validateProposalRow(proposal);
             rows.push(proposal);
             writeTable('proposals', rows);
             pushNotification(

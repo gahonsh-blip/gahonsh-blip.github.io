@@ -24,6 +24,49 @@
     }
 
     /**
+     * Mirrors the CHECK constraints on public.jobs. Without this the database
+     * answers a bad value with a raw PostgREST message such as
+     * `violates check constraint "jobs_budget_min_check"`, which is useless to
+     * the person filling in the form.
+     */
+    function assertJobPayload(payload) {
+        if (payload.title !== undefined && (payload.title.length < 5 || payload.title.length > 150)) {
+            throw new Error('Job title must be 5-150 characters.');
+        }
+        if (payload.description !== undefined && payload.description.length < 20) {
+            throw new Error('Job description must be at least 20 characters.');
+        }
+        if (payload.budget_min !== undefined && !(payload.budget_min >= 0)) {
+            throw new Error('A minimum budget of zero or more is required.');
+        }
+        if (payload.budget_max != null && payload.budget_min != null && payload.budget_max < payload.budget_min) {
+            throw new Error('Maximum budget must be at least the minimum.');
+        }
+        if (payload.hourly_rate_min != null && payload.hourly_rate_min < 0) {
+            throw new Error('Hourly rate cannot be negative.');
+        }
+        if (payload.hourly_rate_min != null && payload.hourly_rate_max != null &&
+            payload.hourly_rate_max < payload.hourly_rate_min) {
+            throw new Error('Maximum hourly rate must be at least the minimum.');
+        }
+    }
+
+    /**
+     * Mirrors the CHECK constraints on public.proposals.
+     */
+    function assertProposalPayload(payload) {
+        if (payload.cover_letter.length < 20) {
+            throw new Error('Your proposal needs at least 20 characters.');
+        }
+        if (!(payload.bid_amount > 0)) {
+            throw new Error('Your bid must be greater than zero.');
+        }
+        if (!Number.isInteger(payload.delivery_time_days) || payload.delivery_time_days < 1) {
+            throw new Error('Delivery time must be a whole number of days, at least one.');
+        }
+    }
+
+    /**
      * Initializes the Supabase JS client safely
      */
     async function getClient() {
@@ -584,6 +627,7 @@
                 estimated_duration: jobData.estimated_duration || '1 to 3 months',
                 status: 'open'
             };
+            assertJobPayload(payload);
 
             const { data, error } = await client
                 .from('jobs')
@@ -638,6 +682,7 @@
                     ? safeUpdates.required_skills.map((s) => String(s).trim()).filter(Boolean)
                     : [];
             }
+            assertJobPayload(safeUpdates);
 
             const { data: existing, error: readError } = await client
                 .from('jobs')
@@ -695,6 +740,7 @@
                 attachment_urls: attachmentUrls,
                 status: 'submitted'
             };
+            assertProposalPayload(payload);
 
             const { data, error } = await client
                 .from('proposals')
