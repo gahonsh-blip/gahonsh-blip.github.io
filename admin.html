@@ -105,6 +105,7 @@
         <button class="tab" data-tab="jobs">Projects</button>
         <button class="tab" data-tab="proposals">Proposals</button>
         <button class="tab" data-tab="contracts">Contracts</button>
+        <button class="tab" data-tab="verification">Verification</button>
     </div>
 
     <div class="toolbar">
@@ -128,7 +129,7 @@
 let client = null;
 let me = null;
 let tab = 'enquiries';
-let cache = { people: [], jobs: [], proposals: [], contracts: [], enquiries: [] };
+let cache = { people: [], jobs: [], proposals: [], contracts: [], enquiries: [], verification: [] };
 
 const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const money = v => { const n = Number(v); return isFinite(n) && n > 0 ? '$' + n.toLocaleString('en-US', {maximumFractionDigits: 0}) : '—'; };
@@ -212,7 +213,22 @@ async function loadAll(){
         }
     })();
 
-    const [overview, people, jobs, proposals, contracts, enquiries] = await Promise.all([
+    // Verification requests come through the client service so the admin page
+    // obeys the same policy as everyone else: only an admin sees the queue.
+    const verificationTask = (async () => {
+        try {
+            if (!window.GahonshDB?.Verification?.listPending) return [];
+            return await window.GahonshDB.Verification.listPending();
+        } catch (e) {
+            if (/PGRST205|could not find the table/i.test(String(e.message || e))) {
+                gaps.push('verification requests');
+            }
+            console.warn(e.message);
+            return [];
+        }
+    })();
+
+    const [overview, people, jobs, proposals, contracts, enquiries, verification] = await Promise.all([
         overviewTask,
         q(async () => {
             const full = await client.from('admin_profiles')
@@ -230,10 +246,11 @@ async function loadAll(){
         q(() => client.from('jobs').select('id, title, status, category, budget_min, proposals_count, created_at, client_id').order('created_at', {ascending:false}).limit(300)),
         q(() => client.from('proposals').select('id, job_id, freelancer_id, bid_amount, delivery_time_days, status, created_at').order('created_at', {ascending:false}).limit(300)),
         q(() => client.from('contracts').select('id, job_id, client_id, freelancer_id, agreed_amount, status, created_at').order('created_at', {ascending:false}).limit(300)),
-        q(() => client.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(300))
+        q(() => client.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(300)),
+        verificationTask
     ]);
 
-    cache = { people, jobs, proposals, contracts, enquiries };
+    cache = { people, jobs, proposals, contracts, enquiries, verification };
     showDeployWarning(gaps);
     renderKpis(overview || {});
     renderTable();
@@ -294,6 +311,22 @@ function renderTable(){
                 <td>${p.role === 'freelancer' ? `<button class="btn btn-sm" data-action="verify" data-id="${esc(p.id)}" data-value="${!p.is_verified}">${p.is_verified ? 'Remove badge' : 'Verify'}</button>` : ''}</td>
             </tr>`).join('') + '</tbody></table>'
             : `<div class="empty">No accounts yet.</div>`;
+    }
+
+    if(tab === 'verification'){
+        const list = cache.verification;
+        rows = list.length ? `<table><thead><tr><th>Member</th><th>Method</th><th>Reference</th><th>Requested</th><th></th></tr></thead><tbody>` +
+            list.map(v => `<tr>
+                <td><strong>${esc(v.member?.full_name || 'Member')}</strong><div class="muted" style="font-size:.78rem">${esc(v.member?.title || v.member?.role || '')}</div></td>
+                <td>${esc(String(v.method || '').replace(/_/g, ' '))}</td>
+                <td>${esc(v.reference || '—')}${v.note ? `<div class="muted" style="font-size:.78rem">${esc(v.note)}</div>` : ''}</td>
+                <td>${date(v.created_at)}</td>
+                <td>
+                    <button class="btn btn-sm" data-action="verify-approve" data-id="${esc(v.id)}">Approve</button>
+                    <button class="btn btn-sm" data-action="verify-reject" data-id="${esc(v.id)}">Decline</button>
+                </td>
+            </tr>`).join('') + '</tbody></table>'
+            : `<div class="empty">No verification requests waiting. Members ask from their profile editor.</div>`;
     }
 
     if(tab === 'jobs'){
@@ -373,7 +406,25 @@ document.getElementById('tableArea').addEventListener('click', (e) => {
     if(btn.dataset.action === 'verify') toggleVerify(id, value);
     else if(btn.dataset.action === 'close-job') closeJob(id);
     else if(btn.dataset.action === 'handled') toggleHandled(id, value);
+    else if(btn.dataset.action === 'verify-approve') decideVerification(id, true);
+    else if(btn.dataset.action === 'verify-reject') decideVerification(id, false);
 });
+
+async function decideVerification(id, approve){
+    let note = '';
+    if(!approve){
+        note = prompt('Why is this request being declined? The member sees this.');
+        if(note === null) return;
+        if(!note.trim()){ alert('A reason is required so the member can fix it.'); return; }
+    }
+    try{
+        await window.GahonshDB.Verification.decide(id, approve, note || null);
+    }catch(err){
+        alert(err.message || 'The request could not be updated.');
+        return;
+    }
+    await loadAll();
+}
 
 async function toggleVerify(id, value){
     const { error } = await client.from('profiles').update({ is_verified: value }).eq('id', id);

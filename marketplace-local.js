@@ -1943,6 +1943,223 @@
         }
     };
 
+    // ------------------------------------------------------------------
+    // Verification requests (mirrors verification_requests + the trigger
+    // validate_verification_mutation and decide_verification()). A member
+    // asks; an admin decides; approval flips is_verified.
+    // ------------------------------------------------------------------
+    const VERIFICATION_METHODS = ['video_call', 'business_documents', 'portfolio_review', 'client_reference'];
+
+    const Verification = {
+        async mine() {
+            const profile = currentUserRecord();
+            if (!profile) return [];
+            return readTable('verification_requests')
+                .filter((r) => r.user_id === profile.id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map(clone);
+        },
+
+        async request({ method, reference = null, note = null } = {}) {
+            const profile = requireUser('Please sign in to request verification.');
+            if (!VERIFICATION_METHODS.includes(method)) {
+                throw new Error('Choose how you would like to be verified.');
+            }
+
+            const rows = readTable('verification_requests');
+            if (rows.some((r) => r.user_id === profile.id && r.status === 'pending')) {
+                throw new Error('You already have a request open. We will review it shortly.');
+            }
+
+            const now = nowIso();
+            const row = {
+                id: newId('verification'),
+                user_id: profile.id,
+                method,
+                reference: reference ? String(reference).trim().slice(0, 200) : null,
+                note: note ? String(note).trim().slice(0, 1000) : null,
+                status: 'pending',
+                decided_by: null,
+                decision_note: null,
+                created_at: now,
+                decided_at: null
+            };
+            rows.push(row);
+            writeTable('verification_requests', rows);
+            return clone(row);
+        },
+
+        async cancel(id) {
+            const profile = requireUser('Please sign in first.');
+            const rows = readTable('verification_requests');
+            const row = rows.find((r) => r.id === id);
+            if (!row) throw new Error('Request not found.');
+            if (profile.role !== 'admin' && (row.user_id !== profile.id || row.status !== 'pending')) {
+                throw new Error('Only an open request of your own can be withdrawn.');
+            }
+            writeTable('verification_requests', rows.filter((r) => r.id !== id));
+            return true;
+        },
+
+        async listPending() {
+            const profile = currentUserRecord();
+            // Mirrors the SELECT policy: a member sees their own rows only, so a
+            // non-admin asking for the review queue gets nothing.
+            if (!profile || profile.role !== 'admin') return [];
+            return readTable('verification_requests')
+                .filter((r) => r.status === 'pending')
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+                .map(clone);
+        },
+
+        async decide(id, approve, note = null) {
+            const profile = requireUser('Please sign in first.');
+            if (profile.role !== 'admin') {
+                throw new Error('Only an admin can decide a verification request.');
+            }
+            const rows = readTable('verification_requests');
+            const index = rows.findIndex((r) => r.id === id);
+            if (index < 0) throw new Error('Request not found.');
+            if (rows[index].status !== 'pending') throw new Error('This request has already been decided.');
+
+            const clean = note ? String(note).trim().slice(0, 1000) : '';
+            if (!approve && !clean) {
+                throw new Error('Say why the request was declined so the member can fix it.');
+            }
+
+            const now = nowIso();
+            rows[index] = Object.assign({}, rows[index], {
+                status: approve ? 'approved' : 'rejected',
+                decided_by: profile.id,
+                decision_note: clean || null,
+                decided_at: now
+            });
+            writeTable('verification_requests', rows);
+
+            if (approve) {
+                const profiles = readTable('profiles');
+                const pIndex = profiles.findIndex((p) => p.id === rows[index].user_id);
+                if (pIndex >= 0) {
+                    profiles[pIndex] = Object.assign({}, profiles[pIndex], { is_verified: true, updated_at: now });
+                    writeTable('profiles', profiles);
+                }
+            }
+
+            pushNotification(
+                rows[index].user_id,
+                'verification',
+                approve ? 'Your profile is verified' : 'Verification could not be confirmed',
+                approve
+                    ? 'The verified badge now shows on your profile and in the talent directory.'
+                    : (clean || 'Submit a new request with different evidence when you are ready.'),
+                'marketplace-dashboard.html'
+            );
+
+            return clone(rows[index]);
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Hourly timesheets (mirrors contract_timesheets + the trigger
+    // validate_timesheet_mutation). A record of work, not a bill.
+    // ------------------------------------------------------------------
+    const Timesheets = {
+        async list(contractId) {
+            const profile = currentUserRecord();
+            if (!profile || !contractId) return [];
+            const contract = milestoneContract(contractId);
+            if (!isContractParty(contract, profile) && profile.role !== 'admin') return [];
+            return readTable('contract_timesheets')
+                .filter((t) => t.contract_id === contractId)
+                .sort((a, b) => new Date(b.work_date) - new Date(a.work_date))
+                .map(clone);
+        },
+
+        async log({ contractId, workDate, hours, note = null } = {}) {
+            const profile = requireUser('Please sign in to log hours.');
+            const contract = milestoneContract(contractId);
+            if (!contract) throw new Error('Contract not found.');
+
+            const job = readTable('jobs').find((j) => j.id === contract.job_id);
+            if (!job || job.job_type !== 'hourly') {
+                throw new Error('Timesheets are only for hourly contracts.');
+            }
+            if (contract.status !== 'active' && profile.role !== 'admin') {
+                throw new Error('Hours can only be logged while the contract is active.');
+            }
+            if (contract.freelancer_id !== profile.id && profile.role !== 'admin') {
+                throw new Error('Only the freelancer can log hours.');
+            }
+
+            const value = Number(hours);
+            if (!Number.isFinite(value) || value <= 0 || value > 24) {
+                throw new Error('Enter the hours worked, between 0.25 and 24.');
+            }
+
+            const day = String(workDate || '').slice(0, 10);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error('Choose the day you worked.');
+            if (day > nowIso().slice(0, 10)) throw new Error('Hours cannot be logged for a future date.');
+
+            const rows = readTable('contract_timesheets');
+            if (rows.some((t) => t.contract_id === contractId && t.work_date === day)) {
+                throw new Error('There is already an entry for that day.');
+            }
+
+            const now = nowIso();
+            const row = {
+                id: newId('timesheet'),
+                contract_id: contractId,
+                freelancer_id: contract.freelancer_id,
+                work_date: day,
+                hours: value,
+                note: note ? String(note).trim().slice(0, 280) : null,
+                status: 'submitted',
+                reviewed_by: null,
+                reviewed_at: null,
+                created_at: now,
+                updated_at: now
+            };
+            rows.push(row);
+            writeTable('contract_timesheets', rows);
+            return clone(row);
+        },
+
+        async decide(id, approve) {
+            const profile = requireUser('Please sign in first.');
+            const rows = readTable('contract_timesheets');
+            const index = rows.findIndex((t) => t.id === id);
+            if (index < 0) throw new Error('Entry not found.');
+
+            const contract = milestoneContract(rows[index].contract_id);
+            if (profile.role !== 'admin' && (!contract || contract.client_id !== profile.id)) {
+                throw new Error('Only the client can review hours.');
+            }
+            if (rows[index].status !== 'submitted') throw new Error('This entry has already been reviewed.');
+
+            const now = nowIso();
+            rows[index] = Object.assign({}, rows[index], {
+                status: approve ? 'approved' : 'rejected',
+                reviewed_by: profile.id,
+                reviewed_at: now,
+                updated_at: now
+            });
+            writeTable('contract_timesheets', rows);
+            return clone(rows[index]);
+        },
+
+        async remove(id) {
+            const profile = requireUser('Please sign in first.');
+            const rows = readTable('contract_timesheets');
+            const row = rows.find((t) => t.id === id);
+            if (!row) throw new Error('Entry not found.');
+            if (profile.role !== 'admin' && (row.freelancer_id !== profile.id || row.status !== 'submitted')) {
+                throw new Error('Approved hours cannot be deleted.');
+            }
+            writeTable('contract_timesheets', rows.filter((t) => t.id !== id));
+            return true;
+        }
+    };
+
     const Reviews = {
         async getForContract(contractId) {
             if (!contractId) return [];
@@ -2332,13 +2549,16 @@
         Invitations: readyAware(Invitations),
         Catalog: readyAware(Catalog),
         Notifications: readyAware(Notifications),
+        Verification: readyAware(Verification),
+        Timesheets: readyAware(Timesheets),
         ready: () => _ready,
         // Test/demo helpers
         _demoPassword: DEMO_PASSWORD,
         _reset: function () {
             ['profiles', 'jobs', 'proposals', 'contracts', 'file_transfers',
                 'contract_milestones', 'reviews', 'saved_jobs', 'saved_talent',
-                'invitations', 'service_packages', 'notifications', 'messages'].forEach((t) => {
+                'invitations', 'service_packages', 'notifications', 'messages',
+                'verification_requests', 'contract_timesheets'].forEach((t) => {
                 try { localStorage.removeItem(PREFIX + t); } catch (e) { /* ignore */ }
             });
             writeSession(null);

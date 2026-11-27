@@ -935,7 +935,7 @@
                 .from('contracts')
                 .select(`
                     *,
-                    job:jobs (id, title, category),
+                    job:jobs (id, title, category, job_type),
                     client:profiles!contracts_client_id_fkey (id, full_name, avatar_url),
                     freelancer:profiles!contracts_freelancer_id_fkey (id, full_name, avatar_url, title)
                 `)
@@ -1091,6 +1091,170 @@
                 .delete()
                 .eq('id', milestoneId);
 
+            if (error) throw error;
+            return true;
+        }
+    };
+
+    // ========================================================================
+    // 4a2. TRUST AND HOURLY WORK — VERIFICATION, TIMESHEETS
+    // ========================================================================
+    // Both are records with a trail, not money. Approving a verification is an
+    // admin action that also flips profiles.is_verified; approving hours only
+    // records that the client signed them off.
+    const VERIFICATION_METHODS = ['video_call', 'business_documents', 'portfolio_review', 'client_reference'];
+
+    const Verification = {
+        async mine() {
+            const client = await getClient();
+            if (!client) return [];
+            const userId = await currentUserId(client);
+            if (!userId) return [];
+            const { data, error } = await client
+                .from('verification_requests')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async request({ method, reference = null, note = null }) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to request verification.');
+            if (!VERIFICATION_METHODS.includes(method)) {
+                throw new Error('Choose how you would like to be verified.');
+            }
+
+            const { data, error } = await client
+                .from('verification_requests')
+                .insert({
+                    user_id: userId,
+                    method,
+                    reference: reference ? String(reference).trim().slice(0, 200) : null,
+                    note: note ? String(note).trim().slice(0, 1000) : null
+                })
+                .select()
+                .single();
+
+            if (error) {
+                if (/duplicate key|unique/i.test(error.message || '')) {
+                    throw new Error('You already have a request open. We will review it shortly.');
+                }
+                throw error;
+            }
+            return data;
+        },
+
+        async cancel(id) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { error } = await client
+                .from('verification_requests')
+                .delete()
+                .eq('id', id)
+                .eq('status', 'pending');
+            if (error) throw error;
+            return true;
+        },
+
+        async listPending() {
+            const client = await getClient();
+            if (!client) return [];
+            const { data, error } = await client
+                .from('verification_requests')
+                .select('*, member:profiles!verification_requests_user_id_fkey ( id, full_name, role, is_verified, title )')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async decide(id, approve, note = null) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { error } = await client.rpc('decide_verification', {
+                p_id: id,
+                p_approve: !!approve,
+                p_note: note || null
+            });
+            if (error) throw error;
+            return true;
+        }
+    };
+
+    const Timesheets = {
+        async list(contractId) {
+            const client = await getClient();
+            if (!client || !contractId) return [];
+            const { data, error } = await client
+                .from('contract_timesheets')
+                .select('*')
+                .eq('contract_id', contractId)
+                .order('work_date', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async log({ contractId, workDate, hours, note = null }) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const userId = await currentUserId(client);
+            if (!userId) throw new Error('Please sign in to log hours.');
+            if (!contractId) throw new Error('A contract is required.');
+
+            const value = Number(hours);
+            if (!Number.isFinite(value) || value <= 0 || value > 24) {
+                throw new Error('Enter the hours worked, between 0.25 and 24.');
+            }
+            const day = String(workDate || '').slice(0, 10);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+                throw new Error('Choose the day you worked.');
+            }
+
+            const { data, error } = await client
+                .from('contract_timesheets')
+                .insert({
+                    contract_id: contractId,
+                    freelancer_id: userId,
+                    work_date: day,
+                    hours: value,
+                    note: note ? String(note).trim().slice(0, 280) : null
+                })
+                .select()
+                .single();
+
+            if (error) {
+                if (/duplicate key|unique/i.test(error.message || '')) {
+                    throw new Error('There is already an entry for that day.');
+                }
+                throw error;
+            }
+            return data;
+        },
+
+        async decide(id, approve) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { data, error } = await client
+                .from('contract_timesheets')
+                .update({ status: approve ? 'approved' : 'rejected' })
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async remove(id) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const { error } = await client
+                .from('contract_timesheets')
+                .delete()
+                .eq('id', id);
             if (error) throw error;
             return true;
         }
@@ -2124,6 +2288,8 @@
     const InvitationsProxy = withFallback(Invitations, _local && _local.Invitations, 'Invitations');
     const CatalogProxy = withFallback(Catalog, _local && _local.Catalog, 'Catalog');
     const NotificationsProxy = withFallback(Notifications, _local && _local.Notifications, 'Notifications');
+    const VerificationProxy = withFallback(Verification, _local && _local.Verification, 'Verification');
+    const TimesheetsProxy = withFallback(Timesheets, _local && _local.Timesheets, 'Timesheets');
 
     // Export services onto global GahonshDB namespace
     window.GahonshDB = {
@@ -2144,6 +2310,8 @@
         SavedTalent: SavedTalentProxy,
         Invitations: InvitationsProxy,
         Catalog: CatalogProxy,
-        Notifications: NotificationsProxy
+        Notifications: NotificationsProxy,
+        Verification: VerificationProxy,
+        Timesheets: TimesheetsProxy
     };
 })();

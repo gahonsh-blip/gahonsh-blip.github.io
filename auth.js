@@ -380,6 +380,27 @@
                                 </span>
                             </label>
                         </div>
+                        <div class="gahonsh-input-group" id="verificationGroup">
+                            <label>Verification</label>
+                            <p id="verificationStatusText" style="font-size: 0.8rem; color: #8a99ad; margin: 0 0 8px;">Not requested yet.</p>
+                            <div id="verificationRequestRow" style="display: none; gap: 8px; flex-wrap: wrap;">
+                                <select id="verificationMethod" aria-label="How would you like to be verified?">
+                                    <option value="video_call">Video call</option>
+                                    <option value="business_documents">Business documents</option>
+                                    <option value="portfolio_review">Portfolio walk-through</option>
+                                    <option value="client_reference">Client reference</option>
+                                </select>
+                                <input type="text" id="verificationReference" maxlength="200" placeholder="Reference, e.g. company name or call date (optional)" aria-label="Verification reference, optional">
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                                <button type="button" id="btnRequestVerification" style="display: none; width: auto; margin: 0; padding: 9px 16px; background: transparent; color: #eaf1ff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                    <i class="fa-solid fa-shield-halved"></i> Request verification
+                                </button>
+                                <button type="button" id="btnCancelVerification" style="display: none; width: auto; margin: 0; padding: 9px 16px; background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.4); border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                    <i class="fa-solid fa-xmark"></i> Withdraw request
+                                </button>
+                            </div>
+                        </div>
                         <div class="gahonsh-input-group" id="resumeFieldGroup" style="display: none;">
                             <label>Resume / CV (PDF)</label>
                             <p id="resumeCurrentText" style="font-size: 0.8rem; color: #8a99ad; margin: 0 0 8px;">No resume uploaded yet.</p>
@@ -433,6 +454,19 @@
             btn.style.opacity = hasResume ? '1' : '0.5';
             btn.style.cursor = hasResume ? 'pointer' : 'not-allowed';
         });
+    }
+
+    function wireVerificationButtons() {
+        const ask = document.getElementById('btnRequestVerification');
+        const cancel = document.getElementById('btnCancelVerification');
+        if (ask && !ask.dataset.wired) {
+            ask.dataset.wired = '1';
+            ask.addEventListener('click', requestVerification);
+        }
+        if (cancel && !cancel.dataset.wired) {
+            cancel.dataset.wired = '1';
+            cancel.addEventListener('click', cancelVerification);
+        }
     }
 
     function renderResumeState(profile) {
@@ -794,6 +828,85 @@
         backdrop.classList.add('active');
     }
 
+    // Verification is decided by a person, so the editor shows the state of the
+    // request rather than promising an instant badge.
+    async function renderVerificationState(profile) {
+        const text = document.getElementById('verificationStatusText');
+        const row = document.getElementById('verificationRequestRow');
+        const ask = document.getElementById('btnRequestVerification');
+        const cancel = document.getElementById('btnCancelVerification');
+        if (!text || !row || !ask || !cancel) return;
+
+        const setState = (message, canAsk, canCancel, pendingId) => {
+            text.textContent = message;
+            row.style.display = canAsk ? 'flex' : 'none';
+            ask.style.display = canAsk ? 'inline-flex' : 'none';
+            cancel.style.display = canCancel ? 'inline-flex' : 'none';
+            cancel.dataset.requestId = pendingId || '';
+        };
+
+        if (profile && profile.is_verified) {
+            setState('Verified. The badge shows on your profile and in the talent directory.', false, false, '');
+            return;
+        }
+
+        let requests = [];
+        try {
+            if (window.GahonshDB?.Verification?.mine) requests = await window.GahonshDB.Verification.mine();
+        } catch (err) {
+            console.warn('[verification] could not read requests:', err);
+        }
+
+        const pending = requests.find((r) => r.status === 'pending');
+        if (pending) {
+            const when = pending.created_at ? new Date(pending.created_at).toLocaleDateString() : 'recently';
+            setState('Request sent on ' + when + '. We review these by hand, usually within a few days.', false, true, pending.id);
+            return;
+        }
+
+        const lastRejected = requests.find((r) => r.status === 'rejected');
+        const reason = lastRejected && lastRejected.decision_note
+            ? ' Last time: ' + lastRejected.decision_note
+            : '';
+        setState('Not verified yet. Ask for a review and we will confirm your details by hand.' + reason, true, false, '');
+    }
+
+    async function requestVerification() {
+        const button = document.getElementById('btnRequestVerification');
+        const method = document.getElementById('verificationMethod')?.value || 'video_call';
+        const reference = document.getElementById('verificationReference')?.value || '';
+        if (button) button.disabled = true;
+        try {
+            if (!window.GahonshDB?.Verification?.request) throw new Error('Marketplace service is unavailable.');
+            await window.GahonshDB.Verification.request({ method, reference: reference || null });
+            showToast('Verification requested. We will review it shortly.');
+            const profile = await window.GahonshDB.Profiles.getMyProfile();
+            wireVerificationButtons();
+        await renderVerificationState(profile);
+        } catch (err) {
+            showToast('Could not send the request: ' + (err.message || 'please try again.'));
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    async function cancelVerification() {
+        const button = document.getElementById('btnCancelVerification');
+        const id = button?.dataset.requestId;
+        if (!id) return;
+        button.disabled = true;
+        try {
+            await window.GahonshDB.Verification.cancel(id);
+            showToast('Request withdrawn.');
+            const profile = await window.GahonshDB.Profiles.getMyProfile();
+            await renderVerificationState(profile);
+        } catch (err) {
+            showToast('Could not withdraw the request: ' + (err.message || 'please try again.'));
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     async function openProfileModal() {
         const backdrop = document.getElementById('profileEditModalBackdrop');
         if (!backdrop) return;
@@ -818,6 +931,8 @@
         } catch (err) {
             console.warn('[openProfileModal]', err);
         }
+
+        await renderVerificationState(profile);
 
         // Resume upload is a freelancer-only capability; clients never see it.
         const role = (profile && profile.role) || _currentUser?.profile?.role;

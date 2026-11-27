@@ -194,6 +194,12 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
     their own profile row, so `role`, `email` and `is_verified` are guarded by
     `trg_protect_profile_fields`, and a project missing that trigger lets any
     client become an admin.
+  - `npm run check:sql` — loads `docs/marketplace-schema.sql` into a real
+    PostgreSQL (PGlite in WASM) and drives the outbox, verification and
+    timesheet rules: who may approve a badge, whether hours can be logged twice
+    on one day, whether a stranded email claim comes back. Needs
+    `npm i --no-save @electric-sql/pglite`; without it the script says so and
+    exits 0. Run it after touching a policy, trigger or RPC.
   - `npm run test:local` — runs `marketplace-local.js` in a sandbox and asserts
     it enforces the same access rules as the SQL policies (who may hire,
     withdraw, shortlist, list proposals, read a contract, change a job status,
@@ -260,6 +266,43 @@ Keep `uploadResume` / `getResume` / `removeResume` in step between
 after changing either. Existing Supabase projects need
 `supabase/migrations/20261123000000_add_freelancer_resumes.sql`; fresh
 installs get the bucket and columns from `docs/marketplace-schema.sql`.
+
+## Verification and Hourly Timesheets
+
+Two records back the promises the marketplace makes: a verified badge and a
+record of hourly work. Neither moves money.
+
+- **Verification.** A member asks from the profile editor
+  (`auth.js` → `renderVerificationState()`), choosing a method — video call,
+  business documents, portfolio review or client reference — and an optional
+  reference. The row starts `pending`; `decide_verification()` (admin only,
+  `admin.html` → Verification tab) approves or declines with a required reason,
+  flips `profiles.is_verified` on approval, and notifies the member. Only the
+  kind of evidence and a short reference are stored: never an ID number, scan or
+  image. One open request per member. A member can withdraw their own open
+  request and cannot approve themselves — the trigger enforces it, not just the
+  UI.
+- **Timesheets.** On an hourly contract (`jobs.job_type = 'hourly'`) the
+  portal shows an hours panel under the milestone panel. The freelancer logs one
+  row per worked day (`work_date`, `hours`, optional note); the client approves
+  or rejects it. `validate_timesheet_mutation()` refuses a fixed-price contract,
+  a non-freelancer author, a future date, a second entry for the same day, and
+  any edit to the hours after submission. Approved hours cannot be withdrawn.
+- **The panel says what it is.** Hours are a record the client signs off, not a
+  bill: the panel states this, and no money moves through the table. Do not
+  relabel it as a payment, invoice or escrow without a real provider behind it.
+- **Success score.** `worker_ratings.success_score` is 60% completion rate plus
+  40% rating, shown beside the stars by `marketplace-trust.js`. It is `NULL`,
+  never `0`, for a member with no finished work and no reviews.
+- **Keep the two engines in step.** `Verification` and `Timesheets` exist in
+  both `supabase-client.js` and `marketplace-local.js` with the same rules.
+  Run `npm run test:local` and `npm run check:sql` after changing either, and
+  add new tables to the `_reset()` list in `marketplace-local.js`.
+- **Deployment.** Existing projects need
+  `supabase/migrations/20261202000000_add_verification_and_timesheets.sql`;
+  fresh installs get the objects from section 14 of
+  `docs/marketplace-schema.sql`. Without it the editor, the admin queue and the
+  hours panel each show a setup message instead of failing silently.
 
 ## Chat Assistant (guided tasks)
 

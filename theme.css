@@ -1414,3 +1414,16 @@ body.light-mode .invite-panel select option {
     background: #ffffff !important;
     color: #0f172a !important;
 }
+
+/* Hourly timesheet states on marketplace-dashboard.html. Amber and red read
+   well on the dark card and disappear on a light one, so light mode uses the
+   darker shade of the same hue. */
+body.light-mode .status-badge.status-submitted {
+    color: #a16207;
+    border-color: rgba(161, 98, 7, 0.45);
+}
+
+body.light-mode .status-badge.status-rejected {
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.45);
+}

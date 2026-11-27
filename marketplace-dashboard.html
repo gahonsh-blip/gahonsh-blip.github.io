@@ -345,6 +345,9 @@
         .ms-actions { display: flex; gap: 6px; flex-wrap: wrap; }
         .ms-actions button { font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: none; color: var(--text-main); cursor: pointer; min-height: 34px; }
         .ms-actions button:hover { border-color: var(--accent-cyan); }
+        .status-badge.status-submitted { color: #fbbf24; border-color: rgba(251, 191, 36, 0.5); }
+        .status-badge.status-approved { color: var(--accent-green); border-color: rgba(52, 211, 153, 0.5); }
+        .status-badge.status-rejected { color: #f87171; border-color: rgba(248, 113, 113, 0.5); }
         .ms-actions button[data-ms-status="accepted"] { border-color: var(--accent-green); color: var(--accent-green); }
         .ms-actions button[data-ms-status="delivered"] { border-color: #fbbf24; color: #fbbf24; }
         .ms-actions button[data-ms-remove] { border-color: rgba(248, 113, 113, 0.5); color: #f87171; }
@@ -1074,12 +1077,14 @@
                         </div>
                     </div>
                     <div class="ms-host" data-milestones-for="${escapeHtml(c.id)}"></div>
+                    ${c.job?.job_type === 'hourly' ? `<div class="ms-host" data-timesheets-for="${escapeHtml(c.id)}"></div>` : ''}
                     <div class="gft-host" data-job-id="${safeId}" data-can-upload="${(c.status === 'active' || isClient) ? '1' : '0'}"></div>
                 </div>
             `;
             }).join('');
             mountContractTransfers();
             mountContractMilestones(contracts);
+            mountContractTimesheets(contracts);
         }
 
         async function loadRecords() {
@@ -1276,6 +1281,90 @@
                 </div>`;
         }
 
+        // Hourly contracts carry a timesheet panel: the freelancer logs a day,
+        // the client approves it. It records work; it does not move money.
+        async function mountContractTimesheets(contracts) {
+            if (!window.isMarketplaceReady()) return;
+            const hosts = document.querySelectorAll('[data-timesheets-for]');
+            for (const host of hosts) {
+                const contract = (contracts || []).find((c) => c.id === host.dataset.timesheetsFor);
+                if (!contract) { host.remove(); continue; }
+                try {
+                    await renderTimesheetPanel(host, contract);
+                } catch (err) {
+                    console.warn('[marketplace-dashboard] timesheets failed:', err);
+                    host.innerHTML = '<p class="ms-empty">Hours could not be loaded for this contract.</p>';
+                }
+            }
+        }
+
+        async function renderTimesheetPanel(host, contract) {
+            const me = currentUser?.id || currentUser?.profile?.id || null;
+            const isClient = !!me && contract.client_id === me;
+            const isWorker = !!me && contract.freelancer_id === me;
+            const active = contract.status === 'active';
+            const today = new Date().toISOString().slice(0, 10);
+
+            let rows = [];
+            try {
+                rows = await window.GahonshDB.Timesheets.list(contract.id);
+            } catch (err) {
+                if (window.GahonshDB.isBackendNotProvisioned?.(err)) {
+                    host.innerHTML = '<p class="ms-empty">Timesheets are not set up on this deployment yet. Run <code>supabase/migrations/20261202000000_add_verification_and_timesheets.sql</code> once in the Supabase SQL Editor, then refresh.</p>';
+                    return;
+                }
+                console.warn('[marketplace-dashboard] timesheet list failed:', err);
+            }
+
+            const approvedHours = rows.filter((r) => r.status === 'approved')
+                .reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
+            const waiting = rows.filter((r) => r.status === 'submitted').length;
+            const rate = Number(contract.agreed_amount) || 0;
+            const summary = rows.length
+                ? `${approvedHours.toFixed(2)} h approved${waiting ? ' · ' + waiting + ' waiting' : ''}${rate ? ' · recorded ' + usd(approvedHours * rate) + ' at ' + usd(rate) + '/h' : ''}`
+                : 'No hours logged yet';
+
+            const rowHtml = rows.map((t) => {
+                const canReview = active && isClient && t.status === 'submitted';
+                const canWithdraw = active && isWorker && t.status === 'submitted';
+                const day = new Date(t.work_date + 'T00:00:00').toLocaleDateString();
+                return `
+                    <div class="ms-row">
+                        <div class="ms-row-main">
+                            <div class="ms-title">${escapeHtml(day)} · ${Number(t.hours) || 0} h</div>
+                            <div class="ms-meta">
+                                <span class="status-badge status-${escapeHtml(t.status)}">${escapeHtml(t.status)}</span>
+                                ${t.note ? ' · ' + escapeHtml(t.note) : ''}
+                            </div>
+                        </div>
+                        <div class="ms-actions">
+                            ${canReview ? `<button type="button" data-ts-status="approved" data-ts-id="${escapeHtml(t.id)}">Approve</button>` : ''}
+                            ${canReview ? `<button type="button" data-ts-status="rejected" data-ts-id="${escapeHtml(t.id)}">Reject</button>` : ''}
+                            ${canWithdraw ? `<button type="button" data-ts-remove="${escapeHtml(t.id)}">Withdraw</button>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+
+            const logForm = active && isWorker ? `
+                <form class="ms-form" data-ts-form="${escapeHtml(contract.id)}">
+                    <input type="date" data-ts-date value="${today}" max="${today}" aria-label="Day worked" required>
+                    <input type="number" data-ts-hours min="0.25" max="24" step="0.25" placeholder="Hours" aria-label="Hours worked" required>
+                    <input type="text" data-ts-note maxlength="280" placeholder="What did you work on? (optional)" aria-label="Work note, optional">
+                    <button type="submit">Log hours</button>
+                </form>` : '';
+
+            host.innerHTML = `
+                <div class="ms-panel">
+                    <div class="ms-head">
+                        <h3>Hours</h3>
+                        <span class="ms-progress">${escapeHtml(summary)}</span>
+                    </div>
+                    <p class="ms-meta" style="margin:0 0 10px;">Hours are a record of work your client signs off. They are not a payment — no money moves through this page.</p>
+                    ${rowHtml || '<p class="ms-empty">No hours logged yet.</p>'}
+                    ${logForm}
+                </div>`;
+        }
+
         // Tab Switching
         const PORTAL_TABS = {
             tabJobsOrProposals: 'primary',
@@ -1367,6 +1456,37 @@
                     console.error('[marketplace-dashboard] withdrawProposal failed:', err);
                     window.GahonshAuthUI.showToast('Could not withdraw the proposal: ' + (err.message || 'please try again.'));
                     withdrawBtn.disabled = false;
+                }
+                return;
+            }
+
+            const tsBtn = e.target.closest('[data-ts-status]');
+            if (tsBtn) {
+                tsBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Timesheets.decide(tsBtn.dataset.tsId, tsBtn.dataset.tsStatus === 'approved');
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] timesheet decision failed:', err);
+                    window.GahonshAuthUI.showToast('Could not review the hours: ' + (err.message || 'please try again.'));
+                    tsBtn.disabled = false;
+                }
+                return;
+            }
+
+            const tsRemove = e.target.closest('[data-ts-remove]');
+            if (tsRemove) {
+                if (!confirm('Withdraw this entry? The client will no longer see it.')) return;
+                tsRemove.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Timesheets.remove(tsRemove.dataset.tsRemove);
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] timesheet remove failed:', err);
+                    window.GahonshAuthUI.showToast('Could not withdraw the entry: ' + (err.message || 'please try again.'));
+                    tsRemove.disabled = false;
                 }
                 return;
             }
@@ -1605,6 +1725,29 @@
         });
 
         document.getElementById('tabListingsContainer').addEventListener('submit', async (e) => {
+            const tsForm = e.target.closest('[data-ts-form]');
+            if (tsForm) {
+                e.preventDefault();
+                const button = tsForm.querySelector('button[type="submit"]');
+                if (button) button.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Timesheets.log({
+                        contractId: tsForm.dataset.tsForm,
+                        workDate: tsForm.querySelector('[data-ts-date]')?.value,
+                        hours: tsForm.querySelector('[data-ts-hours]')?.value,
+                        note: tsForm.querySelector('[data-ts-note]')?.value || null
+                    });
+                    window.GahonshAuthUI.showToast('Hours logged. Your client can review them now.');
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] log hours failed:', err);
+                    window.GahonshAuthUI.showToast('Could not log the hours: ' + (err.message || 'please try again.'));
+                    if (button) button.disabled = false;
+                }
+                return;
+            }
+
             const form = e.target.closest('[data-ms-form]');
             if (!form) return;
             e.preventDefault();

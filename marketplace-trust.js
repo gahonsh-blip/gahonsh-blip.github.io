@@ -9,10 +9,15 @@
     return (window.GahonshDB && window.GahonshDB.getClient) ? window.GahonshDB.getClient() : Promise.resolve(null);
   }
 
-  function starText(avg, count) {
-    if (!count) return 'New';
+  function starText(avg, count, score) {
+    // The success score is the completion rate mixed with the rating (see the
+    // worker_ratings view). It is null until a member has history, so a new
+    // profile reads "New" rather than "0%".
+    var hasScore = score !== null && score !== undefined && isFinite(Number(score));
+    var suffix = hasScore ? ' · ' + Math.round(Number(score)) + '% success' : '';
+    if (!count) return (hasScore ? Math.round(Number(score)) + '% success' : 'New');
     var full = Math.round(avg);
-    return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full) + ' ' + avg.toFixed(1) + ' (' + count + ')';
+    return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full) + ' ' + avg.toFixed(1) + ' (' + count + ')' + suffix;
   }
 
   async function loadRatings() {
@@ -20,7 +25,7 @@
     var c = await client();
     cache = {};
     if (!c) return cache;
-    var res = await c.from('worker_ratings').select('reviewee_id,avg_rating,review_count');
+    var res = await c.from('worker_ratings').select('reviewee_id,avg_rating,review_count,success_score');
     if (!res.error && res.data) {
       res.data.forEach(function (r) { cache[r.reviewee_id] = r; });
     }
@@ -42,7 +47,7 @@
       nodes.forEach(function (el) {
         var uid = el.getAttribute('data-rating-uid');
         var r = map[uid];
-        var text = r ? starText(Number(r.avg_rating), Number(r.review_count)) : 'New';
+        var text = r ? starText(Number(r.avg_rating), Number(r.review_count), r.success_score) : 'New';
         var title = r ? (r.review_count + ' reviews') : 'No reviews yet';
         // Write only when the value actually changes. Assigning textContent
         // always replaces the text node, which the MutationObserver below
