@@ -70,6 +70,15 @@ The marketplace features client-side Supabase integration with Row Level Securit
 > Then apply
 > `supabase/migrations/20261127000000_add_milestones_and_review_rules.sql` for
 > contract milestones and post-completion reviews.
+>
+> Then apply
+> `supabase/migrations/20261202000000_add_verification_and_timesheets.sql`. It
+> adds the verification request queue behind the verified badge, hourly
+> timesheets for hourly contracts, and the completion-based success score on
+> `worker_ratings`. Without it the profile editor says verification is not set
+> up, the admin page shows no queue, and the portal hides the hours panel on
+> hourly contracts. See [DATABASE.md](DATABASE.md) and
+> [UPWORK-GAP.md](UPWORK-GAP.md).
 
 ### Step 2b: Create the Owner Account
 

@@ -1525,23 +1525,74 @@ a partial unique index on `notification_id` and `ON CONFLICT DO NOTHING`.
 `npm run check:sql` now drives all of it: queue on insert, absolute link, claim
 exclusivity, stranded reclaim, five failures to `failed`, provider error kept, a
 failed row never reclaimed, opt-out stops the queue but not the notification,
-and `authenticated` denied a read. Seventeen cases. The static check pins the
-same four invariants as text, so a refactor that drops one fails `npm test` even
-where PGlite is not installed.
+and `authenticated` denied a read. The static check pins the same four
+invariants as text, so a refactor that drops one fails `npm test` even where
+PGlite is not installed. The runner lives in `scripts/check-sql.mjs` and has
+since grown to 41 cases across the outbox, verification and timesheets (see
+below).
+
+## 49. Five bugs the new feature work exposed
+
+Building the verification queue and hourly timesheets is where these turned up.
+Four were caught by a check before the code shipped; one was a pre-existing gap
+the feature could not work without.
+
+**An enum assignment that only fails at run time.** `decide_verification()`
+wrote `SET status = CASE WHEN p_approve THEN 'approved' ELSE 'rejected' END`.
+PL/pgSQL does not type-check a function body at creation, so the schema loaded
+cleanly and the function failed with `42804` — "column status is of type
+verification_status but expression is of type text" — the first time an admin
+pressed Approve. Fixed with an explicit `::verification_status` cast. This is
+exactly the class of bug the SQL check exists for.
+
+**A member could not withdraw their own request.** The trigger that guards the
+table checked "is an admin" before it looked at the operation, so a DELETE by
+the member who created the row was refused — even though the RLS policy allowed
+it. The guard now handles DELETE first and allows the owner to remove an open
+request, while a decided request stays a record.
+
+**The portal could not tell an hourly contract from a fixed one.**
+`Contracts.getMyContracts()` selected `job:jobs (id, title, category)` and left
+`job_type` out, so the timesheet panel had nothing to key on. One column added.
+
+**Amber and red disappeared in light mode.** The two new status colours were
+hardcoded for the dark card. `npm run test:a11y` failed the build with "bright
+accent text needs a light-mode override", and `theme.css` now carries the darker
+shades.
+
+**A reset left the new tables behind.** `GahonshLocal._reset()` clears a fixed
+list of tables; without the two new names, a demo reset kept old verification
+requests and timesheet rows and the next test run saw stale state.
+
+Two behaviours are now pinned by tests rather than assumed:
+
+- **RLS filters, it does not throw.** A member the policy does not match changes
+  zero rows instead of getting an error. The first version of the timesheet
+  check asserted an exception and failed; the check now asserts the resulting
+  state, which is what a caller actually experiences. The trigger raises only
+  where the message helps — a fixed-price contract, a future date, a second
+  entry for the same day.
+- **A success score is `NULL`, never `0`, for a member with no history.** Zero
+  would read as "failed everything" to a buyer, which is the opposite of true.
 
 ## Verification (this round)
 
 ```
 a11y check passed: 22 pages verified.
-security check passed: 119 files verified.
-schema check passed: 94 client reference(s) resolved against 46 schema object(s).
-local engine check passed: 173 authorization case(s) verified.   (167 -> 173)
+security check passed: 121 files verified.
+schema check passed: 103 client reference(s) resolved against 51 schema object(s).
+local engine check passed: 197 authorization case(s) verified.   (173 -> 197)
 content check passed: 22 pages verified.
 chat check passed: 65 case(s) verified.
-email check passed: 27 case(s) verified.                          (new)
-outbox sql check passed: 17 case(s) verified.                     (new, real PostgreSQL)
-lead check passed: 23 case(s) verified.                           (new)
+email check passed: 27 case(s) verified.
+lead check passed.
+sql check passed: 41 case(s).                                     (real PostgreSQL)
 ```
+
+The 24 new engine cases cover who may request verification, who may decide it,
+the one-open-request rule, the verified flip, and the timesheet rules: hourly
+only, freelancer only, no future day, one entry per day, client-only approval,
+approved hours not withdrawable, and a signed-out visitor seeing nothing.
 
 - The two new suites are wired into `npm test`, so neither can be skipped
   quietly: `test:email` pins the outbox contract, `test:leads` pins the CSV

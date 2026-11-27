@@ -20,7 +20,7 @@
     "test:email": "node scripts/check-email.mjs",
     "test:leads": "node scripts/check-leads.mjs",
     "leads:refresh": "node scripts/build-leads.mjs",
-    "check:sql": "node scripts/check-outbox-sql.mjs"
+    "check:sql": "node scripts/check-sql.mjs"
   },
   "dependencies": {
     "express": "^4.19.2"

@@ -985,6 +985,93 @@ async function refuse(fn) {
   check('the public directory does not expose the preference',
     !!optedOutPublicRow && !('email_notifications' in optedOutPublicRow));
 
+  // --- verification requests ---------------------------------------------
+  // The admin queue and the self-approval rule have to match the SQL trigger,
+  // or the offline build lets a member hand themselves a verified badge.
+  await DB.Auth.signOut();
+  check('anonymous visitors cannot request verification',
+    await refuse(() => DB.Verification.request({ method: 'video_call' })) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const verificationRequest = await DB.Verification.request({ method: 'video_call', reference: 'Call booked' });
+  check('a member can request verification', !!verificationRequest && verificationRequest.status === 'pending');
+  check('a second open request is refused',
+    await refuse(() => DB.Verification.request({ method: 'portfolio_review' })) !== null);
+  check('a member cannot decide their own request',
+    await refuse(() => DB.Verification.decide(verificationRequest.id, true)) !== null);
+  check('a non-admin gets an empty review queue',
+    (await DB.Verification.listPending()).length === 0);
+  check('a member sees only their own requests',
+    (await DB.Verification.mine()).length === 1);
+
+  // Promote a member the way the provisioning step does, then act as them.
+  const adminId = freelancers[2].id;
+  write(ctx, 'profiles', read(ctx, 'profiles').map((p) =>
+    p.id === adminId ? Object.assign({}, p, { role: 'admin' }) : p));
+  await DB.Auth.signIn(freelancers[2]._email, password);
+  check('the admin sees the queue', (await DB.Verification.listPending()).length === 1);
+  check('an admin cannot reject without a reason',
+    await refuse(() => DB.Verification.decide(verificationRequest.id, false, '')) !== null);
+
+  const approved = await DB.Verification.decide(verificationRequest.id, true);
+  check('an admin can approve a request', approved.status === 'approved');
+  check('approval flips the verified flag',
+    read(ctx, 'profiles').find((p) => p.id === freelancers[0].id).is_verified === true);
+  check('a decided request cannot be decided twice',
+    await refuse(() => DB.Verification.decide(verificationRequest.id, true)) !== null);
+
+  // --- hourly timesheets --------------------------------------------------
+  await DB.Auth.signIn(client._email, password);
+  const hourlyJob = await DB.Jobs.createJob({
+    title: 'Hourly data clean-up',
+    description: 'Clean a year of sales exports and keep the workbook tidy each week.',
+    category: 'Data Entry',
+    job_type: 'hourly',
+    budget_min: 0,
+    hourly_rate_min: 400,
+    hourly_rate_max: 700
+  });
+  check('an hourly project keeps its type', hourlyJob.job_type === 'hourly');
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const hourlyProposal = await DB.Proposals.submitProposal(hourlyJob.id, 'I can clean this workbook every week.', 500, 30);
+  await DB.Auth.signIn(client._email, password);
+  const hourlyContractId = await DB.Contracts.acceptProposalAndHire(hourlyProposal.id);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  check('the client cannot log hours',
+    await refuse(() => DB.Timesheets.log({ contractId: hourlyContractId, workDate: today, hours: 4 })) !== null);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const entry = await DB.Timesheets.log({ contractId: hourlyContractId, workDate: today, hours: 6.5 });
+  check('the freelancer can log a day of hours', !!entry && entry.status === 'submitted');
+  check('a second entry for the same day is refused',
+    await refuse(() => DB.Timesheets.log({ contractId: hourlyContractId, workDate: today, hours: 2 })) !== null);
+  check('a future day is refused',
+    await refuse(() => DB.Timesheets.log({ contractId: hourlyContractId, workDate: tomorrow, hours: 2 })) !== null);
+  check('more than a day of hours is refused',
+    await refuse(() => DB.Timesheets.log({ contractId: hourlyContractId, workDate: '2026-01-05', hours: 30 })) !== null);
+  check('hours cannot be logged on a fixed-price contract',
+    await refuse(() => DB.Timesheets.log({ contractId: recordContractId, workDate: today, hours: 2 })) !== null);
+  check('the freelancer cannot approve their own hours',
+    await refuse(() => DB.Timesheets.decide(entry.id, true)) !== null);
+
+  await DB.Auth.signIn(client._email, password);
+  const approvedEntry = await DB.Timesheets.decide(entry.id, true);
+  check('the client can approve the day', approvedEntry.status === 'approved');
+  check('the approval records who decided', approvedEntry.reviewed_by === client.id);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('approved hours cannot be withdrawn',
+    await refuse(() => DB.Timesheets.remove(entry.id)) !== null);
+  check('the contract keeps the approved day',
+    (await DB.Timesheets.list(hourlyContractId)).filter((t) => t.status === 'approved').length === 1);
+
+  await DB.Auth.signOut();
+  check('a signed-out visitor sees no hours',
+    (await DB.Timesheets.list(hourlyContractId)).length === 0);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);
