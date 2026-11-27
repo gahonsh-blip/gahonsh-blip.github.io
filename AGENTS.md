@@ -165,9 +165,11 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
 - **Live checks:** `npm run audit:live` crawls the deployment (status, title,
   description length, canonical, `h1`, `.page-info` words, feature markers);
-  `npm run check:live` probes the deployed Supabase project for every object
-  the client reaches and exits non-zero when one is missing. Run the second one
-  after any schema change and before blaming the frontend for an empty card.
+  `npm run check:live` probes the deployed Supabase project for every object the
+  client reaches **and every column the schema declares for those tables**, and
+  exits non-zero when one is missing. A table can answer `200` while a column is
+  gone, so a table-only probe is not enough. Run it after any schema change and
+  before blaming the frontend for an empty card.
 - **Automated checks:** `npm test` runs all eight suites.
   - `npm run test:a11y` — static accessibility contract across all pages,
     including light-mode overrides for the accent palette.

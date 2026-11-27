@@ -1606,6 +1606,44 @@ surfaced a raw `PGRST205` message. `auth.js` now classifies that error
 site yet, and hides the button. The same guard covers the request and withdraw
 paths.
 
+## 51. `check:live` was blind to missing columns, so the drift survived two rounds
+
+A review of the deployed project reported that `profiles.email` and
+`profiles.phone_number` were gone and concluded that running
+`docs/marketplace-schema.sql` was unsafe. Half of that was right.
+
+**Right:** the columns really are missing. `GET /rest/v1/profiles?select=email`
+answers `42703 column profiles.email does not exist` on
+`evdpmombgymthzqegqwr`, while `full_name`, `role`, `is_verified` and
+`availability` answer `200`. Probing every declared column also found a third
+one nobody had named: `profiles.email_notifications`.
+
+**Wrong:** the schema is not unsafe to run. It already carries
+`ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email / phone_number`, the
+backfill from `auth.users` and the `profiles_email_key` index, all *before* it
+builds `admin_profiles` and `admin_overview()`, and it re-attaches
+`trg_protect_profile_fields`. The claim came from the header of
+`20261129000000_restore_profile_pii_columns.sql`, which described the state
+before that repair block was added. The header is now corrected, and
+`docs/SETUP.md` says plainly that the narrow migration is optional.
+
+**Why it was missed twice:** `npm run check:live` probed tables, views and
+functions, and every table answered `200`. A missing column is invisible to
+that. The script now probes every column the committed schema declares for a
+table the client reads — 171 probes against the live project — and reports
+`MISSING col profiles.email 42703`. It fails the run, so the drift cannot pass
+again.
+
+**The repair is tested, not asserted.** `npm run check:sql` case 5 drops
+`admin_profiles`, `admin_overview()`, the trigger and both columns to reproduce
+the live state, re-runs the whole schema file, and asserts the columns, both
+admin objects and the trigger come back. Six new cases, 47 total.
+
+**Still unverified live:** whether the role-escalation guard is attached right
+now. `npm run check:live-security` needs `AUDIT_EMAIL` / `AUDIT_PASSWORD` for a
+disposable account and skipped without them; until it runs, the escalation fix
+is proven in SQL but not against the deployment.
+
 ## Verification (this round)
 
 ```
