@@ -393,13 +393,23 @@
         };
     }
 
+    // The owner's own row. `public_profiles` has no email_notifications column,
+    // so the flag is added here rather than in the public projection: another
+    // member must not learn how this one reads their notifications.
+    function ownProfile(profile) {
+        const row = publicProfile(profile);
+        row.email_notifications = profile.email_notifications !== false;
+        return row;
+    }
+
     // Only these fields may be changed through updateMyProfile(). The
     // immutable identity and privilege columns (id, email, role, is_verified,
     // _salt, _hash, _email, created_at) are not in the list, so a crafted
     // payload can never promote the caller or touch another profile.
     const PROFILE_EDITABLE_FIELDS = [
         'full_name', 'avatar_url', 'location', 'bio', 'title',
-        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note'
+        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note',
+        'email_notifications'
     ];
 
     const AVAILABILITY_VALUES = ['available', 'busy', 'unavailable'];
@@ -409,6 +419,9 @@
         const safe = {};
         for (const key of PROFILE_EDITABLE_FIELDS) {
             if (Object.prototype.hasOwnProperty.call(source, key)) safe[key] = source[key];
+        }
+        if ('email_notifications' in safe) {
+            safe.email_notifications = safe.email_notifications === true || safe.email_notifications === 'true';
         }
         if ('full_name' in safe) {
             const name = String(safe.full_name || '').trim();
@@ -607,7 +620,7 @@
             id: profile.id,
             email: profile._email || (profile.id + '@local.marketplace'),
             user_metadata: { full_name: profile.full_name, role: profile.role },
-            profile: publicProfile(profile)
+            profile: ownProfile(profile)
         };
     }
 
@@ -715,7 +728,7 @@
     const Profiles = {
         async getMyProfile() {
             const profile = currentUserRecord();
-            return profile ? publicProfile(profile) : null;
+            return profile ? ownProfile(profile) : null;
         },
 
         async updateMyProfile(updates) {
@@ -725,7 +738,7 @@
             const index = profiles.findIndex((p) => p.id === profile.id);
             profiles[index] = Object.assign({}, profiles[index], safe, { updated_at: nowIso() });
             writeTable('profiles', profiles);
-            return publicProfile(profiles[index]);
+            return ownProfile(profiles[index]);
         },
 
         async getPublicFreelancers(filters = {}) {

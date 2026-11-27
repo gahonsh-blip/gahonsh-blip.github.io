@@ -1434,6 +1434,126 @@ in `docs/CHAT-ASSISTANT.md` rather than implied by a switch that does nothing.
 files changed in this round: a cached copy would keep the old review and the
 old proposal path.
 
+## 43. The email opt-out was saved and then ignored
+
+**Symptom.** A member unticks "Email me about proposals, hires and contract
+updates", saves, and keeps receiving mail on the offline engine. Reopening the
+editor shows the box ticked again.
+
+**Cause.** Two independent gaps, both found by the new engine cases, not by
+reading the code:
+
+1. `PROFILE_EDITABLE_FIELDS` in `marketplace-local.js` did not list
+   `email_notifications`, so `sanitizeProfileUpdates()` dropped it before the
+   write. The UI reported success.
+2. `authUser()` and `getMyProfile()` returned `publicProfile()`, which by design
+   has no preference flag, so the editor read `undefined` and treated it as on.
+
+**Fix.** The flag is in both allow-lists; the local engine now has two
+projections — `publicProfile()` for the directory, `ownProfile()` for the owner
+— and `authUser().profile` uses the owner's. Six engine cases pin the behaviour,
+including the coercion of a non-boolean value to `false` rather than the string
+`'yes'`.
+
+**Why it mattered.** A consent flag that silently reverts is worse than no flag:
+it tells a member their choice was recorded when it was not.
+
+## 44. The public directory leaked a private preference
+
+`publicProfile()` in the offline engine returned `email_notifications`, while
+the Supabase `public_profiles` view has no such column. Two members reading the
+talent directory from different backends would see different fields, and the
+offline path exposed a preference nobody agreed to publish. The flag now lives
+only in `ownProfile()`, and a case asserts the directory row does not contain it.
+
+## 45. A profile save could break on a project without the migration
+
+The flag was added to every `updateMyProfile()` payload and to the two profile
+select lists. On a project that had not run the new migration that meant:
+
+- `getMyProfile()` threw, because both selects asked for a missing column;
+- every save failed, because the payload always carried it.
+
+**Fix.** Three select tiers (full, resume, base) with the existing schema-gap
+retry, the flag stripped from the retry payload, and the editor sends it only
+when the checkbox changed. If the flag is the *only* thing being saved and the
+column is missing, the save fails with a message naming the migration — it does
+not silently discard an opt-out.
+
+## 46. A check that failed on a comment
+
+`test:email` flagged `supabase-client.js` for "reading the outbox" because the
+new error message names the migration file. The check now looks for an actual
+query (`from('email_outbox')` or `/rest/v1/email_outbox`), not for the word. A
+check that trips on prose trains people to ignore it.
+
+## 47. The lead files
+
+Built from public listings by `scripts/build-leads.mjs` and validated by
+`scripts/check-leads.mjs`. Four rounds of the build went wrong in ways worth
+recording, because each one produced a plausible-looking file:
+
+| Round | What was wrong | Fix |
+|-------|----------------|-----|
+| 1 | Every client row came from one board, because the first source filled the quota | Per-source quotas, then top up |
+| 2 | Relevance matched `api` and `ai ` inside long descriptions, so an iOS contractor and an account executive were "Excel leads" | An explicit service vocabulary, matched against the title and tags only |
+| 3 | Hacker News titles ran into the body, producing 160-character blobs | Take the first paragraph; fall through when it is a bullet or a city |
+| 4 | One employer filled four rows and a marketplace's own advert counted as a client | Two rows per buyer, and a filter for "join our freelancer network" posts |
+
+`compensation` replaced `budget` for the same reason: a salary band on a remote
+job board is not a project budget, so it stays in `notes` where it can be read
+as what it is.
+
+## 48. Two queue bugs that only a database could show
+
+The outbox was written, reviewed and covered by a static check, and it still had
+two defects that no amount of reading caught. Both were found by loading the
+schema into a real PostgreSQL (PGlite, in WASM) and driving the queue:
+
+**A stranded claim.** `claim_email_batch()` moved a row to `sending` and
+returned it. If the sender then died — a timeout, a redeploy mid-request, a
+network cut — the row stayed `sending` forever: `settle_email()` was never
+called, and the claim query only looked at `queued`. The email was lost with no
+error anywhere. Fixed with a `claimed_at` column and a reclaim window: a claim
+older than ten minutes is taken back and counted as another attempt.
+
+**A duplicate queue row.** Nothing stopped two rows for the same notification.
+The trigger fires once per insert, but a replayed migration, a manual re-queue
+or a future retry path could produce a second row and a second email. Fixed with
+a partial unique index on `notification_id` and `ON CONFLICT DO NOTHING`.
+
+`npm run check:sql` now drives all of it: queue on insert, absolute link, claim
+exclusivity, stranded reclaim, five failures to `failed`, provider error kept, a
+failed row never reclaimed, opt-out stops the queue but not the notification,
+and `authenticated` denied a read. Seventeen cases. The static check pins the
+same four invariants as text, so a refactor that drops one fails `npm test` even
+where PGlite is not installed.
+
+## Verification (this round)
+
+```
+a11y check passed: 22 pages verified.
+security check passed: 119 files verified.
+schema check passed: 94 client reference(s) resolved against 46 schema object(s).
+local engine check passed: 173 authorization case(s) verified.   (167 -> 173)
+content check passed: 22 pages verified.
+chat check passed: 65 case(s) verified.
+email check passed: 27 case(s) verified.                          (new)
+outbox sql check passed: 17 case(s) verified.                     (new, real PostgreSQL)
+lead check passed: 23 case(s) verified.                           (new)
+```
+
+- The two new suites are wired into `npm test`, so neither can be skipped
+  quietly: `test:email` pins the outbox contract, `test:leads` pins the CSV
+  promises.
+- The consent flag was driven through the real profile editor in headless
+  Chromium: the checkbox renders on `find-talent.html` and
+  `marketplace-dashboard.html` with its label text, and the six engine cases
+  cover save, re-read, opt back in, coercion and the public projection.
+- The lead files were rebuilt three times against live sources on 2026-11-27;
+  the committed files are the third build, and `test:leads` re-validates every
+  row offline.
+
 ## What is still not ready for a second specialist
 
 The empty states are honest — `find-talent.html` says "Our specialist bench is

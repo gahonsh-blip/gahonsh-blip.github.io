@@ -242,7 +242,8 @@
     // so a crafted payload cannot edit another row or escalate the caller.
     const PROFILE_EDITABLE_FIELDS = [
         'full_name', 'avatar_url', 'location', 'bio', 'title',
-        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note'
+        'hourly_rate', 'skills', 'phone_number', 'availability', 'availability_note',
+        'email_notifications'
     ];
 
     const AVAILABILITY_VALUES = ['available', 'busy', 'unavailable'];
@@ -252,6 +253,9 @@
         const safe = {};
         for (const key of PROFILE_EDITABLE_FIELDS) {
             if (Object.prototype.hasOwnProperty.call(source, key)) safe[key] = source[key];
+        }
+        if ('email_notifications' in safe) {
+            safe.email_notifications = safe.email_notifications === true || safe.email_notifications === 'true';
         }
         if ('full_name' in safe) {
             const name = String(safe.full_name || '').trim();
@@ -309,19 +313,23 @@
             const user = (await client.auth.getUser())?.data?.user;
             if (!user) return null;
 
+            // Three tiers, richest first. A project that has not run the email
+            // migration still reads its profile, minus the preference flag.
             const baseSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at';
             const resumeSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, created_at, updated_at';
+            const fullSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, email_notifications, created_at, updated_at';
 
             let { data, error } = await client
                 .from('profiles')
-                .select(resumeSelect)
+                .select(fullSelect)
                 .eq('id', user.id)
                 .single();
 
-            if (error && isResumeSchemaGap(error)) {
+            for (const select of [resumeSelect, baseSelect]) {
+                if (!error || !isResumeSchemaGap(error)) break;
                 ({ data, error } = await client
                     .from('profiles')
-                    .select(baseSelect)
+                    .select(select)
                     .eq('id', user.id)
                     .single());
             }
@@ -341,25 +349,40 @@
                 throw new Error('No editable profile fields were provided.');
             }
 
+            const fullSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, email_notifications, created_at, updated_at';
             const resumeSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, resume_name, resume_size_bytes, resume_updated_at, created_at, updated_at';
             const baseSelect = 'id, full_name, avatar_url, role, location, bio, title, hourly_rate, skills, is_verified, created_at, updated_at';
+
+            // `email_notifications` needs its own migration. Drop it from the
+            // payload before retrying, but only if something else is left to
+            // save — otherwise the caller asked for the flag alone, and
+            // pretending it saved would silently ignore an opt-out.
+            const withoutFlag = { ...safeUpdates };
+            delete withoutFlag.email_notifications;
 
             let { data, error } = await client
                 .from('profiles')
                 .update(safeUpdates)
                 .eq('id', user.id)
-                .select(resumeSelect)
+                .select(fullSelect)
                 .single();
 
-            if (error && isResumeSchemaGap(error)) {
+            for (const [payload, select] of [[withoutFlag, resumeSelect], [withoutFlag, baseSelect]]) {
+                if (!error || !isResumeSchemaGap(error)) break;
+                if (!Object.keys(payload).length) break;
                 ({ data, error } = await client
                     .from('profiles')
-                    .update(safeUpdates)
+                    .update(payload)
                     .eq('id', user.id)
-                    .select(baseSelect)
+                    .select(select)
                     .single());
             }
 
+            // Only blame the migration when the column is actually the problem.
+            if (error && 'email_notifications' in safeUpdates
+                && /email_notifications/i.test(String(error.message || error.details || ''))) {
+                throw new Error('Email preferences are not available on this project yet. Ask the owner to run supabase/migrations/20261201000000_add_email_outbox.sql.');
+            }
             if (error) throw error;
             return data;
         },

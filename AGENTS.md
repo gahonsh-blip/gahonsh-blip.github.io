@@ -427,6 +427,54 @@ whole repair back — a missing column in a view definition breaks the entire
 file. Check with `npm run check:live` and `npm run check:live-security` after
 applying it.
 
+## Automatic Email (notification outbox)
+
+Every in-app notification is also queued as an email. The browser never sends
+mail and never holds a key.
+
+```
+notifications INSERT -> trigger -> email_outbox (queued)
+pg_cron (1 min) -> supabase/functions/send-email -> Resend -> sent
+```
+
+- **No key in the repo.** `RESEND_API_KEY` lives only in the Edge Function's
+  environment. Never put it in `supabase-config.js`, a page, or a migration;
+  `npm run test:email` fails on a key-shaped string or an `email_outbox` query
+  in a browser script.
+- **Service-role only.** `email_outbox` has RLS on and no policy, and no grant
+  to `anon`/`authenticated`. The function reads it through
+  `claim_email_batch()` / `settle_email()`, which use `FOR UPDATE SKIP LOCKED`
+  so two runs cannot double-send.
+- **Never block the notification.** The trigger's body is wrapped so any error
+  is swallowed. A member who has no address on file still gets the in-app row.
+- **Consent is a column, not a checkbox in the UI alone.** The gate is
+  `profiles.email_notifications`; the editor sends it only when it changed, so a
+  project that has not run the migration still saves the rest of the profile.
+  `getMyProfile()` reads three select tiers (full, resume, base) for the same
+  reason, and `public_profiles` must never expose the flag.
+- **Setup is documented, not assumed.** `docs/SETUP.md` "Step 4" lists the
+  deploy, the secrets and the Vault entries. Without them rows stay `queued`
+  and nothing pretends to have been sent.
+
+## Lead Files (`docs/leads/`)
+
+`clients.csv` and `freelancers.csv` hold 100 public client posts and 100 public
+freelancer profiles. They are **generated**, never hand-edited:
+`npm run leads:refresh` rebuilds them, `npm run test:leads` validates them.
+
+- **Every row carries the public URL it came from** and a `verification` value
+  that says only how it was seen (`listing_page_fetched`, `api_record`,
+  `profile_page_fetched`).
+- **No contact data.** No email, phone or private address is read or written;
+  the check fails on an address-shaped string.
+- **No invented names.** When a marketplace hides the buyer, the row says
+  `Not published` and keeps the post URL. `client_basis` / `name_basis` record
+  what the source actually published.
+- **Do not add a source that needs a login.** The build must run with no
+  credentials beyond an optional `GITHUB_TOKEN` for rate limits.
+- **Refresh before a campaign.** Posts close and profiles go quiet; anything
+  older than about 30 days is stale. See `docs/leads/README.md`.
+
 ## Security Notes
 
 - **File safety is a browser scan, not a server antivirus.** `file-transfer.js`

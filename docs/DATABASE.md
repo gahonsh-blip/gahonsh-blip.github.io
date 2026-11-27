@@ -98,6 +98,41 @@ All tables have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SE
 
 ---
 
+## 4b. Email Outbox
+
+| Object | Kind | Purpose |
+|--------|------|---------|
+| `email_outbox` | table | One row per notification that should also be emailed |
+| `enqueue_notification_email()` | trigger function | Copies a new `notifications` row into the outbox |
+| `claim_email_batch(p_limit)` | function | Atomically takes up to 50 queued rows and marks them `sending` |
+| `settle_email(p_id, p_ok, ...)` | function | Marks a row `sent`, `queued` again, or `failed` after 5 attempts |
+| `notifications_email_outbox` | trigger | `AFTER INSERT ON notifications` |
+
+**Columns that matter**
+
+| Column | Meaning |
+|--------|---------|
+| `to_email` | Copied from the member's private `profiles.email` at queue time |
+| `status` | `queued`, `sending`, `sent`, `failed`, `skipped` |
+| `attempts` | Incremented by `claim_email_batch`; five failures end in `failed` |
+| `last_error` | The provider's message, truncated to 500 characters |
+| `provider_id` | Resend's message id, for a delivery dispute |
+
+**Access.** RLS is enabled with no policy, and `anon`/`authenticated` have no
+grant: a browser cannot read another member's address or draft a message. The
+Edge Function reaches the table with the service role through the two RPCs, so
+two overlapping runs cannot send the same row twice (`FOR UPDATE SKIP LOCKED`).
+
+**Failure behaviour.** The trigger wraps its work in an exception block that
+swallows errors. A missing address, a missing column or a broken queue must
+never cost the member the in-app notification that already succeeded.
+
+**Consent.** `profiles.email_notifications` (default `true`) gates the queue. It
+is the only column a member may change on their own row beyond the profile
+editor's allow-list, and it is never exposed through `public_profiles`.
+
+---
+
 ## 5. Client-Side Data Layer (`supabase-client.js`)
 
 The front-end integrates with Supabase using standard ES6 / CDN client initialization:

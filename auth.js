@@ -371,6 +371,15 @@
                             <label>Professional Bio / About</label>
                             <textarea id="editProfileBio" rows="4" placeholder="Describe your experience, technical expertise, and delivered solutions..."></textarea>
                         </div>
+                        <div class="gahonsh-input-group" style="display: flex; align-items: flex-start; gap: 10px;">
+                            <input type="checkbox" id="editProfileEmailNotifications" checked style="margin-top: 4px; width: 18px; height: 18px; flex: 0 0 auto;">
+                            <label for="editProfileEmailNotifications" style="margin: 0; font-size: 0.86rem; line-height: 1.45;">
+                                Email me about proposals, hires and contract updates
+                                <span style="display: block; color: #8a99ad; font-size: 0.76rem; margin-top: 2px;">
+                                    The portal always shows them. Turn this off to stop the emails.
+                                </span>
+                            </label>
+                        </div>
                         <div class="gahonsh-input-group" id="resumeFieldGroup" style="display: none;">
                             <label>Resume / CV (PDF)</label>
                             <p id="resumeCurrentText" style="font-size: 0.8rem; color: #8a99ad; margin: 0 0 8px;">No resume uploaded yet.</p>
@@ -609,6 +618,7 @@
                 const rate = parseFloat(document.getElementById('editProfileRate').value) || 0;
                 const skillsRaw = document.getElementById('editProfileSkills').value;
                 const bio = document.getElementById('editProfileBio').value.trim();
+                const emailToggle = document.getElementById('editProfileEmailNotifications');
                 const btn = document.getElementById('btnSaveProfile');
 
                 if (!window.GahonshDB || !window.GahonshDB.Profiles) {
@@ -625,13 +635,17 @@
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-                    await window.GahonshDB.Profiles.updateMyProfile({
-                        title,
-                        location,
-                        hourly_rate: rate,
-                        skills,
-                        bio
-                    });
+                    const updates = { title, location, hourly_rate: rate, skills, bio };
+                    // Only send the preference when it changed: a project that
+                    // has not run the email migration must still save the rest
+                    // of the profile, and an unchanged flag is not news.
+                    // Without a known starting value the box is just its
+                    // default, so sending it could silently undo an opt-out.
+                    if (emailToggle && emailToggle.dataset.initial !== undefined
+                        && String(emailToggle.checked) !== emailToggle.dataset.initial) {
+                        updates.email_notifications = emailToggle.checked;
+                    }
+                    await window.GahonshDB.Profiles.updateMyProfile(updates);
 
                     showToast('✅ Profile updated successfully!');
                     profileBackdrop.classList.remove('active');
@@ -794,6 +808,11 @@
                     document.getElementById('editProfileRate').value = profile.hourly_rate || 0;
                     document.getElementById('editProfileSkills').value = Array.isArray(profile.skills) ? profile.skills.join(', ') : '';
                     document.getElementById('editProfileBio').value = profile.bio || '';
+                    const emailToggle = document.getElementById('editProfileEmailNotifications');
+                    if (emailToggle) {
+                        emailToggle.checked = profile.email_notifications !== false;
+                        emailToggle.dataset.initial = String(emailToggle.checked);
+                    }
                 }
             }
         } catch (err) {
