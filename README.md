@@ -68,6 +68,16 @@ To enable persistent database storage and real user authentication for the marke
    ```
 3. Copy your project's **API URL** and **Anon Key** from *Project Settings → API*.
 4. Open the website, click the **"Connect Supabase"** badge or configure via `supabase-config.js` / localStorage modal to activate live cloud synchronization.
+5. Optional: turn on automatic email. Every notification can also be emailed
+   through Resend — see **Step 4** in `docs/SETUP.md`. Without it the in-app
+   notifications work and nothing claims to have sent mail.
+
+**Lead files.** `docs/leads/clients.csv` and `docs/leads/freelancers.csv` hold
+100 public client posts and 100 public freelancer profiles, each with the source
+URL it came from and a note on how it was verified. They are rebuilt with
+`npm run leads:refresh` and validated by `npm test`. Read
+`docs/leads/README.md` before using them: they are research, not a contact
+list, and they contain no email addresses.
 
 ---
 
@@ -102,7 +112,10 @@ To enable persistent database storage and real user authentication for the marke
 │   ├── DATABASE.md             Database Architecture & RLS Documentation
 │   ├── FILE-SAFETY.md          File safety scanner, limits and server-side AV notes
 │   ├── RECORDS.md              Worker/client records and export reference
+│   ├── leads/                  100 public client posts + 100 freelancer profiles (CSV)
 │   └── API.md                  API & Integration Reference
+├── supabase/functions/send-email/  Resend sender for the notification outbox
+├── supabase/migrations/        Incremental SQL for existing projects
 └── package.json                Dev Server & Build Scripts
 ```
 

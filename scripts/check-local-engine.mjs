@@ -958,6 +958,33 @@ async function refuse(fn) {
   check('a cancelled contract cannot be disputed',
     await refuse(() => DB.Contracts.raiseDispute(cancelContractId)) !== null);
 
+  // ---- Email preference (profile consent flag) ---------------------------
+  // The flag decides whether a notification is also emailed. If the offline
+  // engine loses it, a member who opted out keeps getting mail on the fallback
+  // path, and the editor shows the wrong state on reopen.
+  const optOutUser = await DB.Auth.signUp(
+    `optout-${Date.now()}@gahonsh.test`, 'Passw0rd!', 'Opt Out Tester', 'freelancer'
+  );
+  check('a new profile starts with email notifications on',
+    optOutUser.profile.email_notifications === true);
+
+  const afterOptOut = await DB.Profiles.updateMyProfile({ email_notifications: false });
+  check('opting out is saved on the profile', afterOptOut.email_notifications === false);
+  check('opting out survives a re-read',
+    (await DB.Profiles.getMyProfile()).email_notifications === false);
+
+  const afterOptIn = await DB.Profiles.updateMyProfile({ email_notifications: true });
+  check('opting back in is saved', afterOptIn.email_notifications === true);
+
+  const coerced = await DB.Profiles.updateMyProfile({ email_notifications: 'yes' });
+  check('a non-boolean opt-in value is coerced, never stored as a string',
+    coerced.email_notifications === false);
+
+  const optedOutPublicRow = (await DB.Profiles.getPublicFreelancers({}))
+    .find((p) => p.id === optOutUser.profile.id);
+  check('the public directory does not expose the preference',
+    !!optedOutPublicRow && !('email_notifications' in optedOutPublicRow));
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

@@ -171,6 +171,91 @@ pass trivially.
 
 ---
 
+### Step 4: Automatic email (optional, recommended)
+
+A proposal, a hire or a contract update already writes an in-app notification.
+This step also emails it to the member. It is optional: without it the portal
+still works and nothing pretends to have been sent.
+
+**How it fits together**
+
+```
+notifications INSERT
+   -> trigger notifications_email_outbox   (supabase/migrations/20261201000000_add_email_outbox.sql)
+   -> email_outbox row (status = queued)
+   -> pg_cron, every minute -> POST /functions/v1/send-email
+   -> Resend API -> inbox, then status = sent
+```
+
+The Resend key never enters this repository or the browser: it lives in the
+Edge Function's environment. The browser has no grant on `email_outbox`.
+
+**1. Create a Resend account and verify a sending domain.** Add the DNS records
+Resend shows you. The `from` address must be on a domain you verified, or Resend
+rejects the send.
+
+**2. Deploy the function** from the repository root:
+
+```bash
+supabase login
+supabase link --project-ref <project-ref>
+supabase functions deploy send-email --no-verify-jwt
+```
+
+`--no-verify-jwt` is deliberate: the caller is `pg_cron`, which has no user
+token. The function refuses to run unless the request carries the shared secret,
+so it is not an open relay.
+
+**3. Set the function secrets:**
+
+```bash
+supabase secrets set \
+  RESEND_API_KEY=re_xxxxxxxxxxxxxxxx \
+  EMAIL_DRAIN_SECRET=$(openssl rand -hex 24) \
+  EMAIL_FROM="Gahonsh <notifications@gahonsh.com>"
+```
+
+**4. Give the database the URL and the same secret**, in the SQL editor:
+
+```sql
+select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/send-email', 'email_function_url');
+select vault.create_secret('<the same EMAIL_DRAIN_SECRET>', 'email_function_secret');
+```
+
+**5. Enable the scheduler and re-run the migration** so the cron job is created:
+
+```sql
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+```
+
+Then run `supabase/migrations/20261201000000_add_email_outbox.sql` once. It
+prints `Email drain not scheduled: ...` if a step above is missing — that
+message is the setup telling you what is still absent, not a crash.
+
+**6. Test it.** Insert a notification for your own account and watch the queue:
+
+```sql
+select id, to_email, status, attempts, last_error, sent_at
+from public.email_outbox order by created_at desc limit 5;
+```
+
+A row goes `queued` -> `sending` -> `sent` within about a minute. If it stays
+`queued`, the cron job or the secret is missing; if it turns `failed`, read
+`last_error` — Resend's message is copied there (an unverified `from` domain is
+the usual cause).
+
+**Turning it off per member.** The profile editor has an "Email me about
+proposals, hires and contract updates" checkbox, stored in
+`profiles.email_notifications`. The trigger skips the queue when it is off; the
+in-app notification is unaffected.
+
+**Do not** put a Resend key in `supabase-config.js`, in a page, or in a
+migration. `npm run test:email` fails the build if a key-shaped string or an
+`email_outbox` query appears in a browser script.
+
+---
+
 ## 3. Marketplace Core Flows Checklist
 
 Once Supabase is connected, verify the primary user flows:
