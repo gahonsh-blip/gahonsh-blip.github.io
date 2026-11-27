@@ -304,12 +304,27 @@ no API key; keep it that way.
   these guards when adding a new async flow.
 - **Bilingual.** `norm()` preserves Unicode combining marks (`\p{M}`), so
   Devanagari keywords such as `प्रोफाइल` match. Keep that behaviour.
+- **Routing keywords decide which task runs.** A bare `mera profile` or
+  `my profile` in the wizard's keyword list swallowed every "is my profile set
+  up?" question into the six-step form. Status phrasings belong to
+  `profileAudit` / `jobAudit`, edit phrasings to `buildProfileBot` /
+  `postJobBot`, and a two-word phrase scores 5, so a longer phrase wins. Add a
+  case to `npm run test:chat` for any new phrasing.
+- **Self-only reads.** The audits use `Profiles.getMyProfile()` and
+  `Jobs.getMyJobs()`; no message text may become a user id or a lookup.
+  `asksAboutSomeoneElse()` refuses a question about another member before
+  intent routing. `npm run test:chat` fails if the widget reaches
+  `getProfileById`, `public_profiles` or `from('profiles')`.
+- **Every step offers three buttons.** Continue (accept what is there), Skip
+  (leave it), Cancel (stop). A required-empty field in a create flow shows
+  Continue and Cancel only, because Skip could never save.
 - **Security.** User and DB values must stay behind `escapeHtml()` or
   `textContent`; `npm run test:security` scans this file. Never put an
   interpolated value into an inline handler.
 - **Docs/tests.** See `docs/CHAT-ASSISTANT.md` and the chat section of
-  `docs/BUG_REPORT.md`. `npm test` covers the static checks; browser flows use
-  the demo accounts and `demo-job-1`.
+  `docs/BUG_REPORT.md`. `npm run test:chat` loads the real keyword table and
+  scorer and asserts routing, the privacy guard and the step buttons; browser
+  flows use the demo accounts and `demo-job-1`.
 
 ## Owner Studio Editor (local only)
 

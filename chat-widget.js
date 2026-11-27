@@ -286,7 +286,13 @@
         // Action intents start a guided task instead of returning a canned answer.
         {
             id: 'buildProfileBot', action: 'profile',
-            kw: ['build my profile', 'build profile', 'profile banao', 'profile banani', 'profile update', 'update profile', 'edit profile', 'mera profile', 'my profile', 'profile complete', 'profile fill', 'प्रोफाइल बनाओ', 'प्रोफाइल अपडेट', 'प्रोफ़ाइल'],
+            // 'mera profile' / 'my profile' used to live here and swallowed
+            // every "is my profile set up?" question into the six-step wizard.
+            // Only phrases that ask to *edit* the profile belong here.
+            kw: ['build my profile', 'build profile', 'profile banao', 'profile banani', 'profile bana do',
+                'profile update', 'update profile', 'edit profile', 'mera profile banao', 'mera profile update',
+                'profile complete karo', 'profile fill', 'profile bharo',
+                'प्रोफाइल बनाओ', 'प्रोफाइल अपडेट', 'प्रोफ़ाइल बनाओ', 'प्रोफ़ाइल अपडेट'],
             chips: []
         },
         {
@@ -306,12 +312,36 @@
         },
         {
             id: 'profileAudit', action: 'profileAudit',
-            kw: ['check my profile', 'profile check', 'profile audit', 'profile review', 'what is missing in my profile', 'profile me kya kami', 'profile mein kya kami', 'mera profile kaisa', 'profile kaisi hai', 'profile improve', 'profile strong', 'प्रोफाइल चेक', 'प्रोफाइल में क्या कमी', 'प्रोफाइल कैसी'],
+            // Every phrasing of "how complete is my profile?" lands here. The
+            // audit reads the signed-in account only (see startProfileAudit).
+            kw: ['check my profile', 'profile check', 'profile audit', 'profile review',
+                'what is missing in my profile', 'profile me kya kami', 'profile mein kya kami',
+                'mera profile kaisa', 'profile kaisi hai', 'profile improve', 'profile strong',
+                'profile kitna', 'profile set hua', 'profile set hai', 'profile hai ya nahi',
+                'mera profile kitna', 'mera profile dekho', 'mera profile dekhen', 'mera profile dekh',
+                'mera profile report', 'profile report', 'profile status', 'profile complete hai',
+                'profile sahi hai', 'mera profile set', 'profile setup',
+                'प्रोफाइल चेक', 'प्रोफाइल में क्या कमी', 'प्रोफाइल कैसी', 'प्रोफाइल कितना',
+                'प्रोफाइल सेट', 'प्रोफाइल रिपोर्ट', 'प्रोफाइल देख', 'प्रोफाइल स्टेटस',
+                'प्रोफाइल स्थिति', 'प्रोफ़ाइल कितना', 'प्रोफ़ाइल देख', 'प्रोफ़ाइल स्थिति'],
             chips: []
         },
         {
             id: 'jobAudit', action: 'jobAudit',
-            kw: ['check my job', 'job check', 'job audit', 'job review', 'improve my job', 'job improve', 'what is missing in my job post', 'job post me kya kami', 'job post mein kya kami', 'mera job kaisa', 'job post improve', 'जॉब चेक', 'जॉब में क्या कमी', 'जॉब कैसा'],
+            // Clients ask about a "project" or a "posting" more often than a
+            // "job post", so both words route here. Client-only: the check
+            // reads getMyJobs(), never a job belonging to someone else.
+            kw: ['check my job', 'job check', 'job audit', 'job review', 'improve my job', 'job improve',
+                'what is missing in my job post', 'job post me kya kami', 'job post mein kya kami',
+                'mera job kaisa', 'job post improve', 'job post kaisa', 'job post check',
+                'job posting check', 'mera job post check',
+                'project check', 'project audit', 'project report', 'mera project kaisa',
+                'mera project check', 'mera project dekho', 'mera project dekhen',
+                'project me kya kami', 'project mein kya kami', 'project posting me kya kami',
+                'posting me kya kami', 'posting mein kya kami', 'mera posting kaisa',
+                'जॉब चेक', 'जॉब में क्या कमी', 'जॉब कैसा', 'जॉब पोस्ट कैसा',
+                'प्रोजेक्ट चेक', 'प्रोजेक्ट में क्या कमी', 'प्रोजेक्ट कैसा',
+                'पोस्टिंग में क्या कमी', 'प्रोजेक्ट देख'],
             chips: []
         },
         {
@@ -328,8 +358,8 @@
             id: 'botHelp',
             kw: ['what can you do', 'what can i do', 'what do you do for me', 'help', 'kya kar sakta', 'kya kya kaam', 'kya kar sakte', 'commands', 'options', 'capabilities', 'तुम क्या कर सकते', 'क्या कर सकते हो', 'मदद'],
             chips: ['profileAudit', 'jobAudit', 'postJobBot', 'buildProfileBot', 'uploadResume', 'proposalBot', 'findWork', 'human'],
-            en: 'I can do these tasks with you:<br><br>• <b>Check my profile</b> — I score your saved profile and tell you what is missing or weak, then I can fill the gaps.<br>• <b>Check my job post</b> — I score a job you posted and tell you what to improve so the offer is clear and attractive.<br>• <b>Post a job</b> — I ask title, category, scope, budget, duration and skills, then publish it (client account).<br>• <b>Build or update a profile</b> — name, title, location, skills, rate and bio (worker or client).<br>• <b>Upload a resume</b> — I open the profile editor for a PDF up to 5 MB (worker).<br>• <b>Submit a proposal</b> — paste a job link, then give your bid, days and cover letter (worker).<br>• <b>Find work / Find talent</b> — open the right directory.<br>• <b>Quote</b> — I take your name, email and project and send it to the team.<br><br>Sign-in is required for checks, posting, applying and saving a profile. I cannot take payments, approve accounts or bypass the site rules.',
-            hi: 'मैं आपके साथ ये काम कर सकता हूँ:<br><br>• <b>Profile check</b> — आपकी सेव की हुई profile को score करके बताता हूँ कि क्या कमी है, फिर उसे भर भी सकता हूँ.<br>• <b>Job post check</b> — आपकी post की हुई job को score करके बताता हूँ कि offer को साफ और आकर्षक बनाने के लिए क्या सुधारें.<br>• <b>Job post</b> — title, category, scope, budget, duration और skills पूछकर publish करता हूँ (client account).<br>• <b>Profile बनाना/अपडेट</b> — नाम, title, location, skills, rate और bio (worker या client).<br>• <b>Resume upload</b> — 5 MB तक PDF के लिए profile editor खोलता हूँ (worker).<br>• <b>Proposal भेजना</b> — job link paste कीजिए, फिर bid, days और cover letter (worker).<br>• <b>Find work / Find talent</b> — सही directory खोलता हूँ.<br>• <b>Quote</b> — नाम, email और project लेकर team तक भेजता हूँ.<br><br>Check, post, apply और profile सेव करने के लिए sign-in ज़रूरी है. Payment, account approval या site के नियम bypass करना मैं नहीं कर सकता.'
+            en: 'I can do these tasks with you:<br><br>• <b>Check my profile</b> — I score your saved profile and tell you what is missing or weak, then I can fill the gaps.<br>• <b>Check my job post</b> — I score a job you posted and tell you what to improve so the offer is clear and attractive.<br>• <b>Post a job</b> — I ask title, category, scope, budget, duration and skills, then publish it (client account).<br>• <b>Build or update a profile</b> — name, title, location, skills, rate and bio (worker or client).<br>• <b>Upload a resume</b> — I open the profile editor for a PDF up to 5 MB (worker).<br>• <b>Submit a proposal</b> — paste a job link, then give your bid, days and cover letter (worker).<br>• <b>Find work / Find talent</b> — open the right directory.<br>• <b>Quote</b> — I take your name, email and project and send it to the team.<br><br>Sign-in is required for checks, posting, applying and saving a profile, and I only ever read the account that is signed in — never the profile, email, resume or files of another member. I cannot take payments, approve accounts or bypass the site rules.',
+            hi: 'मैं आपके साथ ये काम कर सकता हूँ:<br><br>• <b>Profile check</b> — आपकी सेव की हुई profile को score करके बताता हूँ कि क्या कमी है, फिर उसे भर भी सकता हूँ.<br>• <b>Job post check</b> — आपकी post की हुई job को score करके बताता हूँ कि offer को साफ और आकर्षक बनाने के लिए क्या सुधारें.<br>• <b>Job post</b> — title, category, scope, budget, duration और skills पूछकर publish करता हूँ (client account).<br>• <b>Profile बनाना/अपडेट</b> — नाम, title, location, skills, rate और bio (worker या client).<br>• <b>Resume upload</b> — 5 MB तक PDF के लिए profile editor खोलता हूँ (worker).<br>• <b>Proposal भेजना</b> — job link paste कीजिए, फिर bid, days और cover letter (worker).<br>• <b>Find work / Find talent</b> — सही directory खोलता हूँ.<br>• <b>Quote</b> — नाम, email और project लेकर team तक भेजता हूँ.<br><br>Check, post, apply और profile सेव करने के लिए sign-in ज़रूरी है, और मैं सिर्फ उसी account को पढ़ता हूँ जो signed in है — किसी दूसरे member की profile, email, resume या file कभी नहीं. Payment, account approval या site के नियम bypass करना मैं नहीं कर सकता.'
         }
     ];
 
@@ -1235,12 +1265,16 @@
             return;
         }
         var steps = profileSteps(profile).filter(function (step) { return keys.indexOf(step.key) > -1; });
+        // In a fix flow every gap may be left for later: skipping writes the
+        // value that is already there, so nothing is cleared and nothing is
+        // invented. That also keeps all three step buttons available.
+        steps.forEach(function (step) { step.optional = true; });
         task = { type: 'profile', mode: 'fix', index: 0, steps: steps, data: {} };
         steps.forEach(function (step) {
             if (step.default !== undefined) task.data[step.key] = step.default;
         });
-        addMsg('bot', t('I will ask only the gaps. Tap Skip to keep a current value.',
-            'मैं सिर्फ कमियाँ पूछूँगा. मौजूदा value रखने के लिए Skip दबाइए.'));
+        addMsg('bot', t('I will ask only the gaps. Tap Continue to keep a value, Skip to leave a gap for later, or Cancel to stop.',
+            'मैं सिर्फ कमियाँ पूछूँगा. Continue दबाकर value रखिए, Skip से कमी बाद के लिए छोड़िए, या Cancel से रोकिए.'));
         askTaskStep();
     }
 
@@ -1260,13 +1294,14 @@
             return;
         }
         var steps = jobSteps(job).filter(function (step) { return keys.indexOf(step.key) > -1; });
+        steps.forEach(function (step) { step.optional = true; });
         task = { type: 'job', mode: 'fix', target: job, index: 0, steps: steps, data: {} };
         task.data.job_type = job.job_type || 'fixed';
         steps.forEach(function (step) {
             if (step.default !== undefined) task.data[step.key] = step.default;
         });
-        addMsg('bot', t('I will ask only the gaps. Tap Skip to keep a current value.',
-            'मैं सिर्फ कमियाँ पूछूँगा. मौजूदा value रखने के लिए Skip दबाइए.'));
+        addMsg('bot', t('I will ask only the gaps. Tap Continue to keep a value, Skip to leave a gap for later, or Cancel to stop.',
+            'मैं सिर्फ कमियाँ पूछूँगा. Continue दबाकर value रखिए, Skip से कमी बाद के लिए छोड़िए, या Cancel से रोकिए.'));
         askTaskStep();
     }
 
@@ -1285,14 +1320,25 @@
         var role = profile.role === 'client' ? 'client' : profile.role === 'admin' ? 'admin' : 'worker';
         var roleLabelEn = role === 'admin' ? 'an admin' : 'a ' + role;
         var name = String(profile.full_name || '').trim().split(' ')[0] || t('there', 'दोस्त');
-        var top = audit.items.filter(function (item) { return item.status !== 'ok'; }).slice(0, 2)
-            .map(function (item) {
-                return '• ' + escapeHtml(t(item.label_en, item.label_hi)) + ': ' +
-                    escapeHtml(t(item.detail_en, item.detail_hi));
-            }).join('<br>');
+        // List every gap, not just the first two: "what is set and what is
+        // left" is the question people actually ask at this point.
+        var gaps = audit.items.filter(function (item) { return item.status !== 'ok'; });
+        var shown = gaps.slice(0, 6).map(function (item) {
+            return '• ' + escapeHtml(t(item.label_en, item.label_hi)) + ': ' +
+                escapeHtml(t(item.detail_en, item.detail_hi));
+        }).join('<br>');
+        var more = gaps.length > 6
+            ? '<br>' + t('…and ' + (gaps.length - 6) + ' more — tap Check my profile.',
+                '…और ' + (gaps.length - 6) + ' बाकी — Profile check दबाइए.')
+            : '';
+        var summary = gaps.length
+            ? t(gaps.length + ' of ' + audit.items.length + ' checks need attention:',
+                audit.items.length + ' में से ' + gaps.length + ' चीज़ें बाकी हैं:') + '<br>' + shown + more
+            : t('Every check passes — nothing important is missing.',
+                'सब check pass — कोई ज़रूरी चीज़ बाकी नहीं.');
         addMsg('bot', t(
-            'Welcome back, ' + escapeHtml(name) + '. You are signed in as ' + roleLabelEn + '. Your profile is <b>' + audit.score + '/100</b>.<br><br>' + (top || 'Everything important is filled in.'),
-            'वापसी पर स्वागत, ' + escapeHtml(name) + '. आप ' + role + ' के रूप में signed in हैं. आपकी profile <b>' + audit.score + '/100</b> है.<br><br>' + (top || 'ज़रूरी चीज़ें भरी हुई हैं.')
+            'Welcome back, ' + escapeHtml(name) + '. You are signed in as ' + roleLabelEn + '. Your profile is <b>' + audit.score + '/100</b>.<br><br>' + summary,
+            'वापसी पर स्वागत, ' + escapeHtml(name) + '. आप ' + role + ' के रूप में signed in हैं. आपकी profile <b>' + audit.score + '/100</b> है.<br><br>' + summary
         ));
         if (!task && !jobPicker && !pendingTask && flow.step === 'idle') {
             if (role === 'client') {
@@ -1578,13 +1624,19 @@
         var promptEn = typeof step.prompt_en === 'function' ? step.prompt_en() : step.prompt_en;
         var promptHi = typeof step.prompt_hi === 'function' ? step.prompt_hi() : step.prompt_hi;
         var hint = hasCurrent
-            ? t(' Current: ' + escapeHtml(displayTaskValue(current)) + ' — type a new value or tap Skip to keep it.',
-                ' अभी: ' + escapeHtml(displayTaskValue(current)) + ' — नया लिखिए या Skip दबाएँ.')
+            ? t(' Current: ' + escapeHtml(displayTaskValue(current)) + ' — type a new value, or tap Continue to keep it.',
+                ' अभी: ' + escapeHtml(displayTaskValue(current)) + ' — नया लिखिए, या Continue दबाकर इसे रख लीजिए.')
             : '';
         var progress = t('Step ' + (task.index + 1) + ' of ' + task.steps.length + ' — ',
             'Step ' + (task.index + 1) + ' / ' + task.steps.length + ' — ');
         addMsg('bot', '<span class="gc-step">' + progress + '</span>' + t(promptEn, promptHi) + hint);
-        setChips(step.optional || hasCurrent ? ['skipTask', 'cancelTask'] : ['cancelTask']);
+        // Three exits on every step: Continue accepts what is there (the text
+        // you typed, else the saved value), Skip leaves this one out, Cancel
+        // stops the task. Skip is hidden only where the field is required and
+        // empty, because skipping it could never succeed.
+        setChips(step.optional || hasCurrent
+            ? ['continueTask', 'skipTask', 'cancelTask']
+            : ['continueTask', 'cancelTask']);
     }
 
     function nextTaskStep() {
@@ -1611,6 +1663,30 @@
         jobPicker = null;
         addMsg('bot', t('Cancelled. Nothing was saved. What else can I do?', 'रद्द कर दिया. कुछ सेव नहीं हुआ. और क्या कर सकता हूँ?'));
         setChips();
+    }
+
+    // The Continue chip: submit whatever is in the box, otherwise accept the
+    // value already saved for this step and move on.
+    function continueTaskStep() {
+        if (!task || task.busy) return;
+        if (task.index >= task.steps.length) { handleTaskConfirm('yes'); return; }
+        var typed = String(input.value || '').trim();
+        if (typed) {
+            input.value = '';
+            addMsg('me', escapeHtml(typed));
+            handleTaskInput(typed);
+            return;
+        }
+        var step = task.steps[task.index];
+        var current = task.data[step.key] !== undefined ? task.data[step.key] : step.default;
+        if (current !== undefined && current !== null && String(current).trim() !== '') {
+            task.data[step.key] = current;
+            nextTaskStep();
+            return;
+        }
+        // Nothing typed and nothing saved: an optional gap can move on, a
+        // required one has to be answered, which skip already says.
+        handleTaskInput('skip');
     }
 
     async function handleTaskInput(text) {
@@ -1926,7 +2002,10 @@
             }, 300);
         },
         signIn: handleSignIn,
-        continueTask: handleContinue,
+        continueTask: function () {
+            if (task) { continueTaskStep(); return; }
+            handleContinue();
+        },
         cancelTask: cancelTask,
         skipTask: function () { handleTaskInput('skip'); },
         confirmTask: function () { handleTaskInput('yes'); },
@@ -2027,6 +2106,29 @@
     }
 
     /* --------------------------------------------------------------- routing */
+    /* ------------------------------------------------------------ privacy guard */
+    // The assistant reads one record only: the account that is signed in. Any
+    // question aimed at somebody else's profile, email, phone, resume or files
+    // is refused before intent routing, so no phrasing can reach a lookup.
+    var OTHER_PERSON = /(kisi aur|kisi dusre|kisi doosre|dusre user|doosre user|dusre member|uska|uski|unki|unka|किसी और|किसी दूसरे|उसका|उसकी|उनका|उनकी|someone else|someone's|some other|other user|another user|another member|that user|his profile|her profile)/i;
+    var PRIVATE_FIELD = /(profile|email|e-mail|phone|mobile|number|contact|resume|cv|address|whatsapp|प्रोफाइल|प्रोफ़ाइल|ईमेल|नंबर|फोन|संपर्क|रिज्यूमे|सीवी|पता|व्हाट्सएप)/i;
+    // "profile of <name>", "email for <name>" — a third party named directly.
+    var THIRD_PARTY_OF = /\b(profile|email|e-mail|phone|contact|resume|cv)\s+(?:of|for)\s+(?!me\b|my\b|mine\b|myself\b|the team\b|team\b|gahonsh\b|a job\b|this job\b|the job\b|a project\b|this project\b)[a-z\u0900-\u097F]/i;
+
+    function asksAboutSomeoneElse(text) {
+        var clean = String(text || '');
+        if (THIRD_PARTY_OF.test(clean)) return true;
+        return OTHER_PERSON.test(clean) && PRIVATE_FIELD.test(clean);
+    }
+
+    function refuseThirdParty() {
+        addMsg('bot', t(
+            'I can only read the profile of the account that is signed in — never another member\'s email, phone, resume or files.<br><br>If you need to reach a freelancer or a client, use the message thread on the project page, or ask the team through ' + a(L.whatsapp, 'WhatsApp') + '.',
+            'मैं सिर्फ उसी account की profile पढ़ सकता हूँ जो signed in है — किसी दूसरे member का email, phone, resume या file कभी नहीं.<br><br>किसी freelancer या client से बात करनी हो तो project page के message thread का इस्तेमाल कीजिए, या team से ' + a(L.whatsapp, 'WhatsApp') + ' पर पूछिए.'
+        ));
+        setChips(['profileAudit', 'jobAudit', 'human']);
+    }
+
     function respond(text) {
         var clean = text.trim();
         if (!clean) return;
@@ -2098,6 +2200,11 @@
             }
             flow.project = clean.slice(0, 1200);
             finishQuote();
+            return;
+        }
+
+        if (asksAboutSomeoneElse(clean)) {
+            refuseThirdParty();
             return;
         }
 

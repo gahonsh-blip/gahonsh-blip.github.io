@@ -47,6 +47,12 @@ The audit is deterministic and runs in the browser. It never calls an LLM.
 
 - Sign-in is required for profile, job, proposal and resume actions. The bot
   opens the normal auth modal and offers a **Continue** action afterwards.
+- **Self-only reads.** Every check reads the signed-in account: the profile
+  audit uses `Profiles.getMyProfile()`, the job audit uses `Jobs.getMyJobs()`.
+  No code path accepts a user id, an email or a name from the message, and
+  `asksAboutSomeoneElse()` refuses a question aimed at another member before
+  intent routing runs. A refused question names the in-site message thread as
+  the right way to reach that person.
 - Role checks mirror the services: jobs and job checks need a client or admin
   account, proposals and resumes need a worker or admin account.
 - The bot never asks for a password, never handles payments and never approves
@@ -75,7 +81,13 @@ Natural language works in English, Hindi or Hinglish. Examples:
 - `post a job`, `job post karna hai`, `जॉब पोस्ट करो`
 - `build my profile`, `mera profile update karo`, `प्रोफाइल बनाओ`
 - `check my profile`, `profile check karo`, `प्रोफाइल चेक करो`
-- `check my job post`, `job post check`, `मेरा job post चेक करो`
+- `mera profile kitna set hai`, `profile set hua hai ya nahi`, `mera profile report do`,
+  `प्रोफाइल कितना सेट है` — the status phrasings. These used to start the
+  profile wizard because `mera profile` was one of its keywords; they now run
+  the check.
+- `check my job post`, `job post check`, `मेरा job post चेक करो`,
+  `mere project me kya kami hai`, `project posting me kya kami hai`,
+  `प्रोजेक्ट में क्या कमी है` — clients ask about a "project" or a "posting".
 - `fix my profile`, `profile fix`, `प्रोफाइल ठीक करो`
 - `improve this job`, `job fix`, `job post ठीक करो`
 - `upload resume`, `resume upload`, `रिज्यूमे अपलोड`
@@ -84,15 +96,23 @@ Natural language works in English, Hindi or Hinglish. Examples:
 - `cancel`, `skip`, `yes`, `edit`
 
 During a task, the next message is treated as the answer to the current step.
-Type `cancel` to stop without saving, or tap **Cancel**. Use **Skip** for an
-optional field, **Edit** to restart the questions and **Confirm** to save.
+Every step carries three buttons: **Continue** accepts what is there (the text
+in the box, else the value already saved) and moves on, **Skip** leaves this
+field alone, and **Cancel** stops the task. A required field that is still
+empty shows only Continue and Cancel, because skipping it could never save.
+**Edit** restarts the questions and **Confirm** saves.
 Devanagari is matched after preserving combining marks, so `प्रोफाइल` and
 similar words work.
 
 ## Testing
 
-Run `npm test` for the static checks (a11y, security, schema and the offline
-engine). The guided flows and audits need a browser:
+Run `npm test` for the static checks (a11y, security, schema, the offline
+engine, the page content and the chat router). `npm run test:chat` loads the
+real keyword table and the real scorer from `chat-widget.js` and asserts that
+each phrasing reaches the intended intent, that the privacy guard blocks
+third-party questions, and that a step always offers Continue, Skip and Cancel.
+
+The guided flows and audits also need a browser:
 
 1. Start the preview server with `npm run dev`.
 2. When the Supabase project is unreachable, the marketplace uses the demo
