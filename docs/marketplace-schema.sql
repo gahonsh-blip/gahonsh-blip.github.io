@@ -144,6 +144,16 @@ FROM public.profiles;
 -- Grant public read access to the safe directory view
 GRANT SELECT ON public.public_profiles TO anon, authenticated;
 
+-- A view runs with its owner's privileges by default, which bypasses RLS on the
+-- base table and is what Supabase's Security Advisor flags. This view selects
+-- only directory columns that anon already holds column grants for, and the
+-- row policy on `profiles` is `USING (true)`, so it can run as the caller and
+-- let RLS apply. `admin_profiles` and `worker_ratings` cannot: the first reads
+-- `email`, which anon must not have, and the second aggregates tables a visitor
+-- cannot select. Both stay owner-privileged and gate their own rows; see the
+-- notes at their definitions.
+ALTER VIEW public.public_profiles SET (security_invoker = on);
+
 -- Privacy hardening: `profiles` is a private table. Revoke the default
 -- table-level SELECT and grant only the public directory columns. Email and
 -- phone_number are never granted to anon/authenticated; the admin reads them
@@ -724,6 +734,11 @@ $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
 -- can read the private email column, but the WHERE clause is evaluated with
 -- the caller's auth.uid(). A non-admin authenticated user gets zero rows, and
 -- an anonymous caller has no grant at all.
+-- Owner-privileged on purpose: `email` is not granted to anon or authenticated,
+-- so a `security_invoker` view would fail even for the owner. The `is_admin()`
+-- gate is the access control, and `is_admin()` reads the caller's JWT claim
+-- rather than the view owner's, so a non-admin gets zero rows. `npm run
+-- check:sql` asserts both halves.
 CREATE OR REPLACE VIEW public.admin_profiles AS
 SELECT id, full_name, email, role, is_verified, location, title,
        hourly_rate, created_at
@@ -2682,3 +2697,69 @@ USING (
 REVOKE ALL ON public.contract_timesheets FROM anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.contract_timesheets TO authenticated;
 
+
+-- ----------------------------------------------------------------------------
+-- 13. FUNCTION EXECUTION SURFACE
+-- ----------------------------------------------------------------------------
+-- PostgreSQL grants EXECUTE on every new function to PUBLIC, and Supabase's
+-- default privileges grant it to anon and authenticated as well. Without the
+-- block below, every trigger helper, internal RPC and maintenance function is
+-- callable from a browser holding the publishable key — Supabase's Security
+-- Advisor reports that as "SECURITY DEFINER function executable by anon".
+--
+-- Trigger functions cannot be invoked directly (PostgreSQL rejects a call
+-- outside a trigger), and EXECUTE is checked when the trigger is created, not
+-- when it fires, so revoking here costs nothing at runtime.
+--
+-- Re-grant only what a page actually calls. Keep this list in step with
+-- `.rpc(...)` calls in the client; `npm run check:sql` asserts that every
+-- browser RPC is executable by `authenticated`.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM authenticated;
+
+-- `uuid_generate_v4()` backs the primary-key defaults, so it runs as whichever
+-- role inserts a row. Supabase installs it in the `extensions` schema, which the
+-- revoke above does not touch; a project that installed it in `public` would
+-- lose the default, so re-grant it when it lives here.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' AND p.proname = 'uuid_generate_v4'
+    ) THEN
+        EXECUTE 'GRANT EXECUTE ON FUNCTION public.uuid_generate_v4() TO anon, authenticated, service_role';
+    END IF;
+END $$;
+
+-- Read by row policies and storage policies, which run as the caller.
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.can_access_job_files(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.can_upload_job_files(TEXT) TO anon, authenticated;
+
+-- Public reputation records: a visitor may read a worker's or client's record
+-- before signing in. The functions return aggregates, never contact details.
+GRANT EXECUTE ON FUNCTION public.get_worker_record(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_client_record(UUID) TO anon, authenticated;
+
+-- Signed-in member actions.
+GRANT EXECUTE ON FUNCTION public.get_my_record() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.accept_proposal_and_create_contract(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_proposal_status(UUID, proposal_status) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.complete_contract(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.cancel_contract(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.raise_contract_dispute(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_overview() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.decide_verification(UUID, BOOLEAN, TEXT) TO authenticated;
+
+-- Server-side only: admin provisioning and the email outbox drain.
+GRANT EXECUTE ON FUNCTION public.provision_admin_user(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION public.claim_email_batch(INTEGER) TO service_role;
+GRANT EXECUTE ON FUNCTION public.settle_email(UUID, BOOLEAN, TEXT, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION public.notify_user(UUID, TEXT, TEXT, TEXT, TEXT) TO service_role;
+
+-- Supabase's service role drives everything server-side; it never reaches a
+-- browser. Trigger helpers stay unlisted on purpose: they run as the table
+-- owner, and EXECUTE is not re-checked when a trigger fires.
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;

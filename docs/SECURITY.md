@@ -113,6 +113,23 @@ migration is a copy-paste, not a service to delegate.
   **disposable test account** through `AUDIT_EMAIL` / `AUDIT_PASSWORD`. Use that
   instead of the owner's account.
 
+## Security Advisor: what is fixed, and what is accepted
+
+Supabase's Advisor reports three shapes on this schema. Two are now closed at
+the source; one is a deliberate design with a test.
+
+| Advisor finding | Answer |
+|---|---|
+| View `public_profiles` is `SECURITY DEFINER` | **Fixed.** It sets `security_invoker = on`, so it runs with the caller's privileges and the row policy on `profiles` applies. It only selects columns `anon` already holds grants for, so the directory still works for visitors |
+| Views `admin_profiles` and `worker_ratings` are `SECURITY DEFINER` | **Accepted by design.** `admin_profiles` reads `email`, which `anon` must never have, so a caller-privileged view would fail for everyone. Its access control is the `WHERE public.is_admin()` gate, and `is_admin()` reads the *caller's* JWT claim, not the view owner's. `worker_ratings` aggregates `contracts` and `reviews` that a visitor cannot select, and returns counts and averages only. `npm run check:sql` asserts a non-admin gets zero rows and an admin gets the directory |
+| `SECURITY DEFINER` function has a mutable `search_path` | **Fixed.** Every one pins `search_path = public, pg_temp`, and a check fails the suite if a new function forgets |
+| `anon` can execute `SECURITY DEFINER` functions | **Fixed.** PostgreSQL grants `EXECUTE` to `PUBLIC` by default, so every trigger helper and internal RPC was callable with the publishable key. Section 13 of the schema revokes the blanket grant and re-grants four public read functions plus the signed-in member surface. A check asserts both halves |
+| Leaked password protection is disabled | **Owner action.** It is an Auth setting, not SQL: Authentication → Providers → Email → "Prevent use of leaked passwords". See `docs/SETUP.md` Step 2c |
+
+Adding a function means adding its grant in section 13. A function without a
+grant is not callable from the browser, which is the intended default; the check
+suite lists the ten RPCs a page calls and fails if one loses its grant.
+
 ## Offline fallback
 
 `marketplace-local.js` mirrors the same rules in the browser. `publicProfile()`
