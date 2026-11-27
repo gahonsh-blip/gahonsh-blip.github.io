@@ -7,6 +7,9 @@
 --
 -- Both functions record the outcome on the contract. Neither moves money:
 -- payments are direct between the client and the freelancer.
+--
+-- Security: require an authenticated caller, lock the contract row, restrict
+-- execution to authenticated users, and keep the privileged search_path fixed.
 
 CREATE OR REPLACE FUNCTION public.cancel_contract(p_contract_id UUID)
 RETURNS UUID
@@ -17,6 +20,10 @@ AS $$
 DECLARE
     v_contract public.contracts%ROWTYPE;
 BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Authentication required.';
+    END IF;
+
     SELECT * INTO v_contract
     FROM public.contracts
     WHERE id = p_contract_id
@@ -49,6 +56,7 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.cancel_contract(UUID) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cancel_contract(UUID) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.raise_contract_dispute(p_contract_id UUID)
@@ -60,6 +68,10 @@ AS $$
 DECLARE
     v_contract public.contracts%ROWTYPE;
 BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Authentication required.';
+    END IF;
+
     SELECT * INTO v_contract
     FROM public.contracts
     WHERE id = p_contract_id
@@ -87,4 +99,5 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.raise_contract_dispute(UUID) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.raise_contract_dispute(UUID) TO authenticated;
