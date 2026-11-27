@@ -92,16 +92,41 @@ npm run check:live
 ```
 
 It reads the project URL and publishable key from `supabase-config.js` and
-probes every table, view and function the client reaches. Exit code `0` means
-nothing is missing; `1` prints each missing object with its PostgREST code;
-`2` means the project was unreachable, which is a network or key problem rather
-than a schema one.
+probes every table, view and function the client reaches, **plus every column
+the committed schema declares for those tables**. Exit code `0` means nothing is
+missing; `1` prints each missing object or column with its PostgREST code; `2`
+means the project was unreachable, which is a network or key problem rather than
+a schema one.
+
+The column pass is not cosmetic. The deployed project answered `200` for every
+table while `profiles.email`, `profiles.phone_number` and
+`profiles.email_notifications` were gone (`42703`), which is why `admin_profiles`
+and `admin_overview()` could not be created. A table-only probe cannot see that.
 
 **The short path (recommended).** `docs/marketplace-schema.sql` is idempotent —
 `create table if not exists`, `create or replace function`, policies dropped and
 recreated — so pasting the whole file into the Supabase SQL editor is safe on a
 project that already has most of it. Do that once, then re-run
 `npm run check:live` until it reports `0 missing`.
+
+**It repairs a drifted project, including the private profile columns.** If
+`profiles` has lost `email` or `phone_number`, the schema adds them back before
+it builds `admin_profiles` and `admin_overview()`, backfills the address from
+`auth.users`, and re-attaches the `trg_protect_profile_fields` trigger that stops
+a member writing `role`, `email` or `is_verified` on their own row. That order is
+deliberate: without the repair the view creation fails and the SQL editor rolls
+the whole script back. `npm run check:sql` case 5 reproduces that drifted state,
+re-runs the file and asserts the columns, both admin objects and the trigger come
+back, so the claim is tested rather than asserted.
+
+**Is `20261129000000_restore_profile_pii_columns.sql` required first?** No. It is
+a narrower file that does the same two things (columns plus trigger) without the
+rest of the schema, which is useful when you deliberately do not want to re-run
+everything. Running it first is harmless, and running the full schema alone is
+enough. What is *not* safe is stopping after the narrow file and assuming the
+project is complete: it does not create `contact_messages`, `admin_profiles`,
+`admin_overview()`, `verification_requests`, `contract_timesheets` or
+`decide_verification()`.
 
 **The incremental path.** If you would rather apply only what is missing, run
 the migrations in this order and stop when `check:live` is clean:
@@ -141,6 +166,7 @@ select to_regclass('public.verification_requests')   as verification_requests,
 | `decide_verification` | The admin page shows its deploy warning naming "verification requests"; the tab stays empty |
 | `contract_timesheets` | The hours panel on an hourly contract names the migration file to run instead of rendering an empty list |
 | `contact_messages` | The contact form still delivers through Formspree; the dashboard has no record of the enquiry |
+| `profiles.email`, `profiles.phone_number`, `profiles.email_notifications` | Nothing visibly breaks at first: `public_profiles` still lists people. The admin views cannot be created, so the admin page and its KPIs stay dark |
 | `admin_profiles` | The member list still renders, without email addresses, and the deploy warning says so |
 | `admin_overview` | The KPI row shows its setup message instead of figures |
 

@@ -7,8 +7,15 @@
 --   * `public.profiles` lost its `email` and `phone_number` columns, so the
 --     `admin_profiles` view and the `admin_overview()` RPC could not be
 --     created. `docs/marketplace-schema.sql` builds both on `profiles.email`,
---     so re-running it against that project fails at the view and rolls the
---     whole script back.
+--     so at the time this file was written, re-running the schema failed at the
+--     view and rolled the whole script back.
+--
+--     That has since been fixed at the source: the schema now runs
+--     `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for both columns, backfills
+--     them and re-attaches the trigger before it creates the views, so it
+--     repairs a drifted project on its own (`npm run check:sql` case 5 proves
+--     it). This file remains the narrow fix for a project where the full schema
+--     is deliberately not being applied yet — not a required first step.
 --   * `protect_profile_immutable_fields` (the trigger that stops a member
 --     writing `role`, `email` or `is_verified` on their own row) was not
 --     attached. A signed-in client could PATCH `/rest/v1/profiles` with
@@ -16,10 +23,11 @@
 --     project on 2026-11-24. That is a privilege escalation.
 --
 -- ORDER OF OPERATIONS
---   1. Run this file.
---   2. Run `docs/marketplace-schema.sql` once. It is idempotent and now
---      creates `admin_profiles`, `admin_overview()`, `contact_messages` and
---      re-applies the column grants that keep `email`/`phone_number` private.
+--   1. Run this file (optional, and harmless first).
+--   2. Run `docs/marketplace-schema.sql` once. It is idempotent, repairs the
+--      columns itself, and creates `admin_profiles`, `admin_overview()`,
+--      `contact_messages` and re-applies the column grants that keep
+--      `email`/`phone_number` private.
 --   3. Verify: `npm run check:live`, then
 --      `AUDIT_EMAIL=… AUDIT_PASSWORD=… npm run check:live-security`.
 --

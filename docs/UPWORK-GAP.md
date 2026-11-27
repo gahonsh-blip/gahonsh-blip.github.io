@@ -141,13 +141,25 @@ Phase 1 is implemented in the same pull request as this document:
 5. The static copy on nine pages was raised to the 500-word floor the repo
    documents, and `npm run test:content` now enforces it.
 
-**Live deployment status (2026-11-24).** `npm run check:live` reports six
-objects missing on the deployed Supabase project — `contact_messages`,
-`admin_profiles`, `admin_overview`, `verification_requests`,
-`contract_timesheets` and `decide_verification`. The first three predate this
-work: the live contact form still reaches the owner through Formspree, but the
-dashboard keeps no record of those enquiries, and the admin views are absent.
-`docs/SETUP.md` now has a step-by-step for applying the schema and verifying it.
+**Live deployment status (2026-11-24).** `npm run check:live` reports nine gaps
+on the deployed Supabase project:
+
+| Kind | Missing |
+|---|---|
+| Tables | `contact_messages`, `admin_profiles`, `verification_requests`, `contract_timesheets` |
+| Functions | `admin_overview()`, `decide_verification()` |
+| Columns | `profiles.email`, `profiles.phone_number`, `profiles.email_notifications` |
+
+The first three tables and both functions predate this work: the live contact
+form still reaches the owner through Formspree, but the dashboard keeps no
+record of those enquiries, and the admin views are absent. The columns matter
+because `admin_profiles` and `admin_overview()` read `profiles.email`, so the
+admin views cannot be created until they are back.
+
+One run of `docs/marketplace-schema.sql` closes all nine: it restores the
+columns, backfills the addresses, re-attaches the profile immutability trigger
+and then creates the views. `npm run check:sql` case 5 proves that repair on a
+reproduction of the live state. `docs/SETUP.md` Step 2a is the procedure.
 
 Phase 2 is deliberately not attempted. A payment button that moves no money, or
 a milestone labelled "in escrow" with nothing behind it, would be worse than the

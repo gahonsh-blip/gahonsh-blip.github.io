@@ -95,6 +95,24 @@ The admin page falls back to the safe columns plus `session.user.email` if the
 view is missing, so it keeps working while the migration is pending, but email
 will be blank until the view exists.
 
+### Who runs the migration, and where the credentials go
+
+The owner runs migrations in the Supabase dashboard, signed in directly at
+`supabase.com`. Nobody else needs the login: the repository has everything
+required (`docs/marketplace-schema.sql` and `supabase/migrations/`), so a
+migration is a copy-paste, not a service to delegate.
+
+- **Never enter the Supabase password, a session cookie, or the service-role key
+  on a page you reached from a chat message, an email or any other third-party
+  link** — including "profile setup", "browser handoff" and "connect your
+  account" pages. Those pages are indistinguishable from a credential-phishing
+  form, and the Supabase login grants full control of the database.
+- The service-role key bypasses RLS. It belongs in the Edge Function environment
+  only, never in a browser, a chat, a screenshot or a commit.
+- A check that needs a signed-in member (`npm run check:live-security`) takes a
+  **disposable test account** through `AUDIT_EMAIL` / `AUDIT_PASSWORD`. Use that
+  instead of the owner's account.
+
 ## Offline fallback
 
 `marketplace-local.js` mirrors the same rules in the browser. `publicProfile()`

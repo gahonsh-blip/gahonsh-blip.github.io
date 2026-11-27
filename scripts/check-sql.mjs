@@ -64,8 +64,9 @@ await db.exec(`
   alter default privileges in schema public grant execute on functions to authenticated;
 `);
 
-await db.exec(readFileSync(join(ROOT, 'docs', 'marketplace-schema.sql'), 'utf8')
-    .replace(/CREATE EXTENSION[^;]*;/gi, ''));
+const SCHEMA_SQL = readFileSync(join(ROOT, 'docs', 'marketplace-schema.sql'), 'utf8')
+    .replace(/CREATE EXTENSION[^;]*;/gi, '');
+await db.exec(SCHEMA_SQL);
 
 // Supabase gives service_role full privileges and BYPASSRLS. The stub roles need
 // the same so a test can act as trusted server code.
@@ -282,6 +283,41 @@ check('the completion rate is finished over finished plus cancelled', score?.com
 check('the score mixes completion and rating', score?.success_score === 70, String(score?.success_score));
 check('a member with no history has no score',
     (await one('select success_score from public.worker_ratings where reviewee_id = $1', [other]))?.success_score == null);
+
+// ------------------------------------------- 5. drift repair (live project) --
+// The live project (evdpmombgymthzqegqwr) had lost `profiles.email` and
+// `profiles.phone_number`, so `admin_profiles` and `admin_overview()` could not
+// be created, and the profile immutability trigger was not attached. This
+// reproduces that exact state and proves the committed schema repairs it.
+await db.exec('reset role');
+await db.exec(`
+  drop view if exists public.admin_profiles cascade;
+  drop function if exists public.admin_overview();
+  drop trigger if exists trg_protect_profile_fields on public.profiles;
+  drop function if exists public.protect_profile_immutable_fields() cascade;
+  alter table public.profiles drop column if exists email;
+  alter table public.profiles drop column if exists phone_number;
+`);
+const drifted = await one(`select count(*)::int n from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles'
+      and column_name in ('email', 'phone_number')`);
+check('the fixture really dropped the private columns', drifted.n === 0, String(drifted.n));
+
+const replayError = await expectError(() => db.exec(SCHEMA_SQL));
+check('the committed schema re-runs on a drifted project without error',
+    replayError === null, replayError || '');
+
+const restored = await one(`select count(*)::int n from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles'
+      and column_name in ('email', 'phone_number')`);
+check('the schema restores profiles.email and phone_number', restored.n === 2, String(restored.n));
+check('admin_profiles is created once the columns exist',
+    (await one(`select to_regclass('public.admin_profiles') is not null ok`)).ok === true);
+check('admin_overview() is created once the columns exist',
+    (await one(`select to_regprocedure('public.admin_overview()') is not null ok`)).ok === true);
+const immutability = await one(`select count(*)::int n from pg_trigger
+    where tgrelid = 'public.profiles'::regclass and tgname = 'trg_protect_profile_fields'`);
+check('the profile immutability trigger is attached again', immutability.n === 1, String(immutability.n));
 
 console.log(failures
     ? `\nsql check failed: ${failures} case(s)`
