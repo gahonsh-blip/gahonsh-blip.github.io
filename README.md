@@ -92,6 +92,7 @@ To enable persistent database storage and real user authentication for the marke
 ├── auth.js                     Authentication State & Modal Engine
 ├── supabase-client.js          Database Client & Service Layer
 ├── supabase-config.js          Supabase Connection Configuration
+├── notification-bell.js        Site-wide unread bell & proposal email alert
 ├── theme.js                    Dark/Light Mode Persistence
 ├── theme.css                   Shared Light-Mode Overrides
 ├── script.js                   Theme Button Injector

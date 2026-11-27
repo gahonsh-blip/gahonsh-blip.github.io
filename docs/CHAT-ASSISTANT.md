@@ -9,17 +9,38 @@ browser-only: no API key, no external LLM and no per-message cost.
 
 | Task | Who can use it | What it asks / checks | Service call |
 | :--- | :--- | :--- | :--- |
-| **Post a job** | Client or admin | Title, category, scope, pricing model, fixed budget or hourly range, duration, experience level, optional skills | `Jobs.createJob()` |
+| **Post a job** | Client or admin | Title, category, scope, pricing model, fixed budget or hourly range, duration, experience level, optional skills; the review scores the draft before publishing | `Jobs.createJob()` |
 | **Build / update profile** | Signed-in worker or client | Full name, professional title, location, skills and hourly rate (worker only), bio | `Profiles.updateMyProfile()` |
 | **Profile check** | Signed-in worker or client | Scores name, title, location, skills, hourly rate, bio and resume; lists warnings and gaps | `Profiles.getMyProfile()` |
 | **Fix my profile** | Signed-in worker or client | Asks only the gaps found by the profile check, then re-audits the saved profile | `Profiles.updateMyProfile()` |
 | **Job post check** | Client or admin | Scores title, category, scope, budget, duration, experience level and required skills; lists gaps | `Jobs.getMyJobs()` |
 | **Improve this job** | Client or admin | Asks only the gaps found by the job check, then re-audits the saved job | `Jobs.updateJob()` |
-| **Upload resume** | Worker or admin | Opens the profile editor at the **Resume / CV (PDF)** section | `Profiles.uploadResume()` (through the existing UI) |
+| **Upload resume** | Worker or admin | Reports the file already on record (name, size, date) with **View** and **Replace**, or opens the editor, watches for the upload and re-audits when it lands | `Profiles.uploadResume()` through the editor, then `Profiles.getMyProfile()` |
 | **Submit a proposal** | Worker or admin | Job link or ID, bid, delivery days, cover letter | `Proposals.submitProposal()` |
 | **Quote** | Anyone | Name, email and one line about the work | `contact_messages` lead |
 | **Questions** | Anyone | Services, prices, timelines, samples, payment, process, guarantees | Knowledge base |
 | **Find work / Find talent / My portal** | Anyone | No input; returns the right links | — |
+
+### The resume step
+
+A browser cannot type a file path into a chat box, so the bot does not pretend
+to. It opens the profile editor, then polls `getMyProfile()` every 2.5 s for
+three minutes and compares `resume_updated_at`. When the value changes it
+confirms the file (name, size, date) and re-runs the check, so the score moves
+from 90 to 100 in front of the member. The watch starts **before**
+`openProfileModal()` is awaited: that promise settles when the editor closes,
+so awaiting it first would only start the watch after the upload.
+
+If a file is already on record, the step says so and offers **View my resume**
+(a signed URL in a new tab, opened before the await so the popup is not
+blocked), **Upload resume** to replace it, and **Check my profile**.
+
+### The draft job check
+
+Before a job is published, `renderTaskSummary()` scores the draft with
+`auditJob(draftJobFromTask())` — the same rubric as a saved post — and prints
+`Draft check: N/100` with the weak items. Publishing is not blocked; the check
+tells the client what a freelancer would find thin.
 
 ## How the audit scores work
 
@@ -104,6 +125,21 @@ empty shows only Continue and Cancel, because skipping it could never save.
 Devanagari is matched after preserving combining marks, so `प्रोफाइल` and
 similar words work.
 
+## Notifications and email
+
+A proposal writes a `notifications` row for the client in both engines (the
+`notify_on_proposal_change` trigger on Supabase, `pushNotification()` offline).
+`notification-bell.js` puts a 48 px bell with the unread count on every page for
+a signed-in member, and links to `marketplace-dashboard.html#notifications`.
+
+Email is the studio's Formspree form, because the site has no mail server.
+`GahonshAlerts.proposalSubmitted()` posts the project title, the bid, the
+delivery time and the job link to the studio inbox. It sends no member email,
+phone or resume, it is fire-and-forget, and it fires from both the page form
+(`assets/js/job-details-flow.js`) and the chat. **Automatic email to the client
+still needs a mail provider**; until one is configured, the client is notified
+in the portal and the studio is notified by email.
+
 ## Testing
 
 Run `npm test` for the static checks (a11y, security, schema, the offline
@@ -122,6 +158,11 @@ The guided flows and audits also need a browser:
    `demo-job-1` is a useful link for the proposal and job-check flows.
 4. Check the audit in light mode and at a 390 px viewport: the warning and
    missing colours must stay readable and the chips must keep a 48 px target.
+
+`npm run test:chat` also asserts the asset wiring (every page with the chat
+loads the bell exactly once), that the resume step keeps its force flag and its
+watcher, that the summary scores the draft, and that both proposal paths raise
+the alert.
 
 The security check scans `chat-widget.js` for unescaped values reaching
 `innerHTML`, so keep user input behind `escapeHtml()` or set it with

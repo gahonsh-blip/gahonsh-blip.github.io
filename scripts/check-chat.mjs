@@ -193,6 +193,61 @@ check('the step hint mentions Continue', /tap Continue to keep it/.test(src));
 check('the greeting lists every gap, not the first two',
     /var gaps = audit\.items\.filter/.test(src) && !/\.slice\(0, 2\)/.test(src));
 
+// ------------------------------------------------------------ resume handoff
+// The file picker only exists in the profile editor, so the bot opens it and
+// then watches the profile. Both halves are easy to drop by accident.
+check('the resume step accepts a force flag for Replace',
+    /async function startResumeUpload\(force\)/.test(src) &&
+    /startResumeUpload\(true\)/.test(src));
+check('the resume step reports a file that is already on file',
+    /hasResumeOnFile\(profile\)/.test(src) && /already on file/.test(src));
+check('the resume step watches for the upload and re-audits',
+    /function watchResumeUpload\(/.test(src) &&
+    /resume_updated_at/.test(src) &&
+    /showProfileAudit\(profile\)/.test(src));
+check('the resume can be opened from the chat',
+    /async function openMyResume\(/.test(src) && /Profiles\.getResume\(user\.id\)/.test(src));
+check('opening the resume happens after a user gesture',
+    /var popup = window\.open\('', '_blank'\);/.test(src));
+
+// ------------------------------------------------------------ draft job check
+// A job post is scored before it is published, with the same rubric as a saved
+// post, so a thin brief is visible before the client commits to it.
+check('the summary scores the draft job',
+    /function draftJobFromTask\(/.test(src) && /auditJob\(draftJobFromTask\(\)\)/.test(src));
+check('the draft check is part of the review message',
+    /renderDraftCheck\(\)/.test(src));
+check('a thin draft still allows publishing',
+    /You can publish now, or tap Edit/.test(src));
+
+// ---------------------------------------------------------------- bell wiring
+const bell = fs.readFileSync(path.join(root, 'notification-bell.js'), 'utf8');
+check('the bell bails out of the studio preview',
+    /__GAHONSH_STUDIO_PREVIEW__/.test(bell));
+check('the bell only shows unread items',
+    /unreadCount\(\)/.test(bell) && /data-visible/.test(bell));
+check('the bell links to the notifications tab',
+    /marketplace-dashboard\.html#notifications/.test(bell));
+check('the bell never writes an unescaped value',
+    !/innerHTML\s*=\s*[^'"]/.test(bell) || !/innerHTML\s*=\s*[a-zA-Z]/.test(bell));
+check('the proposal alert is fire and forget',
+    /catch\(function \(\) \{ return false; \}\)/.test(bell));
+
+const pages = fs.readdirSync(root).filter((name) => name.endsWith('.html'));
+const withChat = pages.filter((name) => fs.readFileSync(path.join(root, name), 'utf8').includes('chat-widget.js?v='));
+const missingBell = withChat.filter((name) => !fs.readFileSync(path.join(root, name), 'utf8').includes('notification-bell.js'));
+check('every page with the chat also loads the bell', withChat.length > 0 && missingBell.length === 0,
+    missingBell.join(', '));
+check('no page loads the bell twice', pages.every((name) => {
+    const text = fs.readFileSync(path.join(root, name), 'utf8');
+    return text.split('notification-bell.js').length <= 2;
+}));
+
+// Both proposal submit paths must raise the alert: the page form and the chat.
+const flow = fs.readFileSync(path.join(root, 'assets/js/job-details-flow.js'), 'utf8');
+check('the page form raises the proposal alert', /GahonshAlerts\.proposalSubmitted\(/.test(flow));
+check('the chat raises the proposal alert', /GahonshAlerts\.proposalSubmitted\(/.test(src));
+
 // ---------------------------------------------------------------------- report
 results.forEach((r) => {
     console.log((r.ok ? 'ok   ' : 'FAIL ') + r.name + (r.ok || !r.detail ? '' : ' (' + r.detail + ')'));

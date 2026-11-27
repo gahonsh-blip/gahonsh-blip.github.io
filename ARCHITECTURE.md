@@ -55,6 +55,7 @@ gahonsh-blip.github.io/
 ├── auth.js                     Authentication manager, Sign In/Up modal & role switcher
 ├── supabase-client.js          Database client wrapper & interactive mock fallback engine
 ├── supabase-config.js          Supabase connection parameters & localStorage manager
+├── notification-bell.js        Site-wide unread bell & proposal email alert
 ├── theme.js                    Dark/Light mode theme state manager
 ├── theme.css                   Shared light-mode overrides & mobile UX touch targets
 ├── script.js                   Theme toggle button injector

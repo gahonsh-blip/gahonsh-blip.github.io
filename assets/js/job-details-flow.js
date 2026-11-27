@@ -566,6 +566,16 @@ document.getElementById('proposalForm').onsubmit = async (e) => {
 
     try {
         await window.GahonshDB.Proposals.submitProposal(currentJob.id, coverLetter, bidAmount, deliveryDays);
+        // The client is notified in the portal by the proposals trigger; this
+        // email goes to the studio inbox so nobody has to watch the tab.
+        if (window.GahonshAlerts && window.GahonshAlerts.proposalSubmitted) {
+            window.GahonshAlerts.proposalSubmitted({
+                jobTitle: currentJob.title,
+                bid: bidAmount,
+                days: deliveryDays,
+                jobUrl: window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(currentJob.id)
+            });
+        }
         window.GahonshAuthUI.showToast('\u{1F389} Proposal submitted successfully!');
         document.getElementById('proposalForm').reset();
         setTimeout(() => window.location.reload(), 1400);
