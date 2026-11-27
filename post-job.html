@@ -503,8 +503,8 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js?v=8"></script>
-    <script src="marketplace-local.js?v=9"></script>
-    <script src="supabase-client.js?v=9"></script>
+    <script src="marketplace-local.js?v=10"></script>
+    <script src="supabase-client.js?v=10"></script>
     <script src="auth.js"></script>
 
     <script>
@@ -577,7 +577,7 @@
 
             if (!user) {
                 showPostJobBlocked(
-                    'Please <a href="#" onclick="window.GahonshAuthUI.openAuthModal(\'signup\'); return false;" style="color:var(--accent-cyan);">sign in</a> as a Client to post a project. Freelancer accounts cannot create client jobs.',
+                    'Please <a href="index.html" onclick="window.GahonshAuthUI.openAuthModal(\'signup\'); return false;" style="color:var(--accent-cyan);">sign in or create a Client account</a> to post a project. Freelancer accounts cannot create client jobs.',
                     false
                 );
                 return;

@@ -1219,6 +1219,48 @@ same sentence, and still fails a real claim. Negative-tested both ways:
 is now "Legal" and the link "Terms & Conditions", with "Dispute & Refund Policy"
 added beside it on all 12 pages that carry the four-column footer.
 
+## 31. Both engines accepted values the database rejects
+
+`public.jobs` and `public.proposals` carry CHECK constraints — a title of 5-150
+characters, a description of at least 20, a non-negative budget, a bid above
+zero, a delivery time of one day or more. Neither engine enforced them.
+
+- `marketplace-local.js` coerced with `parseFloat(x) || 0`, so a bid typed as
+  `abc` was stored as a **0-dollar bid** and a delivery time of `0` was stored
+  as `0` days. The offline engine accepted the row, so the browser showed a
+  saved proposal that could never have existed online.
+- `supabase-client.js` sent the raw number to PostgREST, which answered with
+  `new row for relation "proposals" violates check constraint
+  "proposals_bid_amount_check"` — a message that means nothing to the person
+  filling in the form.
+
+Both engines now coerce with `Number()` (a non-numeric value is refused, not
+silently zeroed) and validate against the same rules before the write, with the
+same wording in both. `assertJobPayload()` / `assertProposalPayload()` in
+`supabase-client.js`; `coerceAmount()` / `validateJobRow()` /
+`validateProposalRow()` in `marketplace-local.js`.
+
+Fourteen cases in `npm run test:local` now pin this down — a zero bid, a
+negative bid, a non-numeric bid, a zero-day delivery, a fractional delivery
+time, a two-character cover letter, a four-character title, a nineteen-character
+description, a non-numeric budget, a maximum below the minimum, and the same two
+checks on the edit path — plus one positive case so the rules cannot be
+satisfied by refusing everything.
+
+## 32. The "sign in" prompt on the post-job page was a dead end
+
+`post-job.html` told a signed-out visitor "Please **sign in** as a Client", but
+the link was `href="#"` with an inline handler that opens the **signup** modal.
+With JS blocked or `auth.js` failing to load, the link jumped to the top of the
+page and nothing else happened. The link now falls back to `index.html` and the
+wording matches what the click does: "sign in or create a Client account".
+
+## 33. Asset version tags
+
+`marketplace-local.js` and `supabase-client.js` changed, so every page now asks
+for `?v=10`. Without the bump a returning visitor keeps the cached v=9 copy for
+up to a year and the new validation never reaches the browser.
+
 ## What is still not ready for a second specialist
 
 The empty states are honest — `find-talent.html` says "Our specialist bench is
@@ -1236,7 +1278,7 @@ npm test
   a11y check passed: 22 pages verified.        (dispute-policy.html added)
   security check passed: 114 files verified.
   schema check passed: 94 client reference(s) resolved against 42 schema object(s).
-  local engine check passed: 153 authorization case(s) verified.   (+11)
+  local engine check passed: 167 authorization case(s) verified.   (+14)
   content check passed: 22 pages verified.
 ```
 
@@ -1244,3 +1286,11 @@ npm test
 skipped heading levels, its own canonical, a unique description and a 600-word
 `.page-info` section. It is reachable from every footer, so the sitemap entry
 has a static inbound link.
+
+The cancel and dispute buttons were then driven through the real portal, not
+just the engine: sign in as `apex@client.demo`, hire `aditya@freelancer.demo` on
+`demo-job-1`, open **Active Contracts**, and click. Cancel answers its
+confirmation, the badge flips to `cancelled`, the job closes, and the buttons
+disappear; after a reload the badge is still `cancelled`. Dispute flips the
+contract to `disputed`, leaves the job `in_progress`, and removes the buttons.
+No console error in either run.

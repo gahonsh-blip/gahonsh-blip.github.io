@@ -38,6 +38,12 @@ Repository guide for AI agents and human contributors working on the
   - Never leave a hardcoded dark surface (e.g. `#070c19`, `#02050c`, a dark gradient) whose text is coloured by a theme variable: in light mode the variable turns dark and the text disappears. Add a `body.light-mode` override in `theme.css` that lightens the surface or fixes the text colour.
   - The accent palette has the mirror problem: `#34d399`, `#fbbf24` and `#a7f3d0` read on an ink card but measure 1.2-1.9:1 on a white one. Any literal accent used as `color:` needs a `body.light-mode` override (in `theme.css` or the page's own style block) that darkens the same hue, e.g. `#047857` for green and `#b91c1c` for red. `npm run test:a11y` enforces this for the palette accents.
 - **JS:** Plain ES6 functions, modules, and clear comments.
+  - A CHECK constraint is a rule both engines must apply before the write. A
+    value the offline engine stores but Postgres refuses makes the same action
+    succeed in one browser and fail in another; a value PostgREST refuses shows
+    the user a `violates check constraint` message. Coerce with `Number()` and
+    validate with the same wording in `supabase-client.js` and
+    `marketplace-local.js`, and pin each rule in `npm run test:local`.
   - A `MutationObserver` must never observe mutations its own callback produces. `textContent` assignment always replaces the text node, so a painter that rewrites text inside an observed subtree re-triggers itself forever and hangs the tab. Guard by writing only when the value changed, and scope selectors to the specific placeholder (e.g. `.mt-rating[data-rating-uid]`, not every `[data-rating-uid]`).
 - **Cache-busting:** GitHub Pages serves every asset with
   `cache-control: max-age=600`, and the `?v=N` token is the only thing that
