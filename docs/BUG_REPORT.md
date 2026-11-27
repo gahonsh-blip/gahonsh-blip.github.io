@@ -1261,6 +1261,100 @@ wording matches what the click does: "sign in or create a Client account".
 for `?v=10`. Without the bump a returning visitor keeps the cached v=9 copy for
 up to a year and the new validation never reaches the browser.
 
+## 34. The assistant started a six-step form when asked for a report
+
+Reported from a real session:
+
+> Dekhiye to mera profile set huwa hai ya nahi to batayen?
+> Pahle ap mera profile dekhen or rwport batayen to
+
+Both times the assistant answered `Step 1 / 6 — आपका पूरा नाम क्या है?`. The
+question was "is my profile set up?", and the reply asked for a name.
+
+`buildProfileBot` — the intent that starts the wizard — carried the keywords
+`'mera profile'` and `'my profile'`. `score()` gives a two-word phrase
+`3 + 2 = 5`, and no audit intent matched at all, so the wizard won every
+message that merely *mentioned* the profile:
+
+| Message | Before | After |
+| :--- | :--- | :--- |
+| `mera profile kitna set hai` | Step 1 / 6 | profile check, 10/100 |
+| `mera profile set huwa hai ya nahi` | Step 1 / 6 | profile check |
+| `Pahle ap mera profile dekhen or rwport batayen to` | Step 1 / 6 | profile check |
+| `मेरा प्रोफाइल कितना सेटअप हुआ है` | Step 1 / 6 | profile check |
+| `mera profile banao` | wizard | wizard (unchanged) |
+
+The fix removes the two greedy keywords, keeps only phrasings that ask to
+*edit* (`profile banao`, `profile update`, `mera profile banao`), and gives
+`profileAudit` the status phrasings in English, Hinglish and Devanagari —
+`profile kitna`, `profile set hua`, `profile status`, `mera profile dekho`,
+`प्रोफाइल कितना`, `प्रोफाइल रिपोर्ट` and the rest. `jobAudit` gained the same
+treatment for clients, who say *project* and *posting* more often than *job
+post*: `mere project me kya kami hai`, `project posting me kya kami hai`,
+`प्रोजेक्ट में क्या कमी है`.
+
+## 35. The report only named two gaps out of seven
+
+The welcome message scored the profile and then printed
+`audit.items.filter(...).slice(0, 2)` — the first two gaps only. A profile at
+10/100 listed "Professional title" and "Location" and stopped, so the six other
+missing checks were invisible and the number looked wrong.
+
+The greeting now prints `N of M checks need attention:` followed by every gap
+(up to six, then "…and N more — tap Check my profile"), and the full report
+behind **Check my profile** already listed every item with ✅ / ⚠️ / ❌. A
+missing title is reported as missing and a filled one as passed, which is the
+"what is set and what is left" answer that was asked for.
+
+## 36. Two buttons on a step, and no way to say "keep this and go on"
+
+Each step showed **Skip** and **Cancel** — and only **Cancel** when the field
+was required and empty. There was no button that said "this value is right,
+next one", which is the common case when the form is pre-filled from the saved
+profile.
+
+Every step now carries three:
+
+- **Continue** — submits the text in the box if there is any, otherwise accepts
+  the value already saved, and moves on.
+- **Skip** — leaves this field alone.
+- **Cancel** — stops the task.
+
+In a *fix* flow (`Fix my profile`, `Improve this job`) the steps are marked
+optional, so skipping a gap is a real choice: the value that is already there
+is written back, nothing is cleared and nothing is invented. A required field
+that is still empty in a *create* flow shows Continue and Cancel only, because
+Skip there could never save; `handleTaskInput('skip')` would answer "This one
+is required".
+
+## 37. The assistant could be asked about another member
+
+Nothing stopped a visitor from typing `kisi aur ka profile dikhao` or
+`show me the profile of john`. No such lookup existed, so the reply was the
+generic "I did not catch that" — but a question about someone else's data
+deserves a clear answer, and the guarantee should not depend on nobody adding
+such a lookup later.
+
+`asksAboutSomeoneElse()` now runs before intent routing and refuses, in both
+languages, when the message names another person (`kisi aur`, `uska`, `unki`,
+`किसी और`, `उसका`, `someone else`, `another member`) together with a private
+field (`profile`, `email`, `phone`, `number`, `contact`, `resume`, `cv`,
+`whatsapp`, `प्रोफाइल`, `ईमेल`, `नंबर`), or when it says `profile of <name>`.
+The refusal points at the in-site message thread as the correct route.
+
+The guard is deliberately narrow: `uska price kya hai`, `number of pages in the
+deck` and `what is the email of gahonsh` all pass through, because only a
+person plus a private field is a request for someone else's data.
+
+Beneath the guard, the read paths were already self-only and stay that way:
+`Profiles.getMyProfile()` and `Jobs.getMyJobs()`, both scoped to `auth.uid()`
+by RLS. There is no `getProfileById`, no `public_profiles` read and no
+`from('profiles')` in the widget, and `npm run test:chat` fails if one appears.
+
+## 38. Asset version tags
+
+`chat-widget.js` changed, so the 16 pages that load it ask for `?v=7`.
+
 ## What is still not ready for a second specialist
 
 The empty states are honest — `find-talent.html` says "Our specialist bench is
@@ -1279,6 +1373,7 @@ npm test
   security check passed: 114 files verified.
   schema check passed: 94 client reference(s) resolved against 42 schema object(s).
   local engine check passed: 167 authorization case(s) verified.   (+14)
+  chat check passed: 48 case(s) verified.                          (new)
   content check passed: 22 pages verified.
 ```
 
