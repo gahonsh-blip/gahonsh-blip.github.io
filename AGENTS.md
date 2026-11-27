@@ -18,15 +18,20 @@ Repository guide for AI agents and human contributors working on the
 3. **No secrets in code.** Never commit database service-role secret keys, admin passwords, or personal credentials. The public Supabase `anon` key, Formspree endpoint, and WhatsApp number are public client-side contact points.
 4. **Preserve SEO & Metadata assets.** `sitemap.xml`, `robots.txt`, `metadata.json`, Open Graph meta tags, Google verification file (`googleb9deb43124fcee02.html`), and JSON-LD structured data must remain intact and updated when URLs change.
 5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
-6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine only when the project is unreachable (or a live request fails at the network layer). Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
+6. **Grant functions explicitly.** PostgreSQL gives `PUBLIC` (so `anon`) `EXECUTE` on
+   every new function. Section 13 of the schema revokes that blanket grant, so a
+   new function is *not* callable from the browser until it is granted there. Add
+   the grant in the same edit, or the button that calls it fails with a 404 that
+   looks like a missing function.
+7. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine only when the project is unreachable (or a live request fails at the network layer). Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
    - Do **not** fall back to the local engine for a *reachable* project that has merely not been migrated yet (missing table or bucket). That splits the user's identity — Auth stays on Supabase while data goes to a per-browser store — so a signed-in user is told to sign in and an "uploaded" file never reaches the other party. Surface the deployment gap instead: `isBackendNotProvisioned()` classifies the error and the file-transfer panel shows a setup message. See `docs/SETUP.md` for the migration step.
-7. **Every `contract_status` value must be reachable.** `active` moves to
+8. **Every `contract_status` value must be reachable.** `active` moves to
    `completed`, `cancelled` or `disputed`, and each transition is an RPC
    (`complete_contract`, `cancel_contract`, `raise_contract_dispute`) mirrored
    in `marketplace-local.js` and exposed on the portal contract card. A state
    the schema defines but no path reaches is how a contract sat `active`
    forever. See `docs/DISPUTES.md` before touching the contract flow.
-8. **Keep the schema and the client in step.** Any table, view or function the
+9. **Keep the schema and the client in step.** Any table, view or function the
    client reaches through PostgREST must exist in `docs/marketplace-schema.sql`
    (`npm run test:schema` enforces this). New tables need RLS plus policies, and
    new policies must be declared after the helper functions they call.

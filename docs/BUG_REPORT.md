@@ -1644,6 +1644,48 @@ now. `npm run check:live-security` needs `AUDIT_EMAIL` / `AUDIT_PASSWORD` for a
 disposable account and skipped without them; until it runs, the escalation fix
 is proven in SQL but not against the deployment.
 
+## 52. Every function was callable by anon, and one view bypassed RLS
+
+Prompted by the Security Advisor warnings on the deployed project, the schema was
+audited for the three shapes it reports. Two were real.
+
+**The whole function surface was executable with the publishable key.**
+PostgreSQL grants `EXECUTE` on a new function to `PUBLIC`, and Supabase's default
+privileges add `anon` and `authenticated`. The probe:
+
+```
+anon can execute accept_proposal_and_create_contract, cancel_contract,
+complete_contract, raise_contract_dispute, set_proposal_status,
+can_upload_job_files, handle_new_user, notify_user, protect_profile_immutable_fields,
+validate_*, sync_*, touch_service_package, get_my_record …
+```
+
+Most of those raise on a null `auth.uid()`, and trigger functions cannot be
+invoked directly, so nothing was exploitable. But "we happen to check inside
+every body" is not an access control, and one future function without a check
+would be. Section 13 of the schema now revokes the blanket grant and re-grants
+exactly four public read functions (`is_admin`, `can_access_job_files`,
+`can_upload_job_files`, the two record functions), the ten RPCs a page calls,
+and the service-role helpers.
+
+**`public_profiles` ran with the owner's privileges.** A view bypasses RLS on its
+base table unless `security_invoker` is on, so the directory view ignored the row
+policy entirely. It now sets `security_invoker = on`; the caller has column
+grants for every column it selects and the row policy is `USING (true)`, so the
+directory still returns every profile to a visitor. `admin_profiles` and
+`worker_ratings` cannot follow: the first reads `email`, the second aggregates
+tables a visitor cannot select. Both stay owner-privileged and gate their own
+rows, which is now asserted rather than assumed.
+
+**Twenty-seven new cases** in `npm run check:sql` (47 → 74) cover the pinned
+`search_path`, the invoker setting, the `is_admin()` gate in the admin view, who
+may execute what, and that a non-admin sees zero rows in `admin_profiles` while
+an admin sees the directory with email.
+
+**Leaked password protection** is an Auth setting, not SQL, so it cannot be fixed
+in the repository. `docs/SETUP.md` Step 2c now lists it with the three other Auth
+settings that break sign-in when left at defaults.
+
 ## Verification (this round)
 
 ```

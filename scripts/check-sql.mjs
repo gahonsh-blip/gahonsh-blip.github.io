@@ -319,6 +319,88 @@ const immutability = await one(`select count(*)::int n from pg_trigger
     where tgrelid = 'public.profiles'::regclass and tgname = 'trg_protect_profile_fields'`);
 check('the profile immutability trigger is attached again', immutability.n === 1, String(immutability.n));
 
+// --------------------------------------- 6. security advisor hygiene -------
+// Supabase's Advisor flags three shapes this schema has on purpose: views that
+// run with the owner's privileges, SECURITY DEFINER functions, and functions
+// callable by anon. Each answer below is a check rather than a comment, so a
+// future edit cannot quietly widen the surface.
+const unpinned = await db.query(`select p.proname from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.prosecdef
+      and not exists (select 1 from unnest(coalesce(p.proconfig, '{}'::text[])) c
+                      where c like 'search_path=%')`);
+check('every SECURITY DEFINER function pins search_path',
+    unpinned.rows.length === 0, unpinned.rows.map((r) => r.proname).join(','));
+
+const invoker = await one(`select coalesce(array_to_string(c.reloptions, ','), '') opts
+    from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relname = 'public_profiles'`);
+check('public_profiles runs as the caller so RLS applies',
+    /security_invoker=(on|true)/.test(invoker.opts), invoker.opts);
+
+const adminDef = await one(`select pg_get_viewdef('public.admin_profiles'::regclass, true) def`);
+check('admin_profiles gates its own rows on is_admin()', /is_admin\(\)/.test(adminDef.def));
+
+for (const fn of [
+    'public.provision_admin_user(uuid)',
+    'public.notify_user(uuid, text, text, text, text)',
+    'public.handle_new_user()',
+    'public.decide_verification(uuid, boolean, text)',
+    'public.complete_contract(uuid)',
+    'public.set_proposal_status(uuid, public.proposal_status)',
+]) {
+    const can = await one(`select has_function_privilege('anon', $1, 'execute') ok`, [fn]);
+    check(`anon cannot execute ${fn}`, can.ok === false);
+}
+
+for (const fn of [
+    'public.is_admin()',
+    'public.get_worker_record(uuid)',
+    'public.get_client_record(uuid)',
+    'public.can_access_job_files(text)',
+]) {
+    const can = await one(`select has_function_privilege('anon', $1, 'execute') ok`, [fn]);
+    check(`anon can execute ${fn}`, can.ok === true);
+}
+
+// The list is what the client calls through `.rpc(...)`; a grant that goes
+// missing here is a button that fails in the browser with a 404.
+for (const fn of [
+    'public.accept_proposal_and_create_contract(uuid)',
+    'public.admin_overview()',
+    'public.cancel_contract(uuid)',
+    'public.complete_contract(uuid)',
+    'public.decide_verification(uuid, boolean, text)',
+    'public.get_client_record(uuid)',
+    'public.get_my_record()',
+    'public.get_worker_record(uuid)',
+    'public.raise_contract_dispute(uuid)',
+    'public.set_proposal_status(uuid, public.proposal_status)',
+]) {
+    const can = await one(`select has_function_privilege('authenticated', $1, 'execute') ok`, [fn]);
+    check(`a signed-in member can execute ${fn}`, can.ok === true);
+}
+
+const viewer = await member('Viewer Rao');
+const boss = await member('Boss Rao', 'admin');
+await as(viewer, async () => {
+    const rows = await db.query('select * from public.admin_profiles');
+    check('a non-admin sees no rows in admin_profiles', rows.rows.length === 0, String(rows.rows.length));
+});
+await as(boss, async () => {
+    const rows = await db.query('select * from public.admin_profiles');
+    check('an admin sees the directory, email included',
+        rows.rows.length > 0 && rows.rows.every((r) => typeof r.email === 'string'),
+        String(rows.rows.length));
+});
+await as(viewer, async () => {
+    const rows = await db.query('select full_name from public.public_profiles');
+    check('a signed-in member still reads the public directory through the view', rows.rows.length > 0);
+    const denied = await expectError(() => db.query('select email from public.profiles limit 1'));
+    check('a signed-in member cannot read another email from the table', denied !== null);
+});
+await db.exec('reset role');
+
 console.log(failures
     ? `\nsql check failed: ${failures} case(s)`
     : '\nsql check passed.');

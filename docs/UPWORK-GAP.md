@@ -140,6 +140,10 @@ Phase 1 is implemented in the same pull request as this document:
    (41 cases against a real PostgreSQL) and 24 new cases in `npm run test:local`.
 5. The static copy on nine pages was raised to the 500-word floor the repo
    documents, and `npm run test:content` now enforces it.
+6. The Security Advisor's findings are answered: the function surface is
+   re-granted explicitly, `public_profiles` runs as the caller, and the two
+   owner-privileged views are gated and tested. Leaked password protection is an
+   Auth toggle the owner sets once (`docs/SETUP.md` Step 2c).
 
 **Live deployment status (2026-11-24).** `npm run check:live` reports nine gaps
 on the deployed Supabase project:

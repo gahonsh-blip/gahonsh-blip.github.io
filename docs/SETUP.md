@@ -174,7 +174,7 @@ None of these is silent: each path classifies the error with
 `isBackendNotProvisioned()` and shows a message rather than an empty card.
 
 **Do not** point the site at a half-migrated project and expect the offline
-engine to cover the gap. It deliberately does not — see rule 6 in `AGENTS.md`.
+engine to cover the gap. It deliberately does not — see rule 7 in `AGENTS.md`.
 
 ### Step 2b: Create the Owner Account
 
@@ -259,6 +259,30 @@ pass trivially.
 > If `check:live` reports `profiles.email` as missing, the drift repair has not
 > been applied yet. Do not "fix" it by granting `email` to `anon` or
 > `authenticated`: the admin page and `admin_profiles` are the supported path.
+
+### Step 2c: Turn on the Auth protections SQL cannot set
+
+The schema can revoke grants and pin `search_path`, but four protections live in
+the Supabase Auth configuration. Supabase's Security Advisor reports the first
+one; the rest break sign-in or leak accounts if they are left at defaults.
+
+| Setting | Where | Value for this project |
+|---|---|---|
+| **Leaked password protection** | Authentication → Providers → Email | **On.** Supabase checks new passwords against HaveIBeenPwned. The Advisor warns while it is off, and it is the cheapest defence against credential stuffing |
+| Minimum password length | Authentication → Providers → Email | 8 characters or more |
+| Site URL and redirect allow-list | Authentication → URL Configuration | Site URL `https://gahonsh-blip.github.io/`, allow-list the same origin plus `http://localhost:3000` for local work. A missing entry makes confirmation links land on the wrong host |
+| Confirm email | Authentication → Providers → Email | On for production, so an unverified address cannot post a job |
+
+The same values can be set through the Management API
+(`PATCH /v1/projects/{ref}/config/auth`) when you would rather script it.
+
+Then close the loop:
+
+```bash
+npm run check:live            # every table, view, function and column exists
+AUDIT_EMAIL=… AUDIT_PASSWORD=… npm run check:live-security   # the rules hold for a real member
+npm run check:sql             # the rules themselves, on a real PostgreSQL
+```
 
 ### Step 3: Configure Frontend Credentials
 1. In the Supabase Dashboard, go to **Project Settings → API**.
