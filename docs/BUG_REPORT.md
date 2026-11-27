@@ -1575,6 +1575,37 @@ Two behaviours are now pinned by tests rather than assumed:
 - **A success score is `NULL`, never `0`, for a member with no history.** Zero
   would read as "failed everything" to a buyer, which is the opposite of true.
 
+## 50. The crawl found thin copy, and the live project was six objects behind
+
+Two findings from re-running the live tools after PR #30.
+
+**Three pages read as thin to a crawler.** The audit measures the `.page-info`
+block, not the whole page, and the block on `/`, `/pricing.html` and
+`/services.html` held 247, 296 and 209 words — under the 500-word floor
+`AGENTS.md` has always documented, while every check passed because nothing
+measured it. Six more pages sat between 435 and 499. All nine were extended
+with page-specific copy (who we work with, what handover includes, how payment
+works, what happens after you publish a brief). The floor is now enforced:
+`test:content` rule 11 fails under 500 words and `audit:live` flags the same
+threshold on the deployment, so a new page cannot ship thin.
+
+**The live Supabase project is missing six objects.** `npm run check:live`
+reported `contact_messages`, `admin_profiles`, `admin_overview`,
+`verification_requests`, `contract_timesheets` and `decide_verification` as
+absent. Three predate this work: the contact form has been delivering through
+Formspree while the dashboard kept no record of those enquiries, and the admin
+views were never created. The other three are the feature added in PR #30.
+`docs/SETUP.md` now carries a step-by-step with a backup warning, the
+idempotent short path, the migration order, and SQL that confirms each object.
+
+**One dead click found while writing that guide.** With `verification_requests`
+absent, the profile editor still said "Not verified yet" and offered a Request
+button, because the failed read was only logged to the console; pressing it
+surfaced a raw `PGRST205` message. `auth.js` now classifies that error
+(`verificationUnavailable()`), states that verification is not set up on the
+site yet, and hides the button. The same guard covers the request and withdraw
+paths.
+
 ## Verification (this round)
 
 ```
@@ -1587,6 +1618,11 @@ chat check passed: 65 case(s) verified.
 email check passed: 27 case(s) verified.
 lead check passed.
 sql check passed: 41 case(s).                                     (real PostgreSQL)
+```
+
+```
+audit:live  15 pages, 0 structural problems, .page-info 505-772 words, 0 thin
+check:live  6 of 29 objects missing on the deployed project (documented in SETUP.md)
 ```
 
 The 24 new engine cases cover who may request verification, who may decide it,

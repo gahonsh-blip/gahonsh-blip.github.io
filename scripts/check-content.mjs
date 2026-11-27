@@ -17,6 +17,8 @@
 //   9. No page may zero its stat counters at load. Writing "0" before the
 //      count-up starts is what printed "0 Live Projects" in the audit.
 //  10. The portal load must time out instead of sitting on its placeholder.
+//  11. Every indexable page needs 500+ words of crawlable copy in `.page-info`.
+//      `npm run audit:live` measures the deployed copy the same way.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -103,6 +105,23 @@ for (const page of PRIVATE_PAGES) {
 const sitemap = read('sitemap.xml');
 for (const page of PRIVATE_PAGES) {
     if (sitemap.includes(`/${page}<`)) fail('sitemap.xml', `private page is listed: ${page}`);
+}
+
+// 11. Static copy floor. A JS-rendered listing is invisible to a crawler, so
+//     the `.page-info` block is what a search engine actually reads. The live
+//     audit flagged Home, Pricing and Services as thin when this was unchecked.
+const MIN_INFO_WORDS = 500;
+for (const page of pages) {
+    if (PRIVATE_PAGES.includes(page) || page === 'googleb9deb43124fcee02.html') continue;
+    const block = (read(page).match(/class="page-info"[\s\S]*?<\/section>/i) || [''])[0];
+    if (!block) {
+        fail(page, 'has no .page-info static copy section');
+        continue;
+    }
+    const count = block.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    if (count < MIN_INFO_WORDS) {
+        fail(page, `.page-info carries ${count} words, under the ${MIN_INFO_WORDS}-word floor`);
+    }
 }
 
 // 7. The same link rule applies to markup a script writes into the page.
