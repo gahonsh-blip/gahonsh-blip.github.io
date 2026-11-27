@@ -1103,3 +1103,144 @@ delivery problem, not a code problem. `theme.css` and
 `assets/js/job-details-flow.js` now carry `?v=9`, and `npm run test:content`
 gained a thirteenth rule that fails when two pages disagree on an asset
 version. Negative-tested: pinning `about.html` to `v=8` fails 14 pages.
+
+---
+
+# Dispute policy and the missing contract exits — 2026-11-24 (second pass)
+
+Scope: what a one-specialist marketplace needs before a real client and a real
+freelancer can work through it without a support email. The marketplace had one
+verified specialist (Gopinath Patar) and no second bench, so every gap that a
+busy marketplace hides behind volume is exposed: an engagement that stops going
+ahead had nowhere to go, and a disagreement had no written process.
+
+Method: read the client against the schema for every state the schema declares,
+then traced each one to the UI. `contract_status` and `job_status` both declare
+`cancelled`, and `contract_status` declares `disputed`; the client could reach
+none of them. Search and fetch tools were unavailable for this pass (the
+TinyFish key is not present in this environment and the Tavily plan limit is
+exhausted), so the policy is written from this platform's actual mechanics
+rather than copied from a competitor: no escrow, direct payment, manual
+milestones.
+
+## Findings
+
+| # | Severity | Area | Bug | Status |
+|---|----------|------|-----|--------|
+| 26 | High | Contract lifecycle | `contract_status` declared `cancelled` and `disputed` but no client path reached either: `complete_contract` was the only transition, so an engagement that stopped going ahead stayed `active` and its job stayed `in_progress` forever | Fixed |
+| 27 | High | Legal / trust | No dispute, cancellation or refund policy page existed, while the terms referred to "a refund ... reviewed case by case" with no process, timeline or evidence list | Fixed |
+| 28 | Medium | Portal | A client had no way to stop a project after hiring, and a freelancer had no way to record that a client was not paying | Fixed |
+| 29 | Low | Test guard | The "no unbuilt payment feature" rule flagged denials too, so the honest sentence "we do not operate an escrow account" failed the build | Fixed |
+| 30 | Low | Copy | Footer column labelled "Legal Matrix", link labelled "Terms Structure" | Fixed |
+
+## 26-28. An engagement had no exit
+
+The schema has always had the states. The client did not:
+
+```
+contract_status: active | completed | cancelled | disputed
+client paths:    active -> completed            (complete_contract)
+                 active -> ?                    (nothing)
+```
+
+So the only way out of an engagement was success. A client whose project was no
+longer needed, or a freelancer who was not being paid, had no record to point
+at, and the job sat `in_progress` on the feed.
+
+Both engines now expose the two missing transitions, and the portal shows the
+buttons on active contracts only:
+
+```js
+// supabase-client.js and marketplace-local.js, same rules
+Contracts.cancelContract(contractId)   // either party -> contract + job cancelled
+Contracts.raiseDispute(contractId)     // either party -> contract disputed, job stays in_progress
+```
+
+A dispute deliberately leaves the job `in_progress`: the work has not stopped,
+it is under review. A cancelled or completed contract is final and refuses both
+new actions. The reason a user gives is carried by the `confirm()` copy and the
+contract thread, so there is no reason column to migrate.
+
+`docs/marketplace-schema.sql` §9a and
+`supabase/migrations/20261130000000_add_contract_cancellation.sql` add the
+RPCs (`SECURITY DEFINER`, `search_path` pinned, `auth.uid()` checked, admin
+allowed). `npm run test:schema` resolves the two new calls; `npm run
+test:local` grew 11 cases:
+
+```
+ok   a stranger cannot cancel a contract they are not on
+ok   a stranger cannot dispute a contract they are not on
+ok   the freelancer can put an active contract under review
+ok   a disputed contract keeps the job in progress
+ok   a disputed contract cannot be disputed twice
+ok   a disputed contract cannot be cancelled
+ok   the client can cancel an active contract
+ok   cancelling the contract also closes the job
+ok   a cancelled contract cannot be cancelled twice
+ok   a cancelled contract cannot be completed
+ok   a cancelled contract cannot be disputed
+```
+
+## 27. The policy that the terms kept promising
+
+`terms.html` said a refund is "reviewed case by case" and a dispute is "handled
+between the two parties in writing within 7 days", with no page behind either
+sentence. `dispute-policy.html` now carries the process:
+
+- **Cancellation** before and after work starts, and what the milestone
+  checklist does to what is owed.
+- **Refundable / not refundable**, in two lists, including the deposit rule and
+  third-party costs.
+- **Raising a dispute**: the four things to send, acknowledged in 2 business
+  days, written view in 10.
+- **What the platform can and cannot do**: it cannot reverse a transfer, and
+  the policy says so plainly instead of implying protection that does not exist.
+- **Chargebacks, abuse, appeals** (7 days), and where to write.
+
+It is linked from every footer, from `terms.html` in both places that describe
+refunds and disputes, from `pricing.html`, and it is in `sitemap.xml`. The
+implementation map for the code is `docs/DISPUTES.md`.
+
+## 29. The payment-claim guard was too blunt
+
+The rule that keeps the site from advertising escrow it does not run matched the
+word anywhere, including in the denial. It now skips a mention that is preceded
+by `no`, `not`, `cannot`, `never`, `without`, `does not` or `do not` within the
+same sentence, and still fails a real claim. Negative-tested both ways:
+
+```
++ <p>Your money is held in escrow until delivery.</p>   -> content check failed (1)
++ <p>We do not operate an escrow account.</p>           -> content check passed
+```
+
+## 30. Footer copy
+
+"Legal Matrix" and "Terms Structure" are not English anyone writes; the column
+is now "Legal" and the link "Terms & Conditions", with "Dispute & Refund Policy"
+added beside it on all 12 pages that carry the four-column footer.
+
+## What is still not ready for a second specialist
+
+The empty states are honest — `find-talent.html` says "Our specialist bench is
+opening up" and routes the visitor to the contact form, and the feed says "No
+projects found matching your criteria" — so a single-specialist roster does not
+look broken. What is still manual, and should stay manual until volume justifies
+it: identity checks, the verification badge, and dispute resolution. The next
+functional gap is a **review and rating** write path, because a one-specialist
+marketplace has no reputation signal yet; that is a product decision, not a bug.
+
+## Verification
+
+```
+npm test
+  a11y check passed: 22 pages verified.        (dispute-policy.html added)
+  security check passed: 114 files verified.
+  schema check passed: 94 client reference(s) resolved against 42 schema object(s).
+  local engine check passed: 153 authorization case(s) verified.   (+11)
+  content check passed: 22 pages verified.
+```
+
+`dispute-policy.html` renders through the shared legal shell with one `h1`, no
+skipped heading levels, its own canonical, a unique description and a 600-word
+`.page-info` section. It is reachable from every footer, so the sitemap entry
+has a static inbound link.

@@ -893,6 +893,42 @@
 
             if (error) throw error;
             return data;
+        },
+
+        /**
+         * Either party can stop an engagement that is not going ahead. The RPC
+         * closes the contract and its job together; no money moves.
+         */
+        async cancelContract(contractId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to cancel this contract.');
+
+            const { data, error } = await client.rpc('cancel_contract', {
+                p_contract_id: contractId
+            });
+
+            if (error) throw error;
+            return data;
+        },
+
+        /**
+         * Puts the engagement under review. The job stays in progress so the
+         * record shows a live contract with an open dispute, not a finished one.
+         */
+        async raiseDispute(contractId) {
+            const client = await getClient();
+            if (!client) throw new Error('Supabase not configured');
+            const user = (await client.auth.getUser())?.data?.user;
+            if (!user) throw new Error('Please sign in to raise a dispute.');
+
+            const { data, error } = await client.rpc('raise_contract_dispute', {
+                p_contract_id: contractId
+            });
+
+            if (error) throw error;
+            return data;
         }
     };
 

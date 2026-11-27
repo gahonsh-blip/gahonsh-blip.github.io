@@ -20,7 +20,13 @@ Repository guide for AI agents and human contributors working on the
 5. **Enforce Row Level Security (RLS).** Any new tables in `docs/marketplace-schema.sql` must enforce RLS and validate user identity (`auth.uid()`).
 6. **Preserve Demo Fallback Capability.** `marketplace-local.js` is the offline data engine; `supabase-client.js` must keep preferring a reachable Supabase project and degrade to that local engine only when the project is unreachable (or a live request fails at the network layer). Pages gate on `window.isMarketplaceReady()`, never on raw `isSupabaseConfigured()`, so the marketplace stays fully testable before live credentials exist.
    - Do **not** fall back to the local engine for a *reachable* project that has merely not been migrated yet (missing table or bucket). That splits the user's identity — Auth stays on Supabase while data goes to a per-browser store — so a signed-in user is told to sign in and an "uploaded" file never reaches the other party. Surface the deployment gap instead: `isBackendNotProvisioned()` classifies the error and the file-transfer panel shows a setup message. See `docs/SETUP.md` for the migration step.
-7. **Keep the schema and the client in step.** Any table, view or function the
+7. **Every `contract_status` value must be reachable.** `active` moves to
+   `completed`, `cancelled` or `disputed`, and each transition is an RPC
+   (`complete_contract`, `cancel_contract`, `raise_contract_dispute`) mirrored
+   in `marketplace-local.js` and exposed on the portal contract card. A state
+   the schema defines but no path reaches is how a contract sat `active`
+   forever. See `docs/DISPUTES.md` before touching the contract flow.
+8. **Keep the schema and the client in step.** Any table, view or function the
    client reaches through PostgREST must exist in `docs/marketplace-schema.sql`
    (`npm run test:schema` enforces this). New tables need RLS plus policies, and
    new policies must be declared after the helper functions they call.
@@ -125,6 +131,12 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   password, url, tel or number input and every `<textarea>` needs a `<label
   for>`, `aria-label`, `aria-labelledby` or `title`; `npm run test:a11y`
   enforces it.
+- **Legal pages.** `terms.html`, `privacy-policy.html` and
+  `dispute-policy.html` share the legal shell (`.legal-topbar`, `.container`,
+  `.page-info`) and must link each other. The dispute policy is the customer
+  facing half of `docs/DISPUTES.md`; keep the timelines in both in step
+  (2 business days to acknowledge, 10 business days for a written view, 7 days
+  to appeal, 7 days of bug support).
 - **Meta.** Each indexable page needs a unique `<title>`, a unique
   `<meta name="description">` (roughly 70-160 characters) and a
   `<link rel="canonical">` pointing at its own URL.
