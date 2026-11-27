@@ -1429,8 +1429,10 @@ in `docs/CHAT-ASSISTANT.md` rather than implied by a switch that does nothing.
 
 ## 42. Asset version tags
 
-`notification-bell.js` is new (`?v=1`). `chat-widget.js` is unchanged since
-`?v=7`.
+`notification-bell.js` is new (`?v=1`). `chat-widget.js` went from `?v=7` to
+`?v=8` and `assets/js/job-details-flow.js` from `?v=9` to `?v=10`, because both
+files changed in this round: a cached copy would keep the old review and the
+old proposal path.
 
 ## What is still not ready for a second specialist
 
