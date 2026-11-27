@@ -1355,6 +1355,83 @@ by RLS. There is no `getProfileById`, no `public_profiles` read and no
 
 `chat-widget.js` changed, so the 16 pages that load it ask for `?v=7`.
 
+## 39. "Upload resume" opened the editor and then went quiet
+
+The bot opened the profile editor and never came back. If the member uploaded
+the PDF, nothing in the chat changed: no confirmation, no new score, and the
+same instruction on the next ask. The only way to know it worked was to open
+the portal and look.
+
+The step now:
+
+1. reads the profile first, so a file that is already on record is reported
+   with its name, size and date instead of reopening the editor;
+2. opens the editor and **starts the watcher before awaiting the modal** —
+   `openProfileModal()` settles when the member *closes* the editor, so
+   awaiting it first meant the watch only began after the upload was over
+   (bug found by the browser run, not by reading the code);
+3. polls `getMyProfile()` every 2.5 s for three minutes, comparing
+   `resume_updated_at`;
+4. on a change, confirms the file and re-runs the profile check, so the score
+   visibly moves from 90 to 100;
+5. offers **View my resume**, which opens the private file through a signed
+   URL (the tab is opened before the await so the popup is not blocked).
+
+A client account is still refused, and a page without `GahonshDB.Profiles`
+still gets the portal link instead of a dead end.
+
+## 40. The job review had no quality gate
+
+The bot collected the answers and published them. A brief that scored 40/100
+("Excel help needed", 12 words of scope, no skills) went live exactly like a
+complete one, and the client only found out when proposals came in thin.
+
+The review now scores the draft with the same rubric as a saved post and shows
+it before the publish step:
+
+```
+Draft check: 78/100.
+Still thin: 2 items. You can publish now, or tap Edit to improve it.
+• Scope: add the deliverables, the file formats and the tools.
+• Required skills: list the 3-5 skills the work needs.
+```
+
+Publishing is still allowed — the check informs, it does not block a client who
+knows what they want.
+
+## 41. Nothing told a client that a proposal had arrived
+
+`notifications` rows were already written by the proposals trigger (and by the
+offline engine), but the only place they surfaced was a badge inside the
+portal's Notifications tab. A client who never opens that tab never learned
+that a bid existed. There was no email at all.
+
+Two additions:
+
+- **`notification-bell.js`** on the 16 pages that carry the chat. A signed-in
+  member with unread items gets one 48 px button (bottom-left, away from the
+  chat launcher) with the count, an `aria-label` such as
+  "1 new notification — open your portal", and a link to
+  `marketplace-dashboard.html#notifications`. It polls once a minute while the
+  tab is visible, refreshes on `visibilitychange` and on auth changes, retries
+  on first load because the session restore can finish later, and bails out of
+  the studio preview so it is never baked into a saved page.
+- **A studio email on every proposal.** There is no mail server, and the only
+  working channel is the studio's Formspree form, so
+  `GahonshAlerts.proposalSubmitted()` posts the project title, the bid, the
+  delivery time and the job link. It carries **no member email, phone or
+  resume**, is fire-and-forget (a failed email never affects the saved
+  proposal), and fires from both proposal paths: the page form and the chat.
+  `emailDigest()` gives a member a `mailto:` draft of their unread list.
+
+Per-client automatic email still needs a mail provider; that is stated plainly
+in `docs/CHAT-ASSISTANT.md` rather than implied by a switch that does nothing.
+
+## 42. Asset version tags
+
+`notification-bell.js` is new (`?v=1`). `chat-widget.js` is unchanged since
+`?v=7`.
+
 ## What is still not ready for a second specialist
 
 The empty states are honest — `find-talent.html` says "Our specialist bench is

@@ -399,6 +399,7 @@
         buildProfileBot: { en: 'Build my profile', hi: 'Profile बनाएँ' },
         proposalBot: { en: 'Submit a proposal', hi: 'Proposal भेजें' },
         uploadResume: { en: 'Upload resume', hi: 'Resume upload' },
+        viewResume: { en: 'View my resume', hi: 'मेरा resume देखें' },
         dashboard: { en: 'My portal', hi: 'मेरा portal' },
         signIn: { en: 'Sign in', hi: 'Sign in' },
         continueTask: { en: 'Continue', hi: 'जारी रखें' },
@@ -410,7 +411,7 @@
 
     // Chips that drive a guided task get a stronger visual treatment.
     var ACTION_CHIPS = {
-        postJobBot: 1, buildProfileBot: 1, proposalBot: 1, uploadResume: 1,
+        postJobBot: 1, buildProfileBot: 1, proposalBot: 1, uploadResume: 1, viewResume: 1,
         profileAudit: 1, jobAudit: 1, fixProfile: 1, fixJob: 1,
         dashboard: 1, signIn: 1, continueTask: 1, cancelTask: 1,
         skipTask: 1, confirmTask: 1, editTask: 1
@@ -1644,6 +1645,43 @@
         askTaskStep();
     }
 
+    // The answers as a job row, so the same scorer that checks a saved post can
+    // check the draft before it is published.
+    function draftJobFromTask() {
+        var data = (task && task.data) || {};
+        var jobType = data.job_type || (task && task.target && task.target.job_type) || 'fixed';
+        var budget = data.budget || {};
+        return {
+            title: data.title || '',
+            category: data.category || '',
+            description: data.description || '',
+            job_type: jobType,
+            budget_min: jobType === 'fixed' ? Number(budget.fixed) || 0 : null,
+            hourly_rate_min: jobType === 'hourly' ? Number(budget.min) || 0 : null,
+            hourly_rate_max: jobType === 'hourly' ? Number(budget.max) || 0 : null,
+            estimated_duration: data.duration || '',
+            experience_level: data.experience || '',
+            required_skills: Array.isArray(data.skills) ? data.skills : []
+        };
+    }
+
+    function renderDraftCheck() {
+        if (!task || task.type !== 'job') return '';
+        var audit = auditJob(draftJobFromTask());
+        var weak = audit.items.filter(function (item) { return item.status !== 'ok'; });
+        var head = t('<br><br>Draft check: <b>' + audit.score + '/100</b>.',
+            '<br><br>Draft check: <b>' + audit.score + '/100</b>.');
+        if (!weak.length) {
+            return head + t(' Every check passes, so freelancers will see a complete brief.',
+                ' हर check पास है, इसलिए freelancers को पूरा brief दिखेगा.');
+        }
+        var lines = weak.slice(0, 4).map(function (item) {
+            return '\u2022 ' + escapeHtml(t(item.label_en, item.label_hi)) + ': ' + escapeHtml(t(item.detail_en, item.detail_hi));
+        });
+        return head + t('<br>Still thin: ' + weak.length + ' item' + (weak.length === 1 ? '' : 's') + '. You can publish now, or tap Edit to improve it.<br>',
+            '<br>अभी कमजोर: ' + weak.length + ' चीज़ें. अभी publish कर सकते हैं, या सुधारने के लिए Edit दबाइए.<br>') + lines.join('<br>');
+    }
+
     function renderTaskSummary() {
         task.index = task.steps.length;
         var rows = task.steps.map(function (step) {
@@ -1652,6 +1690,7 @@
         });
         addMsg('bot', t('Please review:', 'नीचे देख लीजिए:') +
             '<div class="gc-summary">' + rows.join('<br>') + '</div>' +
+            renderDraftCheck() +
             t('<br>Type *yes* to save or post, *edit* to change, or *cancel*.',
                 '<br>सेव/पोस्ट करने के लिए *yes* लिखिए, बदलने के लिए *edit*, या *cancel*.'));
         setChips(['confirmTask', 'editTask', 'cancelTask']);
@@ -1828,6 +1867,14 @@
                 success = true;
                 killTyping();
                 var proposalUrl = BASE + 'job-details.html?id=' + encodeURIComponent(task.data.job.id);
+                if (window.GahonshAlerts && window.GahonshAlerts.proposalSubmitted) {
+                    window.GahonshAlerts.proposalSubmitted({
+                        jobTitle: task.data.job.title,
+                        bid: task.data.bid,
+                        days: task.data.days,
+                        jobUrl: proposalUrl
+                    });
+                }
                 addMsg('bot', t('Proposal sent for <b>' + escapeHtml(task.data.job.title) + '</b>. The client can now review your bid.<br><br>' +
                     a(proposalUrl, 'View the job') + ' &middot; ' +
                     a(BASE + 'marketplace-dashboard.html', 'Track it in your portal'),
@@ -1883,7 +1930,84 @@
         if (next) startTask(next);
     }
 
-    async function startResumeUpload() {
+    function resumeLine(profile) {
+        var name = String((profile && profile.resume_name) || '').trim();
+        if (!name) return '';
+        var size = Number(profile.resume_size_bytes) || 0;
+        var when = String((profile && profile.resume_updated_at) || '').slice(0, 10);
+        var bits = [name];
+        if (size) bits.push((size / 1048576).toFixed(1) + ' MB');
+        if (when) bits.push('updated ' + when);
+        return bits.join(' \u00b7 ');
+    }
+
+    function hasResumeOnFile(profile) {
+        return !!(profile && (profile.has_resume || String(profile.resume_name || '').trim()));
+    }
+
+    async function openMyResume() {
+        var user = await ensureUser();
+        if (!user) { promptSignIn(); return; }
+        if (!window.GahonshDB || !window.GahonshDB.Profiles || !window.GahonshDB.Profiles.getResume) {
+            addMsg('bot', t('The resume service is not available on this page. Open your portal instead: ' +
+                a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal'),
+                'इस page पर resume service उपलब्ध नहीं है. Portal खोलिए: ' + a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal')));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        // Open the tab before awaiting so the async signed-URL fetch is not
+        // blocked as a popup.
+        var popup = window.open('', '_blank');
+        try {
+            var resume = await window.GahonshDB.Profiles.getResume(user.id);
+            if (!resume || !resume.url) {
+                if (popup) popup.close();
+                addMsg('bot', t('No resume is on file yet. Tap *Upload resume* to add the PDF.',
+                    'अभी कोई resume नहीं है. PDF जोड़ने के लिए *Upload resume* दबाइए.'));
+                setChips(['uploadResume', 'profileAudit', 'human']);
+                return;
+            }
+            if (popup) popup.location.href = resume.url;
+            else window.open(resume.url, '_blank', 'noopener');
+            if (typeof resume.revoke === 'function') setTimeout(resume.revoke, 60000);
+            addMsg('bot', t('Opening your resume in a new tab.',
+                'आपका resume नए tab में खोल रहा हूँ.'));
+            setChips(['uploadResume', 'profileAudit', 'dashboard']);
+        } catch (err) {
+            if (popup) popup.close();
+            addMsg('bot', t('Could not open the resume: ' + escapeHtml(err.message || 'unknown error'),
+                'Resume नहीं खुल सका: ' + escapeHtml(err.message || 'unknown error')));
+            setChips(['uploadResume', 'dashboard', 'human']);
+        }
+    }
+
+    // The file picker lives in the profile editor, so the bot cannot type a
+    // path for the member. It opens the editor and then watches the profile:
+    // when resume_updated_at changes the step is reported as done and the
+    // check runs again, so the score visibly moves.
+    function watchResumeUpload(epoch, before) {
+        var started = Date.now();
+        function tick() {
+            if (epoch !== chatEpoch) return;
+            if (Date.now() - started > 180000) return;
+            Promise.resolve(fetchMyProfile(null)).then(function (profile) {
+                if (epoch !== chatEpoch) return;
+                var now = String((profile && profile.resume_updated_at) || '');
+                if (hasResumeOnFile(profile) && now && now !== before) {
+                    addMsg('bot', t('Resume saved: <b>' + escapeHtml(resumeLine(profile)) + '</b>. Clients now see a Resume button on your talent card and on your proposals.<br><br>Here is the updated check:',
+                        'Resume सेव हो गया: <b>' + escapeHtml(resumeLine(profile)) + '</b>. अब clients को आपके talent card और proposals पर Resume button दिखेगा.<br><br>अब यह updated check है:'));
+                    showProfileAudit(profile);
+                    return;
+                }
+                setTimeout(tick, 2500);
+            }).catch(function () {
+                setTimeout(tick, 4000);
+            });
+        }
+        setTimeout(tick, 2500);
+    }
+
+    async function startResumeUpload(force) {
         var epoch = chatEpoch;
         addTyping();
         var user = await ensureUser();
@@ -1901,9 +2025,30 @@
             setChips(['buildProfileBot', 'human']);
             return;
         }
+        if (!window.GahonshDB || !window.GahonshDB.Profiles || !window.GahonshDB.Profiles.getMyProfile) {
+            addMsg('bot', t('The profile service is not available on this page. Open your portal instead: ' +
+                a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal'),
+                'इस page पर profile service उपलब्ध नहीं है. Portal खोलिए: ' + a(BASE + 'marketplace-dashboard.html', 'Marketplace Portal')));
+            setChips(['dashboard', 'human']);
+            return;
+        }
+        var profile = await fetchMyProfile(user);
+        if (epoch !== chatEpoch) return;
+        if (!force && hasResumeOnFile(profile)) {
+            addMsg('bot', t('Your resume is already on file: <b>' + escapeHtml(resumeLine(profile)) + '</b>. That is the file clients open from your talent card.<br><br>View it, replace it, or check the rest of the profile:',
+                'आपका resume पहले से है: <b>' + escapeHtml(resumeLine(profile)) + '</b>. Clients talent card से यही file खोलते हैं.<br><br>देखिए, बदलिए, या बाकी profile check कीजिए:'));
+            setChips(['viewResume', 'uploadResume', 'profileAudit', 'dashboard']);
+            return;
+        }
         if (window.GahonshAuthUI && window.GahonshAuthUI.openProfileModal) {
-            addMsg('bot', t('Opening your profile editor. Scroll to *Resume / CV (PDF)*, choose a PDF up to 5 MB, then press *Upload Resume*.',
-                'आपका profile editor खोल रहा हूँ. *Resume / CV (PDF)* तक scroll कीजिए, 5 MB तक की PDF चुनिए, फिर *Upload Resume* दबाइए.'));
+            addMsg('bot', t('Opening your profile editor. Scroll to *Resume / CV (PDF)*, choose a PDF up to 5 MB, then press *Upload Resume*. I will confirm here as soon as the file is saved.',
+                'आपका profile editor खोल रहा हूँ. *Resume / CV (PDF)* तक scroll कीजिए, 5 MB तक की PDF चुनिए, फिर *Upload Resume* दबाइए. File सेव होते ही मैं यहाँ confirm करूँगा.'));
+            setChips(['profileAudit', 'dashboard', 'human']);
+            var before = String((profile && profile.resume_updated_at) || '');
+            // Watch first: openProfileModal() settles when the member closes
+            // the editor, so awaiting it before polling would only start the
+            // watch after the upload had already happened.
+            watchResumeUpload(epoch, before);
             try {
                 await window.GahonshAuthUI.openProfileModal();
             } catch (e) { /* the modal logs its own error */ }
@@ -1985,7 +2130,8 @@
         postJobBot: function () { startTask('job'); },
         buildProfileBot: function () { startTask('profile'); },
         proposalBot: function () { startTask('proposal'); },
-        uploadResume: function () { startTask('resume'); },
+        uploadResume: function () { if (task) task = null; startResumeUpload(true); },
+        viewResume: openMyResume,
         profileAudit: function () { startTask('profileAudit'); },
         jobAudit: function () { startTask('jobAudit'); },
         fixProfile: function () { startTask('profileFix'); },

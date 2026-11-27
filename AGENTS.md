@@ -326,6 +326,25 @@ no API key; keep it that way.
   scorer and asserts routing, the privacy guard and the step buttons; browser
   flows use the demo accounts and `demo-job-1`.
 
+## Notifications and the proposal alert
+
+- **In-app notifications are the record.** A proposal writes a `notifications`
+  row for the client in both engines (trigger on Supabase, `pushNotification()`
+  offline). The portal tab is not enough on its own: `notification-bell.js`
+  puts a 48 px bell with the unread count on every page that loads the chat, so
+  the count is visible without opening the portal. Keep the two in step.
+- **The bell must bail out of the studio preview**
+  (`window.__GAHONSH_STUDIO_PREVIEW__`) and must never interpolate a value into
+  `innerHTML`; it writes text nodes.
+- **Email is the studio Formspree form.** There is no mail server, so
+  `GahonshAlerts.proposalSubmitted()` posts the project title, bid, delivery
+  time and job link to the studio inbox. Never add a member's email, phone or
+  resume to that payload, keep the call fire-and-forget, and raise it from
+  every proposal path. Automatic email to the client needs a mail provider and
+  must not be advertised before one exists.
+- **A page that loads the chat loads the bell.** `npm run test:chat` fails if a
+  page has one without the other, or loads the bell twice.
+
 ## Owner Studio Editor (local only)
 
 `dashboard.html` is a private visual editor served by `server.js`. Its write
