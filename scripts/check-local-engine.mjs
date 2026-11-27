@@ -832,6 +832,67 @@ async function refuse(fn) {
   check('both parties see the full thread',
     clientView.length === 2 && clientView[1].sender_id === recordClient.id);
 
+  // --- contract cancellation and disputes --------------------------------
+  // cancel_contract() and raise_contract_dispute() are the only way an
+  // engagement can leave 'active' without being completed. The rules mirror
+  // the RPCs: the two parties (or an admin) only, active contracts only.
+  await DB.Auth.signIn(recordClient._email, password);
+  const disputeJob = await DB.Jobs.createJob({
+    title: 'Dispute path check',
+    description: 'A project used to verify that a contract can be put under review.',
+    category: 'Web Engineering',
+    job_type: 'fixed',
+    budget_min: 120,
+    required_skills: ['Testing']
+  });
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  const disputeProposal = await DB.Proposals.submitProposal(disputeJob.id, 'I can deliver this scope within a week.', 120, 7);
+  await DB.Auth.signIn(recordClient._email, password);
+  const disputeContractId = await DB.Contracts.acceptProposalAndHire(disputeProposal.id);
+
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  check('a stranger cannot cancel a contract they are not on',
+    await refuse(() => DB.Contracts.cancelContract(disputeContractId)) !== null);
+  check('a stranger cannot dispute a contract they are not on',
+    await refuse(() => DB.Contracts.raiseDispute(disputeContractId)) !== null);
+
+  await DB.Auth.signIn(freelancers[1]._email, password);
+  const disputed = await DB.Contracts.raiseDispute(disputeContractId);
+  check('the freelancer can put an active contract under review',
+    !!disputed && disputed.status === 'disputed');
+  check('a disputed contract keeps the job in progress',
+    read(ctx, 'jobs').find((j) => j.id === disputeJob.id).status === 'in_progress');
+  check('a disputed contract cannot be disputed twice',
+    await refuse(() => DB.Contracts.raiseDispute(disputeContractId)) !== null);
+  check('a disputed contract cannot be cancelled',
+    await refuse(() => DB.Contracts.cancelContract(disputeContractId)) !== null);
+
+  await DB.Auth.signIn(recordClient._email, password);
+  const cancelJobRecord = await DB.Jobs.createJob({
+    title: 'Cancellation path check',
+    description: 'A project used to verify that either party can stop an engagement.',
+    category: 'Web Engineering',
+    job_type: 'fixed',
+    budget_min: 90,
+    required_skills: ['Testing']
+  });
+  await DB.Auth.signIn(freelancers[0]._email, password);
+  const cancelProposal = await DB.Proposals.submitProposal(cancelJobRecord.id, 'I can deliver this small scope quickly.', 90, 5);
+  await DB.Auth.signIn(recordClient._email, password);
+  const cancelContractId = await DB.Contracts.acceptProposalAndHire(cancelProposal.id);
+
+  const cancelled = await DB.Contracts.cancelContract(cancelContractId);
+  check('the client can cancel an active contract',
+    !!cancelled && cancelled.status === 'cancelled');
+  check('cancelling the contract also closes the job',
+    read(ctx, 'jobs').find((j) => j.id === cancelJobRecord.id).status === 'cancelled');
+  check('a cancelled contract cannot be cancelled twice',
+    await refuse(() => DB.Contracts.cancelContract(cancelContractId)) !== null);
+  check('a cancelled contract cannot be completed',
+    await refuse(() => DB.Contracts.completeContract(cancelContractId)) !== null);
+  check('a cancelled contract cannot be disputed',
+    await refuse(() => DB.Contracts.raiseDispute(cancelContractId)) !== null);
+
   if (failures.length) {
     console.error('\nlocal engine check failed: ' + failures.length + ' case(s).');
     process.exit(1);

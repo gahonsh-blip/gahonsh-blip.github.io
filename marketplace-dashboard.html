@@ -566,7 +566,8 @@
                 <p class="footer-heading" style="color:var(--text-main); margin-bottom:18px; font-size:1rem; letter-spacing:0.5px;">Legal</p>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:10px;"><a href="privacy-policy.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Privacy Policy</a></li>
-                    <li style="margin-bottom:10px;"><a href="terms.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Terms Structure</a></li>
+                    <li style="margin-bottom:10px;"><a href="terms.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Terms &amp; Conditions</a></li>
+                    <li style="margin-bottom:10px;"><a href="dispute-policy.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Dispute &amp; Refund Policy</a></li>
                     <li style="margin-bottom:10px;"><a href="contact.html" style="color:var(--text-slate); text-decoration:none; font-size:0.88rem;">Contact Us</a></li>
                 </ul>
             </div>
@@ -586,8 +587,8 @@
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="supabase-config.js?v=8"></script>
-    <script src="marketplace-local.js?v=8"></script>
-    <script src="supabase-client.js?v=8"></script>
+    <script src="marketplace-local.js?v=9"></script>
+    <script src="supabase-client.js?v=9"></script>
     <script src="auth.js"></script>
     <script src="records.js?v=6"></script>
     <script src="assets/js/file-transfer.js?v=7"></script>
@@ -1049,6 +1050,12 @@
                 const workerNote = !isClient && c.status === 'active'
                     ? '<p style="font-size:0.8rem; color:var(--text-slate); margin-top:6px;">The client marks this contract complete. It then appears in both records.</p>'
                     : '';
+                // Both parties can stop an engagement or put it under review;
+                // the RPCs enforce the same rule. Neither action moves money.
+                const stopButtons = c.status === 'active'
+                    ? `<button type="button" class="btn-outline" data-dispute-contract="${escapeHtml(c.id)}"><i class="fa-solid fa-scale-balanced"></i> Raise a dispute</button>
+                       <button type="button" class="btn-outline" data-cancel-contract="${escapeHtml(c.id)}"><i class="fa-solid fa-ban"></i> Cancel contract</button>`
+                    : '';
                 return `
                 <div class="portal-card" data-contract-id="${escapeHtml(c.id)}" data-other-id="${escapeHtml(otherParty?.id || '')}" data-job-id-raw="${escapeHtml(c.job?.id || c.job_id || '')}">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -1062,6 +1069,7 @@
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                             ${completeBtn}
+                            ${stopButtons}
                             <a href="job-details.html?id=${encodeURIComponent(c.job?.id || '')}" class="btn-outline">View Project Details</a>
                         </div>
                     </div>
@@ -1517,6 +1525,46 @@
                     console.error('[marketplace-dashboard] review failed:', err);
                     window.GahonshAuthUI.showToast('Could not save the review: ' + (err.message || 'please try again.'));
                     reviewBtn.disabled = false;
+                }
+                return;
+            }
+
+            const cancelBtn = e.target.closest('[data-cancel-contract]');
+            if (cancelBtn) {
+                if (!confirm('Cancel this contract? It closes the project for both sides. Work already delivered and accepted stays payable, and a dispute can still be raised by email.')) return;
+                cancelBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Contracts.cancelContract(cancelBtn.dataset.cancelContract);
+                    window.GahonshAuthUI.showToast('Contract cancelled. The project is closed for both sides.');
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] cancelContract failed:', err);
+                    const message = window.GahonshDB.isBackendNotProvisioned(err)
+                        ? 'The live database is missing cancel_contract. Run docs/marketplace-schema.sql once, then refresh.'
+                        : (err.message || 'please try again.');
+                    window.GahonshAuthUI.showToast('Could not cancel the contract: ' + message);
+                    cancelBtn.disabled = false;
+                }
+                return;
+            }
+
+            const disputeBtn = e.target.closest('[data-dispute-contract]');
+            if (disputeBtn) {
+                if (!confirm('Put this contract under review? Both sides keep their access, and Gahonsh asks for each side of the story before giving a written view. See the Dispute, Cancellation & Refund Policy for the timeline.')) return;
+                disputeBtn.disabled = true;
+                try {
+                    if (!window.isMarketplaceReady()) throw new Error('Marketplace service is unavailable.');
+                    await window.GahonshDB.Contracts.raiseDispute(disputeBtn.dataset.disputeContract);
+                    window.GahonshAuthUI.showToast('Dispute opened. Write to gahonsh@gmail.com with the project link and your evidence.');
+                    await loadContracts();
+                } catch (err) {
+                    console.error('[marketplace-dashboard] raiseDispute failed:', err);
+                    const message = window.GahonshDB.isBackendNotProvisioned(err)
+                        ? 'The live database is missing raise_contract_dispute. Run docs/marketplace-schema.sql once, then refresh.'
+                        : (err.message || 'please try again.');
+                    window.GahonshAuthUI.showToast('Could not open the dispute: ' + message);
+                    disputeBtn.disabled = false;
                 }
                 return;
             }

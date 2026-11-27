@@ -48,9 +48,16 @@ for (const page of pages) {
         }
     }
 
-    // 4. Payment claims the platform cannot back up.
+    // 4. Payment claims the platform cannot back up. A denial is not a claim:
+    // "we do not operate an escrow account" is the sentence this rule exists to
+    // encourage, so match the feature name only when it is not negated.
     for (const claim of [/payment[- ]verified/i, /escrow/i, /payment protection/i, /money[- ]back guarantee/i]) {
-        if (claim.test(html)) fail(page, `claims an unbuilt payment feature: ${claim}`);
+        for (const m of html.matchAll(new RegExp(claim.source, 'gi'))) {
+            const context = html.slice(Math.max(0, m.index - 60), m.index + m[0].length);
+            if (/\b(no|not|cannot|can't|never|without|does not|do not|isn't|is not)\b[^.]{0,40}$/i.test(context)) continue;
+            fail(page, `claims an unbuilt payment feature: ${claim}`);
+            break;
+        }
     }
 
     // 9. Counters must not be zeroed before the count-up runs.

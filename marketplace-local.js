@@ -1202,6 +1202,57 @@
             writeTable('contracts', contracts);
             writeTable('jobs', jobs);
             return decorateContract(contracts[index]);
+        },
+
+        async cancelContract(contractId) {
+            const profile = requireUser('Please sign in to cancel this contract.');
+            const contracts = readTable('contracts');
+            const index = contracts.findIndex((c) => c.id === contractId);
+            if (index < 0) throw new Error('Contract not found.');
+            const contract = contracts[index];
+            // Mirrors cancel_contract(): either party may stop it, nobody else.
+            if (contract.client_id !== profile.id && contract.freelancer_id !== profile.id
+                && profile.role !== 'admin') {
+                throw new Error('Only the client or the freelancer can cancel this contract.');
+            }
+            if (contract.status !== 'active') {
+                throw new Error('Only active contracts can be cancelled.');
+            }
+
+            const now = nowIso();
+            contracts[index] = Object.assign({}, contract, { status: 'cancelled', updated_at: now });
+            writeTable('contracts', contracts);
+
+            const jobs = readTable('jobs');
+            const jobIndex = jobs.findIndex((j) => j.id === contract.job_id);
+            if (jobIndex >= 0 && jobs[jobIndex].status === 'in_progress') {
+                jobs[jobIndex] = Object.assign({}, jobs[jobIndex], { status: 'cancelled', updated_at: now });
+                writeTable('jobs', jobs);
+            }
+
+            return decorateContract(contracts[index]);
+        },
+
+        async raiseDispute(contractId) {
+            const profile = requireUser('Please sign in to raise a dispute.');
+            const contracts = readTable('contracts');
+            const index = contracts.findIndex((c) => c.id === contractId);
+            if (index < 0) throw new Error('Contract not found.');
+            const contract = contracts[index];
+            // Mirrors raise_contract_dispute(): the two parties, or an admin.
+            if (contract.client_id !== profile.id && contract.freelancer_id !== profile.id
+                && profile.role !== 'admin') {
+                throw new Error('Only the client or the freelancer can dispute this contract.');
+            }
+            if (contract.status !== 'active') {
+                throw new Error('Only active contracts can be disputed.');
+            }
+
+            const now = nowIso();
+            // The job stays in_progress: the engagement is under review, not over.
+            contracts[index] = Object.assign({}, contract, { status: 'disputed', updated_at: now });
+            writeTable('contracts', contracts);
+            return decorateContract(contracts[index]);
         }
     };
 
