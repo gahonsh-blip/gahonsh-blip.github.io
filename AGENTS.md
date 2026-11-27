@@ -124,6 +124,8 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
   page carries a `.page-info` `<section>` just above the footer holding 500+
   words of crawlable body text, because audits and non-JS crawlers see only the
   raw HTML. Styles for it live in `theme.css` under `STATIC PAGE CONTENT`.
+  `npm run test:content` rule 11 fails a page under 500 words, and
+  `npm run audit:live` measures the same block on the deployment.
 - **Heading outline.** Keep exactly one `<h1>` per page and do not skip levels
   (no `h2` -> `h4`). Footer column labels and card titles use
   `<p class="footer-heading">` / `<p class="project-name">`, not `<h4>`/`<h3>`,
@@ -161,7 +163,12 @@ must be kept in sync manually. The shared behaviour lives in `theme.css`
 ## Testing & Verification
 
 - **Local Preview:** Run `npm run dev` (Node.js) or `python3 -m http.server 8000` (Python).
-- **Automated checks:** `npm test` runs all five suites.
+- **Live checks:** `npm run audit:live` crawls the deployment (status, title,
+  description length, canonical, `h1`, `.page-info` words, feature markers);
+  `npm run check:live` probes the deployed Supabase project for every object
+  the client reaches and exits non-zero when one is missing. Run the second one
+  after any schema change and before blaming the frontend for an empty card.
+- **Automated checks:** `npm test` runs all eight suites.
   - `npm run test:a11y` — static accessibility contract across all pages,
     including light-mode overrides for the accent palette.
   - `npm run test:security` — flags inline-handler interpolation, unescaped
@@ -266,6 +273,18 @@ Keep `uploadResume` / `getResume` / `removeResume` in step between
 after changing either. Existing Supabase projects need
 `supabase/migrations/20261123000000_add_freelancer_resumes.sql`; fresh
 installs get the bucket and columns from `docs/marketplace-schema.sql`.
+
+## Payments (not built)
+
+The marketplace does not move money. `docs/PAYMENTS-DECISION.md` holds the
+provider comparison (Razorpay Route vs Stripe Connect vs record-only), the
+verified fee facts, the recommendation and the acceptance criteria for the day
+it is built. Two rules until then:
+
+- **No claim without a feature.** `npm run test:content` fails a page that says
+  escrow, payment protection, "payment verified" or money-back guarantee.
+- **No "funded" milestone.** Milestones are a written checklist; the word
+  "funded" is a promise that money arrived.
 
 ## Verification and Hourly Timesheets
 

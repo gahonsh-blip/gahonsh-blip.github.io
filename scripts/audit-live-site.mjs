@@ -89,8 +89,8 @@ for (const r of rows) {
         + pad(r.canonical ? 'yes' : 'NO', 7) + pad(r.words, 7) + r.markers.join(','));
 }
 
-const thin = rows.filter((r) => r.status === 200 && r.words < 300).map((r) => r.path);
-if (thin.length) console.log(`\nthin static copy (<300 words): ${thin.join(', ')}`);
+const thin = rows.filter((r) => r.status === 200 && r.words < 500).map((r) => r.path);
+if (thin.length) console.log(`\nthin static copy (<500 words): ${thin.join(', ')}`);
 
 console.log(`\n${rows.length} page(s) audited, ${failures} structural problem(s).`);
 process.exit(failures ? 1 : 0);

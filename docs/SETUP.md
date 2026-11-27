@@ -80,6 +80,76 @@ The marketplace features client-side Supabase integration with Row Level Securit
 > hourly contracts. See [DATABASE.md](DATABASE.md) and
 > [UPWORK-GAP.md](UPWORK-GAP.md).
 
+### Step 2a: Apply the schema to a project that already exists
+
+A project created before a feature answers PostgREST with `PGRST205` (missing
+table or view) or `PGRST202` (missing function). The pages degrade to a setup
+message rather than a blank screen, but the feature stays off until the objects
+exist. Find out exactly what is missing:
+
+```bash
+npm run check:live
+```
+
+It reads the project URL and publishable key from `supabase-config.js` and
+probes every table, view and function the client reaches. Exit code `0` means
+nothing is missing; `1` prints each missing object with its PostgREST code;
+`2` means the project was unreachable, which is a network or key problem rather
+than a schema one.
+
+**The short path (recommended).** `docs/marketplace-schema.sql` is idempotent —
+`create table if not exists`, `create or replace function`, policies dropped and
+recreated — so pasting the whole file into the Supabase SQL editor is safe on a
+project that already has most of it. Do that once, then re-run
+`npm run check:live` until it reports `0 missing`.
+
+**The incremental path.** If you would rather apply only what is missing, run
+the migrations in this order and stop when `check:live` is clean:
+
+| Migration | Adds |
+|---|---|
+| `20261123000000_add_freelancer_resumes.sql` | `resumes` bucket, resume columns on `profiles` |
+| `20261124000000_harden_profiles_read_access.sql` | column-level grants on `profiles` |
+| `20261125000000_worker_client_records.sql` | `get_worker_record`, `get_client_record`, `get_my_record`, `complete_contract` |
+| `20261126000000_harden_file_transfers.sql` | `job-attachments` limits, post-completion reads |
+| `20261127000000_add_milestones_and_review_rules.sql` | `contract_milestones`, review rules |
+| `20261129000000_restore_profile_pii_columns.sql` | restores PII columns behind the grants |
+| `20261201000000_add_email_outbox.sql` | `email_outbox`, queue and claim functions |
+| `20261202000000_add_verification_and_timesheets.sql` | `verification_requests`, `contract_timesheets`, `decide_verification`, the success score on `worker_ratings` |
+
+**Before you run it.** Take a backup first: Dashboard → Database → Backups →
+*Create backup* (or `pg_dump` with the connection string). The schema only adds
+objects and replaces functions, so a rollback is rarely needed, but a backup
+turns "rarely" into "never a problem".
+
+**Verify by hand** if you prefer the SQL editor to the script. Each of these
+returns one row when the object exists:
+
+```sql
+select to_regclass('public.verification_requests')   as verification_requests,
+       to_regclass('public.contract_timesheets')     as contract_timesheets,
+       to_regclass('public.contact_messages')        as contact_messages,
+       to_regclass('public.admin_profiles')          as admin_profiles,
+       to_regprocedure('public.decide_verification(uuid, boolean, text)') as decide_verification;
+```
+
+**What each page shows until the objects exist**
+
+| Missing object | What the user sees |
+|---|---|
+| `verification_requests` | The profile editor's Verification block says verification is not set up on the site and hides the request button |
+| `decide_verification` | The admin page shows its deploy warning naming "verification requests"; the tab stays empty |
+| `contract_timesheets` | The hours panel on an hourly contract names the migration file to run instead of rendering an empty list |
+| `contact_messages` | The contact form still delivers through Formspree; the dashboard has no record of the enquiry |
+| `admin_profiles` | The member list still renders, without email addresses, and the deploy warning says so |
+| `admin_overview` | The KPI row shows its setup message instead of figures |
+
+None of these is silent: each path classifies the error with
+`isBackendNotProvisioned()` and shows a message rather than an empty card.
+
+**Do not** point the site at a half-migrated project and expect the offline
+engine to cover the gap. It deliberately does not — see rule 6 in `AGENTS.md`.
+
 ### Step 2b: Create the Owner Account
 
 `admin.html` is owner-only and the site ships no owner credentials, so create

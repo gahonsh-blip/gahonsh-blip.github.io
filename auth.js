@@ -830,6 +830,14 @@
 
     // Verification is decided by a person, so the editor shows the state of the
     // request rather than promising an instant badge.
+    // A project created before the verification migration answers PGRST205 /
+    // PGRST202. Saying "not requested yet" there would invite a click that
+    // cannot work, so the panel states the deployment gap instead.
+    function verificationUnavailable(err) {
+        return /PGRST205|PGRST202|schema cache|could not find the table|does not exist/i
+            .test(String((err && err.message) || err || ''));
+    }
+
     async function renderVerificationState(profile) {
         const text = document.getElementById('verificationStatusText');
         const row = document.getElementById('verificationRequestRow');
@@ -855,6 +863,10 @@
             if (window.GahonshDB?.Verification?.mine) requests = await window.GahonshDB.Verification.mine();
         } catch (err) {
             console.warn('[verification] could not read requests:', err);
+            if (verificationUnavailable(err)) {
+                setState('Verification is not set up on this site yet. The owner needs to apply the database migration (docs/SETUP.md).', false, false, '');
+                return;
+            }
         }
 
         const pending = requests.find((r) => r.status === 'pending');
@@ -884,7 +896,13 @@
             wireVerificationButtons();
         await renderVerificationState(profile);
         } catch (err) {
-            showToast('Could not send the request: ' + (err.message || 'please try again.'));
+            if (verificationUnavailable(err)) {
+                const text = document.getElementById('verificationStatusText');
+                if (text) text.textContent = 'Verification is not set up on this site yet. The owner needs to apply the database migration (docs/SETUP.md).';
+                showToast('Verification is not available yet on this site.');
+            } else {
+                showToast('Could not send the request: ' + (err.message || 'please try again.'));
+            }
         } finally {
             if (button) button.disabled = false;
         }
@@ -901,7 +919,9 @@
             const profile = await window.GahonshDB.Profiles.getMyProfile();
             await renderVerificationState(profile);
         } catch (err) {
-            showToast('Could not withdraw the request: ' + (err.message || 'please try again.'));
+            showToast(verificationUnavailable(err)
+                ? 'Verification is not set up on this site yet.'
+                : 'Could not withdraw the request: ' + (err.message || 'please try again.'));
         } finally {
             button.disabled = false;
         }

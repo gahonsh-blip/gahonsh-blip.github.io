@@ -1,6 +1,7 @@
 # Gahonsh vs Upwork: where the marketplace stands
 
-Research date: 2026-11-27. Re-run with `node scripts/audit-live-site.mjs`.
+Research date: 2026-11-27. Crawl refreshed 2026-11-24 against the deployment of
+PR #30. Re-run with `npm run audit:live`.
 
 This report answers one question: **how much of an Upwork-class marketplace is
 already built, and what is genuinely missing?** It is a build plan, not a
@@ -27,7 +28,7 @@ only" exists in SQL but has no UI.
 
 | Area | Evidence |
 |------|----------|
-| 15 indexable pages, all 200, one `h1`, canonical, unique descriptions | live crawl |
+| 15 indexable pages, all 200, one `h1`, canonical, unique descriptions, 505–772 words of static copy each | live crawl |
 | Profiles: name, title, bio, skills, hourly rate, location, availability + note | `profiles`, `public_profiles` |
 | Resume upload to a private bucket | `uploadResume`, `resumes` bucket |
 | Job posting with category, budget, duration, experience, skills | `post-job.html`, `jobs` |
@@ -88,9 +89,14 @@ money* — and that is the part that cannot be finished by writing code alone.
 | Verification request + admin decision | `is_verified` was set by hand, so the "verified freelancer" claim had no trail | Done — `verification_requests`, `decide_verification()`, profile editor, admin queue |
 | Timesheets for hourly contracts | Hourly jobs could be posted but never recorded | Done — `contract_timesheets`, portal panel, client sign-off |
 | Success score from completed work + reviews | The directory showed stars but not reliability | Done — `worker_ratings.success_score` |
-| Static copy on thin pages | The live crawl found under 300 words on `/` | Already satisfied in the repository: every indexable page carries a `.page-info` section and measures 690–1260 words. The low live figure came from the deployment lagging `main`; the next deploy closes it |
+| Static copy on thin pages | The crawl measured `.page-info` alone, and `/`, `/pricing.html` and `/services.html` held 247, 296 and 209 words there — under the 500-word floor `AGENTS.md` sets | Done — all three rewritten, and six more pages topped up: every indexable page now carries 505–772 words. `npm run test:content` rule 11 fails below 500, so it cannot drift back |
 
 ### Phase 2 — money (needs a provider and a decision, not just code)
+
+The provider comparison, the cost facts, the recommendation and the acceptance
+criteria live in [PAYMENTS-DECISION.md](PAYMENTS-DECISION.md). Short version:
+Razorpay Route first for INR collection and Indian payouts, Stripe Connect later
+for cross-border cards, and no "funded" label until money has actually arrived.
 
 | Item | Blocker |
 |------|---------|
@@ -131,7 +137,17 @@ Phase 1 is implemented in the same pull request as this document:
    with no history scores `null`, never zero.
 4. The rules are enforced twice — RLS plus a trigger in SQL, and the same rules
    in the offline engine — and checked by two new suites: `npm run check:sql`
-   (41 cases against a real PostgreSQL) and 27 new cases in `npm run test:local`.
+   (41 cases against a real PostgreSQL) and 24 new cases in `npm run test:local`.
+5. The static copy on nine pages was raised to the 500-word floor the repo
+   documents, and `npm run test:content` now enforces it.
+
+**Live deployment status (2026-11-24).** `npm run check:live` reports six
+objects missing on the deployed Supabase project — `contact_messages`,
+`admin_profiles`, `admin_overview`, `verification_requests`,
+`contract_timesheets` and `decide_verification`. The first three predate this
+work: the live contact form still reaches the owner through Formspree, but the
+dashboard keeps no record of those enquiries, and the admin views are absent.
+`docs/SETUP.md` now has a step-by-step for applying the schema and verifying it.
 
 Phase 2 is deliberately not attempted. A payment button that moves no money, or
 a milestone labelled "in escrow" with nothing behind it, would be worse than the
