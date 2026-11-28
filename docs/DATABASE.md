@@ -135,6 +135,19 @@ editor's allow-list, and it is never exposed through `public_profiles`.
 
 ---
 
+## 4c. Performance Advisor
+
+The Advisor's performance page reports four shapes. Three are fixed in the
+schema and guarded by `npm run check:sql`; the fourth is left alone on purpose.
+
+| Finding | Answer |
+|---|---|
+| Unindexed foreign keys | **Fixed.** Section 14 indexes every FK whose column is not already the leading column of an index. The ones that matter most are the four the row policies filter on: `contracts.client_id`, `contracts.freelancer_id`, `jobs.client_id`, `proposals.freelancer_id`. A new FK without an index fails the suite |
+| Duplicate indexes | **Fixed.** `contract_timesheets_contract_idx` duplicated `contract_timesheets_day_idx` on `(contract_id, work_date)`; the unique index already serves `ORDER BY work_date DESC` by scanning backwards. It is dropped, and the suite fails if two indexes cover the same columns again |
+| `auth_rls_initplan` — policies re-evaluate `auth.uid()` per row | **Fixed.** Every policy calls `(select auth.uid())` and `(select public.is_admin())`, which the planner runs once per statement instead of once per row. The suite fails on a bare call |
+| Unused indexes | **Left alone.** The project has almost no traffic, so "unused" describes a young database, not a bad index. Revisit after real usage; dropping an index that a future query needs is harder to notice than keeping one |
+| Multiple permissive policies | **Not reproducible from the schema.** The committed schema creates no two permissive policies for the same table and command. A project that shows two is carrying a policy from an older name that the current `DROP POLICY IF EXISTS` does not match. Find it with `select tablename, cmd, policyname from pg_policies where schemaname='public'` and drop the stale name by hand |
+
 ## 5. Client-Side Data Layer (`supabase-client.js`)
 
 The front-end integrates with Supabase using standard ES6 / CDN client initialization:

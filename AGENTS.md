@@ -31,7 +31,12 @@ Repository guide for AI agents and human contributors working on the
    in `marketplace-local.js` and exposed on the portal contract card. A state
    the schema defines but no path reaches is how a contract sat `active`
    forever. See `docs/DISPUTES.md` before touching the contract flow.
-9. **Keep the schema and the client in step.** Any table, view or function the
+9. **Index the foreign keys, wrap the policy calls.** Every FK column must be the
+   leading column of an index (section 14), no two indexes may cover the same
+   columns, and every row policy must call `(select auth.uid())` /
+   `(select public.is_admin())` rather than the bare function. `npm run check:sql`
+   fails on all three.
+10. **Keep the schema and the client in step.** Any table, view or function the
    client reaches through PostgREST must exist in `docs/marketplace-schema.sql`
    (`npm run test:schema` enforces this). New tables need RLS plus policies, and
    new policies must be declared after the helper functions they call.
