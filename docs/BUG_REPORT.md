@@ -1686,6 +1686,56 @@ an admin sees the directory with email.
 in the repository. `docs/SETUP.md` Step 2c now lists it with the three other Auth
 settings that break sign-in when left at defaults.
 
+## 53. The Performance Advisor, and one recommendation that would have broken the score
+
+The same audit reported unindexed foreign keys, duplicate indexes, policies that
+re-run `auth.uid()` per row, unused indexes and two permissive policies. Four
+were real; the recommended fix for one view was wrong.
+
+**Fixed: 18 foreign keys had no index.** Measured against the schema, 18 FK
+columns were not the leading column of any index. The four that cost the most
+are the ones every row policy filters on — `contracts.client_id`,
+`contracts.freelancer_id`, `jobs.client_id`, `proposals.freelancer_id` — because
+a policy check without an index is a sequential scan per query. Section 14 adds
+all 18, and the suite now fails when a new FK arrives without one.
+
+**Fixed: one duplicate index.** `contract_timesheets_contract_idx` covered
+`(contract_id, work_date DESC)` while `contract_timesheets_day_idx` is unique on
+`(contract_id, work_date)`; PostgreSQL scans a btree backwards for `DESC`, so the
+second index bought nothing and cost a write on every row. Dropped.
+
+**Fixed: 45 of 48 policies re-evaluated `auth.uid()` per row.** Every policy now
+writes `(select auth.uid())` and `(select public.is_admin())`, which the planner
+evaluates once per statement. The suite strips the wrapped form and fails on a
+bare call, so the pattern cannot come back.
+
+**Wrong: `ALTER VIEW public.worker_ratings SET (security_invoker = true)`.**
+Applied as written, this does not "enforce RLS" — it silently corrupts the public
+success score. A visitor holds a `SELECT` grant on `contracts`, but RLS hides
+every contract row from them, so the invoker view still returns a row: the
+rating survives, `completed_contracts` drops to 0, and the score reads "no work
+done" for a freelancer who has finished contracts. Measured in the suite:
+
+```
+ok  a visitor sees no contract rows through RLS
+ok  the owner-privileged score still counts the finished contract
+ok  security_invoker would report an empty history, so it stays off
+```
+
+`public_profiles` is the view that *can* take the setting, and does.
+
+**Left alone: 16 unused indexes.** The database has almost no traffic, so
+"unused" describes a young project rather than a bad index.
+
+**Not reproducible: two permissive policies.** The committed schema creates no
+two permissive policies for the same table and command, so a project showing two
+is carrying a policy under an old name that `DROP POLICY IF EXISTS` no longer
+matches. `docs/DATABASE.md` §4c has the query to find it.
+
+**Also corrected: leaked password protection is Pro-plan-only.** Supabase's
+password-security page states it plainly, so `docs/SETUP.md` no longer presents
+it as a free toggle; Step 2e lists the free controls that partly cover the gap.
+
 ## Verification (this round)
 
 ```

@@ -1845,8 +1845,8 @@ DROP POLICY IF EXISTS "Users can update own profile only" ON public.profiles;
 CREATE POLICY "Users can update own profile only" 
 ON public.profiles FOR UPDATE 
 TO authenticated 
-USING (auth.uid() = id OR public.is_admin())
-WITH CHECK (auth.uid() = id OR public.is_admin());
+USING ((select auth.uid()) = id OR (select public.is_admin()))
+WITH CHECK ((select auth.uid()) = id OR (select public.is_admin()));
 
 -- Jobs RLS
 DROP POLICY IF EXISTS "Viewable jobs policy" ON public.jobs;
@@ -1854,8 +1854,8 @@ CREATE POLICY "Viewable jobs policy"
 ON public.jobs FOR SELECT 
 USING (
     status IN ('open', 'in_progress', 'completed')
-    OR (auth.uid() = client_id)
-    OR public.is_admin()
+    OR ((select auth.uid()) = client_id)
+    OR (select public.is_admin())
 );
 
 DROP POLICY IF EXISTS "Clients can create jobs" ON public.jobs;
@@ -1863,24 +1863,24 @@ CREATE POLICY "Clients can create jobs"
 ON public.jobs FOR INSERT 
 TO authenticated 
 WITH CHECK (
-    auth.uid() = client_id AND
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND (role = 'client' OR role = 'admin'))
+    (select auth.uid()) = client_id AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = (select auth.uid()) AND (role = 'client' OR role = 'admin'))
 );
 
 DROP POLICY IF EXISTS "Clients can update own jobs" ON public.jobs;
 CREATE POLICY "Clients can update own jobs" 
 ON public.jobs FOR UPDATE 
 TO authenticated 
-USING (auth.uid() = client_id OR public.is_admin())
-WITH CHECK (auth.uid() = client_id OR public.is_admin());
+USING ((select auth.uid()) = client_id OR (select public.is_admin()))
+WITH CHECK ((select auth.uid()) = client_id OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Clients can delete own draft or open jobs" ON public.jobs;
 CREATE POLICY "Clients can delete own draft or open jobs" 
 ON public.jobs FOR DELETE 
 TO authenticated 
 USING (
-    (auth.uid() = client_id AND status IN ('draft', 'open'))
-    OR public.is_admin()
+    ((select auth.uid()) = client_id AND status IN ('draft', 'open'))
+    OR (select public.is_admin())
 );
 
 -- Job Attachments RLS
@@ -1893,8 +1893,8 @@ USING (
         WHERE jobs.id = job_attachments.job_id 
         AND (
             jobs.status IN ('open', 'in_progress', 'completed')
-            OR jobs.client_id = auth.uid()
-            OR public.is_admin()
+            OR jobs.client_id = (select auth.uid())
+            OR (select public.is_admin())
         )
     )
 );
@@ -1904,11 +1904,11 @@ CREATE POLICY "Job owners can upload attachments"
 ON public.job_attachments FOR INSERT 
 TO authenticated 
 WITH CHECK (
-    auth.uid() = uploaded_by AND
+    (select auth.uid()) = uploaded_by AND
     EXISTS (
         SELECT 1 FROM public.jobs 
         WHERE jobs.id = job_attachments.job_id 
-        AND (jobs.client_id = auth.uid() OR public.is_admin())
+        AND (jobs.client_id = (select auth.uid()) OR (select public.is_admin()))
     )
 );
 
@@ -1917,9 +1917,9 @@ CREATE POLICY "Job owners can delete attachments"
 ON public.job_attachments FOR DELETE 
 TO authenticated 
 USING (
-    auth.uid() = uploaded_by OR 
-    EXISTS (SELECT 1 FROM public.jobs WHERE jobs.id = job_attachments.job_id AND jobs.client_id = auth.uid()) OR
-    public.is_admin()
+    (select auth.uid()) = uploaded_by OR 
+    EXISTS (SELECT 1 FROM public.jobs WHERE jobs.id = job_attachments.job_id AND jobs.client_id = (select auth.uid())) OR
+    (select public.is_admin())
 );
 
 -- File Transfers RLS (in-site send / receive)
@@ -1932,19 +1932,19 @@ DROP POLICY IF EXISTS "Participants can view project files" ON public.file_trans
 CREATE POLICY "Participants can view project files"
 ON public.file_transfers FOR SELECT
 TO authenticated
-USING (uploaded_by = auth.uid() OR public.can_access_job_files(job_id::TEXT));
+USING (uploaded_by = (select auth.uid()) OR public.can_access_job_files(job_id::TEXT));
 
 DROP POLICY IF EXISTS "Participants can upload project files" ON public.file_transfers;
 CREATE POLICY "Participants can upload project files"
 ON public.file_transfers FOR INSERT
 TO authenticated
-WITH CHECK (uploaded_by = auth.uid() AND public.can_upload_job_files(job_id::TEXT));
+WITH CHECK (uploaded_by = (select auth.uid()) AND public.can_upload_job_files(job_id::TEXT));
 
 DROP POLICY IF EXISTS "Uploaders can remove their files" ON public.file_transfers;
 CREATE POLICY "Uploaders can remove their files"
 ON public.file_transfers FOR DELETE
 TO authenticated
-USING (uploaded_by = auth.uid() OR public.is_admin());
+USING (uploaded_by = (select auth.uid()) OR (select public.is_admin()));
 
 -- Proposals RLS
 DROP POLICY IF EXISTS "Proposals viewable by submitter, client, or admin" ON public.proposals;
@@ -1952,9 +1952,9 @@ CREATE POLICY "Proposals viewable by submitter, client, or admin"
 ON public.proposals FOR SELECT 
 TO authenticated 
 USING (
-    freelancer_id = auth.uid() 
-    OR EXISTS (SELECT 1 FROM public.jobs WHERE jobs.id = proposals.job_id AND jobs.client_id = auth.uid())
-    OR public.is_admin()
+    freelancer_id = (select auth.uid()) 
+    OR EXISTS (SELECT 1 FROM public.jobs WHERE jobs.id = proposals.job_id AND jobs.client_id = (select auth.uid()))
+    OR (select public.is_admin())
 );
 
 DROP POLICY IF EXISTS "Freelancers can submit proposal to open jobs" ON public.proposals;
@@ -1962,8 +1962,8 @@ CREATE POLICY "Freelancers can submit proposal to open jobs"
 ON public.proposals FOR INSERT 
 TO authenticated 
 WITH CHECK (
-    auth.uid() = freelancer_id AND
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND (role = 'freelancer' OR role = 'admin')) AND
+    (select auth.uid()) = freelancer_id AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = (select auth.uid()) AND (role = 'freelancer' OR role = 'admin')) AND
     EXISTS (SELECT 1 FROM public.jobs WHERE jobs.id = proposals.job_id AND jobs.status = 'open')
 );
 
@@ -1972,12 +1972,12 @@ CREATE POLICY "Freelancers can update or withdraw own proposal"
 ON public.proposals FOR UPDATE 
 TO authenticated 
 USING (
-    (freelancer_id = auth.uid() AND status IN ('submitted', 'shortlisted'))
-    OR public.is_admin()
+    (freelancer_id = (select auth.uid()) AND status IN ('submitted', 'shortlisted'))
+    OR (select public.is_admin())
 )
 WITH CHECK (
-    (freelancer_id = auth.uid() AND status IN ('submitted', 'shortlisted', 'withdrawn'))
-    OR public.is_admin()
+    (freelancer_id = (select auth.uid()) AND status IN ('submitted', 'shortlisted', 'withdrawn'))
+    OR (select public.is_admin())
 );
 
 -- Contracts RLS
@@ -1986,16 +1986,16 @@ CREATE POLICY "Contracts viewable by involved parties or admin"
 ON public.contracts FOR SELECT 
 TO authenticated 
 USING (
-    client_id = auth.uid() OR 
-    freelancer_id = auth.uid() OR 
-    public.is_admin()
+    client_id = (select auth.uid()) OR 
+    freelancer_id = (select auth.uid()) OR 
+    (select public.is_admin())
 );
 
 DROP POLICY IF EXISTS "No direct client insert on contracts" ON public.contracts;
 CREATE POLICY "No direct client insert on contracts" 
 ON public.contracts FOR INSERT 
 TO authenticated 
-WITH CHECK (public.is_admin());
+WITH CHECK ((select public.is_admin()));
 
 -- Contact messages: write-only for visitors, owner-only to read or manage.
 DROP POLICY IF EXISTS "Anyone can submit a contact message" ON public.contact_messages;
@@ -2008,20 +2008,20 @@ DROP POLICY IF EXISTS "Only admin can read contact messages" ON public.contact_m
 CREATE POLICY "Only admin can read contact messages"
 ON public.contact_messages FOR SELECT
 TO authenticated
-USING (public.is_admin());
+USING ((select public.is_admin()));
 
 DROP POLICY IF EXISTS "Only admin can update contact messages" ON public.contact_messages;
 CREATE POLICY "Only admin can update contact messages"
 ON public.contact_messages FOR UPDATE
 TO authenticated
-USING (public.is_admin())
-WITH CHECK (public.is_admin());
+USING ((select public.is_admin()))
+WITH CHECK ((select public.is_admin()));
 
 DROP POLICY IF EXISTS "Only admin can delete contact messages" ON public.contact_messages;
 CREATE POLICY "Only admin can delete contact messages"
 ON public.contact_messages FOR DELETE
 TO authenticated
-USING (public.is_admin());
+USING ((select public.is_admin()));
 
 -- Reviews: public to read, participant-only to write, immutable once written.
 DROP POLICY IF EXISTS "Reviews are public" ON public.reviews;
@@ -2040,7 +2040,7 @@ CREATE POLICY "Participants can review a completed contract"
 ON public.reviews FOR INSERT
 TO authenticated
 WITH CHECK (
-    reviewer_id = auth.uid()
+    reviewer_id = (select auth.uid())
     AND contract_id IS NOT NULL
     AND reviewer_id <> reviewee_id
     AND EXISTS (
@@ -2048,8 +2048,8 @@ WITH CHECK (
         WHERE c.id = reviews.contract_id
           AND c.status = 'completed'
           AND (
-              (c.client_id = auth.uid() AND c.freelancer_id = reviews.reviewee_id)
-              OR (c.freelancer_id = auth.uid() AND c.client_id = reviews.reviewee_id)
+              (c.client_id = (select auth.uid()) AND c.freelancer_id = reviews.reviewee_id)
+              OR (c.freelancer_id = (select auth.uid()) AND c.client_id = reviews.reviewee_id)
           )
     )
 );
@@ -2058,7 +2058,7 @@ DROP POLICY IF EXISTS "Admins can delete reviews" ON public.reviews;
 CREATE POLICY "Admins can delete reviews"
 ON public.reviews FOR DELETE
 TO authenticated
-USING (public.is_admin());
+USING ((select public.is_admin()));
 
 -- Contract milestones: the client and the freelancer share one checklist.
 -- The policy decides who may touch a row; validate_milestone_mutation()
@@ -2068,11 +2068,11 @@ CREATE POLICY "Contract parties can read milestones"
 ON public.contract_milestones FOR SELECT
 TO authenticated
 USING (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_milestones.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 );
 
@@ -2081,11 +2081,11 @@ CREATE POLICY "Contract parties can add milestones"
 ON public.contract_milestones FOR INSERT
 TO authenticated
 WITH CHECK (
-    created_by = auth.uid()
+    created_by = (select auth.uid())
     AND EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_milestones.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 );
 
@@ -2094,19 +2094,19 @@ CREATE POLICY "Contract parties can update milestones"
 ON public.contract_milestones FOR UPDATE
 TO authenticated
 USING (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_milestones.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 )
 WITH CHECK (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_milestones.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 );
 
@@ -2115,11 +2115,11 @@ CREATE POLICY "Contract parties can remove milestones"
 ON public.contract_milestones FOR DELETE
 TO authenticated
 USING (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_milestones.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 );
 
@@ -2129,9 +2129,9 @@ CREATE POLICY "Contract parties can read messages"
 ON public.messages FOR SELECT
 TO authenticated
 USING (
-    sender_id = auth.uid()
-    OR recipient_id = auth.uid()
-    OR public.is_admin()
+    sender_id = (select auth.uid())
+    OR recipient_id = (select auth.uid())
+    OR (select public.is_admin())
 );
 
 DROP POLICY IF EXISTS "Contract parties can send messages" ON public.messages;
@@ -2139,12 +2139,12 @@ CREATE POLICY "Contract parties can send messages"
 ON public.messages FOR INSERT
 TO authenticated
 WITH CHECK (
-    sender_id = auth.uid()
+    sender_id = (select auth.uid())
     AND (
         contract_id IS NULL
         OR contract_id IN (
             SELECT id FROM public.contracts
-            WHERE client_id = auth.uid() OR freelancer_id = auth.uid()
+            WHERE client_id = (select auth.uid()) OR freelancer_id = (select auth.uid())
         )
     )
 );
@@ -2154,8 +2154,8 @@ DROP POLICY IF EXISTS "Members manage their saved jobs" ON public.saved_jobs;
 CREATE POLICY "Members manage their saved jobs"
 ON public.saved_jobs FOR ALL
 TO authenticated
-USING (freelancer_id = auth.uid() OR public.is_admin())
-WITH CHECK (freelancer_id = auth.uid());
+USING (freelancer_id = (select auth.uid()) OR (select public.is_admin()))
+WITH CHECK (freelancer_id = (select auth.uid()));
 
 -- Saved talent: the client's own shortlist. The CHECK on the table stops a
 -- member saving themselves, so the row always names two different people.
@@ -2163,8 +2163,8 @@ DROP POLICY IF EXISTS "Clients manage their saved talent" ON public.saved_talent
 CREATE POLICY "Clients manage their saved talent"
 ON public.saved_talent FOR ALL
 TO authenticated
-USING (client_id = auth.uid() OR public.is_admin())
-WITH CHECK (client_id = auth.uid());
+USING (client_id = (select auth.uid()) OR (select public.is_admin()))
+WITH CHECK (client_id = (select auth.uid()));
 
 -- Invitations: both parties see the row, only the job owner may create one
 -- (also enforced by validate_invitation_mutation), and only the invited
@@ -2173,17 +2173,17 @@ DROP POLICY IF EXISTS "Invitation parties can read invitations" ON public.invita
 CREATE POLICY "Invitation parties can read invitations"
 ON public.invitations FOR SELECT
 TO authenticated
-USING (client_id = auth.uid() OR freelancer_id = auth.uid() OR public.is_admin());
+USING (client_id = (select auth.uid()) OR freelancer_id = (select auth.uid()) OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Clients can send invitations" ON public.invitations;
 CREATE POLICY "Clients can send invitations"
 ON public.invitations FOR INSERT
 TO authenticated
 WITH CHECK (
-    client_id = auth.uid()
+    client_id = (select auth.uid())
     AND EXISTS (
         SELECT 1 FROM public.jobs j
-        WHERE j.id = invitations.job_id AND j.client_id = auth.uid()
+        WHERE j.id = invitations.job_id AND j.client_id = (select auth.uid())
     )
 );
 
@@ -2191,14 +2191,14 @@ DROP POLICY IF EXISTS "Parties can answer an invitation" ON public.invitations;
 CREATE POLICY "Parties can answer an invitation"
 ON public.invitations FOR UPDATE
 TO authenticated
-USING (client_id = auth.uid() OR freelancer_id = auth.uid() OR public.is_admin())
-WITH CHECK (client_id = auth.uid() OR freelancer_id = auth.uid() OR public.is_admin());
+USING (client_id = (select auth.uid()) OR freelancer_id = (select auth.uid()) OR (select public.is_admin()))
+WITH CHECK (client_id = (select auth.uid()) OR freelancer_id = (select auth.uid()) OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Clients can delete their invitation" ON public.invitations;
 CREATE POLICY "Clients can delete their invitation"
 ON public.invitations FOR DELETE
 TO authenticated
-USING (client_id = auth.uid() OR public.is_admin());
+USING (client_id = (select auth.uid()) OR (select public.is_admin()));
 
 -- Project Catalog: an active package is public so a visitor can browse and a
 -- signed-out reader can see prices. Only the owning freelancer may write.
@@ -2206,18 +2206,18 @@ DROP POLICY IF EXISTS "Active packages are public" ON public.service_packages;
 CREATE POLICY "Active packages are public"
 ON public.service_packages FOR SELECT
 TO anon, authenticated
-USING (is_active = TRUE OR freelancer_id = auth.uid() OR public.is_admin());
+USING (is_active = TRUE OR freelancer_id = (select auth.uid()) OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Freelancers manage their own packages" ON public.service_packages;
 CREATE POLICY "Freelancers manage their own packages"
 ON public.service_packages FOR ALL
 TO authenticated
-USING (freelancer_id = auth.uid() OR public.is_admin())
+USING (freelancer_id = (select auth.uid()) OR (select public.is_admin()))
 WITH CHECK (
-    freelancer_id = auth.uid()
+    freelancer_id = (select auth.uid())
     AND EXISTS (
         SELECT 1 FROM public.profiles p
-        WHERE p.id = auth.uid() AND p.role IN ('freelancer', 'admin')
+        WHERE p.id = (select auth.uid()) AND p.role IN ('freelancer', 'admin')
     )
 );
 
@@ -2228,20 +2228,20 @@ DROP POLICY IF EXISTS "Members read their notifications" ON public.notifications
 CREATE POLICY "Members read their notifications"
 ON public.notifications FOR SELECT
 TO authenticated
-USING (user_id = auth.uid() OR public.is_admin());
+USING (user_id = (select auth.uid()) OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Members update their notifications" ON public.notifications;
 CREATE POLICY "Members update their notifications"
 ON public.notifications FOR UPDATE
 TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+USING (user_id = (select auth.uid()))
+WITH CHECK (user_id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Members delete their notifications" ON public.notifications;
 CREATE POLICY "Members delete their notifications"
 ON public.notifications FOR DELETE
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (select auth.uid()));
 
 -- ----------------------------------------------------------------------------
 -- 12. STORAGE BUCKET FOR IN-SITE FILE TRANSFER
@@ -2296,7 +2296,7 @@ ON storage.objects FOR SELECT
 TO authenticated
 USING (
     bucket_id = 'job-attachments'
-    AND (public.can_access_job_files((storage.foldername(name))[1]) OR owner = auth.uid())
+    AND (public.can_access_job_files((storage.foldername(name))[1]) OR owner = (select auth.uid()))
 );
 
 -- Uploads: a participant may add files to their own project's folder.
@@ -2306,7 +2306,7 @@ ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
     bucket_id = 'job-attachments'
-    AND owner = auth.uid()
+    AND owner = (select auth.uid())
     AND public.can_upload_job_files((storage.foldername(name))[1])
 );
 
@@ -2317,7 +2317,7 @@ ON storage.objects FOR DELETE
 TO authenticated
 USING (
     bucket_id = 'job-attachments'
-    AND (owner = auth.uid() OR public.is_admin())
+    AND (owner = (select auth.uid()) OR (select public.is_admin()))
 );
 
 -- ----------------------------------------------------------------------------
@@ -2343,8 +2343,8 @@ ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
     bucket_id = 'resumes'
-    AND owner = auth.uid()
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND owner = (select auth.uid())
+    AND (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
 DROP POLICY IF EXISTS "Freelancers can replace their own resume" ON storage.objects;
@@ -2353,13 +2353,13 @@ ON storage.objects FOR UPDATE
 TO authenticated
 USING (
     bucket_id = 'resumes'
-    AND owner = auth.uid()
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND owner = (select auth.uid())
+    AND (storage.foldername(name))[1] = (select auth.uid())::text
 )
 WITH CHECK (
     bucket_id = 'resumes'
-    AND owner = auth.uid()
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND owner = (select auth.uid())
+    AND (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
 DROP POLICY IF EXISTS "Freelancers can delete their own resume" ON storage.objects;
@@ -2368,7 +2368,7 @@ ON storage.objects FOR DELETE
 TO authenticated
 USING (
     bucket_id = 'resumes'
-    AND owner = auth.uid()
+    AND owner = (select auth.uid())
 );
 
 -- ----------------------------------------------------------------------------
@@ -2466,13 +2466,13 @@ DROP POLICY IF EXISTS "Verification is readable by its owner and admins" ON publ
 CREATE POLICY "Verification is readable by its owner and admins"
 ON public.verification_requests FOR SELECT
 TO authenticated
-USING (user_id = auth.uid() OR public.is_admin());
+USING (user_id = (select auth.uid()) OR (select public.is_admin()));
 
 DROP POLICY IF EXISTS "Members request verification for themselves" ON public.verification_requests;
 CREATE POLICY "Members request verification for themselves"
 ON public.verification_requests FOR INSERT
 TO authenticated
-WITH CHECK (user_id = auth.uid());
+WITH CHECK (user_id = (select auth.uid()));
 
 -- No UPDATE policy: decisions go through decide_verification(), so an admin
 -- decision and the profile flip happen in one transaction.
@@ -2480,7 +2480,7 @@ DROP POLICY IF EXISTS "Members withdraw their own open request" ON public.verifi
 CREATE POLICY "Members withdraw their own open request"
 ON public.verification_requests FOR DELETE
 TO authenticated
-USING ((user_id = auth.uid() AND status = 'pending') OR public.is_admin());
+USING ((user_id = (select auth.uid()) AND status = 'pending') OR (select public.is_admin()));
 
 REVOKE ALL ON public.verification_requests FROM anon, authenticated;
 GRANT SELECT, INSERT, DELETE ON public.verification_requests TO authenticated;
@@ -2568,8 +2568,10 @@ CREATE TABLE IF NOT EXISTS public.contract_timesheets (
 -- double-log. A wrong entry is withdrawn while it is still submitted.
 CREATE UNIQUE INDEX IF NOT EXISTS contract_timesheets_day_idx
     ON public.contract_timesheets (contract_id, work_date);
-CREATE INDEX IF NOT EXISTS contract_timesheets_contract_idx
-    ON public.contract_timesheets (contract_id, work_date DESC);
+-- `contract_timesheets_day_idx` is unique on (contract_id, work_date); Postgres
+-- scans it backwards for `ORDER BY work_date DESC`, so a second DESC index on
+-- the same columns only added write cost. Dropped for projects that have it.
+DROP INDEX IF EXISTS public.contract_timesheets_contract_idx;
 
 ALTER TABLE public.contract_timesheets ENABLE ROW LEVEL SECURITY;
 
@@ -2659,11 +2661,11 @@ CREATE POLICY "Contract parties read their timesheets"
 ON public.contract_timesheets FOR SELECT
 TO authenticated
 USING (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
         WHERE c.id = contract_timesheets.contract_id
-          AND (c.client_id = auth.uid() OR c.freelancer_id = auth.uid())
+          AND (c.client_id = (select auth.uid()) OR c.freelancer_id = (select auth.uid()))
     )
 );
 
@@ -2671,17 +2673,17 @@ DROP POLICY IF EXISTS "Freelancers log their own hours" ON public.contract_times
 CREATE POLICY "Freelancers log their own hours"
 ON public.contract_timesheets FOR INSERT
 TO authenticated
-WITH CHECK (freelancer_id = auth.uid());
+WITH CHECK (freelancer_id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Clients review the hours on their contracts" ON public.contract_timesheets;
 CREATE POLICY "Clients review the hours on their contracts"
 ON public.contract_timesheets FOR UPDATE
 TO authenticated
 USING (
-    public.is_admin()
+    (select public.is_admin())
     OR EXISTS (
         SELECT 1 FROM public.contracts c
-        WHERE c.id = contract_timesheets.contract_id AND c.client_id = auth.uid()
+        WHERE c.id = contract_timesheets.contract_id AND c.client_id = (select auth.uid())
     )
 );
 
@@ -2690,8 +2692,8 @@ CREATE POLICY "A submitted day can be withdrawn"
 ON public.contract_timesheets FOR DELETE
 TO authenticated
 USING (
-    public.is_admin()
-    OR (freelancer_id = auth.uid() AND status = 'submitted')
+    (select public.is_admin())
+    OR (freelancer_id = (select auth.uid()) AND status = 'submitted')
 );
 
 REVOKE ALL ON public.contract_timesheets FROM anon, authenticated;
@@ -2763,3 +2765,34 @@ GRANT EXECUTE ON FUNCTION public.notify_user(UUID, TEXT, TEXT, TEXT, TEXT) TO se
 -- browser. Trigger helpers stay unlisted on purpose: they run as the table
 -- owner, and EXECUTE is not re-checked when a trigger fires.
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+
+
+-- ----------------------------------------------------------------------------
+-- 14. FOREIGN KEY INDEXES
+-- ----------------------------------------------------------------------------
+-- Supabase's Performance Advisor reports "unindexed foreign key" for every FK
+-- whose column is not the leading column of an index. Without one, a join, an
+-- `ON DELETE CASCADE` and every row-policy check that filters on that column
+-- scans the whole table. The four that matter most are the ones the policies
+-- filter on: `contracts.client_id`, `contracts.freelancer_id`, `jobs.client_id`
+-- and `proposals.freelancer_id`.
+--
+-- `npm run check:sql` fails when a new foreign key arrives without one.
+CREATE INDEX IF NOT EXISTS contracts_client_id_fk_idx ON public.contracts (client_id);
+CREATE INDEX IF NOT EXISTS contracts_freelancer_id_fk_idx ON public.contracts (freelancer_id);
+CREATE INDEX IF NOT EXISTS contracts_job_id_fk_idx ON public.contracts (job_id);
+CREATE INDEX IF NOT EXISTS jobs_client_id_fk_idx ON public.jobs (client_id);
+CREATE INDEX IF NOT EXISTS proposals_freelancer_id_fk_idx ON public.proposals (freelancer_id);
+CREATE INDEX IF NOT EXISTS reviews_job_id_fk_idx ON public.reviews (job_id);
+CREATE INDEX IF NOT EXISTS reviews_reviewer_id_fk_idx ON public.reviews (reviewer_id);
+CREATE INDEX IF NOT EXISTS messages_sender_id_fk_idx ON public.messages (sender_id);
+CREATE INDEX IF NOT EXISTS saved_jobs_job_id_fk_idx ON public.saved_jobs (job_id);
+CREATE INDEX IF NOT EXISTS saved_talent_freelancer_id_fk_idx ON public.saved_talent (freelancer_id);
+CREATE INDEX IF NOT EXISTS invitations_client_id_fk_idx ON public.invitations (client_id);
+CREATE INDEX IF NOT EXISTS job_attachments_job_id_fk_idx ON public.job_attachments (job_id);
+CREATE INDEX IF NOT EXISTS job_attachments_uploaded_by_fk_idx ON public.job_attachments (uploaded_by);
+CREATE INDEX IF NOT EXISTS file_transfers_uploaded_by_fk_idx ON public.file_transfers (uploaded_by);
+CREATE INDEX IF NOT EXISTS contract_milestones_created_by_fk_idx ON public.contract_milestones (created_by);
+CREATE INDEX IF NOT EXISTS contract_timesheets_freelancer_id_fk_idx ON public.contract_timesheets (freelancer_id);
+CREATE INDEX IF NOT EXISTS contract_timesheets_reviewed_by_fk_idx ON public.contract_timesheets (reviewed_by);
+CREATE INDEX IF NOT EXISTS verification_requests_decided_by_fk_idx ON public.verification_requests (decided_by);

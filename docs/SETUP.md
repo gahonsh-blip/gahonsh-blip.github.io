@@ -219,6 +219,22 @@ Editor: it is idempotent (guarded enums, `IF NOT EXISTS` tables and indexes,
 `DROP POLICY IF EXISTS` before every `CREATE POLICY`). Then re-run
 `npm run check:live` until it passes.
 
+**`PGRST205` is not proof the table is absent.** PostgREST answers from its own
+schema cache, so a table created a moment ago — or one whose DDL event did not
+reach it — reads as missing until the cache reloads. If a probe still fails
+right after a migration that clearly ran, reload it once:
+
+```sql
+NOTIFY pgrst, 'reload schema';
+```
+
+Then probe again. A missing **column** is different: that error is `42703`,
+straight from PostgreSQL, and no cache reload can cause or cure it.
+
+The counts reconcile: the schema creates 18 tables and 3 views, and a project
+reporting 15 tables is short exactly `contact_messages`, `verification_requests`
+and `contract_timesheets`, with `admin_profiles` the absent view.
+
 ### Step 2d: Repair a project that drifted (profile columns + immutability)
 
 `npm run check:live` cannot see the rules that only apply to a signed-in
@@ -260,7 +276,7 @@ pass trivially.
 > been applied yet. Do not "fix" it by granting `email` to `anon` or
 > `authenticated`: the admin page and `admin_profiles` are the supported path.
 
-### Step 2c: Turn on the Auth protections SQL cannot set
+### Step 2e: Turn on the Auth protections SQL cannot set
 
 The schema can revoke grants and pin `search_path`, but four protections live in
 the Supabase Auth configuration. Supabase's Security Advisor reports the first
@@ -268,10 +284,18 @@ one; the rest break sign-in or leak accounts if they are left at defaults.
 
 | Setting | Where | Value for this project |
 |---|---|---|
-| **Leaked password protection** | Authentication → Providers → Email | **On.** Supabase checks new passwords against HaveIBeenPwned. The Advisor warns while it is off, and it is the cheapest defence against credential stuffing |
+| **Leaked password protection** | Authentication → Providers → Email | **On if the project is on the Pro plan or above.** Supabase's own documentation states this feature is Pro-and-above, so do not budget it as a free toggle. On Free, use the three free controls below instead and treat the Advisor warning as accepted |
 | Minimum password length | Authentication → Providers → Email | 8 characters or more |
 | Site URL and redirect allow-list | Authentication → URL Configuration | Site URL `https://gahonsh-blip.github.io/`, allow-list the same origin plus `http://localhost:3000` for local work. A missing entry makes confirmation links land on the wrong host |
 | Confirm email | Authentication → Providers → Email | On for production, so an unverified address cannot post a job |
+| Require current password to change it | Authentication → Providers → Email | On. Free, and it stops a hijacked session from locking the owner out |
+| Require reauthentication to change it | Authentication → Providers → Email | On. Free; the user must have signed in within 24 hours |
+
+On the Free plan the leaked-password check is unavailable, so the practical
+substitute is: 8+ characters with digits, upper and lower case, plus the two
+password-change controls above, plus email confirmation. That is weaker than the
+HaveIBeenPwned check and the Advisor will keep saying so — which is the honest
+state of a Free project, not something the schema can fix.
 
 The same values can be set through the Management API
 (`PATCH /v1/projects/{ref}/config/auth`) when you would rather script it.
@@ -409,6 +433,38 @@ Once Supabase is connected, verify the primary user flows:
 4. **Profile Customization & Light/Dark Theme:**
    - Click **"Edit Profile"** in the navigation or dashboard to update full name, headline title, hourly rate, skills, and bio.
    - Toggle the theme button (top-right or bottom-right) to verify dark and light styling persistence.
+
+### What has to be tested with a real account
+
+`npm run check:live` proves the objects exist and `npm run check:live-security`
+proves the rules hold. Neither proves a flow works end to end, and the live
+project has one profile and empty marketplace tables, so the list below is the
+honest remaining work. Test it with two disposable accounts — one client, one
+freelancer — never with the owner's account.
+
+| Area | What to prove | Why a check cannot |
+|---|---|---|
+| Registration and sign-in | Sign up, confirm the email, sign out, sign in, recover a password | Needs a mailbox and a real session |
+| Role selection | A client cannot submit a proposal, a freelancer cannot post a job | Role gates live in the UI and in RLS |
+| Jobs | Post, edit, close; a closed job disappears from the feed | Needs real rows |
+| Proposals | Submit, shortlist, reject, withdraw; the count on the job stays right | Trigger `sync_job_proposals_count` only runs on real writes |
+| Contracts | Accept a proposal, then complete, cancel and dispute it | Three separate RPCs, each with its own guard |
+| Milestones | Add, deliver, accept, request a revision | Two-party flow |
+| Timesheets | Log hours on an hourly contract, client approves, hours cannot be deleted afterwards | Covered by SQL cases, not by the browser |
+| Reviews | One review per contract per side; a second is rejected | Uniqueness plus the completed-contract rule |
+| Messaging | Only the two contract parties read the thread | RLS is per row |
+| Files | Send a file across a contract, download it as the other party, confirm a third party is refused | Storage policies plus the browser scan |
+| Verification | Request, then decide as admin; a member cannot approve themselves | Needs an admin and a member session |
+| Notifications | In-app badge and the email outbox drain | Needs the Edge Function running |
+| Backup and recovery | Take a backup, restore it into a scratch project, point the client at it and run `npm run check:live` | Only the owner can |
+
+**Backup and recovery.** Supabase takes daily backups on paid plans; on Free,
+`Database → Backups` may offer none, in which case export first with
+`pg_dump "$SUPABASE_DB_URL" --no-owner --schema=public > backup.sql` using the
+connection string from `Project Settings → Database`. A backup nobody has
+restored is a hope, not a backup: restore it into a scratch project and run
+`npm run check:live` against that project once. That is the only way to know the
+dump is complete.
 
 ---
 

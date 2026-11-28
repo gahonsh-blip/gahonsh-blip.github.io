@@ -401,6 +401,74 @@ await as(viewer, async () => {
 });
 await db.exec('reset role');
 
+// ------------------------------------------ 7. performance advisor --------
+// The same Advisor run reports unindexed foreign keys, duplicate indexes and
+// row policies that re-evaluate auth.uid() for every row. Each is a one-line
+// rule here so the next migration cannot reintroduce it.
+const unindexed = await db.query(`select c.conrelid::regclass::text tbl, a.attname col
+    from pg_constraint c
+    join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+    where c.contype = 'f' and c.connamespace = 'public'::regnamespace
+      and not exists (select 1 from pg_index i
+                      where i.indrelid = c.conrelid and i.indkey[0] = c.conkey[1])
+    order by 1, 2`);
+check('every foreign key has a leading-column index', unindexed.rows.length === 0,
+    unindexed.rows.map((r) => `${r.tbl}.${r.col}`).join(','));
+
+const dupIndexes = await db.query(`select indrelid::regclass::text tbl,
+        array_to_string(array_agg(indexrelid::regclass::text), ' | ') idxs
+    from pg_index
+    where indrelid in (select oid from pg_class
+                       where relnamespace = 'public'::regnamespace and relkind = 'r')
+    group by indrelid, indkey
+    having count(*) > 1`);
+check('no two indexes cover the same columns', dupIndexes.rows.length === 0,
+    dupIndexes.rows.map((r) => `${r.tbl}: ${r.idxs}`).join(' ; '));
+
+// `(select auth.uid())` is evaluated once per statement; a bare `auth.uid()`
+// in a policy runs once per row. PostgreSQL renders the wrapped form as
+// `( SELECT auth.uid() AS uid)`, so strip that first and look for what is left.
+const unwrapped = await db.query(`select tablename, policyname
+    from (
+        select tablename, policyname,
+               regexp_replace(regexp_replace(regexp_replace(
+                   coalesce(qual, '') || ' ' || coalesce(with_check, ''),
+                   'select auth\\.uid\\(\\) as uid', '', 'gi'),
+                   'select (public\\.)?is_admin\\(\\) as is_admin', '', 'gi'),
+                   '\\(select (auth\\.uid|public\\.is_admin)\\(\\)\\)', '', 'gi') rest
+        from pg_policies where schemaname = 'public'
+    ) p
+    where rest ~ 'auth\\.uid\\(\\)' or rest ~ 'is_admin\\(\\)'`);
+check('every row policy wraps auth.uid()/is_admin() in a subquery',
+    unwrapped.rows.length === 0,
+    unwrapped.rows.map((r) => `${r.tablename}.${r.policyname}`).join(','));
+
+// `worker_ratings` must stay owner-privileged. A visitor holds a SELECT grant on
+// `contracts` and on `reviews`, but RLS hides the contract rows from them, so a
+// `security_invoker` view would still return a row — with the rating and an
+// empty contract history — and the public success score would silently drop to
+// "no work done". Measured below rather than assumed.
+await db.exec('reset role');
+await db.exec('set role anon');
+const visitorContracts = await one('select count(*)::int n from public.contracts');
+const definerScore = await one(
+    'select completed_contracts, success_score from public.worker_ratings where reviewee_id = $1',
+    [freelancer]);
+await db.exec('reset role');
+check('a visitor sees no contract rows through RLS', visitorContracts.n === 0, String(visitorContracts.n));
+check('the owner-privileged score still counts the finished contract',
+    Number(definerScore?.completed_contracts) === 1, String(definerScore?.completed_contracts));
+
+await db.exec('alter view public.worker_ratings set (security_invoker = on)');
+await db.exec('set role anon');
+const invokerScore = await one(
+    'select completed_contracts, success_score from public.worker_ratings where reviewee_id = $1',
+    [freelancer]);
+await db.exec('reset role');
+await db.exec('alter view public.worker_ratings set (security_invoker = off)');
+check('security_invoker would report an empty history, so it stays off',
+    Number(invokerScore?.completed_contracts) === 0, String(invokerScore?.completed_contracts));
+
 console.log(failures
     ? `\nsql check failed: ${failures} case(s)`
     : '\nsql check passed.');
